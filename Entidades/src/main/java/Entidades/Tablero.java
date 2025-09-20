@@ -44,6 +44,11 @@ public class Tablero {
     public void setMazo(List<Ficha> mazo) {
         this.mazo = mazo;
     }
+
+    @Override
+    public String toString() {
+        return "Tablero{" + "jugadores=" + jugadores + ", fichasEnTablero=" + fichasEnTablero + ", mazo=" + mazo + '}';
+    }
     
     
 

@@ -16,6 +16,7 @@ import java.awt.Color;
 import static java.lang.Math.random;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -25,7 +26,7 @@ import java.util.Random;
  */
 public class Modelo implements IModelo {
 
-    Ficha ficha1;
+    Ficha fichaAnterior;
     List<Observador> observadores;
     Tablero tablero;
     Mano mano;
@@ -65,8 +66,7 @@ public class Modelo implements IModelo {
 //        }
 //        juegoDTO.setJugadores(jugadoresDTO);
         // 3️⃣ Fichas restantes en mazo
-        juegoDTO.setFichasMazo(tablero.getMazo() != null ? tablero.getMazo().size() : 0);
-
+        //  juegoDTO.setFichasMazo(tablero.getMazo() != null ? tablero.getMazo().size() : 0);
         // 4️⃣ Mensaje o jugador actual (opcional)
 //        juegoDTO.setJugadorActual(tablero.getJugadorActual() != null
 //                ? new JugadorDTO(tablero.getJugadorActual().getNombre(), tablero.getJugadorActual().getFichas().size())
@@ -144,35 +144,41 @@ public class Modelo implements IModelo {
                 notificarObservadores();
             } else {
                 System.out.println("La ficha no cumple las reglas del grupo.");
+                deshacerGruposIncompletos();
             }
             return;
         }
 
-        // 2️⃣ Lógica de ficha1
-        if (ficha1 == null) {
-            ficha1 = nuevaFicha;
+        // 2️⃣ Lógica de fichaAnterior
+        if (fichaAnterior == null) {
+            fichaAnterior = nuevaFicha;
             System.out.println("Primera ficha colocada, esperando otra para formar grupo.");
         } else {
             // Si la nueva ficha está cerca de la referencia
-            if (estaCerca(ficha1, nuevaFicha.getX(), nuevaFicha.getY())) {
-                String tipo = establecerTipoGrupo(ficha1, nuevaFicha);
+            if (estaCerca(fichaAnterior, nuevaFicha.getX(), nuevaFicha.getY())) {
+                String tipo = establecerTipoGrupo(fichaAnterior, nuevaFicha);
                 if (!tipo.equals("no establecido")) {
-                    List<Ficha> grupoFichas = new ArrayList<>(Arrays.asList(ficha1, nuevaFicha));
+                    List<Ficha> grupoFichas = new ArrayList<>(Arrays.asList(fichaAnterior, nuevaFicha));
                     Grupo nuevoGrupo = new Grupo(tipo, grupoFichas.size(), grupoFichas);
                     tablero.getFichasEnTablero().add(nuevoGrupo);
                     System.out.println("Se creó un nuevo grupo: " + nuevoGrupo);
-                    ficha1 = null;
+                    fichaAnterior = null;
+                    deshacerGruposIncompletos();
                     notificarObservadores();
                 } else {
                     // Nueva referencia incompatible → deshacer referencia previa
-                    ficha1 = nuevaFicha;
+
+                    fichaAnterior = nuevaFicha;
+                    quitarFichaDeGrupos(fichaAnterior);
                     System.out.println("Fichas incompatibles, se reinicia referencia.");
                     deshacerGruposIncompletos();
                     notificarObservadores();
                 }
             } else {
                 // Nueva ficha lejos → deshacer referencia previa
-                ficha1 = nuevaFicha;
+
+                fichaAnterior = nuevaFicha;
+                quitarFichaDeGrupos(fichaAnterior);
                 System.out.println("La ficha no estaba cerca, se reinicia referencia.");
                 deshacerGruposIncompletos();
                 notificarObservadores();
@@ -237,15 +243,37 @@ public class Modelo implements IModelo {
     }
 
     private void deshacerGruposIncompletos() {
-        List<Grupo> aEliminar = new ArrayList<>();
-        for (Grupo grupo : tablero.getFichasEnTablero()) {
-            if (grupo.getNumFichas() < 2) { // grupos que no llegaron a 2 fichas
-                aEliminar.add(grupo);
+        Iterator<Grupo> it = tablero.getFichasEnTablero().iterator();
+        while (it.hasNext()) {
+            Grupo grupo = it.next();
+            if (!esGrupoValido(grupo)) {
+                it.remove();
+                System.out.println("❌ Grupo eliminado por ser incompleto: " + grupo);
             }
         }
-        tablero.getFichasEnTablero().removeAll(aEliminar);
-        if (!aEliminar.isEmpty()) {
-            System.out.println("Se deshicieron grupos incompletos: " + aEliminar);
+        notificarObservadores();
+    }
+
+    private boolean esGrupoValido(Grupo grupo) {
+        if (grupo.getTipo().equals("numero")) {
+            int size = grupo.getFichas().size();
+            return size >= 2 && size <= 4; // válido solo de 2 a 4
+        }
+        if (grupo.getTipo().equals("escalera")) {
+            int size = grupo.getFichas().size();
+            return size >= 2 && size <= 13; // válido solo de 3 a 13
+        }
+        return false;
+    }
+    // Método para quitar una ficha de cualquier grupo existente
+
+    private void quitarFichaDeGrupos(Ficha ficha) {
+        for (Grupo grupo : tablero.getFichasEnTablero()) {
+            if (grupo.getFichas().remove(ficha)) {
+                grupo.setNumFichas(grupo.getFichas().size());
+                System.out.println("🔹 Se quitó la ficha del grupo: " + grupo);
+            }
         }
     }
+
 }

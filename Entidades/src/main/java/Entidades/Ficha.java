@@ -5,6 +5,7 @@
 package Entidades;
 
 import java.awt.Color;
+import java.util.Objects;
 
 /**
  *
@@ -68,4 +69,22 @@ public class Ficha {
         return "Ficha{" + "numero=" + numero + ", color=" + color + ", comodin=" + comodin + '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Ficha)) {
+            return false;
+        }
+        Ficha ficha = (Ficha) o;
+        return numero == ficha.numero
+                && comodin == ficha.comodin
+                && Objects.equals(color, ficha.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(numero, color, comodin);
+    }
 }

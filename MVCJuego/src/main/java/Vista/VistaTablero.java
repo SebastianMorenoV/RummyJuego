@@ -216,11 +216,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }//GEN-LAST:event_panelManoMouseClicked
 
     private void panelTableroMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelTableroMouseReleased
-        int x = evt.getX();
-        int y = evt.getY();
-        System.out.println("La ficha se puso en x:" + x + " Y: " + y + "aaaaaaaaaa");
-        // Aquí puedes avisar al controlador
-        //controlador.fichaSoltada(fichaUI, x, y);
+   
     }//GEN-LAST:event_panelTableroMouseReleased
 
 
@@ -238,14 +234,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     @Override
     public void actualiza(IModelo modelo) {
-        System.out.println("Llego a vista");
-
         if (!fichasInicializadas) {
             incializarFichasManoPrueba(modelo);
             fichasInicializadas = true; // marca que ya se ejecutó
         } else {
             pintarFichasTablero(modelo, control);
-            System.out.println("se actulizo esta vaina");
         }
 
     }
