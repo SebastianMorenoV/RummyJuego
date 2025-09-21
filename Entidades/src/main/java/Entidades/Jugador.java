@@ -12,8 +12,14 @@ public class Jugador {
     String nickname;
     String grupoColor;
     Mano manoJugador;
-
+    
     public Jugador() {
+    }
+
+    public Jugador(String nickname, String grupoColor, Mano manoJugador) {
+        this.nickname = nickname;
+        this.grupoColor = grupoColor;
+        this.manoJugador = manoJugador;
     }
 
     public String getNickname() {
@@ -26,6 +32,18 @@ public class Jugador {
 
     public Mano getManoJugador() {
         return manoJugador;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setGrupoColor(String grupoColor) {
+        this.grupoColor = grupoColor;
+    }
+
+    public void setManoJugador(Mano manoJugador) {
+        this.manoJugador = manoJugador;
     }
     
     

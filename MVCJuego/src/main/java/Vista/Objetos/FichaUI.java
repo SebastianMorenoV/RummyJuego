@@ -12,14 +12,21 @@ import java.awt.event.MouseEvent;
 
 public class FichaUI extends JPanel {
 
+    private int idFicha;
     private int numero;
     private Color color;
     private boolean comodin;
 
+    public enum Origen {
+        MANO, TABLERO
+    }
+    private Origen origen;
+
     private int mouseX, mouseY; // para arrastre
     private JPanel originalParent;
 
-    public FichaUI(int numero, Color color, boolean comodin, Controlador controlador) {
+    public FichaUI(int idFicha, int numero, Color color, boolean comodin, Controlador controlador) {
+        this.idFicha = idFicha;
         this.numero = numero;
         this.color = color;
         this.comodin = comodin;
@@ -45,6 +52,7 @@ public class FichaUI extends JPanel {
                 int posicionY = punto.y;
 
                 FichaJuegoDTO ficha = new FichaJuegoDTO();
+                ficha.setIdFicha(idFicha);
                 ficha.setNumeroFicha(numero);
                 ficha.setColor(color);
                 ficha.setComodin(comodin);
@@ -85,5 +93,13 @@ public class FichaUI extends JPanel {
 
     public boolean isComodin() {
         return comodin;
+    }
+
+    public void setOrigen(Origen origen) {
+        this.origen = origen;
+    }
+
+    public Origen getOrigen() {
+        return origen;
     }
 }

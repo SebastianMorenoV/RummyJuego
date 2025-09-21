@@ -9,13 +9,13 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Entidades.Ficha;
 import Entidades.Grupo;
+import Entidades.Jugador;
 import Entidades.Tablero;
 import Entidades.Mano;
 import Vista.Observador;
 import java.awt.Color;
-import static java.lang.Math.random;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -29,16 +29,14 @@ public class Modelo implements IModelo {
     Ficha fichaAnterior;
     List<Observador> observadores;
     Tablero tablero;
-    Mano mano;
+    Jugador jugador;
 
     public Modelo() {
         observadores = new ArrayList<>();
         tablero = new Tablero();
-        mano = new Mano();
+        jugador = new Jugador();
     }
 
-    //Definir que es lo que va a mandar el metodo , no puede darle entidades a la interfaz.
-    //Deberia traducir a codigo para interfaz
     @Override
     public JuegoDTO getTablero() {
         JuegoDTO juegoDTO = new JuegoDTO();
@@ -56,29 +54,18 @@ public class Modelo implements IModelo {
             gruposDTO.add(grupoDTO);
         }
         juegoDTO.setGruposEnTablero(gruposDTO);
-
-//        // 2️⃣ Convertir jugadores
-//        List<JugadorDTO> jugadoresDTO = new ArrayList<>();
-//        for (Jugador jugador : tablero.getJugadores()) {
-//            // Solo agregamos info relevante para la vista
-//            JugadorDTO jDTO = new JugadorDTO(jugador.getNombre(), jugador.getFichas().size());
-//            jugadoresDTO.add(jDTO);
-//        }
-//        juegoDTO.setJugadores(jugadoresDTO);
-        // 3️⃣ Fichas restantes en mazo
-        //  juegoDTO.setFichasMazo(tablero.getMazo() != null ? tablero.getMazo().size() : 0);
-        // 4️⃣ Mensaje o jugador actual (opcional)
-//        juegoDTO.setJugadorActual(tablero.getJugadorActual() != null
-//                ? new JugadorDTO(tablero.getJugadorActual().getNombre(), tablero.getJugadorActual().getFichas().size())
-//                : null);
-//        juegoDTO.setMensaje("Estado del tablero actualizado");
         return juegoDTO;
     }
 
-    //Probablemente este metodo tenga que traducir lo que la vista debe recibir, segun la informacion de los objetos actualizar la vista.
+    /**
+     * Metodo para obtener la mano desde la vista , utilizada por modelo.
+     *
+     * @return un arreglo de FichaJuegoDTO con los datos traducidos de las
+     * fichas.
+     */
     @Override
     public List<FichaJuegoDTO> getMano() {
-        List<Grupo> gruposMano = mano.getGruposMano();
+        List<Grupo> gruposMano = jugador.getManoJugador().getGruposMano();
         List<FichaJuegoDTO> fichasJuegoDTO = new ArrayList<>();
         for (Grupo grupo : gruposMano) {
             List<Ficha> fichas = grupo.getFichas();
@@ -86,16 +73,19 @@ public class Modelo implements IModelo {
                 Color color = ficha.getColor();
                 int numero = ficha.getNumero();
                 boolean comodin = ficha.isComodin();
-                fichasJuegoDTO.add(new FichaJuegoDTO(numero, color, comodin));
+                int id = ficha.getId();
+                fichasJuegoDTO.add(new FichaJuegoDTO(id, numero, color, comodin));
             }
-
         }
         return fichasJuegoDTO;
     }
 
     public void iniciarJuego() {
         //Incializar mano en vista.
-        crearGruposMano();
+        //crearGruposMano();
+        this.jugador = new Jugador("Sebas", "B1", new Mano());
+        crearMazoCompleto();
+        repartirMano(jugador);
         notificarObservadores();
     }
 
@@ -109,83 +99,118 @@ public class Modelo implements IModelo {
         observadores.add(obs);
     }
 
-    public List<Grupo> crearGruposMano() {
-
-        Grupo grupo1 = new Grupo();
-        grupo1.setTipo("Escalera");
-        grupo1.setNumFichas(13);
-        grupo1.getFichas().clear();
-
-        Color[] colores = {Color.RED, Color.BLUE, Color.BLACK, Color.ORANGE};
-        Random random = new Random();
-        for (int i = 1; i <= 13; i++) {
-            Color color = colores[random.nextInt(colores.length)];
-            int numero = random.nextInt(13);
-            grupo1.getFichas().add(new Ficha(numero, color, false));
-        }
-        List<Grupo> grupos = new ArrayList<>();
-        grupos.add(grupo1);
-        mano.setGruposMano(grupos);
-        mano.setFichasEnMano(grupos.size());
-
-        return grupos;
-    }
-
     public void colocarFicha(FichaJuegoDTO fichaDTO, int x, int y) {
-        Ficha nuevaFicha = new Ficha(fichaDTO.getNumeroFicha(), fichaDTO.getColor(), fichaDTO.isComodin(), x, y);
+        Ficha fichaAColocar = fichaDTO.toFicha(x, y);
 
-        // 1️⃣ Intentar agregar a un grupo existente
-        Grupo grupoCercano = encontrarGrupo(nuevaFicha);
-        if (grupoCercano != null) {
-            if (puedeAgregarAFichas(grupoCercano, nuevaFicha)) {
-                grupoCercano.getFichas().add(nuevaFicha);
-                grupoCercano.setNumFichas(grupoCercano.getFichas().size());
-                System.out.println("Ficha agregada a grupo existente: " + grupoCercano);
-                notificarObservadores();
-            } else {
-                System.out.println("La ficha no cumple las reglas del grupo.");
-                deshacerGruposIncompletos();
+        // 1️⃣ Revisar si la ficha ya está en algún grupo (movimiento dentro del tablero)
+        Grupo grupoOrigen = buscarGrupoPorFicha(fichaAColocar.getId());
+        if (grupoOrigen != null) {
+            // Quitar ficha del grupo actual
+            grupoOrigen.getFichas().removeIf(fichaEnGrupo -> fichaEnGrupo.getId() == fichaAColocar.getId());
+            grupoOrigen.setNumFichas(grupoOrigen.getFichas().size());
+
+            // Eliminar grupo si queda incompleto
+            if (!esGrupoValido(grupoOrigen)) {
+                tablero.getFichasEnTablero().remove(grupoOrigen);
+                System.out.println("? Grupo eliminado por ser incompleto tras mover ficha: " + grupoOrigen);
             }
+        }
+
+        // 2️⃣ Buscar un grupo cercano donde se pueda agregar
+        Grupo grupoCercano = encontrarGrupo(fichaAColocar);
+        if (grupoCercano != null && puedeAgregarAFichas(grupoCercano, fichaAColocar)) {
+            // Agregar ficha al grupo cercano
+            grupoCercano.getFichas().add(fichaAColocar);
+            grupoCercano.setNumFichas(grupoCercano.getFichas().size());
+            // Actualizar tipo de grupo (puede ser "numero" o "escalera")
+            // se hace dentro de puedeAgregarAFichas
+            // Limpiar grupos incompletos restantes
+            deshacerGruposIncompletos();
+            System.out.println("Ficha agregada a grupo existente: " + grupoCercano);
+            notificarObservadores();
             return;
         }
 
-        // 2️⃣ Lógica de fichaAnterior
-        if (fichaAnterior == null) {
-            fichaAnterior = nuevaFicha;
-            System.out.println("Primera ficha colocada, esperando otra para formar grupo.");
-        } else {
-            // Si la nueva ficha está cerca de la referencia
-            if (estaCerca(fichaAnterior, nuevaFicha.getX(), nuevaFicha.getY())) {
-                String tipo = establecerTipoGrupo(fichaAnterior, nuevaFicha);
-                if (!tipo.equals("no establecido")) {
-                    List<Ficha> grupoFichas = new ArrayList<>(Arrays.asList(fichaAnterior, nuevaFicha));
-                    Grupo nuevoGrupo = new Grupo(tipo, grupoFichas.size(), grupoFichas);
-                    tablero.getFichasEnTablero().add(nuevoGrupo);
-                    System.out.println("Se creó un nuevo grupo: " + nuevoGrupo);
-                    fichaAnterior = null;
-                    deshacerGruposIncompletos();
-                    notificarObservadores();
-                } else {
-                    // Nueva referencia incompatible → deshacer referencia previa
+        // 3️⃣ Si no hay grupo cercano válido, crear un nuevo grupo
+        List<Ficha> fichasAGrupo = new ArrayList<>();
+        fichasAGrupo.add(fichaAColocar);
+        Grupo grupoNuevo = new Grupo("No establecido", fichasAGrupo.size(), fichasAGrupo);
+        tablero.getFichasEnTablero().add(grupoNuevo);
+        System.out.println("Creacion de grupo nuevo correctamente: " + grupoNuevo);
+        notificarObservadores();
+    }
 
-                    fichaAnterior = nuevaFicha;
-                    quitarFichaDeGrupos(fichaAnterior);
-                    System.out.println("Fichas incompatibles, se reinicia referencia.");
-                    deshacerGruposIncompletos();
-                    notificarObservadores();
+    public void crearMazoCompleto() {
+        List<Ficha> mazo = tablero.getMazo();
+        Color[] colores = {Color.RED, Color.BLUE, Color.BLACK, Color.ORANGE};
+
+        // IDs únicos del 1 al 108
+        List<Integer> idsDisponibles = new ArrayList<>();
+        for (int i = 1; i <= 108; i++) {
+            idsDisponibles.add(i);
+        }
+        Collections.shuffle(idsDisponibles);
+
+        Random random = new Random();
+
+        // Crear 104 fichas normales (2 sets de 13 números por color)
+        for (Color color : colores) {
+            for (int set = 0; set < 2; set++) {
+                for (int numero = 1; numero <= 13; numero++) {
+                    int id = idsDisponibles.remove(0);
+                    mazo.add(new Ficha(id, numero, color, false));
                 }
-            } else {
-                // Nueva ficha lejos → deshacer referencia previa
-
-                fichaAnterior = nuevaFicha;
-                quitarFichaDeGrupos(fichaAnterior);
-                System.out.println("La ficha no estaba cerca, se reinicia referencia.");
-                deshacerGruposIncompletos();
-                notificarObservadores();
             }
+        }
+
+        // Crear 4 comodines
+        for (int i = 0; i < 4; i++) {
+            int id = idsDisponibles.remove(0);
+            mazo.add(new Ficha(id, 0, Color.GRAY, true)); // comodines
+        }
+
+        Collections.shuffle(mazo); // barajar
+        tablero.setMazo(mazo);
+    }
+
+    public void repartirMano(Jugador jugador) {
+        List<Ficha> mazo = tablero.getMazo();
+        List<Ficha> fichasMano = new ArrayList<>();
+        for (int i = 0; i < 13; i++) {
+            fichasMano.add(mazo.remove(0)); // quita del mazo
+        }
+
+        // Crear grupo de mano
+        Grupo grupo = new Grupo();
+        grupo.setTipo("Escalera");
+        grupo.setFichas(fichasMano);
+
+        List<Grupo> gruposMano = new ArrayList<>();
+        gruposMano.add(grupo);
+
+        Mano mano = jugador.getManoJugador();
+        mano.setGruposMano(gruposMano);
+        mano.setFichasEnMano(fichasMano.size());
+    }
+
+    public void tomarFichaMazo() {
+        List<Ficha> mazo = tablero.getMazo();
+        if (mazo.isEmpty()) {
+            return; // si no hay fichas, nada que hacer
+        }
+        Ficha ficha = mazo.remove(0); // tomar la primera ficha del mazo (ya está barajada)
+
+        // Agregarla al primer grupo de la mano (o puedes crear lógica para otro grupo)
+        Mano manoJugador = jugador.getManoJugador();
+        List<Grupo> gruposMano = manoJugador.getGruposMano();
+        if (!gruposMano.isEmpty()) {
+            gruposMano.get(0).getFichas().add(ficha);
+            manoJugador.setFichasEnMano(manoJugador.getFichasEnMano() + 1);
+            System.out.println("Se añadio nueva ficha a la mano.");
         }
     }
 
+    ////////////////////////////////METODOS FUERTES/////////////////////////////////////////////////////
     private Grupo encontrarGrupo(Ficha nuevaFicha) {
         return tablero.getFichasEnTablero().stream()
                 //encuentra el grupo de la ficha que le pasas como parametro
@@ -212,6 +237,11 @@ public class Modelo implements IModelo {
 
     private boolean puedeAgregarAFichas(Grupo grupo, Ficha nuevaFicha) {
         List<Ficha> fichas = grupo.getFichas();
+        if (grupo.getTipo().equals("No establecido")) {
+            Ficha primerFichaGrupo = grupo.getFichas().get(0);
+            String tipo = establecerTipoGrupo(primerFichaGrupo, nuevaFicha);
+            grupo.setTipo(tipo);
+        }
 
         if (grupo.getTipo().equals("numero")) {
             // Máx 4 fichas, mismo número, colores diferentes
@@ -254,25 +284,27 @@ public class Modelo implements IModelo {
         notificarObservadores();
     }
 
-    private boolean esGrupoValido(Grupo grupo) {
-        if (grupo.getTipo().equals("numero")) {
-            int size = grupo.getFichas().size();
-            return size >= 2 && size <= 4; // válido solo de 2 a 4
-        }
-        if (grupo.getTipo().equals("escalera")) {
-            int size = grupo.getFichas().size();
-            return size >= 2 && size <= 13; // válido solo de 3 a 13
-        }
-        return false;
-    }
-    // Método para quitar una ficha de cualquier grupo existente
-
-    private void quitarFichaDeGrupos(Ficha ficha) {
-        for (Grupo grupo : tablero.getFichasEnTablero()) {
-            if (grupo.getFichas().remove(ficha)) {
-                grupo.setNumFichas(grupo.getFichas().size());
-                System.out.println("🔹 Se quitó la ficha del grupo: " + grupo);
+    private Grupo buscarGrupoPorFicha(int idFicha) {
+        for (Grupo g : tablero.getFichasEnTablero()) {
+            for (Ficha f : g.getFichas()) {
+                if (f.getId() == idFicha) {
+                    return g;
+                }
             }
+        }
+        return null;
+    }
+
+    private boolean esGrupoValido(Grupo grupo) {
+        int size = grupo.getFichas().size();
+        switch (grupo.getTipo()) {
+            case "No establecido":
+                return size >= 1;  // grupo en construcción
+            case "numero":
+            case "escalera":
+                return size >= 2;  // mínimo 2 fichas para ser válido
+            default:
+                return false;
         }
     }
 

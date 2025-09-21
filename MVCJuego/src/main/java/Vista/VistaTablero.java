@@ -11,11 +11,12 @@ import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.util.List;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
@@ -50,19 +51,39 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private void initComponents() {
 
         GUIjuego = new javax.swing.JPanel();
+        panelFichasArmadas = new javax.swing.JPanel();
         panelJugador4 = new Vista.PanelRound();
         panelJugador1 = new Vista.PanelRound();
         panelMano = new Vista.PanelRound();
+        fondoMano = new javax.swing.JLabel();
         panelJugador3 = new Vista.PanelRound();
         mazo = new Vista.PanelRound();
+        btnMazo = new javax.swing.JLabel();
         panelJugador2 = new Vista.PanelRound();
         panelTablero = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        fondoPanelTablero = new javax.swing.JLabel();
+        fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         GUIjuego.setBackground(new java.awt.Color(0, 0, 0));
         GUIjuego.setLayout(null);
+
+        panelFichasArmadas.setBackground(new java.awt.Color(23, 57, 134));
+
+        javax.swing.GroupLayout panelFichasArmadasLayout = new javax.swing.GroupLayout(panelFichasArmadas);
+        panelFichasArmadas.setLayout(panelFichasArmadasLayout);
+        panelFichasArmadasLayout.setHorizontalGroup(
+            panelFichasArmadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 640, Short.MAX_VALUE)
+        );
+        panelFichasArmadasLayout.setVerticalGroup(
+            panelFichasArmadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 120, Short.MAX_VALUE)
+        );
+
+        GUIjuego.add(panelFichasArmadas);
+        panelFichasArmadas.setBounds(130, 0, 640, 120);
 
         panelJugador4.setRoundBottomLeft(40);
         panelJugador4.setRoundBottomRight(40);
@@ -112,6 +133,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         });
         panelMano.setLayout(null);
+
+        fondoMano.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/mano.png"))); // NOI18N
+        fondoMano.setText("jLabel1");
+        panelMano.add(fondoMano);
+        fondoMano.setBounds(-50, -20, 650, 140);
+
         GUIjuego.add(panelMano);
         panelMano.setBounds(160, 380, 580, 120);
 
@@ -134,24 +161,37 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(panelJugador3);
         panelJugador3.setBounds(780, 0, 120, 110);
 
+        mazo.setBackground(new java.awt.Color(156, 113, 17));
         mazo.setRoundBottomLeft(40);
         mazo.setRoundBottomRight(40);
         mazo.setRoundTopLeft(40);
         mazo.setRoundTopRight(40);
 
+        btnMazo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnMazo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/mazoGUI.png"))); // NOI18N
+        btnMazo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnMazo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnMazoMouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout mazoLayout = new javax.swing.GroupLayout(mazo);
         mazo.setLayout(mazoLayout);
         mazoLayout.setHorizontalGroup(
             mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 60, Short.MAX_VALUE)
+            .addComponent(btnMazo, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
         );
         mazoLayout.setVerticalGroup(
             mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 80, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mazoLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnMazo, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14))
         );
 
         GUIjuego.add(mazo);
-        mazo.setBounds(790, 250, 60, 80);
+        mazo.setBounds(790, 230, 60, 87);
 
         panelJugador2.setRoundBottomLeft(40);
         panelJugador2.setRoundBottomRight(40);
@@ -179,13 +219,19 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         });
         panelTablero.setLayout(null);
-        GUIjuego.add(panelTablero);
-        panelTablero.setBounds(130, 40, 640, 320);
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
-        jLabel1.setText("jLabel1");
-        GUIjuego.add(jLabel1);
-        jLabel1.setBounds(0, 0, 1322, 902);
+        fondoPanelTablero.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/tablero.png"))); // NOI18N
+        fondoPanelTablero.setText("jLabel1");
+        panelTablero.add(fondoPanelTablero);
+        fondoPanelTablero.setBounds(-50, 0, 750, 420);
+
+        GUIjuego.add(panelTablero);
+        panelTablero.setBounds(130, 130, 640, 242);
+
+        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
+        fondo.setText("jLabel1");
+        GUIjuego.add(fondo);
+        fondo.setBounds(0, 0, 900, 902);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -216,14 +262,22 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }//GEN-LAST:event_panelManoMouseClicked
 
     private void panelTableroMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelTableroMouseReleased
-   
+
     }//GEN-LAST:event_panelTableroMouseReleased
+
+    private void btnMazoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnMazoMouseClicked
+        control.pasarTurno();
+    }//GEN-LAST:event_btnMazoMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel GUIjuego;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel btnMazo;
+    private javax.swing.JLabel fondo;
+    private javax.swing.JLabel fondoMano;
+    private javax.swing.JLabel fondoPanelTablero;
     private Vista.PanelRound mazo;
+    private javax.swing.JPanel panelFichasArmadas;
     private Vista.PanelRound panelJugador1;
     private Vista.PanelRound panelJugador2;
     private Vista.PanelRound panelJugador3;
@@ -234,26 +288,34 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     @Override
     public void actualiza(IModelo modelo) {
+
         if (!fichasInicializadas) {
-            incializarFichasManoPrueba(modelo);
+            inicializarFichasMano(modelo);
             fichasInicializadas = true; // marca que ya se ejecutó
         } else {
             pintarFichasTablero(modelo, control);
         }
-
     }
 
     public void pintarFichasTablero(IModelo modelo, Controlador controlador) {
-        // 1️⃣ Obtener el JuegoDTO desde el modelo
         JuegoDTO juego = modelo.getTablero();
         List<GrupoDTO> grupos = juego.getGruposEnTablero();
 
+        // Devolver fichas a la mano si no están en ningún grupo
+        //devolverFichasAMano(modelo, grupos);
         // 2️⃣ Limpiar el panel del tablero antes de pintar
-        panelTablero.removeAll();
-        panelTablero.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panelFichasArmadas.removeAll();
+        panelFichasArmadas.setBackground(new Color(23, 57, 134));
+        panelFichasArmadas.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
 
         // 3️⃣ Recorrer cada grupo
         for (GrupoDTO grupoDTO : grupos) {
+            // Ignorar grupos no establecidos
+            System.out.println(grupoDTO.getTipo());
+            if (grupoDTO.getTipo().equals("No establecido")) {
+                continue; // salta a la siguiente iteración
+            }
+
             // Crear un panel para el grupo
             JPanel panelGrupo = new JPanel();
             panelGrupo.setBorder(BorderFactory.createTitledBorder(grupoDTO.getTipo()));
@@ -263,61 +325,69 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             for (FichaJuegoDTO fichaDTO : grupoDTO.getFichasGrupo()) {
                 // Crear un FichaUI en lugar de JButton
                 FichaUI fichaUI = new FichaUI(
+                        fichaDTO.getIdFicha(),
                         fichaDTO.getNumeroFicha(),
                         fichaDTO.getColor(),
                         fichaDTO.isComodin(),
                         controlador
                 );
 
-                fichaUI.setPreferredSize(new Dimension(40, 60));
+                fichaUI.setPreferredSize(new Dimension(20, 50));
                 panelGrupo.add(fichaUI);
 
                 // 🔹 Eliminar la ficha de la mano si existe allí
-                modelo.getMano().removeIf(f
-                        -> f.getNumeroFicha() == fichaDTO.getNumeroFicha()
-                        && f.getColor().equals(fichaDTO.getColor())
-                        && f.isComodin() == fichaDTO.isComodin()
-                );
+                modelo.getMano().removeIf(f -> f.getIdFicha() == fichaDTO.getIdFicha());
             }
 
             // Agregar el panel del grupo al tablero
-            panelTablero.add(panelGrupo);
+            panelFichasArmadas.add(panelGrupo);
         }
 
         // 4️⃣ Refrescar la vista
-        panelTablero.revalidate();
-        panelTablero.repaint();
+        panelFichasArmadas.revalidate();
+        panelFichasArmadas.repaint();
     }
 
-    public void incializarFichasManoPrueba(IModelo modelo) {
-
+    public void inicializarFichasMano(IModelo modelo) {
         List<FichaJuegoDTO> fichasMano = modelo.getMano();
-        int startX = panelMano.getX() + 10; // posición inicial relativa al panelMano
-        int startY = panelMano.getY() + 10;
-
-        int xPos = startX;
-        int yPos = startY;
-
         for (FichaJuegoDTO fichaJuegoDTO : fichasMano) {
-            int numero = fichaJuegoDTO.getNumeroFicha();
-            Color color = fichaJuegoDTO.getColor();
-            boolean comodin = fichaJuegoDTO.isComodin();
+            System.out.println("Ficha: " + fichaJuegoDTO);
+        }
+        // 1️⃣ Eliminar fichas antiguas de la mano
+        for (Component c : GUIjuego.getComponents()) {
+            if (c instanceof FichaUI && ((FichaUI) c).getOrigen() == FichaUI.Origen.MANO) {
+                GUIjuego.remove(c);
+            }
+        }
 
-            FichaUI fichaUI = new FichaUI(numero, color, comodin, control);
-            fichaUI.setSize(35, 50); // tamaño fijo
+        // 2️⃣ Posición inicial relativa al panelMano
+        Point posPanel = panelMano.getLocation(); // posición dentro de GUIjuego
+        int xPos = posPanel.x + 10;
+        int yPos = posPanel.y + 10;
+
+        // 3️⃣ Agregar fichas
+        for (FichaJuegoDTO fichaDTO : fichasMano) {
+            FichaUI fichaUI = new FichaUI(
+                    fichaDTO.getIdFicha(),
+                    fichaDTO.getNumeroFicha(),
+                    fichaDTO.getColor(),
+                    fichaDTO.isComodin(),
+                    control
+            );
+            fichaUI.setOrigen(FichaUI.Origen.MANO);
+            fichaUI.setSize(35, 50);
             fichaUI.setLocation(xPos, yPos);
+            fichaUI.setOpaque(false);
 
-            fichaUI.setOpaque(false); // transparente, para que no tape fondo
-            GUIjuego.add(fichaUI); // agregamos directamente al panel principal
-            GUIjuego.setComponentZOrder(fichaUI, 0); // trae la ficha al frente
+            GUIjuego.add(fichaUI);
+            GUIjuego.setComponentZOrder(fichaUI, 0);
 
             xPos += 40; // separación entre fichas
         }
-        yPos += 80;
-        xPos = startX;
 
-        revalidate();
-        repaint();
+        // 4️⃣ Actualizar GUI
+        GUIjuego.revalidate();
+        GUIjuego.repaint();
     }
 
 }

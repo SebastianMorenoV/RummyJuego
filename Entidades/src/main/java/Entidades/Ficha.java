@@ -13,6 +13,7 @@ import java.util.Objects;
  */
 public class Ficha {
 
+    int id;
     int numero;
     Color color;
     boolean comodin;
@@ -35,7 +36,23 @@ public class Ficha {
         this.x = x;
         this.y = y;
     }
+    
+    public Ficha(int id, int numero, Color color, boolean comodin) {
+        this.id = id;
+        this.numero = numero;
+        this.color = color;
+        this.comodin = comodin;
+    }
 
+    public Ficha(int id, int numero, Color color, boolean comodin, int x, int y) {
+        this.id = id;
+        this.numero = numero;
+        this.color = color;
+        this.comodin = comodin;
+        this.x = x;
+        this.y = y;
+    }
+    
     public int getNumero() {
         return numero;
     }
@@ -64,27 +81,17 @@ public class Ficha {
         return comodin;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
-        return "Ficha{" + "numero=" + numero + ", color=" + color + ", comodin=" + comodin + '}';
+        return "Ficha{" + "id=" + id + ", numero=" + numero + ", color=" + color + ", comodin=" + comodin + ", x=" + x + ", y=" + y + '}';
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Ficha)) {
-            return false;
-        }
-        Ficha ficha = (Ficha) o;
-        return numero == ficha.numero
-                && comodin == ficha.comodin
-                && Objects.equals(color, ficha.color);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(numero, color, comodin);
-    }
+    
 }

@@ -16,7 +16,7 @@ public class JuegoDTO {
     private List<GrupoDTO> gruposEnTablero;
     private int fichasMazo;     // solo cantidad, no toda la lista
     private String mensaje;     // para mostrar en la UI
-
+    private String evento;
     public JuegoDTO() {
     }
 
@@ -66,6 +66,14 @@ public class JuegoDTO {
 
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
+    }
+
+    public String getEvento() {
+        return evento;
+    }
+
+    public void setEvento(String evento) {
+        this.evento = evento;
     }
     
 }

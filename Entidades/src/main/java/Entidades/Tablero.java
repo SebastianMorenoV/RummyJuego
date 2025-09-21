@@ -19,6 +19,7 @@ public class Tablero {
     List<Ficha> mazo;
 
     public Tablero() {
+        this.mazo = new ArrayList<>();
     }
 
     public List<Jugador> getJugadores() {
