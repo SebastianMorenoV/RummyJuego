@@ -102,7 +102,10 @@ public class Modelo implements IModelo {
     public void colocarFicha(FichaJuegoDTO fichaDTO, int x, int y) {
         Ficha fichaAColocar = fichaDTO.toFicha(x, y);
 
-        // 1️⃣ Revisar si la ficha ya está en algún grupo (movimiento dentro del tablero)
+        // Eliminar la ficha de la mano del jugador
+        eliminarFichaDeMano(fichaAColocar);
+
+        // 1. Revisar si la ficha ya está en algún grupo (movimiento dentro del tablero)
         Grupo grupoOrigen = buscarGrupoPorFicha(fichaAColocar.getId());
         if (grupoOrigen != null) {
             // Quitar ficha del grupo actual
@@ -112,26 +115,24 @@ public class Modelo implements IModelo {
             // Eliminar grupo si queda incompleto
             if (!esGrupoValido(grupoOrigen)) {
                 tablero.getFichasEnTablero().remove(grupoOrigen);
-                System.out.println("? Grupo eliminado por ser incompleto tras mover ficha: " + grupoOrigen);
+                System.out.println("Grupo eliminado por ser incompleto tras mover ficha: " + grupoOrigen);
             }
         }
 
-        // 2️⃣ Buscar un grupo cercano donde se pueda agregar
+        // 2. Buscar un grupo cercano donde se pueda agregar
         Grupo grupoCercano = encontrarGrupo(fichaAColocar);
         if (grupoCercano != null && puedeAgregarAFichas(grupoCercano, fichaAColocar)) {
             // Agregar ficha al grupo cercano
             grupoCercano.getFichas().add(fichaAColocar);
             grupoCercano.setNumFichas(grupoCercano.getFichas().size());
-            // Actualizar tipo de grupo (puede ser "numero" o "escalera")
-            // se hace dentro de puedeAgregarAFichas
+
             // Limpiar grupos incompletos restantes
             deshacerGruposIncompletos();
             System.out.println("Ficha agregada a grupo existente: " + grupoCercano);
             notificarObservadores();
             return;
         }
-
-        // 3️⃣ Si no hay grupo cercano válido, crear un nuevo grupo
+        // 3. Si no hay grupo cercano válido, crear un nuevo grupo
         List<Ficha> fichasAGrupo = new ArrayList<>();
         fichasAGrupo.add(fichaAColocar);
         Grupo grupoNuevo = new Grupo("No establecido", fichasAGrupo.size(), fichasAGrupo);
@@ -308,4 +309,14 @@ public class Modelo implements IModelo {
         }
     }
 
+    private void eliminarFichaDeMano(Ficha ficha) {
+        for (Grupo grupo : jugador.getManoJugador().getGruposMano()) {
+            boolean removida = grupo.getFichas().removeIf(f -> f.getId() == ficha.getId());
+            if (removida) {
+                grupo.setNumFichas(grupo.getFichas().size());
+                System.out.println("Ficha eliminada de la mano: " + ficha);
+                break; // ya se eliminó, no seguir buscando
+            }
+        }
+    }
 }

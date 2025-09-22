@@ -54,6 +54,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         panelFichasArmadas = new javax.swing.JPanel();
         panelJugador4 = new Vista.PanelRound();
         panelJugador1 = new Vista.PanelRound();
+        TerminarTurno = new Vista.PanelRound();
+        btnFinalizarTurno = new javax.swing.JLabel();
         panelMano = new Vista.PanelRound();
         fondoMano = new javax.swing.JLabel();
         panelJugador3 = new Vista.PanelRound();
@@ -123,6 +125,40 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(panelJugador1);
         panelJugador1.setBounds(0, 390, 120, 110);
 
+        TerminarTurno.setBackground(new java.awt.Color(0, 0, 0));
+        TerminarTurno.setForeground(new java.awt.Color(255, 51, 51));
+        TerminarTurno.setRoundBottomLeft(40);
+        TerminarTurno.setRoundBottomRight(40);
+        TerminarTurno.setRoundTopLeft(40);
+        TerminarTurno.setRoundTopRight(40);
+
+        btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
+        btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnFinalizarTurnoMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout TerminarTurnoLayout = new javax.swing.GroupLayout(TerminarTurno);
+        TerminarTurno.setLayout(TerminarTurnoLayout);
+        TerminarTurnoLayout.setHorizontalGroup(
+            TerminarTurnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnFinalizarTurno, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        TerminarTurnoLayout.setVerticalGroup(
+            TerminarTurnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TerminarTurnoLayout.createSequentialGroup()
+                .addContainerGap(7, Short.MAX_VALUE)
+                .addComponent(btnFinalizarTurno, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14))
+        );
+
+        GUIjuego.add(TerminarTurno);
+        TerminarTurno.setBounds(790, 130, 100, 80);
+
         panelMano.setRoundBottomLeft(40);
         panelMano.setRoundBottomRight(40);
         panelMano.setRoundTopLeft(40);
@@ -169,7 +205,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         btnMazo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnMazo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/mazoGUI.png"))); // NOI18N
-        btnMazo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnMazo.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnMazo.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnMazoMouseClicked(evt);
@@ -269,9 +305,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         control.pasarTurno();
     }//GEN-LAST:event_btnMazoMouseClicked
 
+    private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel GUIjuego;
+    private Vista.PanelRound TerminarTurno;
+    private javax.swing.JLabel btnFinalizarTurno;
     private javax.swing.JLabel btnMazo;
     private javax.swing.JLabel fondo;
     private javax.swing.JLabel fondoMano;
