@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -30,6 +31,8 @@ public class Modelo implements IModelo {
     List<Observador> observadores;
     Tablero tablero;
     Jugador jugador;
+    Tablero tableroAnterior; // copia del tablero al inicio del turno
+    List<Ficha> fichasJugadorAlInicioTurno; // para rastrear solo las fichas del jugador
 
     public Modelo() {
         observadores = new ArrayList<>();
@@ -125,7 +128,8 @@ public class Modelo implements IModelo {
             // Agregar ficha al grupo cercano
             grupoCercano.getFichas().add(fichaAColocar);
             grupoCercano.setNumFichas(grupoCercano.getFichas().size());
-
+            // Actualizar tipo de grupo (puede ser "numero" o "escalera")
+            // se hace dentro de puedeAgregarAFichas
             // Limpiar grupos incompletos restantes
             deshacerGruposIncompletos();
             System.out.println("Ficha agregada a grupo existente: " + grupoCercano);
@@ -318,5 +322,110 @@ public class Modelo implements IModelo {
                 break; // ya se eliminó, no seguir buscando
             }
         }
+    }
+
+    public Tablero copiaTablero(Tablero original) {
+        System.out.println("[DEBUG] Iniciando copia profunda del tablero...");
+        Tablero copia = new Tablero();
+        List<Grupo> gruposCopia = new ArrayList<>();
+
+        for (Grupo g : original.getFichasEnTablero()) {
+            System.out.println("[DEBUG] Copiando grupo: " + g.getTipo() + " con " + g.getFichas().size() + " fichas.");
+            List<Ficha> fichasCopia = new ArrayList<>();
+            for (Ficha f : g.getFichas()) {
+                Ficha fCopia = new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin(), f.getX(), f.getY());
+                fichasCopia.add(fCopia);
+                System.out.println("[DEBUG]   Copiada ficha ID=" + f.getId() + " Num=" + f.getNumero());
+            }
+            Grupo gCopia = new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
+            gruposCopia.add(gCopia);
+        }
+
+        copia.setFichasEnTablero(gruposCopia);
+        System.out.println("[DEBUG] Copia de tablero finalizada.");
+        return copia;
+    }
+
+    public void iniciarTurno() {
+        System.out.println("[DEBUG] Iniciando turno...");
+        tableroAnterior = copiaTablero(tablero);
+
+        fichasJugadorAlInicioTurno = new ArrayList<>();
+        for (Grupo g : jugador.getManoJugador().getGruposMano()) {
+            fichasJugadorAlInicioTurno.addAll(g.getFichas());
+        }
+        System.out.println("[DEBUG] Se guardaron " + fichasJugadorAlInicioTurno.size() + " fichas del jugador al inicio del turno.");
+    }
+
+    public boolean terminarTurno() {
+        System.out.println("[DEBUG] Intentando terminar turno...");
+
+        // Revisar si hay grupos inválidos (estado "No establecido")
+        for (Grupo g : tablero.getFichasEnTablero()) {
+            if ("No establecido".equals(g.getTipo())) {
+                System.out.println("[DEBUG] Grupo inválido encontrado con estado 'No establecido': " + g);
+
+                // Restaurar el tablero al inicio del turno
+                tablero = copiaTablero(tableroAnterior);
+                System.out.println("[DEBUG] Tablero restaurado al estado inicial del turno.");
+
+                // Devolver solo las fichas del jugador que se movieron al tablero
+                List<Ficha> fichasADevolver = fichasJugadorAlInicioTurno.stream()
+                        .filter(f -> !estaEnManoJugador(f)) // si no está en la mano, fue movida
+                        .collect(Collectors.toList());
+
+                devolverFichasAMano(fichasADevolver);
+                System.out.println("[DEBUG] Fichas del jugador devueltas a la mano: " + fichasADevolver.size());
+
+                notificarObservadores();
+                System.out.println("[DEBUG] No se puede terminar el turno: hay grupos con estado 'No establecido'.");
+                return false;
+            }
+        }
+
+        System.out.println("[DEBUG] Todos los grupos son válidos. Turno finalizado correctamente.");
+
+        // Actualizar tableroAnterior y fichasJugadorAlInicioTurno para el siguiente turno
+        tableroAnterior = copiaTablero(tablero);
+
+        // Guardar el estado de la mano del jugador para el próximo turno
+        fichasJugadorAlInicioTurno = new ArrayList<>();
+        for (Grupo g : jugador.getManoJugador().getGruposMano()) {
+            fichasJugadorAlInicioTurno.addAll(g.getFichas());
+        }
+        notificarObservadores();
+        return true;
+        
+    }
+
+    private void devolverFichasAMano(List<Ficha> fichas) {
+        Mano manoJugador = jugador.getManoJugador();
+        List<Grupo> gruposMano = manoJugador.getGruposMano();
+
+        for (Ficha ficha : fichas) {
+            if (!gruposMano.isEmpty()) {
+                gruposMano.get(0).getFichas().add(ficha);
+                System.out.println("[DEBUG] Ficha devuelta al primer grupo de la mano: ID=" + ficha.getId());
+            } else {
+                List<Ficha> nuevasFichas = new ArrayList<>();
+                nuevasFichas.add(ficha);
+                Grupo nuevoGrupo = new Grupo("mano", nuevasFichas.size(), nuevasFichas);
+                gruposMano.add(nuevoGrupo);
+                System.out.println("[DEBUG] Nuevo grupo creado en la mano con la ficha: ID=" + ficha.getId());
+            }
+
+            manoJugador.setFichasEnMano(manoJugador.getFichasEnMano() + 1);
+        }
+    }
+
+    private boolean estaEnManoJugador(Ficha ficha) {
+        for (Grupo g : jugador.getManoJugador().getGruposMano()) {
+            for (Ficha f : g.getFichas()) {
+                if (f.getId() == ficha.getId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

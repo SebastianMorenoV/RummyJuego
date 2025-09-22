@@ -17,6 +17,7 @@ public class Controlador {
 
     public void iniciarJuego() {
         modelo.iniciarJuego();
+        modelo.iniciarTurno();
     }
 
     public void fichaSoltada(FichaJuegoDTO ficha, int x, int y) {
@@ -24,7 +25,10 @@ public class Controlador {
     }
 
     public void pasarTurno() {
-
         modelo.tomarFichaMazo();    
+    }
+    
+    public void terminarTurno(){
+        modelo.terminarTurno();
     }
 }

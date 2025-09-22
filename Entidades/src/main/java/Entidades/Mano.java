@@ -20,6 +20,14 @@ public class Mano {
         grupos = new ArrayList<>();
     }
 
+    public List<Ficha> getTodasFichas() {
+        List<Ficha> todas = new ArrayList<>();
+        for (Grupo g : grupos) {
+            todas.addAll(g.getFichas());
+        }
+        return todas;
+    }
+
     public int getFichasEnMano() {
         return fichasEnMano;
     }

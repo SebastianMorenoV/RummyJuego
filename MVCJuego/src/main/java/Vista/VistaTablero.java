@@ -306,7 +306,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }//GEN-LAST:event_btnMazoMouseClicked
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
-        // TODO add your handling code here:
+        control.terminarTurno();
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
 
