@@ -34,7 +34,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     public VistaTablero(Controlador control) {
         this.control = control;
         this.setSize(920, 550);
-        this.setName("Rummy");
+        this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -51,11 +51,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private void initComponents() {
 
         GUIjuego = new javax.swing.JPanel();
+        btnFinalizarTurno = new javax.swing.JLabel();
         panelFichasArmadas = new javax.swing.JPanel();
         panelJugador4 = new Vista.PanelRound();
         panelJugador1 = new Vista.PanelRound();
-        TerminarTurno = new Vista.PanelRound();
-        btnFinalizarTurno = new javax.swing.JLabel();
         panelMano = new Vista.PanelRound();
         fondoMano = new javax.swing.JLabel();
         panelJugador3 = new Vista.PanelRound();
@@ -70,6 +69,18 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         GUIjuego.setBackground(new java.awt.Color(0, 0, 0));
         GUIjuego.setLayout(null);
+
+        btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
+        btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnFinalizarTurnoMouseClicked(evt);
+            }
+        });
+        GUIjuego.add(btnFinalizarTurno);
+        btnFinalizarTurno.setBounds(790, 260, 100, 100);
 
         panelFichasArmadas.setBackground(new java.awt.Color(23, 57, 134));
 
@@ -124,40 +135,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         GUIjuego.add(panelJugador1);
         panelJugador1.setBounds(0, 390, 120, 110);
-
-        TerminarTurno.setBackground(new java.awt.Color(0, 0, 0));
-        TerminarTurno.setForeground(new java.awt.Color(255, 51, 51));
-        TerminarTurno.setRoundBottomLeft(40);
-        TerminarTurno.setRoundBottomRight(40);
-        TerminarTurno.setRoundTopLeft(40);
-        TerminarTurno.setRoundTopRight(40);
-
-        btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
-        btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnFinalizarTurnoMouseClicked(evt);
-            }
-        });
-
-        javax.swing.GroupLayout TerminarTurnoLayout = new javax.swing.GroupLayout(TerminarTurno);
-        TerminarTurno.setLayout(TerminarTurnoLayout);
-        TerminarTurnoLayout.setHorizontalGroup(
-            TerminarTurnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnFinalizarTurno, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        TerminarTurnoLayout.setVerticalGroup(
-            TerminarTurnoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, TerminarTurnoLayout.createSequentialGroup()
-                .addContainerGap(7, Short.MAX_VALUE)
-                .addComponent(btnFinalizarTurno, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14, 14, 14))
-        );
-
-        GUIjuego.add(TerminarTurno);
-        TerminarTurno.setBounds(790, 130, 100, 80);
 
         panelMano.setRoundBottomLeft(40);
         panelMano.setRoundBottomRight(40);
@@ -221,13 +198,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         mazoLayout.setVerticalGroup(
             mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mazoLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(14, Short.MAX_VALUE)
                 .addComponent(btnMazo, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14, 14, 14))
+                .addContainerGap())
         );
 
         GUIjuego.add(mazo);
-        mazo.setBounds(790, 230, 60, 87);
+        mazo.setBounds(800, 150, 60, 87);
 
         panelJugador2.setRoundBottomLeft(40);
         panelJugador2.setRoundBottomRight(40);
@@ -312,7 +289,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel GUIjuego;
-    private Vista.PanelRound TerminarTurno;
     private javax.swing.JLabel btnFinalizarTurno;
     private javax.swing.JLabel btnMazo;
     private javax.swing.JLabel fondo;
@@ -371,7 +347,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                         fichaDTO.getNumeroFicha(),
                         fichaDTO.getColor(),
                         fichaDTO.isComodin(),
-                        controlador
+                        controlador, this
                 );
 
                 fichaUI.setPreferredSize(new Dimension(20, 50));
@@ -414,7 +390,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     fichaDTO.getNumeroFicha(),
                     fichaDTO.getColor(),
                     fichaDTO.isComodin(),
-                    control
+                    control, this
             );
             fichaUI.setOrigen(FichaUI.Origen.MANO);
             fichaUI.setSize(35, 50);
@@ -430,6 +406,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         // 4️⃣ Actualizar GUI
         GUIjuego.revalidate();
         GUIjuego.repaint();
+    }
+
+    public JPanel getPanelTablero() {
+        return panelTablero;
     }
 
 }

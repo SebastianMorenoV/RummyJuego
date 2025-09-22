@@ -6,6 +6,7 @@ package Vista.Objetos;
  */
 import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
+import Vista.VistaTablero;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -16,6 +17,7 @@ public class FichaUI extends JPanel {
     private int numero;
     private Color color;
     private boolean comodin;
+    private int originalX, originalY;
 
     public enum Origen {
         MANO, TABLERO
@@ -25,7 +27,7 @@ public class FichaUI extends JPanel {
     private int mouseX, mouseY; // para arrastre
     private JPanel originalParent;
 
-    public FichaUI(int idFicha, int numero, Color color, boolean comodin, Controlador controlador) {
+    public FichaUI(int idFicha, int numero, Color color, boolean comodin, Controlador controlador, VistaTablero vista) {
         this.idFicha = idFicha;
         this.numero = numero;
         this.color = color;
@@ -39,26 +41,41 @@ public class FichaUI extends JPanel {
                 mouseX = e.getX();
                 mouseY = e.getY();
                 originalParent = (JPanel) getParent();
+                originalX = getX(); // posición original dentro del panel
+                originalY = getY();
                 getParent().setComponentZOrder(FichaUI.this, 0); // Traer al frente
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                JPanel panelTablero = vista.getPanelTablero();
+
                 // Convertir la posición relativa al panelTablero
-                java.awt.Point punto = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), originalParent.getParent());
+                java.awt.Point punto = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
                 System.out.println("Soltaste la ficha en x: " + punto.x + " y: " + punto.y);
 
-                int posicionX = punto.x;
-                int posicionY = punto.y;
+                // Verificar si la ficha quedó dentro del panel
+                if (punto.x >= 0 && punto.y >= 0
+                        && punto.x <= panelTablero.getWidth()
+                        && punto.y <= panelTablero.getHeight()) {
 
-                FichaJuegoDTO ficha = new FichaJuegoDTO();
-                ficha.setIdFicha(idFicha);
-                ficha.setNumeroFicha(numero);
-                ficha.setColor(color);
-                ficha.setComodin(comodin);
+                    // Crear DTO de ficha
+                    FichaJuegoDTO ficha = new FichaJuegoDTO();
+                    ficha.setIdFicha(idFicha);
+                    ficha.setNumeroFicha(numero);
+                    ficha.setColor(color);
+                    ficha.setComodin(comodin);
 
-                // Aquí puedes avisar al controlador
-                controlador.fichaSoltada(ficha, punto.x, punto.y);
+                    // Avisar al controlador que se soltó en una posición válida
+                    controlador.fichaSoltada(ficha, punto.x, punto.y);
+
+                } else {
+
+                    // opcional: devolver la ficha a su posición original
+                    System.out.println("Ficha soltada fuera del tablero. Regresando a su posición original.");
+                    setLocation(originalX, originalY);
+                    getParent().repaint(); // repintar para reflejar el cambio
+                }
             }
         });
 
