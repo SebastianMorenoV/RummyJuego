@@ -9,7 +9,7 @@
     <artifactId>Entidades</artifactId>
     <packaging>jar</packaging>
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <exec.mainClass>com.itson.entidades.Entidades</exec.mainClass>
     </properties>
 </project>

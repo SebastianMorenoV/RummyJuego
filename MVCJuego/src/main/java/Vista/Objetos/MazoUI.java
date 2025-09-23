@@ -25,15 +25,19 @@ public class MazoUI extends JPanel implements MouseListener {
     String numeroFichasRestantes;
     Controlador control;
 
-    public MazoUI(String numeroFichasRestantes,Controlador control) {
+    public MazoUI(String numeroFichasRestantes, Controlador control) {
         this.control = control;
         this.numeroFichasRestantes = numeroFichasRestantes;
         setPreferredSize(new Dimension(40, 70));
-        
+
         // Agrega el MouseListener al componente en el constructor
         addMouseListener(this);
     }
-    
+
+    public MazoUI() {
+
+    }
+
     // El método que se ejecutará al hacer clic con el mouse
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -42,7 +46,7 @@ public class MazoUI extends JPanel implements MouseListener {
         // como repartir una nueva ficha, etc.
         control.pasarTurno();
     }
-    
+
     // Los siguientes métodos deben ser implementados por MouseListener,
     // aunque no los uses, son obligatorios.
     @Override
@@ -94,5 +98,11 @@ public class MazoUI extends JPanel implements MouseListener {
 
         // Restaurar la fuente original
         g.setFont(original);
+    }
+
+    public void actualizarNumeroFichas(int nuevoNumero) {
+        this.numeroFichasRestantes = String.valueOf(nuevoNumero);
+        // Repinta el componente para mostrar el nuevo número
+        repaint();
     }
 }

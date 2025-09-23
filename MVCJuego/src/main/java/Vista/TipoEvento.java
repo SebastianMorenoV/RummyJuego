@@ -15,6 +15,7 @@ public enum TipoEvento {
     ACTUALIZAR_TABLERO,
     REPINTAR_MANO,
     INCIALIZAR_FICHAS,
+    TOMO_FICHA
     
 
 }
