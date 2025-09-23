@@ -13,6 +13,7 @@ import Entidades.Jugador;
 import Entidades.Tablero;
 import Entidades.Mano;
 import Vista.Observador;
+import Vista.TipoEvento;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,12 +93,12 @@ public class Modelo implements IModelo {
         this.jugador = new Jugador("Sebas", "B1", new Mano());
         crearMazoCompleto();
         repartirMano(jugador);
-        notificarObservadores();
+        notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
 
-    public void notificarObservadores() {
+    public void notificarObservadores(TipoEvento tipoEvento) {
         for (Observador observer : observadores) {
-            observer.actualiza(this);
+            observer.actualiza(this,tipoEvento);
         }
     }
 
@@ -145,7 +146,7 @@ public class Modelo implements IModelo {
             // Limpiar grupos incompletos restantes
             deshacerGruposIncompletos();
             System.out.println("Ficha agregada a grupo existente: " + grupoCercano);
-            notificarObservadores();
+            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
             return;
         }
         // 3. Si no hay grupo cercano válido, crear un nuevo grupo
@@ -155,7 +156,7 @@ public class Modelo implements IModelo {
         tablero.getFichasEnTablero().add(grupoNuevo);
         System.out.println("Creacion de grupo nuevo correctamente: " + grupoNuevo);
         deshacerGruposIncompletos();
-        notificarObservadores();
+         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
     }
 
     public void crearMazoCompleto() {
@@ -225,6 +226,7 @@ public class Modelo implements IModelo {
             gruposMano.get(0).getFichas().add(ficha);
             manoJugador.setFichasEnMano(manoJugador.getFichasEnMano() + 1);
             System.out.println("Se añadio nueva ficha a la mano.");
+            notificarObservadores(TipoEvento.REPINTAR_MANO);
         }
     }
 
@@ -321,7 +323,7 @@ public class Modelo implements IModelo {
                 System.out.println("⚠ Grupo marcado como no establecido por ser incompleto: " + grupo);
             }
         }
-        notificarObservadores();
+         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
     }
 
     private Grupo buscarGrupoPorFicha(int idFicha) {
@@ -471,8 +473,7 @@ public class Modelo implements IModelo {
 
                 devolverFichasAMano(fichasADevolver);
                 System.out.println("[DEBUG] Fichas del jugador devueltas a la mano: " + fichasADevolver.size());
-
-                notificarObservadores();
+                 notificarObservadores(TipoEvento.REPINTAR_MANO);
                 System.out.println("[DEBUG] No se puede terminar el turno: hay grupos con estado 'No establecido'.");
                 return false;
             }
@@ -488,7 +489,7 @@ public class Modelo implements IModelo {
         for (Grupo g : jugador.getManoJugador().getGruposMano()) {
             fichasJugadorAlInicioTurno.addAll(g.getFichas());
         }
-        notificarObservadores();
+         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
         return true;
 
     }

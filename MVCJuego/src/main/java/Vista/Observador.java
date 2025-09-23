@@ -11,5 +11,5 @@ import Modelo.IModelo;
  * @author moren
  */
 public interface Observador {
-    public void actualiza(IModelo modelo);
+    public void actualiza(IModelo modelo, TipoEvento tipoEvento);
 }

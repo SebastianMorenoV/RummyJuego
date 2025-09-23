@@ -38,10 +38,5 @@ public class ManoUI extends JPanel {
         // Fondo marrón redondeado
         g.setColor(new Color(156, 113, 17));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-
-        // Línea horizontal en el medio
-        g.setColor(Color.BLACK);
-        int yLinea = getHeight() / 2;
-        g.drawLine(10, yLinea, getWidth() - 10, yLinea);
     }
 }

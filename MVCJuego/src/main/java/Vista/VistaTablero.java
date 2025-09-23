@@ -10,6 +10,7 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
+import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
@@ -18,6 +19,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -31,6 +36,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private Controlador control;
     private boolean fichasInicializadas = false;
     private TableroUI tableroUI;
+    private ManoUI manoUI;
 
     /**
      * Creates new form VistaTableross
@@ -54,26 +60,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        panelTablero = new javax.swing.JPanel();
         GUIjuego = new javax.swing.JPanel();
         btnFinalizarTurno = new javax.swing.JLabel();
         panelFichasArmadas = new javax.swing.JPanel();
-        panelJugador4 = new Vista.PanelRound();
-        panelJugador1 = new Vista.PanelRound();
-        panelJugador3 = new Vista.PanelRound();
-        mazo = new Vista.PanelRound();
-        btnMazo = new javax.swing.JLabel();
-        panelJugador2 = new Vista.PanelRound();
         fondo = new javax.swing.JLabel();
-
-        panelTablero.setBackground(new java.awt.Color(15, 89, 46));
-        panelTablero.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(6, 71, 34), 3, true));
-        panelTablero.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                panelTableroMouseReleased(evt);
-            }
-        });
-        panelTablero.setLayout(null);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -108,116 +98,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(panelFichasArmadas);
         panelFichasArmadas.setBounds(130, 0, 640, 120);
 
-        panelJugador4.setRoundBottomLeft(40);
-        panelJugador4.setRoundBottomRight(40);
-        panelJugador4.setRoundTopLeft(40);
-        panelJugador4.setRoundTopRight(40);
-
-        javax.swing.GroupLayout panelJugador4Layout = new javax.swing.GroupLayout(panelJugador4);
-        panelJugador4.setLayout(panelJugador4Layout);
-        panelJugador4Layout.setHorizontalGroup(
-            panelJugador4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 120, Short.MAX_VALUE)
-        );
-        panelJugador4Layout.setVerticalGroup(
-            panelJugador4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 110, Short.MAX_VALUE)
-        );
-
-        GUIjuego.add(panelJugador4);
-        panelJugador4.setBounds(0, 0, 120, 110);
-
-        panelJugador1.setRoundBottomLeft(40);
-        panelJugador1.setRoundBottomRight(40);
-        panelJugador1.setRoundTopLeft(40);
-        panelJugador1.setRoundTopRight(40);
-
-        javax.swing.GroupLayout panelJugador1Layout = new javax.swing.GroupLayout(panelJugador1);
-        panelJugador1.setLayout(panelJugador1Layout);
-        panelJugador1Layout.setHorizontalGroup(
-            panelJugador1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 120, Short.MAX_VALUE)
-        );
-        panelJugador1Layout.setVerticalGroup(
-            panelJugador1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 110, Short.MAX_VALUE)
-        );
-
-        GUIjuego.add(panelJugador1);
-        panelJugador1.setBounds(0, 390, 120, 110);
-
-        panelJugador3.setRoundBottomLeft(40);
-        panelJugador3.setRoundBottomRight(40);
-        panelJugador3.setRoundTopLeft(40);
-        panelJugador3.setRoundTopRight(40);
-
-        javax.swing.GroupLayout panelJugador3Layout = new javax.swing.GroupLayout(panelJugador3);
-        panelJugador3.setLayout(panelJugador3Layout);
-        panelJugador3Layout.setHorizontalGroup(
-            panelJugador3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 120, Short.MAX_VALUE)
-        );
-        panelJugador3Layout.setVerticalGroup(
-            panelJugador3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 110, Short.MAX_VALUE)
-        );
-
-        GUIjuego.add(panelJugador3);
-        panelJugador3.setBounds(780, 0, 120, 110);
-
-        mazo.setBackground(new java.awt.Color(156, 113, 17));
-        mazo.setRoundBottomLeft(40);
-        mazo.setRoundBottomRight(40);
-        mazo.setRoundTopLeft(40);
-        mazo.setRoundTopRight(40);
-
-        btnMazo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        btnMazo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/mazoGUI.png"))); // NOI18N
-        btnMazo.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        btnMazo.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnMazoMouseClicked(evt);
-            }
-        });
-
-        javax.swing.GroupLayout mazoLayout = new javax.swing.GroupLayout(mazo);
-        mazo.setLayout(mazoLayout);
-        mazoLayout.setHorizontalGroup(
-            mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mazoLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnMazo, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-        mazoLayout.setVerticalGroup(
-            mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mazoLayout.createSequentialGroup()
-                .addContainerGap(14, Short.MAX_VALUE)
-                .addComponent(btnMazo, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        GUIjuego.add(mazo);
-        mazo.setBounds(40, 190, 60, 87);
-
-        panelJugador2.setRoundBottomLeft(40);
-        panelJugador2.setRoundBottomRight(40);
-        panelJugador2.setRoundTopLeft(40);
-        panelJugador2.setRoundTopRight(40);
-
-        javax.swing.GroupLayout panelJugador2Layout = new javax.swing.GroupLayout(panelJugador2);
-        panelJugador2.setLayout(panelJugador2Layout);
-        panelJugador2Layout.setHorizontalGroup(
-            panelJugador2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 120, Short.MAX_VALUE)
-        );
-        panelJugador2Layout.setVerticalGroup(
-            panelJugador2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 110, Short.MAX_VALUE)
-        );
-
-        GUIjuego.add(panelJugador2);
-        panelJugador2.setBounds(780, 390, 120, 110);
-
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
         fondo.setText("jLabel1");
         GUIjuego.add(fondo);
@@ -247,14 +127,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void panelTableroMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelTableroMouseReleased
-
-    }//GEN-LAST:event_panelTableroMouseReleased
-
-    private void btnMazoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnMazoMouseClicked
-        control.pasarTurno();
-    }//GEN-LAST:event_btnMazoMouseClicked
-
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
         control.terminarTurno();
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
@@ -263,25 +135,24 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel GUIjuego;
     private javax.swing.JLabel btnFinalizarTurno;
-    private javax.swing.JLabel btnMazo;
     private javax.swing.JLabel fondo;
-    private Vista.PanelRound mazo;
     private javax.swing.JPanel panelFichasArmadas;
-    private Vista.PanelRound panelJugador1;
-    private Vista.PanelRound panelJugador2;
-    private Vista.PanelRound panelJugador3;
-    private Vista.PanelRound panelJugador4;
-    private javax.swing.JPanel panelTablero;
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void actualiza(IModelo modelo) {
+    public void actualiza(IModelo modelo, TipoEvento tipoEvento) {
 
-        if (!fichasInicializadas) {
-            inicializarFichasMano(modelo);
-            fichasInicializadas = true; // marca que ya se ejecutó
-        } else {
-            pintarFichasTablero(modelo, control);
+        switch (tipoEvento) {
+            case INCIALIZAR_FICHAS:
+                inicializarFichasMano(modelo);
+                break;
+            case REPINTAR_MANO:
+                repintarMano(modelo, control, manoUI);
+                break;
+            case ACTUALIZAR_TABLERO:
+                pintarFichasTablero(modelo, control);
+                // Lógica para actualizar el tablero
+                break;
         }
     }
 
@@ -291,7 +162,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         // Devolver fichas a la mano si no están en ningún grupo
         //devolverFichasAMano(modelo, grupos);
-        // 2️⃣ Limpiar el panel del tablero antes de pintar
+        // Limpiar panel antes de pintar
         panelFichasArmadas.removeAll();
         panelFichasArmadas.setBackground(new Color(23, 57, 134));
         panelFichasArmadas.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -347,9 +218,48 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 GUIjuego.remove(c);
             }
         }
+        String rutaImagen = "C:\\Users\\Sebastian Moreno\\Desktop\\Diagrama\\logoEcos.jpg";
+
+        try {
+            // Convierte la cadena de texto de la ruta en un objeto Path
+            Path path = new File(rutaImagen).toPath();
+
+            // Lee todos los bytes del archivo
+            byte[] imagenAvatarBytes = Files.readAllBytes(path);
+            System.out.println("Imagen cargada exitosamente. Tamaño: " + imagenAvatarBytes.length + " bytes.");
+
+            // 2. Crea los objetos JugadorUI, pasándoles la misma imagen en bytes ya cargada
+            JugadorUI jugador1 = new JugadorUI("Sebastian", 7, imagenAvatarBytes);
+            jugador1.setSize(150, 150);
+            jugador1.setLocation(-10, -10);
+            GUIjuego.add(jugador1);
+            GUIjuego.setComponentZOrder(jugador1, GUIjuego.getComponentCount() - 2);
+
+            JugadorUI jugador2 = new JugadorUI("Benjamin", 15, imagenAvatarBytes);
+            jugador2.setSize(150, 150);
+            jugador2.setLocation(-10, 360);
+            GUIjuego.add(jugador2);
+            GUIjuego.setComponentZOrder(jugador2, GUIjuego.getComponentCount() - 2);
+
+            JugadorUI jugador3 = new JugadorUI("Luciano", 10, imagenAvatarBytes);
+            jugador3.setSize(150, 150);
+            jugador3.setLocation(760, -10);
+            GUIjuego.add(jugador3);
+            GUIjuego.setComponentZOrder(jugador3, GUIjuego.getComponentCount() - 2);
+
+            JugadorUI jugador4 = new JugadorUI("Mr.Fitch", 5, imagenAvatarBytes);
+            jugador4.setSize(150, 150);
+            jugador4.setLocation(760, 360);
+            GUIjuego.add(jugador4);
+            GUIjuego.setComponentZOrder(jugador4, GUIjuego.getComponentCount() - 2);
+
+        } catch (IOException e) {
+            System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
+            e.printStackTrace();
+        }
 
         //Crear Mano
-        ManoUI manoUI = new ManoUI();
+        manoUI = new ManoUI();
         manoUI.setLocation(160, 380);
         manoUI.setSize(580, 120);
         GUIjuego.add(manoUI);
@@ -388,7 +298,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             xPos += 40; // separación entre fichas
         }
 
-        MazoUI mazoUI = new MazoUI("17");
+        MazoUI mazoUI = new MazoUI("17", control);
         mazoUI.setLocation(800, 150);
         mazoUI.setSize(70, 90);
         mazoUI.setOpaque(false);
@@ -404,4 +314,40 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         return tableroUI;
     }
 
+    public void repintarMano(IModelo modelo, Controlador controlador, ManoUI manoUI) {
+        // 1️⃣ Limpiar el panel de la mano para evitar duplicados
+        manoUI.removeAll();
+
+        // 2️⃣ Obtener las fichas de la mano del modelo
+        List<FichaJuegoDTO> fichasMano = modelo.getMano();
+
+        // 3️⃣ Posición inicial de las fichas dentro del panel de la mano
+        int xPos = 10;
+        int yPos = 10;
+
+        // 4️⃣ Dibujar cada ficha en la mano
+        for (FichaJuegoDTO fichaDTO : fichasMano) {
+            FichaUI fichaUI = new FichaUI(
+                    fichaDTO.getIdFicha(),
+                    fichaDTO.getNumeroFicha(),
+                    fichaDTO.getColor(),
+                    fichaDTO.isComodin(),
+                    controlador,
+                    this
+            );
+
+            fichaUI.setOrigen(FichaUI.Origen.MANO);
+            fichaUI.setSize(25, 45); // Asume el tamaño de la ficha
+            fichaUI.setLocation(xPos, yPos);
+            fichaUI.setOpaque(false);
+
+            manoUI.add(fichaUI);
+
+            xPos += 40; // Ajusta el espaciado
+        }
+
+        // 5️⃣ Refrescar el panel para mostrar los cambios
+        manoUI.revalidate();
+        manoUI.repaint();
+    }
 }
