@@ -10,6 +10,9 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
+import Vista.Objetos.ManoUI;
+import Vista.Objetos.MazoUI;
+import Vista.Objetos.TableroUI;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -27,6 +30,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private Controlador control;
     private boolean fichasInicializadas = false;
+    private TableroUI tableroUI;
 
     /**
      * Creates new form VistaTableross
@@ -50,20 +54,26 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        panelTablero = new javax.swing.JPanel();
         GUIjuego = new javax.swing.JPanel();
         btnFinalizarTurno = new javax.swing.JLabel();
         panelFichasArmadas = new javax.swing.JPanel();
         panelJugador4 = new Vista.PanelRound();
         panelJugador1 = new Vista.PanelRound();
-        panelMano = new Vista.PanelRound();
-        fondoMano = new javax.swing.JLabel();
         panelJugador3 = new Vista.PanelRound();
         mazo = new Vista.PanelRound();
         btnMazo = new javax.swing.JLabel();
         panelJugador2 = new Vista.PanelRound();
-        panelTablero = new javax.swing.JPanel();
-        fondoPanelTablero = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
+
+        panelTablero.setBackground(new java.awt.Color(15, 89, 46));
+        panelTablero.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(6, 71, 34), 3, true));
+        panelTablero.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                panelTableroMouseReleased(evt);
+            }
+        });
+        panelTablero.setLayout(null);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -136,25 +146,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(panelJugador1);
         panelJugador1.setBounds(0, 390, 120, 110);
 
-        panelMano.setRoundBottomLeft(40);
-        panelMano.setRoundBottomRight(40);
-        panelMano.setRoundTopLeft(40);
-        panelMano.setRoundTopRight(40);
-        panelMano.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                panelManoMouseClicked(evt);
-            }
-        });
-        panelMano.setLayout(null);
-
-        fondoMano.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/mano.png"))); // NOI18N
-        fondoMano.setText("jLabel1");
-        panelMano.add(fondoMano);
-        fondoMano.setBounds(-50, -20, 650, 140);
-
-        GUIjuego.add(panelMano);
-        panelMano.setBounds(160, 380, 580, 120);
-
         panelJugador3.setRoundBottomLeft(40);
         panelJugador3.setRoundBottomRight(40);
         panelJugador3.setRoundTopLeft(40);
@@ -193,7 +184,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         mazo.setLayout(mazoLayout);
         mazoLayout.setHorizontalGroup(
             mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnMazo, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mazoLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(btnMazo, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         mazoLayout.setVerticalGroup(
             mazoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -204,7 +197,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         );
 
         GUIjuego.add(mazo);
-        mazo.setBounds(800, 150, 60, 87);
+        mazo.setBounds(40, 190, 60, 87);
 
         panelJugador2.setRoundBottomLeft(40);
         panelJugador2.setRoundBottomRight(40);
@@ -225,26 +218,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(panelJugador2);
         panelJugador2.setBounds(780, 390, 120, 110);
 
-        panelTablero.setBackground(new java.awt.Color(153, 153, 153));
-        panelTablero.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                panelTableroMouseReleased(evt);
-            }
-        });
-        panelTablero.setLayout(null);
-
-        fondoPanelTablero.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/tablero.png"))); // NOI18N
-        fondoPanelTablero.setText("jLabel1");
-        panelTablero.add(fondoPanelTablero);
-        fondoPanelTablero.setBounds(-50, 0, 750, 420);
-
-        GUIjuego.add(panelTablero);
-        panelTablero.setBounds(130, 130, 640, 242);
-
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
         fondo.setText("jLabel1");
         GUIjuego.add(fondo);
-        fondo.setBounds(0, 0, 900, 902);
+        fondo.setBounds(0, 0, 900, 500);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -270,10 +247,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void panelManoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelManoMouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_panelManoMouseClicked
-
     private void panelTableroMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelTableroMouseReleased
 
     }//GEN-LAST:event_panelTableroMouseReleased
@@ -292,15 +265,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JLabel btnFinalizarTurno;
     private javax.swing.JLabel btnMazo;
     private javax.swing.JLabel fondo;
-    private javax.swing.JLabel fondoMano;
-    private javax.swing.JLabel fondoPanelTablero;
     private Vista.PanelRound mazo;
     private javax.swing.JPanel panelFichasArmadas;
     private Vista.PanelRound panelJugador1;
     private Vista.PanelRound panelJugador2;
     private Vista.PanelRound panelJugador3;
     private Vista.PanelRound panelJugador4;
-    private Vista.PanelRound panelMano;
     private javax.swing.JPanel panelTablero;
     // End of variables declaration//GEN-END:variables
 
@@ -378,8 +348,23 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         }
 
+        //Crear Mano
+        ManoUI manoUI = new ManoUI();
+        manoUI.setLocation(160, 380);
+        manoUI.setSize(580, 120);
+        GUIjuego.add(manoUI);
+        GUIjuego.setComponentZOrder(manoUI, GUIjuego.getComponentCount() - 2);
+
+        //Crear Tablero
+        tableroUI = new TableroUI();
+        tableroUI.setLocation(130, 130);
+        tableroUI.setSize(640, 242);
+        tableroUI.setOpaque(false);
+        GUIjuego.add(tableroUI);
+        GUIjuego.setComponentZOrder(tableroUI, GUIjuego.getComponentCount() - 2);
+
         // 2️⃣ Posición inicial relativa al panelMano
-        Point posPanel = panelMano.getLocation(); // posición dentro de GUIjuego
+        Point posPanel = manoUI.getLocation(); // posición dentro de GUIjuego
         int xPos = posPanel.x + 10;
         int yPos = posPanel.y + 10;
 
@@ -393,23 +378,30 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     control, this
             );
             fichaUI.setOrigen(FichaUI.Origen.MANO);
-            fichaUI.setSize(35, 50);
+            fichaUI.setSize(25, 45);
             fichaUI.setLocation(xPos, yPos);
             fichaUI.setOpaque(false);
 
-            GUIjuego.add(fichaUI);
-            GUIjuego.setComponentZOrder(fichaUI, 0);
+            manoUI.add(fichaUI);
+            manoUI.setComponentZOrder(fichaUI, 0);
 
             xPos += 40; // separación entre fichas
         }
+
+        MazoUI mazoUI = new MazoUI("17");
+        mazoUI.setLocation(800, 150);
+        mazoUI.setSize(70, 90);
+        mazoUI.setOpaque(false);
+        GUIjuego.add(mazoUI);
+        GUIjuego.setComponentZOrder(mazoUI, GUIjuego.getComponentCount() - 2);
 
         // 4️⃣ Actualizar GUI
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
 
-    public JPanel getPanelTablero() {
-        return panelTablero;
+    public TableroUI getPanelTablero() {
+        return tableroUI;
     }
 
 }

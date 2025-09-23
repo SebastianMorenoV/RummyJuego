@@ -1,14 +1,12 @@
 package Vista.Objetos;
 
-/**
- *
- * @author moren
- */
 import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
 import Vista.VistaTablero;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class FichaUI extends JPanel {
@@ -17,99 +15,158 @@ public class FichaUI extends JPanel {
     private int numero;
     private Color color;
     private boolean comodin;
-    private int originalX, originalY;
+
+    private int mouseX, mouseY;
+    private Point originalLocation;
+    private JPanel originalParent;
+
+    private Origen origen;
+
+    private VistaTablero vista;
+    private Controlador controlador;
 
     public enum Origen {
         MANO, TABLERO
     }
-    private Origen origen;
 
-    private int mouseX, mouseY; // para arrastre
-    private JPanel originalParent;
-
-    public FichaUI(int idFicha, int numero, Color color, boolean comodin, Controlador controlador, VistaTablero vista) {
+    public FichaUI(int idFicha, int numero, Color color, boolean comodin,
+            Controlador controlador, VistaTablero vista) {
         this.idFicha = idFicha;
         this.numero = numero;
         this.color = color;
         this.comodin = comodin;
-        setSize(20, 50);
-        setPreferredSize(new Dimension(20, 50));
+        this.vista = vista;
+        this.controlador = controlador;
 
-        addMouseListener(new java.awt.event.MouseAdapter() {
+        setSize(25, 40);
+        setPreferredSize(new Dimension(25, 40));
+        setOpaque(false);
+
+        initDrag();
+    }
+
+    private void initDrag() {
+        MouseAdapter ma = new MouseAdapter() {
+            private JComponent glassPane;
+            private Point glassPaneOffset;
+
             @Override
             public void mousePressed(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
+
                 originalParent = (JPanel) getParent();
-                originalX = getX(); // posición original dentro del panel
-                originalY = getY();
-                getParent().setComponentZOrder(FichaUI.this, 0); // Traer al frente
+                originalLocation = getLocation();
+
+                // Activar GlassPane
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(FichaUI.this);
+                glassPane = (JComponent) frame.getGlassPane();
+                glassPane.setVisible(true);
+                glassPane.setLayout(null);
+
+                // Convertir posición a GlassPane
+                Point locOnGlass = SwingUtilities.convertPoint(FichaUI.this, 0, 0, glassPane);
+                glassPaneOffset = new Point(mouseX, mouseY);
+                setLocation(locOnGlass);
+
+                // Remover del panel original y agregar al GlassPane
+                originalParent.remove(FichaUI.this);
+                glassPane.add(FichaUI.this);
+                glassPane.revalidate();
+                glassPane.repaint();
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                Point glassPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), glassPane);
+                setLocation(glassPoint.x - glassPaneOffset.x, glassPoint.y - glassPaneOffset.y);
+                glassPane.repaint();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                JPanel panelTablero = vista.getPanelTablero();
+                TableroUI panelTablero = vista.getPanelTablero();
+                Point releasePoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
 
-                // Convertir la posición relativa al panelTablero
-                java.awt.Point punto = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
-                System.out.println("Soltaste la ficha en x: " + punto.x + " y: " + punto.y);
+                // Quitar del GlassPane si lo estás usando
+                if (glassPane != null) {
+                    glassPane.remove(FichaUI.this);
+                    glassPane.setVisible(false);
+                }
 
-                // Verificar si la ficha quedó dentro del panel
-                if (punto.x >= 0 && punto.y >= 0
-                        && punto.x <= panelTablero.getWidth()
-                        && punto.y <= panelTablero.getHeight()) {
+                // Si se soltó dentro del tablero
+                if (releasePoint.x >= 0 && releasePoint.y >= 0
+                        && releasePoint.x <= panelTablero.getWidth()
+                        && releasePoint.y <= panelTablero.getHeight()) {
 
-                    // Crear DTO de ficha
-                    FichaJuegoDTO ficha = new FichaJuegoDTO();
-                    ficha.setIdFicha(idFicha);
-                    ficha.setNumeroFicha(numero);
-                    ficha.setColor(color);
-                    ficha.setComodin(comodin);
+                    // Remover de la celda anterior si existía
+                    if (origen == Origen.TABLERO) {
+                        panelTablero.removerFicha(FichaUI.this);
+                    }
 
-                    // Avisar al controlador que se soltó en una posición válida
-                    controlador.fichaSoltada(ficha, punto.x, punto.y);
+                    // Intentar colocar la ficha en la celda libre más cercana
+                    boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, releasePoint);
+
+                    if (colocada) {
+                        origen = Origen.TABLERO;
+
+                        // Notificar al controlador
+                        FichaJuegoDTO fichaDTO = new FichaJuegoDTO();
+                        fichaDTO.setIdFicha(idFicha);
+                        fichaDTO.setNumeroFicha(numero);
+                        fichaDTO.setColor(color);
+                        fichaDTO.setComodin(comodin);
+                        controlador.fichaSoltada(fichaDTO,getX(), getY());
+
+                    } else {
+                        // Si no hay celda libre, devolver a la mano
+                        setLocation(originalLocation);
+                        originalParent.add(FichaUI.this);
+                        originalParent.setComponentZOrder(FichaUI.this, 0);
+                        originalParent.revalidate();
+                        originalParent.repaint();
+                        origen = Origen.MANO;
+                    }
 
                 } else {
-
-                    // opcional: devolver la ficha a su posición original
-                    System.out.println("Ficha soltada fuera del tablero. Regresando a su posición original.");
-                    setLocation(originalX, originalY);
-                    getParent().repaint(); // repintar para reflejar el cambio
+                    // Si se soltó fuera del tablero, regresar a la mano
+                    if (origen == Origen.TABLERO) {
+                        panelTablero.removerFicha(FichaUI.this);
+                    }
+                    setLocation(originalLocation);
+                    originalParent.add(FichaUI.this);
+                    originalParent.setComponentZOrder(FichaUI.this, 0);
+                    originalParent.revalidate();
+                    originalParent.repaint();
+                    origen = Origen.MANO;
                 }
             }
-        });
 
-        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                int x = getX() + e.getX() - mouseX;
-                int y = getY() + e.getY() - mouseY;
-                setLocation(x, y);
-                getParent().repaint();
-            }
-        });
+        };
+
+        addMouseListener(ma);
+        addMouseMotionListener(ma);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         g.setColor(color);
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
         g.setColor(Color.WHITE);
-        g.drawString(comodin ? "★" : String.valueOf(numero), getWidth() / 2 - 5, getHeight() / 2 + 5);
+
+        // Texto centrado
+        FontMetrics fm = g.getFontMetrics();
+        String texto = comodin ? "★" : String.valueOf(numero);
+        int x = (getWidth() - fm.stringWidth(texto)) / 2;
+        int y = (getHeight() + fm.getAscent()) / 2 - 2;
+        g.drawString(texto, x, y);
     }
 
-    // Getters si necesitas pasar info al controlador
-    public int getNumero() {
-        return numero;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public boolean isComodin() {
-        return comodin;
+    // Getters y setters
+    public int getIdFicha() {
+        return idFicha;
     }
 
     public void setOrigen(Origen origen) {

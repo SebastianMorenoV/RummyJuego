@@ -16,9 +16,12 @@ import Vista.Observador;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -115,10 +118,19 @@ public class Modelo implements IModelo {
             grupoOrigen.getFichas().removeIf(fichaEnGrupo -> fichaEnGrupo.getId() == fichaAColocar.getId());
             grupoOrigen.setNumFichas(grupoOrigen.getFichas().size());
 
-            // Eliminar grupo si queda incompleto
+            // Si el grupo quedó inválido, eliminarlo del tablero
             if (!esGrupoValido(grupoOrigen)) {
                 tablero.getFichasEnTablero().remove(grupoOrigen);
                 System.out.println("Grupo eliminado por ser incompleto tras mover ficha: " + grupoOrigen);
+
+                // Si quieres, aquí podrías crear nuevos grupos a partir de los fragmentos restantes
+                for (Ficha f : grupoOrigen.getFichas()) {
+                    List<Ficha> lista = new ArrayList<>();
+                    lista.add(f);
+                    Grupo nuevo = new Grupo("No establecido", 1, lista);
+                    tablero.getFichasEnTablero().add(nuevo);
+                    System.out.println("Creado nuevo grupo de ficha aislada: " + nuevo);
+                }
             }
         }
 
@@ -142,6 +154,7 @@ public class Modelo implements IModelo {
         Grupo grupoNuevo = new Grupo("No establecido", fichasAGrupo.size(), fichasAGrupo);
         tablero.getFichasEnTablero().add(grupoNuevo);
         System.out.println("Creacion de grupo nuevo correctamente: " + grupoNuevo);
+        deshacerGruposIncompletos();
         notificarObservadores();
     }
 
@@ -181,7 +194,7 @@ public class Modelo implements IModelo {
     public void repartirMano(Jugador jugador) {
         List<Ficha> mazo = tablero.getMazo();
         List<Ficha> fichasMano = new ArrayList<>();
-        for (int i = 0; i < 13; i++) {
+        for (int i = 0; i < 40; i++) {
             fichasMano.add(mazo.remove(0)); // quita del mazo
         }
 
@@ -216,6 +229,15 @@ public class Modelo implements IModelo {
     }
 
     ////////////////////////////////METODOS FUERTES/////////////////////////////////////////////////////
+    private List<Grupo> encontrarGruposColindantes(Ficha nuevaFicha) {
+        return tablero.getFichasEnTablero().stream()
+                .filter(grupo -> grupo.getFichas().stream()
+                .anyMatch(f -> estaCerca(f, nuevaFicha.getX(), nuevaFicha.getY())))
+                .sorted(Comparator.comparingInt(grupo -> grupo.getFichas()
+                .stream().mapToInt(Ficha::getX).min().orElse(Integer.MAX_VALUE)))
+                .toList();
+    }
+
     private Grupo encontrarGrupo(Ficha nuevaFicha) {
         return tablero.getFichasEnTablero().stream()
                 //encuentra el grupo de la ficha que le pasas como parametro
@@ -225,7 +247,7 @@ public class Modelo implements IModelo {
     }
 
     private boolean estaCerca(Ficha f, int x, int y) {
-        int distancia = 50;
+        int distancia = 29;
         return Math.abs(f.getX() - x) <= distancia && Math.abs(f.getY() - y) <= distancia;
     }
 
@@ -242,8 +264,9 @@ public class Modelo implements IModelo {
 
     private boolean puedeAgregarAFichas(Grupo grupo, Ficha nuevaFicha) {
         List<Ficha> fichas = grupo.getFichas();
+
         if (grupo.getTipo().equals("No establecido")) {
-            Ficha primerFichaGrupo = grupo.getFichas().get(0);
+            Ficha primerFichaGrupo = fichas.get(0);
             String tipo = establecerTipoGrupo(primerFichaGrupo, nuevaFicha);
             grupo.setTipo(tipo);
         }
@@ -260,7 +283,7 @@ public class Modelo implements IModelo {
         }
 
         if (grupo.getTipo().equals("escalera")) {
-            // Máx 13 fichas, misma color, números secuenciales
+            // Máx 13 fichas, misma color
             if (fichas.size() >= 13) {
                 return false;
             }
@@ -268,22 +291,34 @@ public class Modelo implements IModelo {
                 return false;
             }
 
-            List<Integer> numeros = fichas.stream().map(Ficha::getNumero).sorted().toList();
-            int min = numeros.get(0), max = numeros.get(numeros.size() - 1);
+            // Obtener números y posiciones X
+            List<Ficha> ordenadas = new ArrayList<>(fichas);
+            ordenadas.sort(Comparator.comparingInt(Ficha::getX)); // izquierda a derecha
+            int minNum = ordenadas.get(0).getNumero();
+            int maxNum = ordenadas.get(ordenadas.size() - 1).getNumero();
+            int minX = ordenadas.get(0).getX();
+            int maxX = ordenadas.get(ordenadas.size() - 1).getX();
 
-            return nuevaFicha.getNumero() == min - 1 || nuevaFicha.getNumero() == max + 1;
+            // Verificar que el nuevo número encaje al inicio o final de la escalera
+            if (nuevaFicha.getNumero() == minNum - 1) {
+                // Debe ir a la izquierda
+                return nuevaFicha.getX() < minX;
+            } else if (nuevaFicha.getNumero() == maxNum + 1) {
+                // Debe ir a la derecha
+                return nuevaFicha.getX() > maxX;
+            }
+
+            return false; // no encaja en la secuencia
         }
 
         return false;
     }
 
     private void deshacerGruposIncompletos() {
-        Iterator<Grupo> it = tablero.getFichasEnTablero().iterator();
-        while (it.hasNext()) {
-            Grupo grupo = it.next();
+        for (Grupo grupo : tablero.getFichasEnTablero()) {
             if (!esGrupoValido(grupo)) {
-                it.remove();
-                System.out.println("❌ Grupo eliminado por ser incompleto: " + grupo);
+                grupo.setTipo("No establecido");
+                System.out.println("⚠ Grupo marcado como no establecido por ser incompleto: " + grupo);
             }
         }
         notificarObservadores();
@@ -301,13 +336,73 @@ public class Modelo implements IModelo {
     }
 
     private boolean esGrupoValido(Grupo grupo) {
-        int size = grupo.getFichas().size();
+        List<Ficha> fichas = grupo.getFichas();
+        int size = fichas.size();
+
         switch (grupo.getTipo()) {
             case "No establecido":
-                return size >= 1;  // grupo en construcción
+                return size >= 1; // grupo en construcción
+
             case "numero":
+                if (size < 2 || size > 4) {
+                    return false;
+                }
+
+                int numero = fichas.get(0).getNumero();
+                Set<Color> colores = new HashSet<>();
+
+                for (Ficha f : fichas) {
+                    if (f.getNumero() != numero) {
+                        return false; // todos el mismo número
+                    }
+                    if (!colores.add(f.getColor())) {
+                        return false; // colores duplicados
+                    }
+                }
+
+                // Verificar cercanía horizontal
+                fichas.sort(Comparator.comparingInt(Ficha::getX));
+                for (int i = 0; i < fichas.size() - 1; i++) {
+                    int distancia = Math.abs(fichas.get(i + 1).getX() - fichas.get(i).getX());
+                    if (distancia > 29) {
+                        return false;
+                    }
+                }
+
+                return true;
+
             case "escalera":
-                return size >= 2;  // mínimo 2 fichas para ser válido
+                if (size < 2 || size > 13) {
+                    return false;
+                }
+
+                Color color = fichas.get(0).getColor();
+                List<Integer> numeros = new ArrayList<>();
+                for (Ficha f : fichas) {
+                    if (!f.getColor().equals(color)) {
+                        return false; // mismo color
+                    }
+                    numeros.add(f.getNumero());
+                }
+                Collections.sort(numeros);
+
+                for (int i = 0; i < numeros.size() - 1; i++) {
+                    if (numeros.get(i + 1) != numeros.get(i) + 1) {
+                        return false; // secuencia
+                    }
+                }
+
+                // Verificar cercanía horizontal
+                fichas.sort(Comparator.comparingInt(Ficha::getX));
+                for (int i = 0; i < fichas.size() - 1; i++) {
+                    int distancia = Math.abs(fichas.get(i + 1).getX() - fichas.get(i).getX());
+                    if (distancia > 29) {
+                        return false;
+                    }
+                }
+
+                return true;
+
             default:
                 return false;
         }
@@ -395,7 +490,7 @@ public class Modelo implements IModelo {
         }
         notificarObservadores();
         return true;
-        
+
     }
 
     private void devolverFichasAMano(List<Ficha> fichas) {
