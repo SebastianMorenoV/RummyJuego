@@ -26,7 +26,7 @@ public class Mensaje implements Serializable {
     }
 
     // Constructor para movimiento de ficha
-    public Mensaje(FichaJuegoDTO ficha, int x, int y) {
+    public Mensaje(TipoMensaje tipoMensaje, FichaJuegoDTO ficha, int x, int y) {
         this.tipo = TipoMensaje.MOVER_FICHA;
         this.ficha = ficha;
         this.x = x;

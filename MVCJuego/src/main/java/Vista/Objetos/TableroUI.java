@@ -124,7 +124,7 @@ public class TableroUI extends JPanel {
     }
     
     public void actualiza(JuegoDTO juego) {
-        // 1️⃣ Limpiar todas las fichas anteriores del tablero
+        // 1️⃣ Limpiar todas las fichas
         for (int r = 0; r < filas; r++) {
             for (int c = 0; c < columnas; c++) {
                 if (celdas[r][c] != null) {
@@ -134,28 +134,21 @@ public class TableroUI extends JPanel {
             }
         }
 
-        // 2️⃣ Recorrer todos los grupos del tablero
+        // 2️⃣ Agregar fichas de todos los grupos
         for (GrupoDTO grupo : juego.getGruposEnTablero()) {
             for (FichaJuegoDTO fichaDTO : grupo.getFichasGrupo()) {
-                // 3️⃣ Crear componente visual usando el constructor correcto de FichaUI
                 FichaUI fichaUI = new FichaUI(
                         fichaDTO.getIdFicha(),
                         fichaDTO.getNumeroFicha(),
                         fichaDTO.getColor(),
                         fichaDTO.isComodin(),
-                        controlador, // referencia al controlador
-                        vista // referencia a la vista contenedora
+                        controlador,
+                        vista
                 );
-
-                // 4️⃣ Calcular la celda más cercana a las coordenadas de la ficha
-                Point celda = obtenerCeldaLibreCercana(new Point(fichaDTO.getX(), fichaDTO.getY()));
-                if (celda != null) {
-                    colocarFichaEnCelda(fichaUI, new Point(fichaDTO.getX(), fichaDTO.getY()));
-                }
+                colocarFichaEnCelda(fichaUI, new Point(fichaDTO.getX(), fichaDTO.getY()));
             }
         }
 
-        // 5️⃣ Redibujar
         revalidate();
         repaint();
     }
