@@ -526,22 +526,14 @@ public class Modelo implements IModelo {
     
     @Override
     public void actualizaDesdeRed(JuegoDTO juego) {
-        // 1. Crear tablero a partir del DTO recibido
         Tablero nuevoTablero = new Tablero();
         List<Grupo> grupos = new ArrayList<>();
 
         for (GrupoDTO grupoDTO : juego.getGruposEnTablero()) {
             List<Ficha> fichas = new ArrayList<>();
             for (FichaJuegoDTO fichaDTO : grupoDTO.getFichasGrupo()) {
-                // Mapear manualmente a Ficha
-                Ficha ficha = new Ficha(
-                        fichaDTO.getIdFicha(),
-                        fichaDTO.getNumeroFicha(),
-                        fichaDTO.getColor(), // ya es Color
-                        fichaDTO.isComodin(),
-                        fichaDTO.getX(), // si guardas coordenadas
-                        fichaDTO.getY()
-                );
+                Ficha ficha = new Ficha(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(),
+                        fichaDTO.getColor(), fichaDTO.isComodin());
                 fichas.add(ficha);
             }
             Grupo grupo = new Grupo(grupoDTO.getTipo(), fichas.size(), fichas);
@@ -551,7 +543,6 @@ public class Modelo implements IModelo {
         nuevoTablero.setFichasEnTablero(grupos);
         this.tablero = nuevoTablero;
 
-        // 2. Notificar a todas las vistas
         notificarObservadores();
     }
     

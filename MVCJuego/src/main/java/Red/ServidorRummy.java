@@ -10,7 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  *
  * @author Admin
@@ -62,24 +61,14 @@ public class ServidorRummy {
         @Override
         public void run() {
             try {
-                in = new ObjectInputStream(socket.getInputStream());
                 out = new ObjectOutputStream(socket.getOutputStream());
-
+                in = new ObjectInputStream(socket.getInputStream());
                 while (true) {
                     Mensaje mensaje = (Mensaje) in.readObject();
-
-                    if (mensaje.getTipo() == TipoMensaje.MOVER_FICHA) {
-                        // Reenviar el mensaje a todos los demás clientes
-                        for (ClienteHandler ch : clientes) {
-                            if (ch != this) {
-                                try {
-                                    ObjectOutputStream oos = new ObjectOutputStream(ch.socket.getOutputStream());
-                                    oos.writeObject(mensaje);
-                                    oos.flush();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                    // reenviar a todos los clientes excepto al emisor
+                    for (ClienteHandler ch : clientes) {
+                        if (ch != this) {
+                            ch.enviarMensaje(mensaje);
                         }
                     }
                 }
@@ -87,6 +76,5 @@ public class ServidorRummy {
                 e.printStackTrace();
             }
         }
-
     }
 }

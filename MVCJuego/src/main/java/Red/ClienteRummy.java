@@ -7,7 +7,6 @@ package Red;
 import DTO.FichaJuegoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
-import Vista.Objetos.TableroUI;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,7 +22,6 @@ public class ClienteRummy {
     private Socket socket;
     private IModelo modelo;
     private ObjectOutputStream out;
-    private TableroUI tableroUI;
 
     public ClienteRummy(IModelo modelo) {
         this.modelo = modelo;
@@ -58,8 +56,7 @@ public class ClienteRummy {
     // Enviar movimiento en tiempo real
     public void enviarMovimiento(FichaJuegoDTO ficha, int x, int y) {
         try {
-            Mensaje mensaje = new Mensaje(TipoMensaje.MOVER_FICHA, ficha, x, y);
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            Mensaje mensaje = new Mensaje(ficha, x, y);
             out.writeObject(mensaje);
             out.flush();
         } catch (Exception e) {
@@ -77,7 +74,6 @@ public class ClienteRummy {
                     SwingUtilities.invokeLater(() -> {
                         procesarMensaje(mensaje);
                         modelo.actualizaDesdeRed(juego);
-                        tableroUI.actualiza(juego);
                     });
                 }
             } catch (Exception e) {
