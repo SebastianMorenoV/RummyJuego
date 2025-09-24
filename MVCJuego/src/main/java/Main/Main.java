@@ -6,6 +6,7 @@ package Main;
 
 import Controlador.Controlador;
 import Modelo.Modelo;
+import Red.ClienteRummy;
 import Vista.VistaTablero;
 /**
  *
@@ -22,7 +23,11 @@ public class Main {
         VistaTablero vista = new VistaTablero(controlador);
 
         modelo.agregarObservador(vista);
-        
+
+        ClienteRummy cliente = new ClienteRummy(modelo);
+        cliente.conectar("192.168.1.71", 5000); // tu IP del servidor y puerto
+        controlador.setCliente(cliente);
+
         controlador.iniciarJuego();
     }
     

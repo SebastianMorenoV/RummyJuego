@@ -523,4 +523,25 @@ public class Modelo implements IModelo {
         }
         return false;
     }
+    
+    public void actualizaDesdeRed(JuegoDTO juego) {
+        Tablero nuevoTablero = new Tablero();
+        List<Grupo> grupos = new ArrayList<>();
+
+        for (GrupoDTO grupoDTO : juego.getGruposEnTablero()) {
+            List<Ficha> fichas = new ArrayList<>();
+            for (FichaJuegoDTO fichaDTO : grupoDTO.getFichasGrupo()) {
+                Ficha ficha = new Ficha(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(),
+                        fichaDTO.getColor(), fichaDTO.isComodin());
+                fichas.add(ficha);
+            }
+            Grupo grupo = new Grupo(grupoDTO.getTipo(), fichas.size(), fichas);
+            grupos.add(grupo);
+        }
+
+        nuevoTablero.setFichasEnTablero(grupos);
+        this.tablero = nuevoTablero;
+
+        notificarObservadores();
+    }
 }

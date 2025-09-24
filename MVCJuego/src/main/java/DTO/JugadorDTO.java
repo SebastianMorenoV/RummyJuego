@@ -4,11 +4,13 @@
  */
 package DTO;
 
+import java.io.Serializable;
+
 /**
  *
  * @author benja
  */
-public class JugadorDTO {
+public class JugadorDTO implements Serializable{
     private String nombre;
     private int fichasRestantes;   // en vez de mandar toda la lista
     private boolean esTurno;       // bandera para la vista

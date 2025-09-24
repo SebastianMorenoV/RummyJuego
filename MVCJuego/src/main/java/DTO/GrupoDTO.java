@@ -4,13 +4,14 @@
  */
 package DTO;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author benja
  */
-public class GrupoDTO {
+public class GrupoDTO implements Serializable{
     private String tipo;       // "escalera" o "numero"
     private int cantidad;      // en vez de mandar todas las fichas
     private List<FichaJuegoDTO> fichasGrupo; // un String para mostrar fácil en UI (ej: "1R, 2R, 3R")

@@ -6,12 +6,13 @@ package DTO;
 
 import Entidades.Ficha;
 import java.awt.Color;
+import java.io.Serializable;
 
 /**
  *
  * @author benja
  */
-public class FichaJuegoDTO {
+public class FichaJuegoDTO implements Serializable{
 
     int idFicha;
     int numeroFicha;

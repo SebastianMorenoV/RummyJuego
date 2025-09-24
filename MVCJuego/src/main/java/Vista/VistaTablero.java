@@ -83,14 +83,14 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
             }
         });
         GUIjuego.add(btnFinalizarTurno);
-        btnFinalizarTurno.setBounds(790, 260, 100, 100);
+        btnFinalizarTurno.setBounds(800, 270, 90, 50);
 
         panelFichasArmadas.setBackground(new java.awt.Color(23, 57, 134));
 
@@ -256,7 +256,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }//GEN-LAST:event_btnMazoMouseClicked
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
-        control.terminarTurno();
+        System.out.println("[VISTA] Click en finalizar turno detectado");
+        boolean exito = control.terminarTurno();
+        System.out.println("[VISTA] Terminar turno retornó: " + exito);
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
 

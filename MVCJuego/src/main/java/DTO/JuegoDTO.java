@@ -4,13 +4,14 @@
  */
 package DTO;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author benja
  */
-public class JuegoDTO {
+public class JuegoDTO implements Serializable{
     private String jugadorActual;
     private List<JugadorDTO> jugadores;
     private List<GrupoDTO> gruposEnTablero;

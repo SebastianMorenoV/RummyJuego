@@ -1,7 +1,11 @@
 package Controlador;
 
 import DTO.FichaJuegoDTO;
+import DTO.JuegoDTO;
 import Modelo.Modelo;
+import Red.ClienteRummy;
+import Red.Mensaje;
+import Red.TipoMensaje;
 
 /**
  *
@@ -10,9 +14,14 @@ import Modelo.Modelo;
 public class Controlador {
 
     Modelo modelo;
+    private ClienteRummy cliente;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
+    }
+
+    public void setCliente(ClienteRummy cliente) {
+        this.cliente = cliente;
     }
 
     public void iniciarJuego() {
@@ -25,10 +34,17 @@ public class Controlador {
     }
 
     public void pasarTurno() {
-        modelo.tomarFichaMazo();    
+        modelo.tomarFichaMazo();
     }
-    
-    public void terminarTurno(){
-        modelo.terminarTurno();
+
+    public boolean terminarTurno() {
+        boolean exito = modelo.terminarTurno(); // ahora guardamos el boolean
+
+        if (cliente != null && cliente.estaConectado()) {
+            JuegoDTO estado = modelo.getTablero();
+            cliente.enviarTurno(estado);
+        }
+
+        return exito; // retornamos el resultado
     }
 }
