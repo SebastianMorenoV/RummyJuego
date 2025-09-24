@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -110,56 +112,108 @@ public class Modelo implements IModelo {
     }
 
     public void colocarFicha(FichaJuegoDTO fichaDTO, int x, int y) {
+        // 1. Crear la ficha a colocar
         Ficha fichaAColocar = fichaDTO.toFicha(x, y);
 
-        // Eliminar la ficha de la mano del jugador
+        // 2. Eliminar la ficha de la mano
         eliminarFichaDeMano(fichaAColocar);
 
-        // 1. Revisar si la ficha ya está en algún grupo (movimiento dentro del tablero)
-        Grupo grupoOrigen = buscarGrupoPorFicha(fichaAColocar.getId());
-        if (grupoOrigen != null) {
-            // Quitar ficha del grupo actual
-            grupoOrigen.getFichas().removeIf(fichaEnGrupo -> fichaEnGrupo.getId() == fichaAColocar.getId());
-            grupoOrigen.setNumFichas(grupoOrigen.getFichas().size());
+        // 3. Quitar la ficha de cualquier grupo donde ya esté
+        for (Grupo g : tablero.getFichasEnTablero()) {
+            g.getFichas().removeIf(f -> f.getId() == fichaAColocar.getId());
+        }
 
-            // Si el grupo quedó inválido, eliminarlo del tablero
-            if (!esGrupoValido(grupoOrigen)) {
-                tablero.getFichasEnTablero().remove(grupoOrigen);
-                System.out.println("Grupo eliminado por ser incompleto tras mover ficha: " + grupoOrigen);
+        // 4. Agregar la ficha directamente a la lista de fichas del tablero
+        List<Ficha> todasFichas = new ArrayList<>();
+        for (Grupo g : tablero.getFichasEnTablero()) {
+            todasFichas.addAll(g.getFichas());
+        }
+        todasFichas.add(fichaAColocar);
 
-                // Si quieres, aquí podrías crear nuevos grupos a partir de los fragmentos restantes
-                for (Ficha f : grupoOrigen.getFichas()) {
-                    List<Ficha> lista = new ArrayList<>();
-                    lista.add(f);
-                    Grupo nuevo = new Grupo("No establecido", 1, lista);
-                    tablero.getFichasEnTablero().add(nuevo);
-                    System.out.println("Creado nuevo grupo de ficha aislada: " + nuevo);
+        // 5. Limpiar grupos actuales y reorganizar con TODAS las fichas
+        tablero.getFichasEnTablero().clear();
+        reorganizarGruposTablero(todasFichas);
+
+        // 6. Notificar a los observadores
+        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
+
+        System.out.println("Ficha colocada y grupos reorganizados correctamente: " + fichaAColocar);
+    }
+
+    public void reorganizarGruposTablero(List<Ficha> todasFichas) {
+        List<Ficha> fichasOrdenadas = new ArrayList<>(todasFichas);
+        fichasOrdenadas.sort(Comparator.comparingInt(Ficha::getY).thenComparingInt(Ficha::getX));
+
+        List<Grupo> gruposFinales = new ArrayList<>();
+        boolean[] usadas = new boolean[fichasOrdenadas.size()];
+
+        for (int i = 0; i < fichasOrdenadas.size(); i++) {
+            if (usadas[i]) {
+                continue;
+            }
+            Ficha base = fichasOrdenadas.get(i);
+
+            // --- ESCALERA ---
+            List<Ficha> escalera = new ArrayList<>();
+            escalera.add(base);
+            for (int j = i + 1; j < fichasOrdenadas.size(); j++) {
+                if (usadas[j]) {
+                    continue;
                 }
+                Ficha siguiente = fichasOrdenadas.get(j);
+                Ficha ultima = escalera.get(escalera.size() - 1);
+
+                boolean mismaFila = Math.abs(siguiente.getY() - ultima.getY()) <= 5;
+                boolean mismoColor = siguiente.getColor().equals(ultima.getColor());
+                boolean consecutivo = siguiente.getNumero() == ultima.getNumero() + 1;
+                boolean xCorrecto = siguiente.getX() - ultima.getX() == 29;
+
+                if (mismaFila && mismoColor && consecutivo && xCorrecto) {
+                    escalera.add(siguiente);
+                }
+            }
+
+            if (escalera.size() >= 2) {
+                for (Ficha f : escalera) {
+                    usadas[fichasOrdenadas.indexOf(f)] = true;
+                }
+                gruposFinales.add(new Grupo("escalera", escalera.size(), new ArrayList<>(escalera)));
+                continue;
+            }
+
+            // --- MISMO NÚMERO ---
+            List<Ficha> mismoNumero = new ArrayList<>();
+            mismoNumero.add(base);
+            for (int j = i + 1; j < fichasOrdenadas.size(); j++) {
+                if (usadas[j]) {
+                    continue;
+                }
+                Ficha siguiente = fichasOrdenadas.get(j);
+
+                boolean numeroIgual = siguiente.getNumero() == base.getNumero();
+                boolean colorDistinto = mismoNumero.stream()
+                        .noneMatch(f -> f.getColor().equals(siguiente.getColor()));
+                boolean mismaFila = Math.abs(siguiente.getY() - base.getY()) <= 5;
+                boolean xCercano = Math.abs(siguiente.getX() - base.getX()) <= 29 * 3;
+
+                if (numeroIgual && colorDistinto && mismaFila && xCercano) {
+                    mismoNumero.add(siguiente);
+                }
+            }
+
+            if (mismoNumero.size() >= 2) {
+                for (Ficha f : mismoNumero) {
+                    usadas[fichasOrdenadas.indexOf(f)] = true;
+                }
+                gruposFinales.add(new Grupo("numero", mismoNumero.size(), new ArrayList<>(mismoNumero)));
+            } else {
+                gruposFinales.add(new Grupo("No establecido", 1, new ArrayList<>(List.of(base))));
+                usadas[i] = true;
             }
         }
 
-        // 2. Buscar un grupo cercano donde se pueda agregar
-        Grupo grupoCercano = encontrarGrupo(fichaAColocar);
-        if (grupoCercano != null && puedeAgregarAFichas(grupoCercano, fichaAColocar)) {
-            // Agregar ficha al grupo cercano
-            grupoCercano.getFichas().add(fichaAColocar);
-            grupoCercano.setNumFichas(grupoCercano.getFichas().size());
-            // Actualizar tipo de grupo (puede ser "numero" o "escalera")
-            // se hace dentro de puedeAgregarAFichas
-            // Limpiar grupos incompletos restantes
-            deshacerGruposIncompletos();
-            System.out.println("Ficha agregada a grupo existente: " + grupoCercano);
-            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
-            return;
-        }
-        // 3. Si no hay grupo cercano válido, crear un nuevo grupo
-        List<Ficha> fichasAGrupo = new ArrayList<>();
-        fichasAGrupo.add(fichaAColocar);
-        Grupo grupoNuevo = new Grupo("No establecido", fichasAGrupo.size(), fichasAGrupo);
-        tablero.getFichasEnTablero().add(grupoNuevo);
-        System.out.println("Creacion de grupo nuevo correctamente: " + grupoNuevo);
-        deshacerGruposIncompletos();
-        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
+        tablero.setFichasEnTablero(gruposFinales);
+        System.out.println("Grupos reorganizados correctamente: " + gruposFinales);
     }
 
     public void crearMazoCompleto() {
@@ -236,23 +290,6 @@ public class Modelo implements IModelo {
     }
 
     ////////////////////////////////METODOS FUERTES/////////////////////////////////////////////////////
-    private List<Grupo> encontrarGruposColindantes(Ficha nuevaFicha) {
-        return tablero.getFichasEnTablero().stream()
-                .filter(grupo -> grupo.getFichas().stream()
-                .anyMatch(f -> estaCerca(f, nuevaFicha.getX(), nuevaFicha.getY())))
-                .sorted(Comparator.comparingInt(grupo -> grupo.getFichas()
-                .stream().mapToInt(Ficha::getX).min().orElse(Integer.MAX_VALUE)))
-                .toList();
-    }
-
-    private Grupo encontrarGrupo(Ficha nuevaFicha) {
-        return tablero.getFichasEnTablero().stream()
-                //encuentra el grupo de la ficha que le pasas como parametro
-                .filter(grupo -> grupo.getFichas().stream().anyMatch(f -> estaCerca(f, nuevaFicha.getX(), nuevaFicha.getY())))
-                .findFirst()
-                .orElse(null);
-    }
-
     private boolean estaCerca(Ficha f, int x, int y) {
         int distancia = 29;
         return Math.abs(f.getX() - x) <= distancia && Math.abs(f.getY() - y) <= distancia;
@@ -267,152 +304,6 @@ public class Modelo implements IModelo {
             return "escalera"; // consecutivos, mismo color
         }
         return "no establecido";
-    }
-
-    private boolean puedeAgregarAFichas(Grupo grupo, Ficha nuevaFicha) {
-        List<Ficha> fichas = grupo.getFichas();
-
-        if (grupo.getTipo().equals("No establecido")) {
-            Ficha primerFichaGrupo = fichas.get(0);
-            String tipo = establecerTipoGrupo(primerFichaGrupo, nuevaFicha);
-            grupo.setTipo(tipo);
-        }
-
-        if (grupo.getTipo().equals("numero")) {
-            // Máx 4 fichas, mismo número, colores diferentes
-            if (fichas.size() >= 4) {
-                return false;
-            }
-            if (fichas.stream().anyMatch(f -> f.getColor().equals(nuevaFicha.getColor()))) {
-                return false;
-            }
-            return fichas.get(0).getNumero() == nuevaFicha.getNumero();
-        }
-
-        if (grupo.getTipo().equals("escalera")) {
-            // Máx 13 fichas, misma color
-            if (fichas.size() >= 13) {
-                return false;
-            }
-            if (!fichas.get(0).getColor().equals(nuevaFicha.getColor())) {
-                return false;
-            }
-
-            // Obtener números y posiciones X
-            List<Ficha> ordenadas = new ArrayList<>(fichas);
-            ordenadas.sort(Comparator.comparingInt(Ficha::getX)); // izquierda a derecha
-            int minNum = ordenadas.get(0).getNumero();
-            int maxNum = ordenadas.get(ordenadas.size() - 1).getNumero();
-            int minX = ordenadas.get(0).getX();
-            int maxX = ordenadas.get(ordenadas.size() - 1).getX();
-
-            // Verificar que el nuevo número encaje al inicio o final de la escalera
-            if (nuevaFicha.getNumero() == minNum - 1) {
-                // Debe ir a la izquierda
-                return nuevaFicha.getX() < minX;
-            } else if (nuevaFicha.getNumero() == maxNum + 1) {
-                // Debe ir a la derecha
-                return nuevaFicha.getX() > maxX;
-            }
-
-            return false; // no encaja en la secuencia
-        }
-
-        return false;
-    }
-
-    private void deshacerGruposIncompletos() {
-        for (Grupo grupo : tablero.getFichasEnTablero()) {
-            if (!esGrupoValido(grupo)) {
-                grupo.setTipo("No establecido");
-                System.out.println("⚠ Grupo marcado como no establecido por ser incompleto: " + grupo);
-            }
-        }
-        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
-    }
-
-    private Grupo buscarGrupoPorFicha(int idFicha) {
-        for (Grupo g : tablero.getFichasEnTablero()) {
-            for (Ficha f : g.getFichas()) {
-                if (f.getId() == idFicha) {
-                    return g;
-                }
-            }
-        }
-        return null;
-    }
-
-    private boolean esGrupoValido(Grupo grupo) {
-        List<Ficha> fichas = grupo.getFichas();
-        int size = fichas.size();
-
-        switch (grupo.getTipo()) {
-            case "No establecido":
-                return size >= 1; // grupo en construcción
-
-            case "numero":
-                if (size < 2 || size > 4) {
-                    return false;
-                }
-
-                int numero = fichas.get(0).getNumero();
-                Set<Color> colores = new HashSet<>();
-
-                for (Ficha f : fichas) {
-                    if (f.getNumero() != numero) {
-                        return false; // todos el mismo número
-                    }
-                    if (!colores.add(f.getColor())) {
-                        return false; // colores duplicados
-                    }
-                }
-
-                // Verificar cercanía horizontal
-                fichas.sort(Comparator.comparingInt(Ficha::getX));
-                for (int i = 0; i < fichas.size() - 1; i++) {
-                    int distancia = Math.abs(fichas.get(i + 1).getX() - fichas.get(i).getX());
-                    if (distancia > 29) {
-                        return false;
-                    }
-                }
-
-                return true;
-
-            case "escalera":
-                if (size < 2 || size > 13) {
-                    return false;
-                }
-
-                Color color = fichas.get(0).getColor();
-                List<Integer> numeros = new ArrayList<>();
-                for (Ficha f : fichas) {
-                    if (!f.getColor().equals(color)) {
-                        return false; // mismo color
-                    }
-                    numeros.add(f.getNumero());
-                }
-                Collections.sort(numeros);
-
-                for (int i = 0; i < numeros.size() - 1; i++) {
-                    if (numeros.get(i + 1) != numeros.get(i) + 1) {
-                        return false; // secuencia
-                    }
-                }
-
-                // Verificar cercanía horizontal
-                fichas.sort(Comparator.comparingInt(Ficha::getX));
-                for (int i = 0; i < fichas.size() - 1; i++) {
-                    int distancia = Math.abs(fichas.get(i + 1).getX() - fichas.get(i).getX());
-                    if (distancia > 29) {
-                        return false;
-                    }
-                }
-
-                return true;
-
-            default:
-                return false;
-        }
     }
 
     private void eliminarFichaDeMano(Ficha ficha) {

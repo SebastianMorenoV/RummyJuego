@@ -46,11 +46,17 @@ public class Tablero {
         this.mazo = mazo;
     }
 
+    public List<Ficha> getTodasFichas() {
+        List<Ficha> todas = new ArrayList<>();
+        for (Grupo g : fichasEnTablero) {
+            todas.addAll(g.getFichas());
+        }
+        return todas;
+    }
+
     @Override
     public String toString() {
         return "Tablero{" + "jugadores=" + jugadores + ", fichasEnTablero=" + fichasEnTablero + ", mazo=" + mazo + '}';
     }
-    
-    
 
 }
