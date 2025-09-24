@@ -18,14 +18,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -322,22 +316,6 @@ public class Modelo implements IModelo {
     }
 
     ////////////////////////////////METODOS FUERTES/////////////////////////////////////////////////////
-    private boolean estaCerca(Ficha f, int x, int y) {
-        int distancia = 29;
-        return Math.abs(f.getX() - x) <= distancia && Math.abs(f.getY() - y) <= distancia;
-    }
-
-    private String establecerTipoGrupo(Ficha f1, Ficha f2) {
-        if (f1.getNumero() == f2.getNumero() && !f1.getColor().equals(f2.getColor())) {
-            return "numero"; // mismo número, distinto color
-        }
-        if (f1.getColor().equals(f2.getColor())
-                && (f1.getNumero() + 1 == f2.getNumero() || f1.getNumero() - 1 == f2.getNumero())) {
-            return "escalera"; // consecutivos, mismo color
-        }
-        return "no establecido";
-    }
-
     private void eliminarFichaDeMano(Ficha ficha) {
         for (Grupo grupo : jugador.getManoJugador().getGruposMano()) {
             boolean removida = grupo.getFichas().removeIf(f -> f.getId() == ficha.getId());
@@ -441,34 +419,4 @@ public class Modelo implements IModelo {
         }
     }
 
-    private void devolverFichasAMano(List<Ficha> fichas) {
-        Mano manoJugador = jugador.getManoJugador();
-        List<Grupo> gruposMano = manoJugador.getGruposMano();
-
-        for (Ficha ficha : fichas) {
-            if (!gruposMano.isEmpty()) {
-                gruposMano.get(0).getFichas().add(ficha);
-                System.out.println("[DEBUG] Ficha devuelta al primer grupo de la mano: ID=" + ficha.getId());
-            } else {
-                List<Ficha> nuevasFichas = new ArrayList<>();
-                nuevasFichas.add(ficha);
-                Grupo nuevoGrupo = new Grupo("mano", nuevasFichas.size(), nuevasFichas);
-                gruposMano.add(nuevoGrupo);
-                System.out.println("[DEBUG] Nuevo grupo creado en la mano con la ficha: ID=" + ficha.getId());
-            }
-
-            manoJugador.setFichasEnMano(manoJugador.getFichasEnMano() + 1);
-        }
-    }
-
-    private boolean estaEnManoJugador(Ficha ficha) {
-        for (Grupo g : jugador.getManoJugador().getGruposMano()) {
-            for (Ficha f : g.getFichas()) {
-                if (f.getId() == ficha.getId()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }
