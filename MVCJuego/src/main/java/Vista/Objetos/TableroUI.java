@@ -1,9 +1,15 @@
 package Vista.Objetos;
 
+import Controlador.Controlador;
+import DTO.FichaJuegoDTO;
+import DTO.GrupoDTO;
+import DTO.JuegoDTO;
+import Vista.VistaTablero;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
@@ -12,6 +18,8 @@ public class TableroUI extends JPanel {
     private final int filas = 5;
     private final int columnas = 22;
     private FichaUI[][] celdas; // Control de fichas en cada celda
+    private VistaTablero vista;
+    private Controlador controlador;
 
     public TableroUI() {
         setPreferredSize(new Dimension(880, 275)); // tamaño base
@@ -114,4 +122,43 @@ public class TableroUI extends JPanel {
             }
         }
     }
+    
+    public void actualiza(JuegoDTO juego) {
+        // 1️⃣ Limpiar todas las fichas anteriores del tablero
+        for (int r = 0; r < filas; r++) {
+            for (int c = 0; c < columnas; c++) {
+                if (celdas[r][c] != null) {
+                    remove(celdas[r][c]);
+                    celdas[r][c] = null;
+                }
+            }
+        }
+
+        // 2️⃣ Recorrer todos los grupos del tablero
+        for (GrupoDTO grupo : juego.getGruposEnTablero()) {
+            for (FichaJuegoDTO fichaDTO : grupo.getFichasGrupo()) {
+                // 3️⃣ Crear componente visual usando el constructor correcto de FichaUI
+                FichaUI fichaUI = new FichaUI(
+                        fichaDTO.getIdFicha(),
+                        fichaDTO.getNumeroFicha(),
+                        fichaDTO.getColor(),
+                        fichaDTO.isComodin(),
+                        controlador, // referencia al controlador
+                        vista // referencia a la vista contenedora
+                );
+
+                // 4️⃣ Calcular la celda más cercana a las coordenadas de la ficha
+                Point celda = obtenerCeldaLibreCercana(new Point(fichaDTO.getX(), fichaDTO.getY()));
+                if (celda != null) {
+                    colocarFichaEnCelda(fichaUI, new Point(fichaDTO.getX(), fichaDTO.getY()));
+                }
+            }
+        }
+
+        // 5️⃣ Redibujar
+        revalidate();
+        repaint();
+    }
+
+
 }
