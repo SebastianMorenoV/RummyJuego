@@ -48,6 +48,11 @@ public class GrupoDTO {
         this.fichasGrupo = fichasGrupo;
     }
 
+    @Override
+    public String toString() {
+        return "GrupoDTO{" + "tipo=" + tipo + ", cantidad=" + cantidad + ", fichasGrupo=" + fichasGrupo + '}';
+    }
+
     
     
 }

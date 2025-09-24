@@ -33,6 +33,17 @@ public class FichaJuegoDTO {
         this.comodin = comodin;
     }
 
+    public FichaJuegoDTO(int idFicha, int numeroFicha, Color color, boolean comodin, int x, int y) {
+        this.idFicha = idFicha;
+        this.numeroFicha = numeroFicha;
+        this.color = color;
+        this.comodin = comodin;
+        this.x = x;
+        this.y = y;
+    }
+    
+    
+
     public FichaJuegoDTO() {
 
     }

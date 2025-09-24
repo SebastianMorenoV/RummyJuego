@@ -15,33 +15,43 @@ public class FichaUI extends JPanel {
     private int numero;
     private Color color;
     private boolean comodin;
-
+    private VistaTablero vista;
     private int mouseX, mouseY;
     private Point originalLocation;
     private JPanel originalParent;
-
     private Origen origen;
-
-    private VistaTablero vista;
     private Controlador controlador;
 
     public enum Origen {
         MANO, TABLERO
     }
-
+    
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
             Controlador controlador, VistaTablero vista) {
+        this.vista = vista;
         this.idFicha = idFicha;
         this.numero = numero;
         this.color = color;
         this.comodin = comodin;
-        this.vista = vista;
         this.controlador = controlador;
-
         setSize(25, 40);
         setPreferredSize(new Dimension(25, 40));
         setOpaque(false);
+        initDrag();
+    }
 
+    public FichaUI(int idFicha, int numero, Color color, boolean comodin,
+            Controlador controlador, Point originalLocation, VistaTablero vista) {
+        this.vista = vista;
+        this.originalLocation = originalLocation;
+        this.idFicha = idFicha;
+        this.numero = numero;
+        this.color = color;
+        this.comodin = comodin;
+        this.controlador = controlador;
+        setSize(25, 40);
+        setPreferredSize(new Dimension(25, 40));
+        setOpaque(false);
         initDrag();
     }
 
@@ -101,7 +111,7 @@ public class FichaUI extends JPanel {
 
                     // Remover de la celda anterior si existía
                     if (origen == Origen.TABLERO) {
-                        panelTablero.removerFicha(FichaUI.this);
+                        panelTablero.removerFicha(FichaUI.this.idFicha);
                     }
 
                     // Intentar colocar la ficha en la celda libre más cercana
@@ -116,7 +126,7 @@ public class FichaUI extends JPanel {
                         fichaDTO.setNumeroFicha(numero);
                         fichaDTO.setColor(color);
                         fichaDTO.setComodin(comodin);
-                        controlador.fichaSoltada(fichaDTO,getX(), getY());
+                        controlador.fichaSoltada(fichaDTO, getX(), getY());
 
                     } else {
                         // Si no hay celda libre, devolver a la mano
@@ -131,7 +141,7 @@ public class FichaUI extends JPanel {
                 } else {
                     // Si se soltó fuera del tablero, regresar a la mano
                     if (origen == Origen.TABLERO) {
-                        panelTablero.removerFicha(FichaUI.this);
+                        panelTablero.removerFicha(FichaUI.this.idFicha);
                     }
                     setLocation(originalLocation);
                     originalParent.add(FichaUI.this);
