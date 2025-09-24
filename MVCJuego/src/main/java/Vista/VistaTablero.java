@@ -14,6 +14,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,6 +23,7 @@ import java.nio.file.Path;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 
 /**
  * Esta clase representa la vistaGeneral de el tablero y todos sus elementos de
@@ -29,12 +32,12 @@ import javax.swing.JPanel;
  * @author benja
  */
 public class VistaTablero extends javax.swing.JFrame implements Observador {
-    
+
     private Controlador control;
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
-    
+
     public VistaTablero(Controlador control) {
         this.control = control;
         this.setSize(920, 550);
@@ -62,7 +65,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
@@ -130,7 +133,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     @Override
     public void actualiza(IModelo modelo, TipoEvento tipoEvento) {
-        
+
         switch (tipoEvento) {
             case INCIALIZAR_FICHAS:
                 iniciarJuego(modelo);
@@ -144,18 +147,18 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case TOMO_FICHA:
                 repintarMazo(modelo, control);
                 break;
-            case DEVOLVER_FICHAS:
+            case DEVOLVER_FICHAS_TABLERO:
                 tableroUI.repintarTablero();
         }
     }
-    
+
     public void pintarJugadaTablero(IModelo modelo, Controlador controlador) {
         JuegoDTO juego = modelo.getTablero();
         List<GrupoDTO> grupos = juego.getGruposEnTablero();
-        
         panelFichasArmadas.removeAll();
         panelFichasArmadas.setBackground(new Color(23, 57, 134));
         panelFichasArmadas.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panelFichasArmadas.add(new JScrollBar());
 
         // Para cada grupo
         for (GrupoDTO grupoDTO : grupos) {
@@ -179,7 +182,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                         fichaDTO.isComodin(),
                         controlador, this
                 );
-                
+                for (MouseListener ml : fichaUI.getMouseListeners()) {
+                    fichaUI.removeMouseListener(ml);
+                }
+                for (MouseMotionListener mml : fichaUI.getMouseMotionListeners()) {
+                    fichaUI.removeMouseMotionListener(mml);
+                }
                 fichaUI.setPreferredSize(new Dimension(20, 50));
                 panelGrupo.add(fichaUI);
             }
@@ -193,6 +201,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     /**
      * Es utilizado para iniciar el juego (Pinta las fichas dentro de la mano,
      * crea un tablero, crea el mazo,carga los jugadores.)
+     *
      * @param modelo El modelo que se encarga de enviar datos.
      */
     public void iniciarJuego(IModelo modelo) {
@@ -241,10 +250,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             fichaUI.setSize(25, 45);
             fichaUI.setLocation(xPos, yPos);
             fichaUI.setOpaque(false);
-            
+
             manoUI.add(fichaUI);
             manoUI.setComponentZOrder(fichaUI, 0);
-            
+
             xPos += 40; // Espacio entre fichas.
         }
         manoUI.revalidate();
@@ -274,10 +283,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
-    
+
     public void cargarJugadores() {
         String rutaImagen = "src/main/resources/avatares/avatar.png";
-        
+
         try {
             // Convierte la cadena de texto de la ruta en un objeto Path
             Path path = new File(rutaImagen).toPath();
@@ -292,31 +301,31 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             jugador1.setLocation(-10, -10);
             GUIjuego.add(jugador1);
             GUIjuego.setComponentZOrder(jugador1, GUIjuego.getComponentCount() - 2);
-            
+
             JugadorUI jugador2 = new JugadorUI("Benjamin", 15, imagenAvatarBytes);
             jugador2.setSize(150, 150);
             jugador2.setLocation(-10, 360);
             GUIjuego.add(jugador2);
             GUIjuego.setComponentZOrder(jugador2, GUIjuego.getComponentCount() - 2);
-            
+
             JugadorUI jugador3 = new JugadorUI("Luciano", 10, imagenAvatarBytes);
             jugador3.setSize(150, 150);
             jugador3.setLocation(760, -10);
             GUIjuego.add(jugador3);
             GUIjuego.setComponentZOrder(jugador3, GUIjuego.getComponentCount() - 2);
-            
+
             JugadorUI jugador4 = new JugadorUI("Mr.Fitch", 5, imagenAvatarBytes);
             jugador4.setSize(150, 150);
             jugador4.setLocation(760, 360);
             GUIjuego.add(jugador4);
             GUIjuego.setComponentZOrder(jugador4, GUIjuego.getComponentCount() - 2);
-            
+
         } catch (IOException e) {
             System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
             e.printStackTrace();
         }
     }
-    
+
     public void crearMano(IModelo modelo) {
         //Crear Mano
         manoUI = new ManoUI();
@@ -326,7 +335,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.setComponentZOrder(manoUI, GUIjuego.getComponentCount() - 2);
         repintarMano(modelo, control, manoUI);
     }
-    
+
     public void crearTablero(IModelo modelo) {
         //Crear Tablero
         tableroUI = new TableroUI(modelo, control, this);
@@ -336,7 +345,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(tableroUI);
         GUIjuego.setComponentZOrder(tableroUI, GUIjuego.getComponentCount() - 2);
     }
-    
+
     public void crearMazo(IModelo modelo) {
         // Obtener las dimensiones de el panel mano.
         int fichasRestantes = modelo.getTablero().getFichasMazo();
@@ -345,7 +354,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         mazoUI.setLocation(800, 150);
         mazoUI.setSize(70, 90);
         mazoUI.setOpaque(false);
-        
+
         GUIjuego.add(mazoUI);
         GUIjuego.setComponentZOrder(mazoUI, GUIjuego.getComponentCount() - 2);
         repintarMazo(modelo, control);

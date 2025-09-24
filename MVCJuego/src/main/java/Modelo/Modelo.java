@@ -173,7 +173,7 @@ public class Modelo implements IModelo {
                 }
             }
 
-            if (escalera.size() >= 2) {
+            if (escalera.size() >= 3) {
                 for (Ficha f : escalera) {
                     usadas[fichasOrdenadas.indexOf(f)] = true;
                 }
@@ -181,32 +181,64 @@ public class Modelo implements IModelo {
                 continue;
             }
 
-            // --- MISMO NÚMERO ---
-            List<Ficha> mismoNumero = new ArrayList<>();
-            mismoNumero.add(base);
+            // --- MISMO NÚMERO (LÓGICA CORREGIDA) ---
+            List<Ficha> candidatos = new ArrayList<>();
+            // Agrega la ficha base y busca otras con el mismo número en la misma fila
+            candidatos.add(base);
             for (int j = i + 1; j < fichasOrdenadas.size(); j++) {
-                if (usadas[j]) {
-                    continue;
-                }
-                Ficha siguiente = fichasOrdenadas.get(j);
+                if (usadas[j]) continue;
 
-                boolean numeroIgual = siguiente.getNumero() == base.getNumero();
-                boolean colorDistinto = mismoNumero.stream()
-                        .noneMatch(f -> f.getColor().equals(siguiente.getColor()));
-                boolean mismaFila = Math.abs(siguiente.getY() - base.getY()) <= 5;
-                boolean xCercano = Math.abs(siguiente.getX() - base.getX()) <= 29 * 3;
+                Ficha potencial = fichasOrdenadas.get(j);
+                boolean mismoNumero = potencial.getNumero() == base.getNumero();
+                boolean mismaFila = Math.abs(potencial.getY() - base.getY()) <= 5;
 
-                if (numeroIgual && colorDistinto && mismaFila && xCercano) {
-                    mismoNumero.add(siguiente);
+                if (mismoNumero && mismaFila) {
+                    candidatos.add(potencial);
                 }
             }
 
-            if (mismoNumero.size() >= 2) {
-                for (Ficha f : mismoNumero) {
-                    usadas[fichasOrdenadas.indexOf(f)] = true;
+            // Si hay suficientes candidatos para formar un grupo, búscalos
+            if (candidatos.size() >= 3) {
+                // Ordena los candidatos por su posición X para verificar adyacencia
+                candidatos.sort(Comparator.comparingInt(Ficha::getX));
+                
+                List<Ficha> grupoActual = new ArrayList<>();
+
+                for (Ficha fichaCandidata : candidatos) {
+                    // Si el grupo está vacío o la ficha actual está pegada a la anterior
+                    if (grupoActual.isEmpty() || (fichaCandidata.getX() - grupoActual.get(grupoActual.size() - 1).getX() < 44)) { // 44 = ~1.5 * ancho de ficha
+                        // Y además no tiene un color repetido
+                        if (grupoActual.stream().noneMatch(f -> f.getColor().equals(fichaCandidata.getColor()))) {
+                            grupoActual.add(fichaCandidata);
+                        }
+                    } else {
+                        // Si la ficha está muy lejos, el grupo anterior se termina.
+                        // Verificamos si el grupo que acabamos de formar es válido
+                        if (grupoActual.size() >= 3) {
+                            gruposFinales.add(new Grupo("numero", grupoActual.size(), new ArrayList<>(grupoActual)));
+                            for (Ficha f : grupoActual) {
+                                usadas[fichasOrdenadas.indexOf(f)] = true;
+                            }
+                        }
+                        // Empezamos un nuevo grupo con la ficha actual (que estaba separada)
+                        grupoActual.clear();
+                        // Comprobamos que no se repita el color antes de añadir
+                        if (grupoActual.stream().noneMatch(f -> f.getColor().equals(fichaCandidata.getColor()))){
+                             grupoActual.add(fichaCandidata);
+                        }
+                    }
                 }
-                gruposFinales.add(new Grupo("numero", mismoNumero.size(), new ArrayList<>(mismoNumero)));
-            } else {
+
+                // Al final del bucle, revisa el último grupo que se estaba formando
+                if (grupoActual.size() >= 3) {
+                    gruposFinales.add(new Grupo("numero", grupoActual.size(), new ArrayList<>(grupoActual)));
+                    for (Ficha f : grupoActual) {
+                        usadas[fichasOrdenadas.indexOf(f)] = true;
+                    }
+                }
+            }
+             // Si después de todo, la ficha 'base' no se usó en ningún grupo de "mismo número" válido, trátala como no establecida.
+            if (!usadas[i]) {
                 gruposFinales.add(new Grupo("No establecido", 1, new ArrayList<>(List.of(base))));
                 usadas[i] = true;
             }
@@ -335,17 +367,22 @@ public class Modelo implements IModelo {
         }
 
         copia.setFichasEnTablero(gruposCopia);
+        copia.setMazo(tablero.getMazo());
         System.out.println("[DEBUG] Copia de tablero finalizada.");
         return copia;
     }
 
     public void iniciarTurno() {
         System.out.println("[DEBUG] Iniciando turno...");
-        tableroAnterior = copiaTablero(tablero);
+        tableroAnterior = copiaTablero(tablero); // Esto ya hace una copia profunda, ¡bien!
 
+        // Asegúrate de hacer una copia profunda de las fichas en la mano también
         fichasJugadorAlInicioTurno = new ArrayList<>();
         for (Grupo g : jugador.getManoJugador().getGruposMano()) {
-            fichasJugadorAlInicioTurno.addAll(g.getFichas());
+            for (Ficha f : g.getFichas()) {
+                // Crea un nuevo objeto Ficha para la copia
+                fichasJugadorAlInicioTurno.add(new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()));
+            }
         }
         System.out.println("[DEBUG] Se guardaron " + fichasJugadorAlInicioTurno.size() + " fichas del jugador al inicio del turno.");
     }
@@ -353,42 +390,55 @@ public class Modelo implements IModelo {
     public boolean terminarTurno() {
         System.out.println("[DEBUG] Intentando terminar turno...");
 
-        // Revisar si hay grupos inválidos (estado "No establecido")
+        // 1. Validar el estado final del tablero
+        boolean tableroValido = true;
         for (Grupo g : tablero.getFichasEnTablero()) {
-            if ("No establecido".equals(g.getTipo())) {
-                System.out.println("[DEBUG] Grupo inválido encontrado con estado 'No establecido': " + g);
-
-                // Restaurar el tablero al inicio del turno
-                tablero = copiaTablero(tableroAnterior);
-                System.out.println("[DEBUG] Tablero restaurado al estado inicial del turno.");
-
-                // Devolver solo las fichas del jugador que se movieron al tablero
-                List<Ficha> fichasADevolver = fichasJugadorAlInicioTurno.stream()
-                        .filter(f -> !estaEnManoJugador(f)) // si no está en la mano, fue movida
-                        .collect(Collectors.toList());
-
-                devolverFichasAMano(fichasADevolver);
-                System.out.println("[DEBUG] Fichas del jugador devueltas a la mano: " + fichasADevolver.size());
-                notificarObservadores(TipoEvento.REPINTAR_MANO);
-                notificarObservadores(TipoEvento.DEVOLVER_FICHAS);
-                System.out.println("[DEBUG] No se puede terminar el turno: hay grupos con estado 'No establecido'.");
-                return false;
+            // Un grupo es inválido si no está bien formado O tiene menos de 3 fichas.
+            if ("No establecido".equals(g.getTipo()) || g.getFichas().size() < 3) {
+                tableroValido = false;
+                System.out.println("[DEBUG] Movimiento inválido detectado. Grupo: " + g.getTipo() + ", Tamaño: " + g.getFichas().size());
+                break; // Si uno es inválido, todo el tablero lo es.
             }
         }
 
-        System.out.println("[DEBUG] Todos los grupos son válidos. Turno finalizado correctamente.");
+        // 2. Actuar según la validación
+        if (tableroValido) {
+            // --- CASO DE ÉXITO ---
+            System.out.println("[DEBUG] Todos los grupos son válidos. Turno finalizado correctamente.");
+            // Se consolida el estado actual como el nuevo "estado anterior" para el próximo turno.
+            iniciarTurno();
+            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
+            return true;
 
-        // Actualizar tableroAnterior y fichasJugadorAlInicioTurno para el siguiente turno
-        tableroAnterior = copiaTablero(tablero);
+        } else {
+            // --- CASO DE FALLO (AQUÍ ESTÁ LA CORRECCIÓN) ---
+            System.out.println("[DEBUG] No se puede terminar el turno, revirtiendo cambios.");
 
-        // Guardar el estado de la mano del jugador para el próximo turno
-        fichasJugadorAlInicioTurno = new ArrayList<>();
-        for (Grupo g : jugador.getManoJugador().getGruposMano()) {
-            fichasJugadorAlInicioTurno.addAll(g.getFichas());
+            // a. Restaurar el tablero a su estado inicial
+            tablero = copiaTablero(tableroAnterior);
+            System.out.println("[DEBUG] Tablero restaurado.");
+
+            // b. Restaurar la mano del jugador COMPLETAMENTE
+            Mano manoJugador = jugador.getManoJugador();
+            manoJugador.getGruposMano().clear(); // Limpia la mano actual
+
+            // Vuelve a crear la mano usando la copia guardada
+            List<Ficha> manoRestauradaFichas = new ArrayList<>();
+            for (Ficha f : fichasJugadorAlInicioTurno) {
+                manoRestauradaFichas.add(new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()));
+            }
+
+            Grupo grupoManoRestaurado = new Grupo("mano", manoRestauradaFichas.size(), manoRestauradaFichas);
+            manoJugador.getGruposMano().add(grupoManoRestaurado);
+            manoJugador.setFichasEnMano(manoRestauradaFichas.size());
+            System.out.println("[DEBUG] Mano del jugador restaurada.");
+
+            // c. Notificar a la Vista para que se repinte todo
+            notificarObservadores(TipoEvento.REPINTAR_MANO);
+            notificarObservadores(TipoEvento.DEVOLVER_FICHAS_TABLERO); // Este evento debería forzar el repintado del tablero
+            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
+            return false;
         }
-        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
-        return true;
-
     }
 
     private void devolverFichasAMano(List<Ficha> fichas) {

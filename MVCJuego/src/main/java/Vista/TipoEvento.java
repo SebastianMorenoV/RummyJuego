@@ -12,5 +12,5 @@ public enum TipoEvento {
     REPINTAR_MANO,
     INCIALIZAR_FICHAS,
     TOMO_FICHA,
-    DEVOLVER_FICHAS    
+    DEVOLVER_FICHAS_TABLERO    
 }
