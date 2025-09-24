@@ -30,8 +30,14 @@ public class Controlador {
     }
 
     public void fichaSoltada(FichaJuegoDTO ficha, int x, int y) {
-        modelo.colocarFicha(ficha, x, y);
+        modelo.colocarFicha(ficha, x, y); // actualiza localmente
+
+        // 🚀 enviar a otros clientes en tiempo real
+        if (cliente != null && cliente.estaConectado()) {
+            cliente.enviarMovimiento(ficha, x, y);
+        }
     }
+
 
     public void pasarTurno() {
         modelo.tomarFichaMazo();
@@ -47,4 +53,6 @@ public class Controlador {
 
         return exito; // retornamos el resultado
     }
+    
+    
 }

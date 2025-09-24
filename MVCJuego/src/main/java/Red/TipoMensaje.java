@@ -4,11 +4,13 @@
  */
 package Red;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Admin
  */
-public enum TipoMensaje {
-    JUGADA, // cuando un jugador hace un movimiento
-    ACTUALIZACION // servidor envía el estado del juego a todos
+public enum TipoMensaje implements Serializable {
+    ESTADO_COMPLETO,
+    MOVER_FICHA
 }

@@ -544,4 +544,52 @@ public class Modelo implements IModelo {
 
         notificarObservadores();
     }
+    
+    @Override
+    public void moverFichaDesdeRed(FichaJuegoDTO fichaDTO, int x, int y) {
+        // 🔹 1. Convertir color manualmente
+        Color color = fichaDTO.getColor();
+
+        // 🔹 2. Crear la ficha manualmente
+        Ficha ficha = new Ficha(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(), color, fichaDTO.isComodin(), x, y);
+
+        // 🔹 3. Revisar si la ficha ya está en algún grupo (como en tu colocarFicha)
+        Grupo grupoOrigen = buscarGrupoPorFicha(ficha.getId());
+        if (grupoOrigen != null) {
+            // Quitar ficha del grupo actual
+            grupoOrigen.getFichas().removeIf(f -> f.getId() == ficha.getId());
+            grupoOrigen.setNumFichas(grupoOrigen.getFichas().size());
+
+            if (!esGrupoValido(grupoOrigen)) {
+                tablero.getFichasEnTablero().remove(grupoOrigen);
+
+                for (Ficha f : grupoOrigen.getFichas()) {
+                    List<Ficha> lista = new ArrayList<>();
+                    lista.add(f);
+                    Grupo nuevo = new Grupo("No establecido", 1, lista);
+                    tablero.getFichasEnTablero().add(nuevo);
+                }
+            }
+        }
+
+        // 🔹 4. Intentar agregarla a un grupo cercano
+        Grupo grupoCercano = encontrarGrupo(ficha);
+        if (grupoCercano != null && puedeAgregarAFichas(grupoCercano, ficha)) {
+            grupoCercano.getFichas().add(ficha);
+            grupoCercano.setNumFichas(grupoCercano.getFichas().size());
+            deshacerGruposIncompletos();
+        } else {
+            // 🔹 5. Si no hay grupo cercano, crear un nuevo grupo
+            List<Ficha> fichasAGrupo = new ArrayList<>();
+            fichasAGrupo.add(ficha);
+            Grupo grupoNuevo = new Grupo("No establecido", fichasAGrupo.size(), fichasAGrupo);
+            tablero.getFichasEnTablero().add(grupoNuevo);
+            deshacerGruposIncompletos();
+        }
+
+        // 🔹 6. Notificar observadores
+        notificarObservadores();
+    }
+
+
 }

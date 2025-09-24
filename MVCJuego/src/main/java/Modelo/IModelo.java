@@ -17,4 +17,5 @@ public interface IModelo {
     public  List<FichaJuegoDTO> getMano();
 
     public void actualizaDesdeRed(JuegoDTO juego);
+    void moverFichaDesdeRed(FichaJuegoDTO ficha, int x, int y);
 }

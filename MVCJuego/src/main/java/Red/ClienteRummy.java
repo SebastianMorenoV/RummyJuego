@@ -4,6 +4,7 @@
  */
 package Red;
 
+import DTO.FichaJuegoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class ClienteRummy {
 
     private Socket socket;
     private IModelo modelo;
+    private ObjectOutputStream out;
 
     public ClienteRummy(IModelo modelo) {
         this.modelo = modelo;
@@ -28,6 +30,7 @@ public class ClienteRummy {
     public void conectar(String ip, int puerto) {
         try {
             socket = new Socket(ip, puerto);
+            out = new ObjectOutputStream(socket.getOutputStream());
             escucharServidor();
             System.out.println("Conectado al servidor en " + ip + ":" + puerto);
         } catch (IOException e) {
@@ -39,12 +42,24 @@ public class ClienteRummy {
         return socket != null && socket.isConnected();
     }
 
+    // Enviar estado completo del juego (al terminar turno)
     public void enviarTurno(JuegoDTO juego) {
         try {
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(juego);
+            Mensaje mensaje = new Mensaje(juego);
+            out.writeObject(mensaje);
             out.flush();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Enviar movimiento en tiempo real
+    public void enviarMovimiento(FichaJuegoDTO ficha, int x, int y) {
+        try {
+            Mensaje mensaje = new Mensaje(ficha, x, y);
+            out.writeObject(mensaje);
+            out.flush();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -54,15 +69,26 @@ public class ClienteRummy {
             try {
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 while (true) {
-                    JuegoDTO juego = (JuegoDTO) in.readObject();
+                    Mensaje mensaje = (Mensaje) in.readObject();
                     SwingUtilities.invokeLater(() -> {
-                        modelo.actualizaDesdeRed(juego);
+                        procesarMensaje(mensaje);
                     });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
-        
+    }
+
+    private void procesarMensaje(Mensaje mensaje) {
+        if (mensaje.getTipo() == TipoMensaje.ESTADO_COMPLETO) {
+            modelo.actualizaDesdeRed(mensaje.getJuego());
+        } else if (mensaje.getTipo() == TipoMensaje.MOVER_FICHA) {
+            modelo.moverFichaDesdeRed(
+                    mensaje.getFicha(),
+                    mensaje.getX(),
+                    mensaje.getY()
+            );
+        }
     }
 }

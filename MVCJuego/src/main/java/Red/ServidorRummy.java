@@ -4,7 +4,6 @@
  */
 package Red;
 
-import DTO.JuegoDTO;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -19,7 +18,6 @@ public class ServidorRummy {
 
     private int puerto;
     private List<ClienteHandler> clientes = new ArrayList<>();
-    private JuegoDTO estadoGlobal;
 
     public ServidorRummy(int puerto) {
         this.puerto = puerto;
@@ -51,10 +49,9 @@ public class ServidorRummy {
             this.socket = socket;
         }
 
-        public void enviarJuego(JuegoDTO juego) {
+        public void enviarMensaje(Mensaje mensaje) {
             try {
-                out = new ObjectOutputStream(socket.getOutputStream());
-                out.writeObject(juego);
+                out.writeObject(mensaje);
                 out.flush();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -64,13 +61,14 @@ public class ServidorRummy {
         @Override
         public void run() {
             try {
+                out = new ObjectOutputStream(socket.getOutputStream());
                 in = new ObjectInputStream(socket.getInputStream());
                 while (true) {
-                    JuegoDTO juego = (JuegoDTO) in.readObject();
-                    estadoGlobal = juego;
+                    Mensaje mensaje = (Mensaje) in.readObject();
+                    // reenviar a todos los clientes excepto al emisor
                     for (ClienteHandler ch : clientes) {
                         if (ch != this) {
-                            ch.enviarJuego(juego);
+                            ch.enviarMensaje(mensaje);
                         }
                     }
                 }
