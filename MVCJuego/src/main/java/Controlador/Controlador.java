@@ -30,13 +30,11 @@ public class Controlador {
         modelo.tomarFichaMazo();
     }
 
-    public void actualizarGruposEnTablero(List<GrupoDTO> grupos) {
-        modelo.terminarTurno(grupos);
+    public void colocarFicha(List<GrupoDTO> grupos) {
+        modelo.colocarFicha(grupos);
     }
 
-    public void terminarTurno(List<GrupoDTO> gruposPropuestos) {
-        // El controlador recibe datos puros, sin conocer a la Vista.
-        // Su única tarea es pasarle estos datos al Modelo.
-        modelo.terminarTurno(gruposPropuestos);
+    public void terminarTurno() {
+        modelo.terminarTurno();
     }
 }

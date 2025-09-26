@@ -65,59 +65,71 @@ public class Modelo implements IModelo {
     }
 
     /**
-     * Valida la jugada propuesta. Si es válida, la confirma. Si es inválida,
-     * revierte el tablero y la mano al estado guardado al inicio del turno.
-     *
-     * @param gruposPropuestos El estado del tablero que el jugador armó en la
-     * UI.
+     * Valida la jugada final en el tablero. Si es válida, confirma los cambios
+     * y actualiza la mano. Si es inválida, revierte el tablero y la mano al
+     * estado inicial del turno.
      */
-    // En la clase Modelo.java
-    public void terminarTurno(List<GrupoDTO> gruposPropuestos) {
-        System.out.println("\n[MODELO] Intentando terminar turno...");
-        actualizarGruposEnTablero(gruposPropuestos);
+    public void terminarTurno() { // Recibe vacío, ya que el tablero ya está actualizado
+        System.out.println("\n[MODELO] Intentando terminar turno con el estado actual del tablero...");
 
+        // Un turno es válido si:
+        // 1. No hay ningún grupo marcado como "Invalido" (grupos >= 3 que no cumplen regla).
+        // 2. Todos los grupos de 1 o 2 fichas son eliminados o retornados a la mano (esto es responsabilidad de la vista/jugador en este modelo, pero aquí validamos que no queden).
+        // NOTA: Para este modelo, un grupo 'Temporal' (1 o 2 fichas) NO debe estar en el tablero al finalizar el turno.
         boolean tableroValido = this.tablero.getFichasEnTablero().stream()
-                .noneMatch(g -> "Invalido".equals(g.getTipo()));
+                .noneMatch(g -> "Invalido".equals(g.getTipo()) || "Temporal".equals(g.getTipo()));
 
-        // --- LÓGICA DE PRIMERA JUGADA ---
+        // --- LÓGICA DE PRIMERA JUGADA (Solo si el tablero es válido hasta ahora) ---
         if (tableroValido && !primerMovimientoRealizado) {
+            // En este punto, solo contamos los puntos de los grupos válidos ('escalera' o 'tercia')
             int puntosJugada = calcularPuntos(this.tablero.getFichasEnTablero());
             System.out.println("[MODELO] Verificando primera jugada. Puntos: " + puntosJugada);
             if (puntosJugada < 30) {
                 System.out.println("[MODELO] >> ERROR: La primera jugada debe sumar 30 puntos o más.");
-                tableroValido = false; // La jugada no es válida si no cumple el requisito de puntos.
+                tableroValido = false;
+                notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+
             }
         }
 
         if (tableroValido) {
-            System.out.println("[MODELO] >> ÉXITO: La jugada es válida.");
+            System.out.println("[MODELO] >> ÉXITO: La jugada es válida. Confirmando cambios.");
+
+            // Si es el primer movimiento válido
             if (!primerMovimientoRealizado) {
-                primerMovimientoRealizado = true; // Marca que la primera jugada ya se hizo.
+                primerMovimientoRealizado = true;
                 System.out.println("[MODELO] Primera jugada completada exitosamente.");
             }
 
-            // Actualizar la mano del jugador
+            // --- Actualizar la mano del jugador (mover fichas de la mano al tablero) ---
+            // Se identifican las fichas que están en el tablero...
             List<Integer> idsEnTablero = new ArrayList<>();
             this.tablero.getFichasEnTablero().forEach(g -> g.getFichas().forEach(f -> idsEnTablero.add(f.getId())));
+
+            // ...y se eliminan de la mano si su ID está en el tablero.
             this.jugador.getManoJugador().getFichasEnMano().removeIf(f -> idsEnTablero.contains(f.getId()));
 
-            iniciarTurno(); // Guardar el nuevo estado válido.
-
+            iniciarTurno(); // Guardar el nuevo estado válido (para el próximo turno).
+            notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
+            notificarObservadores(TipoEvento.REPINTAR_MANO);
             // --- LÓGICA DE VICTORIA ---
             if (this.jugador.getManoJugador().getFichasEnMano().isEmpty()) {
                 System.out.println("[MODELO] ¡JUEGO TERMINADO! El jugador ha ganado.");
-                // Aquí podrías añadir una notificación de victoria.
                 // notificarObservadores(TipoEvento.JUEGO_TERMINADO);
             }
 
+            notificarObservadores(TipoEvento.REPINTAR_MANO); // Repintar mano para mostrar las fichas restantes
+
         } else {
             System.out.println("[MODELO] >> FALLO: Reviertiendo tablero y mano al estado anterior.");
-            this.tablero = this.tableroAlInicioDelTurno;
-            this.jugador.setManoJugador(this.manoAlInicioDelTurno);
-        }
+            // Restaurar estado
+            this.tablero = copiaProfundaTablero(this.tableroAlInicioDelTurno);
+            this.jugador.setManoJugador(copiaProfundaMano(this.manoAlInicioDelTurno));
 
-        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
-        notificarObservadores(TipoEvento.REPINTAR_MANO);
+            // El tablero se repinta para mostrar el estado revertido
+            notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+            notificarObservadores(TipoEvento.REPINTAR_MANO);
+        }
     }
 
     /**
@@ -138,29 +150,47 @@ public class Modelo implements IModelo {
 
     // --- Métodos de Lógica de Juego y Validación ---
     /**
-     * Recibe los grupos desde la UI, los valida individualmente y actualiza el
-     * estado temporal del tablero.
+     * Recibe el estado actual del tablero desde la UI, lo valida
+     * individualmente (marcando los grupos con menos de 3 fichas o inválidos) y
+     * actualiza el estado temporal del tablero de la entidad. Este método
+     * permite la retroalimentación visual inmediata.
+     *
+     * @param gruposPropuestos El estado actual del tablero que el jugador armó
+     * en la UI.
      */
-    private void actualizarGruposEnTablero(List<GrupoDTO> gruposPropuestos) {
+    public void colocarFicha(List<GrupoDTO> gruposPropuestos) { // Antes era terminarTurno
+        System.out.println("\n[MODELO] Actualizando y validando grupos en tiempo real...");
         List<Grupo> nuevosGruposDelTablero = new ArrayList<>();
 
         for (GrupoDTO grupoDTO : gruposPropuestos) {
+            // 1. Crear las entidades Ficha a partir de los DTOs
             List<Ficha> fichasDelGrupo = grupoDTO.getFichasGrupo().stream()
                     .map(dto -> new Ficha(dto.getIdFicha(), dto.getNumeroFicha(), dto.getColor(), dto.isComodin()))
                     .collect(Collectors.toList());
 
-            String tipoGrupoValidado = "Invalido";
+            String tipoGrupoValidado = "Temporal"; // Nuevo tipo: 'Temporal' para grupos < 3 fichas
+
+            // 2. Validar Grupos: Solo si tienen 3 o más fichas
             if (fichasDelGrupo.size() >= 3) {
                 if (esEscaleraValida(fichasDelGrupo)) {
                     tipoGrupoValidado = "escalera";
                 } else if (esTerciaValida(fichasDelGrupo)) {
                     tipoGrupoValidado = "tercia";
+                } else {
+                    tipoGrupoValidado = "Invalido";
                 }
             }
 
+            // 3. Crear el nuevo Grupo y agregarlo a la lista temporal
             nuevosGruposDelTablero.add(new Grupo(tipoGrupoValidado, fichasDelGrupo.size(), fichasDelGrupo));
         }
-        tablero.setFichasEnTablero(nuevosGruposDelTablero);
+
+        // 4. Actualizar el tablero de la entidad con el nuevo estado validado
+        this.tablero.setFichasEnTablero(nuevosGruposDelTablero);
+
+        // 5. Notificar a la vista para que se repinte con el estado actual (incluyendo grupos 'Invalido' o 'Temporal')
+        // Esto resuelve los bugs visuales al tener una ÚNICA fuente de verdad.
+        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
     }
 
     /**
