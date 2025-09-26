@@ -13,15 +13,25 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 public class TableroUI extends JPanel {
 
     private final int filas = 5;
     private final int columnas = 22;
-    private FichaUI[][] celdas; // Matriz para controlar las fichas en la cuadrícula
+
+    // --- NUEVO ALMACENAMIENTO PARA LAS FICHAS ---
+    // Mantiene el estado visual de las fichas en el tablero. La clave es el ID de la ficha.
+    private final Map<Integer, FichaUI> fichasEnTablero;
+    private final Map<Integer, FichaUI> fichasEnTableroValidas;
+    private final Map<Integer, Point> posicionesValidas;
 
     private final IModelo modelo;
     private final Controlador control;
@@ -31,15 +41,16 @@ public class TableroUI extends JPanel {
         this.vista = vista;
         this.modelo = modelo;
         this.control = control;
+        this.fichasEnTablero = new HashMap<>();
+        this.fichasEnTableroValidas = new HashMap<>();
+        this.posicionesValidas = new HashMap<>();
 
-        // Usamos las dimensiones "perfectas" para evitar desfases.
         setSize(660, 245);
         setPreferredSize(new Dimension(660, 245));
-
-        setLayout(null); // Layout absoluto para posicionar fichas manualmente.
-        this.celdas = new FichaUI[filas][columnas];
+        setLayout(null);
     }
 
+    // ... paintComponent se queda igual ...
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -59,61 +70,65 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Coloca una ficha en la celda más cercana al punto donde se soltó.
-     *
-     * @param ficha La ficha a colocar.
-     * @param punto El punto (en píxeles) donde se soltó.
-     * @return true si se pudo colocar, false si no había espacio.
+     * Coloca una ficha en la celda más cercana y la guarda en el estado local.
      */
     public boolean colocarFichaEnCelda(FichaUI ficha, Point punto) {
         Point celda = calcularCeldaParaPunto(punto);
 
-        if (celdas[celda.y][celda.x] == null) { // Si la celda está libre
-            centrarYPosicionarFicha(ficha, celda.y, celda.x);
-            celdas[celda.y][celda.x] = ficha;
-            this.add(ficha);
-            return true;
-        }
-        // Si la celda principal está ocupada, no busca otra.
-        return false;
-    }
-
-    /**
-     * Remueve una ficha del tablero usando su ID.
-     *
-     * @param idFicha El ID de la ficha a remover.
-     */
-    public void removerFicha(int idFicha) {
-        for (int r = 0; r < filas; r++) {
-            for (int c = 0; c < columnas; c++) {
-                if (celdas[r][c] != null && celdas[r][c].getIdFicha() == idFicha) {
-                    Component fichaParaRemover = celdas[r][c];
-                    celdas[r][c] = null;
-                    this.remove(fichaParaRemover);
-                    return;
-                }
+        // Verificamos si la celda está ocupada
+        for (FichaUI fichaExistente : fichasEnTablero.values()) {
+            Point celdaExistente = calcularCeldaParaPunto(fichaExistente.getLocation());
+            if (celdaExistente.equals(celda)) {
+                return false; // Celda ocupada
             }
         }
+
+        centrarYPosicionarFicha(ficha, celda.y, celda.x);
+        this.add(ficha);
+        fichasEnTablero.put(ficha.getIdFicha(), ficha); // <-- La guardamos en el Map
+
+        this.revalidate();
+        this.repaint();
+        return true;
     }
 
     /**
-     * El "puente" al Modelo. Recorre la cuadrícula, descubre los grupos y los
-     * prepara para ser validados.
-     *
-     * @return Una lista de GrupoDTO representando el estado del tablero.
+     * Remueve una ficha del estado local del tablero.
+     */
+    public void removerFicha(int idFicha) {
+        FichaUI fichaParaRemover = fichasEnTablero.remove(idFicha);
+        if (fichaParaRemover != null) {
+            this.remove(fichaParaRemover);
+            this.revalidate();
+            this.repaint();
+        }
+    }
+
+    /**
+     * Genera los grupos basándose en el estado visual actual del tablero.
      */
     public List<GrupoDTO> generarGruposDesdeCeldas() {
+        // 1. Construir una representación de la cuadrícula a partir del Map
+        FichaUI[][] celdasTemporales = new FichaUI[filas][columnas];
+        for (FichaUI ficha : fichasEnTablero.values()) {
+            Point celda = calcularCeldaParaPunto(ficha.getLocation());
+            if (celda.y < filas && celda.x < columnas) {
+                celdasTemporales[celda.y][celda.x] = ficha;
+            }
+        }
+
+        // 2. Usar la misma lógica de antes sobre la cuadrícula temporal
         List<GrupoDTO> gruposEncontrados = new ArrayList<>();
         boolean[][] visitadas = new boolean[filas][columnas];
 
         for (int r = 0; r < filas; r++) {
             for (int c = 0; c < columnas; c++) {
-                if (celdas[r][c] != null && !visitadas[r][c]) {
+                if (celdasTemporales[r][c] != null && !visitadas[r][c]) {
                     List<FichaUI> grupoActual = new ArrayList<>();
                     int columnaActual = c;
 
-                    while (columnaActual < columnas && celdas[r][columnaActual] != null) {
-                        grupoActual.add(celdas[r][columnaActual]);
+                    while (columnaActual < columnas && celdasTemporales[r][columnaActual] != null) {
+                        grupoActual.add(celdasTemporales[r][columnaActual]);
                         visitadas[r][columnaActual] = true;
                         columnaActual++;
                     }
@@ -121,12 +136,7 @@ public class TableroUI extends JPanel {
                     if (!grupoActual.isEmpty()) {
                         List<FichaJuegoDTO> fichasDTO = new ArrayList<>();
                         for (FichaUI fichaUI : grupoActual) {
-                            fichasDTO.add(new FichaJuegoDTO(
-                                    fichaUI.getIdFicha(),
-                                    fichaUI.getNumero(),
-                                    fichaUI.getColor(),
-                                    fichaUI.isComodin()
-                            ));
+                            fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(), fichaUI.getColor(), fichaUI.isComodin()));
                         }
                         gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO));
                     }
@@ -137,59 +147,179 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Limpia el tablero y lo reconstruye desde cero basándose en los datos del
-     * Modelo. Se usa para revertir turnos o cargar partidas.
+     * Guarda la disposición actual de las fichas como el nuevo estado "válido".
+     * Se debe llamar después de una jugada exitosa.
      */
-    public void repintarTablero() {
-        this.removeAll();
-        this.celdas = new FichaUI[filas][columnas];
+    public void guardarEstadoVisualValido() {
+        // Limpiamos el estado anterior
+        fichasEnTableroValidas.clear();
+        posicionesValidas.clear();
 
-        JuegoDTO juego = modelo.getTablero();
-        if (juego == null || juego.getGruposEnTablero() == null) {
-            return;
+        // Clonamos el estado actual
+        for (Map.Entry<Integer, FichaUI> entry : fichasEnTablero.entrySet()) {
+            fichasEnTableroValidas.put(entry.getKey(), entry.getValue());
+            posicionesValidas.put(entry.getKey(), (Point) entry.getValue().getLocation().clone());
+        }
+    }
+
+    /**
+     * Restaura visualmente el tablero a la última disposición guardada.
+     */
+    public void revertirCambiosVisuales() {
+        System.out.println("[VISTA] Revertiendo cambios visuales...");
+
+        // 1. Elimina TODOS los componentes actuales del panel.
+        removeAll();
+        fichasEnTablero.clear();
+
+        // 2. Vuelve a añadir solo las fichas del último estado válido en su posición exacta.
+        for (Map.Entry<Integer, FichaUI> entry : fichasEnTableroValidas.entrySet()) {
+            Integer idFicha = entry.getKey();
+            FichaUI ficha = entry.getValue();
+            Point pos = posicionesValidas.get(idFicha);
+
+            // Se vuelve a añadir la ficha al panel y al mapa de estado actual.
+            add(ficha);
+            ficha.setLocation(pos);
+            fichasEnTablero.put(idFicha, ficha);
         }
 
-        List<GrupoDTO> grupos = juego.getGruposEnTablero();
-
-        int filaActual = 0;
-        int colActual = 1; // Empezar en la columna 1 para dejar un margen
-
-        for (GrupoDTO grupoDTO : grupos) {
-            if ("Invalido".equals(grupoDTO.getTipo())) {
-                continue;
+        // 3. Limpia CUALQUIER panel de feedback que haya quedado.
+        // Esta es la parte crucial que faltaba.
+        for (Component c : getComponents()) {
+            if (c instanceof JPanel && !(c instanceof FichaUI)) {
+                remove(c);
             }
-
-            for (FichaJuegoDTO fichaDTO : grupoDTO.getFichasGrupo()) {
-                if (colActual >= this.columnas) { // Si no cabe, salta a la siguiente fila
-                    filaActual++;
-                    colActual = 1;
-                }
-                if (filaActual >= this.filas) {
-                    break; // Si no hay más filas, para.
-                }
-                FichaUI fichaUI = new FichaUI(
-                        fichaDTO.getIdFicha(),
-                        fichaDTO.getNumeroFicha(),
-                        fichaDTO.getColor(),
-                        fichaDTO.isComodin(),
-                        control,
-                        vista
-                );
-
-                // Coloca la ficha en la celda correspondiente
-                celdas[filaActual][colActual] = fichaUI;
-                centrarYPosicionarFicha(fichaUI, filaActual, colActual);
-                this.add(fichaUI);
-
-                colActual++;
-            }
-            colActual++; // Deja una celda de espacio entre grupos
         }
+
+        // 4. Redibuja los feedbacks correctos basados en el estado revertido del modelo.
+        JuegoDTO juegoRevertido = modelo.getTablero();
+        if (juegoRevertido != null && juegoRevertido.getGruposEnTablero() != null) {
+            for (GrupoDTO grupoDTO : juegoRevertido.getGruposEnTablero()) {
+                if (grupoDTO.getFichasGrupo().isEmpty()) {
+                    continue;
+                }
+
+                // Usamos la posición guardada de la primera ficha para dibujar el borde.
+                int primeraFichaId = grupoDTO.getFichasGrupo().get(0).getIdFicha();
+                Point posFicha = posicionesValidas.get(primeraFichaId);
+                if (posFicha != null) {
+                    Point celdaAncla = calcularCeldaParaPunto(posFicha);
+                    dibujarFeedbackParaGrupo(grupoDTO, celdaAncla);
+                }
+            }
+        }
+
         revalidate();
         repaint();
     }
 
-    // --- Métodos de Ayuda para Posicionamiento ---
+    /**
+     * Sincroniza el tablero visual con el estado validado del Modelo.
+     */
+    public void repintarTablero(boolean esJugadaFinal) {
+        JuegoDTO juego = modelo.getTablero();
+        if (juego == null) {
+            return;
+        }
+
+        List<GrupoDTO> gruposDelModelo = juego.getGruposEnTablero();
+
+        // 1. Crear un conjunto de IDs de fichas que son válidas según el modelo.
+        Set<Integer> idsValidosDelModelo = new HashSet<>();
+        if (gruposDelModelo != null) {
+            for (GrupoDTO grupo : gruposDelModelo) {
+                for (FichaJuegoDTO ficha : grupo.getFichasGrupo()) {
+                    idsValidosDelModelo.add(ficha.getIdFicha());
+                }
+            }
+        }
+
+        // 2. Eliminar del tablero las fichas que el modelo no ha validado.
+        Iterator<Map.Entry<Integer, FichaUI>> iter = fichasEnTablero.entrySet().iterator();
+        while (iter.hasNext()) {
+            Map.Entry<Integer, FichaUI> entry = iter.next();
+            if (!idsValidosDelModelo.contains(entry.getKey())) {
+                this.remove(entry.getValue()); // Quitar del panel
+                iter.remove(); // Quitar del Map
+            }
+        }
+
+        // Eliminar todos los paneles de feedback viejos
+        for (Component c : getComponents()) {
+            if (c instanceof JPanel && !(c instanceof FichaUI)) {
+                remove(c);
+            }
+        }
+
+        // 3. Reorganizar y pintar feedback para los grupos válidos.
+        if (gruposDelModelo != null) {
+            for (GrupoDTO grupoDTO : gruposDelModelo) {
+                if (grupoDTO.getFichasGrupo().isEmpty()) {
+                    continue;
+                }
+
+                // La posición del grupo es la posición de su primera ficha.
+                int primeraFichaId = grupoDTO.getFichasGrupo().get(0).getIdFicha();
+                FichaUI primeraFichaUI = fichasEnTablero.get(primeraFichaId);
+
+                if (primeraFichaUI == null) {
+                    continue; // Si la ficha no está, no podemos posicionar el grupo.
+                }
+                Point celdaAncla = calcularCeldaParaPunto(primeraFichaUI.getLocation());
+
+                // Reposicionar todas las fichas del grupo para que estén juntas.
+                for (int i = 0; i < grupoDTO.getFichasGrupo().size(); i++) {
+                    int idFichaActual = grupoDTO.getFichasGrupo().get(i).getIdFicha();
+                    FichaUI fichaActualUI = fichasEnTablero.get(idFichaActual);
+                    if (fichaActualUI != null) {
+                        centrarYPosicionarFicha(fichaActualUI, celdaAncla.y, celdaAncla.x + i);
+                    }
+                }
+
+                // Dibujar el panel de feedback alrededor del grupo ya posicionado.
+                dibujarFeedbackParaGrupo(grupoDTO, celdaAncla);
+            }
+        }
+
+        revalidate();
+        repaint();
+
+        if (esJugadaFinal) {
+        guardarEstadoVisualValido();
+    }
+    }
+
+    private void dibujarFeedbackParaGrupo(GrupoDTO grupo, Point celdaInicio) {
+        int anchoCelda = getWidth() / columnas;
+        int altoCelda = getHeight() / filas;
+        int numFichas = grupo.getFichasGrupo().size();
+
+        JPanel feedbackPanel = new JPanel();
+        feedbackPanel.setLayout(null);
+        feedbackPanel.setSize(numFichas * anchoCelda, altoCelda);
+        feedbackPanel.setLocation(celdaInicio.x * anchoCelda, celdaInicio.y * altoCelda);
+        feedbackPanel.setOpaque(false);
+
+        Color borderColor;
+        switch (grupo.getTipo()) {
+            case "Invalido":
+                borderColor = Color.RED;
+                break;
+            case "Temporal":
+                borderColor = Color.YELLOW.darker();
+                break;
+            default:
+                borderColor = Color.GREEN.darker();
+                break;
+        }
+        feedbackPanel.setBorder(BorderFactory.createLineBorder(borderColor, 2));
+
+        this.add(feedbackPanel);
+        this.setComponentZOrder(feedbackPanel, getComponentCount() - 1); // Ponerlo al fondo
+    }
+
+    // --- Métodos de Ayuda (sin cambios) ---
     private Point calcularCeldaParaPunto(Point puntoEnPixeles) {
         int anchoCelda = getWidth() / columnas;
         int altoCelda = getHeight() / filas;

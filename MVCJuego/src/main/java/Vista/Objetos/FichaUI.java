@@ -1,12 +1,18 @@
 package Vista.Objetos;
 
 import Controlador.Controlador;
+import DTO.GrupoDTO;
 import Vista.VistaTablero;
-
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Point;
 import javax.swing.*;
-import java.awt.*;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 public class FichaUI extends JPanel {
 
@@ -15,10 +21,11 @@ public class FichaUI extends JPanel {
     private Color color;
     private boolean comodin;
     private VistaTablero vista;
+    private Controlador control;
     private Point originalLocation;
     private JPanel originalParent;
     private Origen origen;
-    
+
     // El glassPane se usa para un arrastre fluido por toda la ventana.
     private JComponent glassPane;
     private Point glassPaneOffset;
@@ -26,27 +33,33 @@ public class FichaUI extends JPanel {
     public enum Origen {
         MANO, TABLERO
     }
-    
+
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
-                   Controlador controlador, VistaTablero vista) {
+            Controlador controlador, VistaTablero vista) {
+        this.control = controlador;
         this.vista = vista;
         this.idFicha = idFicha;
         this.numero = numero;
         this.color = color;
         this.comodin = comodin;
         // El controlador ya no es necesario aquí, pero lo mantenemos por si acaso.
-        
+
         // Usamos las dimensiones que acordamos para un encaje perfecto.
         setSize(28, 45);
         setPreferredSize(new Dimension(28, 45));
         setOpaque(false);
         initDrag();
     }
-    
+
     // Este constructor con Point ya no es necesario con la nueva lógica, pero se puede mantener.
-    public FichaUI(int idFicha, int numero, Color color, boolean comodin, 
-                   Controlador controlador, Point originalLocation, VistaTablero vista) {
-        this(idFicha, numero, color, comodin, controlador, vista);
+    public FichaUI(int idFicha, int numero, Color color, boolean comodin,
+            Controlador controlador, Point originalLocation, VistaTablero vista) {
+        this.control = controlador;
+        this.vista = vista;
+        this.idFicha = idFicha;
+        this.numero = numero;
+        this.color = color;
+        this.comodin = comodin;
         this.originalLocation = originalLocation;
     }
 
@@ -59,12 +72,14 @@ public class FichaUI extends JPanel {
                 glassPaneOffset = e.getPoint();
 
                 JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(FichaUI.this);
-                if (frame == null) return;
+                if (frame == null) {
+                    return;
+                }
                 glassPane = (JComponent) frame.getGlassPane();
 
                 Point locOnGlass = SwingUtilities.convertPoint(originalParent, getLocation(), glassPane);
                 setLocation(locOnGlass);
-                
+
                 originalParent.remove(FichaUI.this);
                 glassPane.add(FichaUI.this);
                 glassPane.setVisible(true);
@@ -74,36 +89,42 @@ public class FichaUI extends JPanel {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (glassPane == null) return;
+                if (glassPane == null) {
+                    return;
+                }
                 Point glassPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), glassPane);
                 setLocation(glassPoint.x - glassPaneOffset.x, glassPoint.y - glassPaneOffset.y);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (glassPane == null) return;
+                if (glassPane == null) {
+                    return;
+                }
                 TableroUI panelTablero = vista.getPanelTablero();
                 Point dropPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
-                
+
                 glassPane.remove(FichaUI.this);
                 glassPane.setVisible(false);
-                
-                boolean dentroDelTablero = dropPoint.x >= 0 && dropPoint.y >= 0 &&
-                                            dropPoint.x < panelTablero.getWidth() && 
-                                            dropPoint.y < panelTablero.getHeight();
+
+                boolean dentroDelTablero = dropPoint.x >= 0 && dropPoint.y >= 0
+                        && dropPoint.x < panelTablero.getWidth()
+                        && dropPoint.y < panelTablero.getHeight();
 
                 if (dentroDelTablero) {
                     // Si la ficha ya estaba en el tablero, primero la quitamos de su celda vieja.
                     if (origen == Origen.TABLERO) {
                         panelTablero.removerFicha(FichaUI.this.idFicha);
                     }
-                    
+
                     // Intentamos colocar la ficha en una nueva celda.
                     boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, dropPoint);
 
                     if (colocada) {
                         // Si se pudo colocar, su nuevo origen es el tablero.
                         origen = Origen.TABLERO;
+                        List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
+                        control.colocarFicha(gruposColocados);
                     } else {
                         // Si no había espacio, la devolvemos a su origen (la mano).
                         devolverFichaAlOrigen();
@@ -112,11 +133,11 @@ public class FichaUI extends JPanel {
                     // Si se soltó fuera del tablero, también la devolvemos.
                     devolverFichaAlOrigen();
                 }
-                
+
                 panelTablero.revalidate();
                 panelTablero.repaint();
             }
-            
+
             private void devolverFichaAlOrigen() {
                 setLocation(originalLocation);
                 originalParent.add(FichaUI.this);
@@ -141,11 +162,25 @@ public class FichaUI extends JPanel {
         int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
         g.drawString(texto, x, y);
     }
-    
+
     // --- Getters y Setters ---
-    public int getIdFicha() { return idFicha; }
-    public void setOrigen(Origen origen) { this.origen = origen; }
-    public int getNumero() { return numero; }
-    public Color getColor() { return color; }
-    public boolean isComodin() { return comodin; }
+    public int getIdFicha() {
+        return idFicha;
+    }
+
+    public void setOrigen(Origen origen) {
+        this.origen = origen;
+    }
+
+    public int getNumero() {
+        return numero;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public boolean isComodin() {
+        return comodin;
+    }
 }
