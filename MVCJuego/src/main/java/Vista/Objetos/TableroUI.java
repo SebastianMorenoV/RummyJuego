@@ -11,194 +11,240 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
 public class TableroUI extends JPanel {
 
-    private final int filas = 5;
-    private final int columnas = 22;
-    private FichaUI[][] celdas; // Control de fichas en cada celda
+    private List<GrupoUI> gruposUI;
+    // ¡NUEVO ATRIBUTO! Un mapa para recordar la posición de cada grupo.
+    private java.util.Map<String, Point> posicionesDeGrupos = new java.util.HashMap<>();
     private IModelo modelo;
     private Controlador control;
     private VistaTablero vista;
 
     public TableroUI(IModelo modelo, Controlador control, VistaTablero vista) {
+        // ... (inicialización básica se mantiene)
         this.vista = vista;
         this.modelo = modelo;
         this.control = control;
-        setPreferredSize(new Dimension(880, 275)); // tamaño base
+        setPreferredSize(new Dimension(880, 275));
         setBorder(new LineBorder(new Color(6, 71, 34), 3, true));
-        setLayout(null); // absolute layout para posicionar fichas manualmente
-        celdas = new FichaUI[filas][columnas];
+
+//                setPreferredSize(new Dimension(880, 275)); // tamaño base
+//                setBorder(new LineBorder(new Color(6, 71, 34), 3, true));
+        this.gruposUI = new java.util.ArrayList<>(); // Inicializar la lista
+        setLayout(null); // Mantenemos el layout absoluto para posicionar los GRUPOS
+        // ...
     }
 
+    // El paintComponent ahora es mucho más simple. Solo dibuja el fondo.
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        int anchoCelda = getWidth() / columnas;
-        int altoCelda = getHeight() / filas;
-
-        // Fondo verde redondeado
         g.setColor(new Color(15, 89, 46));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
-
-        // Dibujar líneas de las celdas
-        g.setColor(new Color(0, 0, 0, 50));
-        for (int r = 0; r <= filas; r++) {
-            g.drawLine(0, r * altoCelda, getWidth(), r * altoCelda);
-        }
-        for (int c = 0; c <= columnas; c++) {
-            g.drawLine(c * anchoCelda, 0, c * anchoCelda, getHeight());
-        }
+        // Las líneas de la cuadrícula pueden ser opcionales ahora.
     }
 
     /**
-     * Metodo para colocar una ficha desde dentro o fuera de el tablero.
-     * @param ficha La ficha que se quiere colocar.
-     * @param punto Las coordenadas de la ficha.
-     * @return true si la ficha se logra colocar , false si no se puede colocar porque no cabe.
+     * Lógica principal para cuando se suelta una ficha sobre el tablero. Decide
+     * si crear un nuevo grupo o añadir a uno existente.
      */
-    public boolean colocarFichaEnCelda(FichaUI ficha, Point punto) {
-        // 1. Si la ficha no está en el tablero, busca la celda libre más cercana
-        Point celda = obtenerCeldaLibreCercana(punto);
+    // En la clase Vista.Objetos.TableroUI.java
+    public void procesarFichaSoltada(FichaUI ficha, Point dropPoint) {
+        GrupoUI grupoCercano = encontrarGrupoCercano(dropPoint);
 
-        if (celda == null) {
-            return false;
+        if (grupoCercano != null) {
+            // AÑADIR A GRUPO EXISTENTE
+            // Convertimos el punto de soltado a las coordenadas internas del grupoCercano
+            Point puntoEnGrupo = javax.swing.SwingUtilities.convertPoint(this, dropPoint, grupoCercano);
+
+            // Llamamos al nuevo método inteligente de agregarFicha
+            grupoCercano.agregarFicha(ficha, puntoEnGrupo);
+
+            grupoCercano.setSize(grupoCercano.getPreferredSize());
+        } else {
+            // CREAR GRUPO NUEVO (esta lógica no cambia)
+            GrupoUI nuevoGrupo = new GrupoUI();
+            nuevoGrupo.agregarFicha(ficha);
+            nuevoGrupo.setSize(nuevoGrupo.getPreferredSize());
+            nuevoGrupo.setLocation(dropPoint);
+            this.gruposUI.add(nuevoGrupo);
+            this.add(nuevoGrupo);
         }
-
-        int fila = celda.y;
-        int columna = celda.x;
-
-        // 1. Llama al método auxiliar para el cálculo y posicionamiento
-        centrarYPosicionarFicha(ficha, fila, columna);
-
-        // Marcar la celda ocupada
-        celdas[fila][columna] = ficha;
-
-        add(ficha);
-        setComponentZOrder(ficha, 0);
         revalidate();
         repaint();
-        return true;
+    }
+
+    private GrupoUI encontrarGrupoCercano(Point punto) {
+        for (GrupoUI grupo : gruposUI) {
+            // Si el punto donde se soltó la ficha está dentro de los límites de un grupo existente...
+            if (grupo.getBounds().contains(punto)) {
+                return grupo;
+            }
+        }
+        return null; // No se encontró un grupo cercano
+    }
+
+    // El método repintarTablero que hicimos antes, con la lógica de "firmas",
+    // ahora es el encargado de sincronizar con el modelo.
+    // En la clase TableroUI
+    // (Añade el método auxiliar convertirAFichasUI que te di en la respuesta anterior)
+    private List<FichaUI> convertirAFichasUI(List<FichaJuegoDTO> fichasDTO) {
+        // ...
+        return fichasDTO.stream()
+                .map(dto -> new FichaUI(dto.getIdFicha(), dto.getNumeroFicha(), dto.getColor(), dto.isComodin(), control, vista))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Metodo que obtiene la celda mas cercana al punto que le pasamos.
-     * @param punto El punto que se tiene que evaluar.
-     * @return El punto donde esta la celda.
+     * Genera una lista de GrupoDTO a partir del estado actual de los GrupoUI en
+     * el tablero. Esta lista se enviaría al controlador para que el modelo la
+     * valide.
      */
-    public Point obtenerCeldaLibreCercana(Point punto) {
-        int anchoCelda = getWidth() / columnas;
-        int altoCelda = getHeight() / filas;
+    // Modifica generarListaDeGrupoDTOs para que guarde las posiciones
+    public List<GrupoDTO> generarListaDeGrupoDTOs(List<GrupoUI> gruposUI) {
+        // Limpiamos el mapa anterior antes de llenarlo de nuevo
+        posicionesDeGrupos.clear();
 
-        int col = Math.min(punto.x / anchoCelda, columnas - 1);
-        int fila = Math.min(punto.y / altoCelda, filas - 1);
+        return gruposUI.stream()
+                .map(grupoUI -> {
+                    // ... (el código de conversión de fichas se queda igual)
+                    List<FichaJuegoDTO> fichasDTO = convertirAFichasDTO(grupoUI.getFichas());
 
-        if (celdas[fila][col] == null) {
-            return new Point(col, fila);
-        }
+                    // ¡GUARDAMOS LA POSICIÓN!
+                    // Usamos la firma del grupo como clave y su ubicación como valor.
+                    String firma = generarFirmaDeFichasDTO(fichasDTO);
+                    posicionesDeGrupos.put(firma, grupoUI.getLocation());
 
-        // Buscar la celda vacía más cercana
-        int distancia = 1;
-        while (distancia < Math.max(filas, columnas)) {
-            for (int dr = -distancia; dr <= distancia; dr++) {
-                for (int dc = -distancia; dc <= distancia; dc++) {
-                    int nuevaFila = fila + dr;
-                    int nuevaCol = col + dc;
-                    if (nuevaFila >= 0 && nuevaFila < filas
-                            && nuevaCol >= 0 && nuevaCol < columnas
-                            && celdas[nuevaFila][nuevaCol] == null) {
-                        return new Point(nuevaCol, nuevaFila);
-                    }
-                }
-            }
-            distancia++;
-        }
-        return null;
+                    // ... (el resto del método se queda igual)
+                    return new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO);
+                })
+                .collect(Collectors.toList());
     }
 
-    public void removerFicha(int idFicha) {
-        for (int r = 0; r < filas; r++) {
-            for (int c = 0; c < columnas; c++) {
-                if (celdas[r][c] != null && celdas[r][c].getIdFicha() == idFicha) {
-                    FichaUI ficha = celdas[r][c];
-                    celdas[r][c] = null;
-                    remove(ficha);
-                    revalidate();
-                    repaint();
-                    return;
-                }
-            }
-        }
-    }
-
+    // En la clase TableroUI
     public void repintarTablero() {
-        this.removeAll(); // Elimina todos los componentes
-        this.celdas = new FichaUI[filas][columnas]; // Reinicia el control de celdas
+        System.out.println("\n--- [DEBUG] Iniciando repintado completo del TableroUI ---");
 
+        // 1. Limpiar el estado visual
+        this.removeAll();
+        this.gruposUI.clear();
+        System.out.println("[DEBUG] Paneles y lista de gruposUI eliminados.");
+
+        // 2. Obtener el estado real del modelo
         JuegoDTO juego = modelo.getTablero();
-        List<GrupoDTO> grupos = juego.getGruposEnTablero();
+        List<GrupoDTO> gruposDelModelo = juego.getGruposEnTablero();
+        System.out.println("[DEBUG] Obtenidos " + gruposDelModelo.size() + " grupos desde el Modelo.");
+        System.out.println("[DEBUG] Grupos recibidos: " + gruposDelModelo);
 
-        // Iterar sobre los datos del modelo
-        for (GrupoDTO grupoDTO : grupos) {
-            if (grupoDTO.getTipo().equals("No establecido")) {
+        // Imprime el contenido del mapa de posiciones que se guardó en el turno.
+        System.out.println("[DEBUG] Mapa de posiciones guardado: " + posicionesDeGrupos);
+
+        // 3. Crear y añadir los GrupoUI basados en el modelo
+        for (GrupoDTO grupoDTO : gruposDelModelo) {
+            System.out.println("\n[DEBUG] Procesando grupo DTO: " + grupoDTO.getFichasGrupo());
+
+            if (grupoDTO.getTipo().equals("Invalido")) {
+                System.out.println("[DEBUG] >> Grupo marcado como 'Invalido'. Omitiendo.");
                 continue;
             }
 
-            for (FichaJuegoDTO fichaDTO : grupoDTO.getFichasGrupo()) {
-                FichaUI fichaUI = new FichaUI(
-                        fichaDTO.getIdFicha(),
-                        fichaDTO.getNumeroFicha(),
-                        fichaDTO.getColor(),
-                        fichaDTO.isComodin(),
-                        control,
-                        new Point(fichaDTO.getX(), fichaDTO.getY()),
-                        vista
-                );
+            GrupoUI grupoUI = new GrupoUI();
+            List<FichaUI> fichas = convertirAFichasUI(grupoDTO.getFichasGrupo());
+            grupoUI.setFichas(fichas);
+            grupoUI.setSize(grupoUI.getPreferredSize());
+            System.out.println("[DEBUG] Creado GrupoUI con " + fichas.size() + " fichas y tamaño " + grupoUI.getSize());
 
-                // Calcular la fila y columna desde las coordenadas x,y del DTO
-                int anchoCelda = getWidth() / columnas;
-                int altoCelda = getHeight() / filas;
-                int columna = fichaDTO.getX() / anchoCelda;
-                int fila = fichaDTO.getY() / altoCelda;
+            // --- SECCIÓN DE DEPURACIÓN DE POSICIONES ---
+            String firma = generarFirmaDeGrupoDTO(grupoDTO);
+            System.out.println("[DEBUG] Generada firma para el grupo: '" + firma + "'");
 
-                // Usar un método para colocar la ficha en la celda exacta
-                colocarFichaEnCeldaExacta(fichaUI, fila, columna);
+            Point posicionOriginal = posicionesDeGrupos.get(firma);
+
+            if (posicionOriginal != null) {
+                System.out.println("[DEBUG] >> ¡Éxito! Posición encontrada en el mapa: " + posicionOriginal);
+                grupoUI.setLocation(posicionOriginal);
+            } else {
+                System.err.println("[DEBUG] >> ¡ADVERTENCIA! No se encontró posición para la firma '" + firma + "'. Usando posición por defecto.");
+                grupoUI.setLocation(10, 10);
+            }
+            // --- FIN DE SECCIÓN DE DEPURACIÓN ---
+
+            this.add(grupoUI);
+            this.gruposUI.add(grupoUI);
+            System.out.println("[DEBUG] GrupoUI añadido al panel en la posición: " + grupoUI.getLocation());
+        }
+
+        System.out.println("\n[DEBUG] Repintado finalizado. Llamando a revalidate() y repaint().");
+        revalidate();
+        repaint();
+        System.out.println("--- [DEBUG] Fin del ciclo de repintado ---\n");
+    }
+
+    // Necesitarás estos dos métodos auxiliares para generar las firmas consistentemente
+    private String generarFirmaDeGrupoDTO(GrupoDTO grupo) {
+        return grupo.getFichasGrupo().stream()
+                .map(FichaJuegoDTO::getIdFicha).sorted()
+                .map(String::valueOf).collect(Collectors.joining("-"));
+    }
+
+    private String generarFirmaDeFichasDTO(List<FichaJuegoDTO> fichas) {
+        return fichas.stream()
+                .map(FichaJuegoDTO::getIdFicha).sorted()
+                .map(String::valueOf).collect(Collectors.joining("-"));
+    }
+
+    public void recogerFichaDeGrupo(FichaUI ficha) {
+        GrupoUI grupoDeOrigen = null;
+        for (GrupoUI grupo : gruposUI) {
+            if (grupo.getFichas().stream().anyMatch(f -> f.getIdFicha() == ficha.getIdFicha())) {
+                grupoDeOrigen = grupo;
+                break;
             }
         }
 
-        this.revalidate();
-        this.repaint();
-    }
+        if (grupoDeOrigen != null) {
+            grupoDeOrigen.removerFicha(ficha);
 
-    public void colocarFichaEnCeldaExacta(FichaUI ficha, int fila, int columna) {
-        if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas) {
-            return;
+            if (grupoDeOrigen.getFichas().isEmpty()) {
+                gruposUI.remove(grupoDeOrigen);
+                this.remove(grupoDeOrigen);
+            } else {
+                grupoDeOrigen.setSize(grupoDeOrigen.getPreferredSize());
+            }
+
+            revalidate();
+            repaint();
         }
-        // 1. Llama al método auxiliar para el cálculo y posicionamiento
-        centrarYPosicionarFicha(ficha, fila, columna);
-        // 2. Lógica restante (actualizar el panel y el arreglo)
-        celdas[fila][columna] = ficha;
-        add(ficha);
-        setComponentZOrder(ficha, 0);
-        revalidate();
-        repaint();
     }
 
     /**
-     * Calcula las coordenadas para centrar la ficha en una celda y la
-     * posiciona.
+     * Método auxiliar para convertir una lista de FichaUI a FichaJuegoDTO. Es
+     * el inverso del método que teníamos antes.
      */
-    private void centrarYPosicionarFicha(FichaUI ficha, int fila, int columna) {
-        int anchoCelda = getWidth() / columnas;
-        int altoCelda = getHeight() / filas;
-
-        // Lógica de centrado (ahora vive en un solo lugar)
-        int x = columna * anchoCelda + (anchoCelda - ficha.getWidth()) / 2;
-        int y = fila * altoCelda + (altoCelda - ficha.getHeight()) / 2;
-
-        ficha.setLocation(x, y);
+    private List<FichaJuegoDTO> convertirAFichasDTO(List<FichaUI> fichasUI) {
+        return fichasUI.stream()
+                .map(fichaUI -> {
+                    // Creamos un nuevo DTO con la información de la FichaUI
+                    return new FichaJuegoDTO(
+                            fichaUI.getIdFicha(),
+                            fichaUI.getNumero(), // Asumiendo que FichaUI tiene getNumero()
+                            fichaUI.getColor(), // Asumiendo que FichaUI tiene getColor()
+                            fichaUI.isComodin() // Asumiendo que FichaUI tiene isComodin()
+                    );
+                })
+                .collect(Collectors.toList());
     }
+
+    public List<GrupoUI> getGruposUI() {
+        return gruposUI;
+    }
+
+    public void setGruposUI(List<GrupoUI> gruposUI) {
+        this.gruposUI = gruposUI;
+    }
+
 }

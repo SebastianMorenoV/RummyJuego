@@ -15,17 +15,19 @@ public class FichaUI extends JPanel {
     private int numero;
     private Color color;
     private boolean comodin;
-    private VistaTablero vista;
     private int mouseX, mouseY;
     private Point originalLocation;
     private JPanel originalParent;
     private Origen origen;
     private Controlador controlador;
 
+    //no escencial:
+    private VistaTablero vista;
+
     public enum Origen {
         MANO, TABLERO
     }
-    
+
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
             Controlador controlador, VistaTablero vista) {
         this.vista = vista;
@@ -64,23 +66,40 @@ public class FichaUI extends JPanel {
             public void mousePressed(MouseEvent e) {
                 mouseX = e.getX();
                 mouseY = e.getY();
-
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
 
-                // Activar GlassPane
+                // --- ORDEN CORREGIDO ---
+                // 1. PRIMERO, obtenemos una referencia a la ventana y al glassPane.
+                //    Mientras la ficha aún está en su panel, sabemos que tiene un "ancestro" JFrame.
                 JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(FichaUI.this);
+
+                // Agregamos una comprobación para evitar cualquier error.
+                if (frame == null) {
+                    System.err.println("Error: No se pudo encontrar el JFrame contenedor.");
+                    return;
+                }
                 glassPane = (JComponent) frame.getGlassPane();
+
+                // 2. AHORA SÍ, si la ficha venía del tablero, le decimos que la recoja.
+                //    En este punto, ya no importa que la ficha se "desconecte" de la ventana,
+                //    porque ya guardamos la referencia al glassPane.
+                if (origen == Origen.TABLERO) {
+                    TableroUI panelTablero = vista.getPanelTablero();
+                    panelTablero.recogerFichaDeGrupo(FichaUI.this);
+                }
+
+                // 3. El resto del código para mover la ficha al glassPane se queda igual.
                 glassPane.setVisible(true);
                 glassPane.setLayout(null);
-
-                // Convertir posición a GlassPane
                 Point locOnGlass = SwingUtilities.convertPoint(FichaUI.this, 0, 0, glassPane);
                 glassPaneOffset = new Point(mouseX, mouseY);
-                setLocation(locOnGlass);
 
-                // Remover del panel original y agregar al GlassPane
+                // Como la ficha ya fue removida por recogerFichaDeGrupo si venía del tablero,
+                // esta línea solo es necesaria si venía de la mano. No hace daño dejarla.
                 originalParent.remove(FichaUI.this);
+
+                setLocation(locOnGlass);
                 glassPane.add(FichaUI.this);
                 glassPane.revalidate();
                 glassPane.repaint();
@@ -98,54 +117,24 @@ public class FichaUI extends JPanel {
                 TableroUI panelTablero = vista.getPanelTablero();
                 Point releasePoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
 
-                // Quitar del GlassPane si lo estás usando
                 if (glassPane != null) {
                     glassPane.remove(FichaUI.this);
                     glassPane.setVisible(false);
                 }
 
-                // Si se soltó dentro del tablero
-                if (releasePoint.x >= 0 && releasePoint.y >= 0
-                        && releasePoint.x <= panelTablero.getWidth()
-                        && releasePoint.y <= panelTablero.getHeight()) {
+                // --- LÓGICA DE LÍMITES CORREGIDA ---
+                // Comprobamos si el punto de soltado está dentro de los límites 0,0 y el ancho/alto del panel.
+                boolean dentroDelTablero = releasePoint.x >= 0 && releasePoint.y >= 0
+                        && releasePoint.x < panelTablero.getWidth()
+                        && releasePoint.y < panelTablero.getHeight();
 
-                    // Remover de la celda anterior si existía
-                    if (origen == Origen.TABLERO) {
-                        panelTablero.removerFicha(FichaUI.this.idFicha);
-                    }
-
-                    // Intentar colocar la ficha en la celda libre más cercana
-                    boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, releasePoint);
-
-                    if (colocada) {
-                        origen = Origen.TABLERO;
-
-                        // Notificar al controlador
-                        FichaJuegoDTO fichaDTO = new FichaJuegoDTO();
-                        fichaDTO.setIdFicha(idFicha);
-                        fichaDTO.setNumeroFicha(numero);
-                        fichaDTO.setColor(color);
-                        fichaDTO.setComodin(comodin);
-                        controlador.fichaSoltada(fichaDTO, getX(), getY());
-
-                    } else {
-                        // Si no hay celda libre, devolver a la mano
-                        setLocation(originalLocation);
-                        originalParent.add(FichaUI.this);
-                        originalParent.setComponentZOrder(FichaUI.this, 0);
-                        originalParent.revalidate();
-                        originalParent.repaint();
-                        origen = Origen.MANO;
-                    }
-
+                if (dentroDelTablero) {
+                    origen = Origen.TABLERO;
+                    panelTablero.procesarFichaSoltada(FichaUI.this, releasePoint);
                 } else {
-                    // Si se soltó fuera del tablero, regresar a la mano
-                    if (origen == Origen.TABLERO) {
-                        panelTablero.removerFicha(FichaUI.this.idFicha);
-                    }
+                    // Devolver a la mano si se suelta fuera
                     setLocation(originalLocation);
                     originalParent.add(FichaUI.this);
-                    originalParent.setComponentZOrder(FichaUI.this, 0);
                     originalParent.revalidate();
                     originalParent.repaint();
                     origen = Origen.MANO;
@@ -186,4 +175,17 @@ public class FichaUI extends JPanel {
     public Origen getOrigen() {
         return origen;
     }
+
+    public int getNumero() {
+        return numero;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public boolean isComodin() {
+        return comodin;
+    }
+
 }

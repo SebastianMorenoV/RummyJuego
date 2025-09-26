@@ -6,6 +6,7 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
+import Vista.Objetos.GrupoUI;
 import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
@@ -24,6 +25,10 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Comparator;
 
 /**
  * Esta clase representa la vistaGeneral de el tablero y todos sus elementos de
@@ -120,7 +125,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
-        control.terminarTurno();
+        // 1. La Vista recolecta el estado de su componente TableroUI.
+        List<GrupoDTO> gruposPropuestos = this.tableroUI.generarListaDeGrupoDTOs(this.tableroUI.getGruposUI());
+
+        // 2. La Vista llama al Controlador con los datos ya listos.
+        control.terminarTurno(gruposPropuestos);
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
 
@@ -139,15 +148,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 iniciarJuego(modelo);
                 break;
             case REPINTAR_MANO:
-                repintarMano(modelo, control, manoUI);
+                repintarMano(modelo, control);
                 break;
-            case ACTUALIZAR_TABLERO:
+            case ACTUALIZAR_JUGADA:
                 pintarJugadaTablero(modelo, control);
                 break;
             case TOMO_FICHA:
                 repintarMazo(modelo, control);
                 break;
-            case DEVOLVER_FICHAS_TABLERO:
+            case ACTUALIZAR_TABLERO:
                 tableroUI.repintarTablero();
         }
     }
@@ -214,7 +223,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         }
         cargarJugadores();
-        crearMano(modelo);
+        repintarMano(modelo, control);
         crearTablero(modelo);
         crearMazo(modelo);
         GUIjuego.revalidate();
@@ -228,36 +237,23 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @param controlador Controlador que llama a modelo.
      * @param manoUI objeto presentacion que representa una mano.
      */
-    public void repintarMano(IModelo modelo, Controlador controlador, ManoUI manoUI) {
-        // Limpiar todo el panel mano para sobreponer fichas.
-        manoUI.removeAll();
-        List<FichaJuegoDTO> fichasMano = modelo.getMano();
+    public void repintarMano(IModelo modelo, Controlador controlador) {
 
-        // Posicion inicial de las fichas dentro de ManoUI.
-        int xPos = 10;
-        int yPos = 10;
-
-        // Dibujar fichas
-        for (FichaJuegoDTO fichaDTO : fichasMano) {
-            FichaUI fichaUI = new FichaUI(
-                    fichaDTO.getIdFicha(),
-                    fichaDTO.getNumeroFicha(),
-                    fichaDTO.getColor(),
-                    fichaDTO.isComodin(),
-                    controlador, this
-            );
-            fichaUI.setOrigen(FichaUI.Origen.MANO);
-            fichaUI.setSize(25, 45);
-            fichaUI.setLocation(xPos, yPos);
-            fichaUI.setOpaque(false);
-
-            manoUI.add(fichaUI);
-            manoUI.setComponentZOrder(fichaUI, 0);
-
-            xPos += 40; // Espacio entre fichas.
+        if (this.manoUI == null) {
+            this.manoUI = new ManoUI();
+            pintarFichasMano(controlador, modelo);
+            GUIjuego.add(this.manoUI);
+            manoUI.setLocation(160, 380);
+            manoUI.setSize(580, 120);
+            GUIjuego.setComponentZOrder(this.manoUI, GUIjuego.getComponentCount() - 2);
+        } else {
+            manoUI.removeAll();
+            pintarFichasMano(controlador, modelo);
         }
-        manoUI.revalidate();
-        manoUI.repaint();
+
+        // Espacio entre fichas.
+        GUIjuego.revalidate();
+        GUIjuego.repaint();
     }
 
     /**
@@ -268,18 +264,21 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @param control el control pasado por la vista.
      */
     public void repintarMazo(IModelo modelo, Controlador control) {
-        // 1. Obtén el número de fichas restantes
         int fichasRestantes = modelo.getTablero().getFichasMazo();
-        if (this.mazoUI != null) {
-            GUIjuego.remove(this.mazoUI);
+        String fichasRestantesString = String.valueOf(fichasRestantes);
+
+        if (this.mazoUI == null) {
+            // se crea solo una vez
+            this.mazoUI = new MazoUI(fichasRestantesString, control);
+            this.manoUI.setLocation(160, 380);
+            this.manoUI.setSize(580, 120);
+            GUIjuego.add(this.mazoUI);
+            GUIjuego.setComponentZOrder(this.mazoUI, GUIjuego.getComponentCount() - 2);
+        } else {
+            // si ya existe, solo actualizas
+            this.mazoUI.setNumeroFichasRestantes(fichasRestantesString);
         }
-        // 3. Creas una nueva instancia del MazoUI con el número actualizado
-        this.mazoUI = new MazoUI(String.valueOf(fichasRestantes), control);
-        this.mazoUI.setLocation(800, 150);
-        this.mazoUI.setSize(70, 90);
-        this.mazoUI.setOpaque(false);
-        GUIjuego.add(this.mazoUI);
-        GUIjuego.setComponentZOrder(this.mazoUI, GUIjuego.getComponentCount() - 2);
+
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
@@ -326,16 +325,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    public void crearMano(IModelo modelo) {
-        //Crear Mano
-        manoUI = new ManoUI();
-        manoUI.setLocation(160, 380);
-        manoUI.setSize(580, 120);
-        GUIjuego.add(manoUI);
-        GUIjuego.setComponentZOrder(manoUI, GUIjuego.getComponentCount() - 2);
-        repintarMano(modelo, control, manoUI);
-    }
-
     public void crearTablero(IModelo modelo) {
         //Crear Tablero
         tableroUI = new TableroUI(modelo, control, this);
@@ -360,7 +349,137 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         repintarMazo(modelo, control);
     }
 
+    public void pintarFichasMano(Controlador controlador, IModelo modelo) {
+        
+        List<FichaJuegoDTO> fichasMano = modelo.getMano();
+        // Posicion inicial de las fichas dentro de ManoUI.
+        int xPos = 10;
+        int yPos = 10;
+
+        // Dibujar fichas
+        for (FichaJuegoDTO fichaDTO : fichasMano) {
+            FichaUI fichaUI = new FichaUI(
+                    fichaDTO.getIdFicha(),
+                    fichaDTO.getNumeroFicha(),
+                    fichaDTO.getColor(),
+                    fichaDTO.isComodin(),
+                    controlador, this
+            );
+            fichaUI.setOrigen(FichaUI.Origen.MANO);
+            fichaUI.setSize(25, 45);
+            fichaUI.setLocation(xPos, yPos);
+            fichaUI.setOpaque(false);
+
+            manoUI.add(fichaUI);
+            manoUI.setComponentZOrder(fichaUI, 0);
+
+            xPos += 40;
+        }
+    }
+
+// ... dentro de la clase que contiene el método repintarTablero
+    public void repintarTablero(IModelo modelo) {
+        JuegoDTO tableroDTO = modelo.getTablero();
+        List<GrupoDTO> gruposDelModelo = tableroDTO.getGruposEnTablero();
+        List<GrupoUI> gruposEnLaUI = tableroUI.getGruposUI();
+
+        // --- PASO 1: Mapear los grupos del modelo usando su "firma" ---
+        // La firma es una cadena de texto con los IDs de las fichas, ordenados numéricamente.
+        // Ej: Un grupo con fichas (ID 8, ID 3, ID 5) tendrá la firma "3-5-8".
+        Map<String, GrupoDTO> mapaGruposModelo = gruposDelModelo.stream()
+                .collect(Collectors.toMap(
+                        this::generarFirmaDeGrupoDTO, // Clave: la firma del grupo
+                        grupo -> grupo, // Valor: el grupo mismo
+                        (grupoExistente, grupoNuevo) -> grupoExistente // En caso de firmas duplicadas, nos quedamos con la primera
+                ));
+
+        // --- PASO 2: Revisar los grupos existentes en la UI ---
+        var iteradorGruposUI = gruposEnLaUI.iterator();
+        while (iteradorGruposUI.hasNext()) {
+            GrupoUI grupoActualUI = iteradorGruposUI.next();
+            String firmaUIGroup = generarFirmaDeGrupoUI(grupoActualUI);
+
+            if (mapaGruposModelo.containsKey(firmaUIGroup)) {
+                // EL GRUPO AÚN EXISTE: Las fichas no han cambiado.
+                // Lo dejamos como está y lo quitamos del mapa para no procesarlo de nuevo.
+                mapaGruposModelo.remove(firmaUIGroup);
+            } else {
+                // EL GRUPO YA NO EXISTE (o fue modificado): Lo eliminamos.
+                // Una modificación (ej: añadir una ficha) cambia la firma, por lo que tratamos
+                // al grupo modificado como si fuera uno "nuevo" y eliminamos el "viejo".
+                iteradorGruposUI.remove();
+                tableroUI.remove(grupoActualUI);
+            }
+        }
+
+        // --- PASO 3: Agregar los grupos nuevos o modificados ---
+        // Lo que queda en el mapa son grupos que no tenían una contraparte exacta en la UI.
+        for (GrupoDTO grupoNuevoDTO : mapaGruposModelo.values()) {
+            GrupoUI nuevoGrupoUI = new GrupoUI();
+
+            List<FichaUI> fichasParaUINuevo = convertirAFichasUI(grupoNuevoDTO.getFichasGrupo());
+            nuevoGrupoUI.setFichas(fichasParaUINuevo);
+
+            gruposEnLaUI.add(nuevoGrupoUI);
+            tableroUI.add(nuevoGrupoUI);
+        }
+
+        // --- PASO 4: Refrescar el panel principal ---
+        tableroUI.revalidate();
+        tableroUI.repaint();
+    }
+
+    /**
+     * Genera una firma única para un GrupoDTO ordenando los IDs de sus fichas.
+     */
+    private String generarFirmaDeGrupoDTO(GrupoDTO grupo) {
+        if (grupo == null || grupo.getFichasGrupo() == null || grupo.getFichasGrupo().isEmpty()) {
+            return "";
+        }
+        return grupo.getFichasGrupo().stream()
+                .map(FichaJuegoDTO::getIdFicha)
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.joining("-"));
+    }
+
+    /**
+     * Genera una firma única para un GrupoUI ordenando los IDs de sus fichas.
+     */
+    private String generarFirmaDeGrupoUI(GrupoUI grupoUI) {
+        if (grupoUI == null || grupoUI.getFichas() == null || grupoUI.getFichas().isEmpty()) {
+            return "";
+        }
+        return grupoUI.getFichas().stream()
+                .map(FichaUI::getIdFicha)
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.joining("-"));
+    }
+
+    /**
+     * Método auxiliar para convertir FichaJuegoDTO a FichaUI. ¡Debes adaptar
+     * esta parte a tu constructor de FichaUI!
+     */
+    private List<FichaUI> convertirAFichasUI(List<FichaJuegoDTO> fichasDTO) {
+        // Necesitas pasar las dependencias que tu FichaUI requiere, como el Controlador y la Vista.
+        // Aquí asumo que puedes acceder a ellas desde esta clase.
+        Controlador miControlador = this.control; // Ejemplo
+        VistaTablero miVista = this;             // Ejemplo
+
+        return fichasDTO.stream()
+                .map(dto -> new FichaUI(
+                dto.getIdFicha(),
+                dto.getNumeroFicha(),
+                dto.getColor(),
+                dto.isComodin(),
+                miControlador,
+                miVista
+        ))
+                .collect(Collectors.toList());
+    }
     //Gets and sets
+
     public TableroUI getPanelTablero() {
         return tableroUI;
     }

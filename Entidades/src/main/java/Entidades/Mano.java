@@ -13,35 +13,35 @@ import java.util.List;
  */
 public class Mano {
 
-    private int fichasEnMano;
-    private List<Grupo> grupos;
+    private int cantidadFichasEnMano;
+    private List<Ficha> fichasEnMano;
 
     public Mano() {
-        grupos = new ArrayList<>();
+        fichasEnMano = new ArrayList<>();
     }
 
-    public List<Ficha> getTodasFichas() {
-        List<Ficha> todas = new ArrayList<>();
-        for (Grupo g : grupos) {
-            todas.addAll(g.getFichas());
-        }
-        return todas;
-    }
-
-    public int getFichasEnMano() {
-        return fichasEnMano;
-    }
-
-    public List<Grupo> getGruposMano() {
-        return grupos;
-    }
-
-    public void setFichasEnMano(int fichasEnMano) {
+    public Mano(int cantidadFichasEnMano, List<Ficha> fichasEnMano) {
+        this.cantidadFichasEnMano = cantidadFichasEnMano;
         this.fichasEnMano = fichasEnMano;
     }
 
-    public void setGruposMano(List<Grupo> grupos) {
-        this.grupos = grupos;
+    public int getCantidadFichasEnMano() {
+        return cantidadFichasEnMano;
     }
+
+    public void setCantidadFichasEnMano(int cantidadFichasEnMano) {
+        this.cantidadFichasEnMano = cantidadFichasEnMano;
+    }
+
+    public List<Ficha> getFichasEnMano() {
+        return fichasEnMano;
+    }
+
+    public void setFichasEnMano(List<Ficha> fichasEnMano) {
+        this.fichasEnMano = fichasEnMano;
+    }
+
+  
+
 
 }

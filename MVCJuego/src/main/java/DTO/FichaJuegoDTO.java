@@ -17,8 +17,6 @@ public class FichaJuegoDTO {
     int numeroFicha;
     Color color;
     boolean comodin;
-    int x;
-    int y;
 
     public FichaJuegoDTO(int numeroFicha, Color color, boolean comodin) {
         this.numeroFicha = numeroFicha;
@@ -38,8 +36,6 @@ public class FichaJuegoDTO {
         this.numeroFicha = numeroFicha;
         this.color = color;
         this.comodin = comodin;
-        this.x = x;
-        this.y = y;
     }
     
     
@@ -72,21 +68,6 @@ public class FichaJuegoDTO {
         this.comodin = comodin;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
 
     public int getIdFicha() {
         return idFicha;
@@ -97,12 +78,12 @@ public class FichaJuegoDTO {
     }
 
     public Ficha toFicha(int x, int y) {
-        return new Ficha(this.idFicha, this.numeroFicha, this.color, this.comodin, x, y);
+        return new Ficha(this.idFicha, this.numeroFicha, this.color, this.comodin);
     }
 
     @Override
     public String toString() {
-        return "FichaJuegoDTO{" + "idFicha=" + idFicha + ", numeroFicha=" + numeroFicha + ", color=" + color + ", comodin=" + comodin + ", x=" + x + ", y=" + y + '}';
+        return "FichaJuegoDTO{" + "idFicha=" + idFicha + ", numeroFicha=" + numeroFicha + ", color=" + color + ", comodin=" + comodin + '}';
     }
 
 }

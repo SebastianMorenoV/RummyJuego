@@ -5,7 +5,6 @@
 package Entidades;
 
 import java.util.ArrayList;
-import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
@@ -19,7 +18,6 @@ public class Grupo {
     private String tipo;
     private int numFichas;
     private List<Ficha> fichas;
-    private Random random = new Random();
 
     public Grupo() {
         this.fichas = new ArrayList<>();
@@ -53,10 +51,6 @@ public class Grupo {
 
     public void setFichas(List<Ficha> fichas) {
         this.fichas = fichas;
-    }
-
-    public void setRandom(Random random) {
-        this.random = random;
     }
 
     @Override

@@ -25,6 +25,7 @@ public class MazoUI extends JPanel implements MouseListener {
     String numeroFichasRestantes;
     Controlador control;
 
+    
     public MazoUI(String numeroFichasRestantes, Controlador control) {
         this.control = control;
         this.numeroFichasRestantes = numeroFichasRestantes;
@@ -65,6 +66,11 @@ public class MazoUI extends JPanel implements MouseListener {
     public void mouseExited(MouseEvent e) {
     }
 
+    public void setNumeroFichasRestantes(String numeroFichasRestantes) {
+        this.numeroFichasRestantes = numeroFichasRestantes;
+        repaint();
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

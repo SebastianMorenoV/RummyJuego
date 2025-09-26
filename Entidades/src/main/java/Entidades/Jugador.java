@@ -46,6 +46,9 @@ public class Jugador {
         this.manoJugador = manoJugador;
     }
     
+    public boolean agregarFichaAJugador(Ficha ficha){
+        return manoJugador.getFichasEnMano().add(ficha);
+    }
     
     
 }

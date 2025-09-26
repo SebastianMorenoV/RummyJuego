@@ -5,7 +5,6 @@
 package Entidades;
 
 import java.awt.Color;
-import java.util.Objects;
 
 /**
  *
@@ -17,9 +16,7 @@ public class Ficha {
     int numero;
     Color color;
     boolean comodin;
-    int x;
-    int y;
-
+    
     public Ficha() {
     }
 
@@ -29,14 +26,6 @@ public class Ficha {
         this.comodin = comodin;
     }
 
-    public Ficha(int numero, Color color, boolean comodin, int x, int y) {
-        this.numero = numero;
-        this.color = color;
-        this.comodin = comodin;
-        this.x = x;
-        this.y = y;
-    }
-    
     public Ficha(int id, int numero, Color color, boolean comodin) {
         this.id = id;
         this.numero = numero;
@@ -44,37 +33,12 @@ public class Ficha {
         this.comodin = comodin;
     }
 
-    public Ficha(int id, int numero, Color color, boolean comodin, int x, int y) {
-        this.id = id;
-        this.numero = numero;
-        this.color = color;
-        this.comodin = comodin;
-        this.x = x;
-        this.y = y;
-    }
-    
     public int getNumero() {
         return numero;
     }
 
     public Color getColor() {
         return color;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
     }
 
     public boolean isComodin() {
@@ -91,7 +55,8 @@ public class Ficha {
 
     @Override
     public String toString() {
-        return "Ficha{" + "id=" + id + ", numero=" + numero + ", color=" + color + ", comodin=" + comodin + ", x=" + x + ", y=" + y + '}';
+        return "Ficha{" + "id=" + id + ", numero=" + numero + ", color=" + color + ", comodin=" + comodin + '}';
     }
-    
+
+
 }
