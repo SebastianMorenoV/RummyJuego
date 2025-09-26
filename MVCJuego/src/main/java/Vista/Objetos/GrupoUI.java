@@ -1,114 +1,105 @@
 package Vista.Objetos;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
 
-/**
- *
- * @author Sebastian Moreno
- */
 public class GrupoUI extends JPanel {
 
-    // Lista de las fichas que se van a dibujar
     private List<FichaUI> fichas;
-    // Dimensiones constantes para cada ficha
-    private final int FICHA_ANCHO = 25;
+    // Mantenemos las constantes que definimos
+    private final int FICHA_ANCHO = 28;
     private final int FICHA_ALTO = 45;
+    private final int ESPACIO_ENTRE_FICHAS = 2;
 
     public GrupoUI() {
-        this.fichas = new java.util.ArrayList<>();
-        // Usamos un FlowLayout para que las fichas se acomoden una al lado de la otra.
-        setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
-        setOpaque(false); // Hacemos el panel del grupo transparente
+        this.fichas = new ArrayList<>();
+        // **CAMBIO CLAVE:** Ya no usamos un FlowLayout.
+        // Al ponerlo en null, nosotros tomamos el control total del posicionamiento interno.
+        setLayout(null);
+        setOpaque(false);
     }
 
-    public List<FichaUI> getFichas() {
-        return fichas;
-    }
-
-    public void setFichas(List<FichaUI> nuevasFichas) {
-        // 1. Limpiar componentes y lista anteriores
-        this.removeAll();
-        this.fichas.clear();
-
-        // 2. Agregar las nuevas fichas
-        for (FichaUI ficha : nuevasFichas) {
-            this.fichas.add(ficha);
-            this.add(ficha); // ¡Añadimos el componente FichaUI directamente al panel!
-        }
-
-        // 3. Actualizar el tamaño y repintar
-        actualizarTamano();
-        this.revalidate();
-        this.repaint();
-    }
-
-    // Método para añadir una sola ficha (útil para el drag-and-drop)
-    // En la clase Vista.Objetos.GrupoUI.java
-// El método ahora recibe el punto donde se soltó la ficha
-    public void agregarFicha(FichaUI ficha, Point puntoDeSoltado) {
-        // Por defecto, se añade al final
-        int indiceDeInsercion = this.fichas.size();
-
-        // Calculamos en qué posición (índice) debería insertarse la nueva ficha
-        for (int i = 0; i < this.fichas.size(); i++) {
-            FichaUI fichaActual = this.fichas.get(i);
-            // Si el punto X está a la izquierda del centro de una ficha existente,
-            // encontramos nuestro punto de inserción.
-            if (puntoDeSoltado.x < fichaActual.getX() + (fichaActual.getWidth() / 2)) {
-                indiceDeInsercion = i;
-                break;
+    /**
+     * Este método es llamado por Swing para ordenar los componentes. Aquí es
+     * donde implementamos nuestra lógica de layout manual y perfecta.
+     */
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        int x = 0; // La primera ficha empieza en la coordenada 0 del panel.
+        for (Component comp : getComponents()) {
+            if (comp instanceof FichaUI) {
+                // Posicionamos cada ficha una al lado de la otra.
+                comp.setBounds(x, 0, FICHA_ANCHO, FICHA_ALTO);
+                x += FICHA_ANCHO + ESPACIO_ENTRE_FICHAS; // Avanzamos la posición para la siguiente.
             }
         }
+    }
 
-        // Añadimos la ficha a la lista de datos y al panel en el índice correcto
-        this.fichas.add(indiceDeInsercion, ficha);
-        this.add(ficha, indiceDeInsercion);
-
+    // El resto de los métodos no necesitan cambios, ya que revalidate()
+    // automáticamente llamará a nuestro nuevo doLayout().
+    // <editor-fold defaultstate="collapsed" desc="Resto de métodos de GrupoUI (sin cambios)">
+    public void setFichas(List<FichaUI> nuevasFichas) {
+        this.removeAll();
+        this.fichas.clear();
+        for (FichaUI ficha : nuevasFichas) {
+            this.fichas.add(ficha);
+            this.add(ficha);
+        }
         actualizarTamano();
         revalidate();
         repaint();
     }
 
-// Mantenemos el método antiguo por si se necesita en otro lugar, 
-// pero lo hacemos llamar al nuevo.
-    public void agregarFicha(FichaUI ficha) {
-        agregarFicha(ficha, new Point(Integer.MAX_VALUE, 0)); // Añade al final
+    public void agregarFicha(FichaUI ficha, Point puntoDeSoltado) {
+        int indiceDeInsercion = this.fichas.size();
+
+        // El cálculo del índice ahora es más simple con nuestro layout manual.
+        int xRelativo = puntoDeSoltado.x;
+        int posicionDeCorte = (FICHA_ANCHO + ESPACIO_ENTRE_FICHAS) / 2;
+
+        for (int i = 0; i < getComponentCount(); i++) {
+            Component comp = getComponent(i);
+            if (xRelativo < comp.getX() + posicionDeCorte) {
+                indiceDeInsercion = i;
+                break;
+            }
+        }
+
+        this.fichas.add(indiceDeInsercion, ficha);
+        this.add(ficha, indiceDeInsercion);
+        actualizarTamano();
+        revalidate();
+        repaint();
     }
-    
-    
-    // En la clase Vista.Objetos.GrupoUI.java
+
+    public void agregarFicha(FichaUI ficha) {
+        agregarFicha(ficha, new Point(Integer.MAX_VALUE, 0));
+    }
 
     public void removerFicha(FichaUI fichaARemover) {
-        // Elimina la ficha del panel visual
         this.remove(fichaARemover);
-
-        // Elimina la ficha de la lista de datos interna
         this.fichas.removeIf(fichaEnLista -> fichaEnLista.getIdFicha() == fichaARemover.getIdFicha());
-
-        // Actualiza el tamaño preferido del panel
         actualizarTamano();
-
-        // ¡LÍNEAS CLAVE! Forzamos al propio grupo a actualizar su layout y redibujarse.
         revalidate();
         repaint();
     }
 
     private void actualizarTamano() {
         if (fichas.isEmpty()) {
-            // Si no hay fichas, el grupo no debe ocupar espacio
             setPreferredSize(new Dimension(0, 0));
         } else {
-            int anchoTotal = fichas.size() * (FICHA_ANCHO); // Un pequeño espacio entre fichas
+            int anchoTotal = (fichas.size() * FICHA_ANCHO) + Math.max(0, (fichas.size() - 1) * ESPACIO_ENTRE_FICHAS);
             setPreferredSize(new Dimension(anchoTotal, FICHA_ALTO));
         }
     }
 
-    // El paintComponent ahora solo dibuja el borde, las fichas se dibujan solas.
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -117,4 +108,27 @@ public class GrupoUI extends JPanel {
             g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
         }
     }
+
+    /**
+     * Devuelve el índice (posición) de una ficha en la lista interna.
+     *
+     * @param ficha La ficha a buscar.
+     * @return El índice de la ficha, o -1 si no se encuentra.
+     */
+    // En la clase Vista.Objetos.GrupoUI.java
+    public int getIndiceDeFicha(FichaUI ficha) {
+        for (int i = 0; i < fichas.size(); i++) {
+            if (fichas.get(i).getIdFicha() == ficha.getIdFicha()) {
+                System.out.println("[DEBUG - GrupoUI] Ficha encontrada en el índice: " + i);
+                return i;
+            }
+        }
+        System.err.println("[DEBUG - GrupoUI] ADVERTENCIA: No se encontró la ficha en el grupo.");
+        return -1;
+    }
+
+    public List<FichaUI> getFichas() {
+        return fichas;
+    }
+    // </editor-fold>
 }

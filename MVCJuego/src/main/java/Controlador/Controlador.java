@@ -31,12 +31,12 @@ public class Controlador {
     }
 
     public void actualizarGruposEnTablero(List<GrupoDTO> grupos) {
-        modelo.actualizarGruposEnTablero(grupos);
+        modelo.terminarTurno(grupos);
     }
 
     public void terminarTurno(List<GrupoDTO> gruposPropuestos) {
         // El controlador recibe datos puros, sin conocer a la Vista.
         // Su única tarea es pasarle estos datos al Modelo.
-        modelo.actualizarGruposEnTablero(gruposPropuestos);
+        modelo.terminarTurno(gruposPropuestos);
     }
 }

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Modelo;
 
 import DTO.FichaJuegoDTO;
@@ -14,26 +10,27 @@ import Entidades.Tablero;
 import Entidades.Mano;
 import Vista.Observador;
 import Vista.TipoEvento;
+
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
- *
- * @author moren
+ * Contiene toda la lógica del juego, valida las jugadas y gestiona el estado.
+ * Es la única fuente de verdad para la Vista.
  */
 public class Modelo implements IModelo {
 
-    Ficha fichaAnterior;
-    List<Observador> observadores;
-    Tablero tablero;
-    Jugador jugador;
-    Tablero tableroAnterior; // copia del tablero al inicio del turno
-    List<Ficha> fichasJugadorAlInicioTurno; // para rastrear solo las fichas del jugador
+    private List<Observador> observadores;
+    private Tablero tablero;
+    private Jugador jugador;
+
+    // --- Atributos para guardar el estado del turno ---
+    private Tablero tableroAlInicioDelTurno;
+    private Mano manoAlInicioDelTurno;
+    private boolean primerMovimientoRealizado = false;
 
     public Modelo() {
         observadores = new ArrayList<>();
@@ -41,151 +38,254 @@ public class Modelo implements IModelo {
         jugador = new Jugador();
     }
 
-    @Override
-    public JuegoDTO getTablero() {
-        JuegoDTO juegoDTO = new JuegoDTO();
-
-        // 1️⃣ Convertir grupos del tablero
-        List<GrupoDTO> gruposDTO = new ArrayList<>();
-        for (Grupo grupo : tablero.getFichasEnTablero()) {
-            List<FichaJuegoDTO> fichasDTO = grupo.getFichas().stream()
-                    .map(ficha -> new FichaJuegoDTO(
-                    ficha.getId(),
-                    ficha.getNumero(),
-                    ficha.getColor(),
-                    ficha.isComodin()
-            ))
-                    .toList(); // versión moderna de stream
-            GrupoDTO grupoDTO = new GrupoDTO(grupo.getTipo(), grupo.getFichas().size(), fichasDTO);
-            gruposDTO.add(grupoDTO);
-        }
-        juegoDTO.setGruposEnTablero(gruposDTO);
-        juegoDTO.setFichasMazo(tablero.getMazo().size());
-        return juegoDTO;
-    }
-
+    // --- Métodos de Inicio y Flujo de Turno ---
     /**
-     * Metodo para obtener la mano desde la vista , utilizada por modelo.
-     *
-     * @return un arreglo de FichaJuegoDTO con los datos traducidos de las
-     * fichas.
+     * Prepara el juego, reparte las fichas y guarda el estado inicial.
      */
-    @Override
-    public List<FichaJuegoDTO> getMano() {
-        List<Ficha> fichasEnMano = jugador.getManoJugador().getFichasEnMano();
-        List<FichaJuegoDTO> fichasJuegoDTO = new ArrayList<>();
-        for (Ficha ficha : fichasEnMano) {
-            fichasJuegoDTO.add(new FichaJuegoDTO(ficha.getId(), ficha.getNumero(), ficha.getColor(), ficha.isComodin()));
-        }
-        return fichasJuegoDTO;
-    }
-
     public void iniciarJuego() {
-        //Incializar mano en vista.
-        //crearGruposMano();
         this.jugador = new Jugador("Sebas", "B1", new Mano());
         tablero.crearMazoCompleto();
         repartirMano(jugador);
+
+        // Guarda el estado inicial del tablero y la mano como el punto de restauración.
+        iniciarTurno();
+
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
 
+    /**
+     * Guarda una copia profunda del estado actual del tablero y la mano del
+     * jugador. Se llama al inicio de un turno válido.
+     */
+    public void iniciarTurno() {
+        System.out.println("[MODELO] Guardando estado al inicio del turno...");
+        this.tableroAlInicioDelTurno = copiaProfundaTablero(this.tablero);
+        this.manoAlInicioDelTurno = copiaProfundaMano(this.jugador.getManoJugador());
+        System.out.println("[MODELO] Estado guardado.");
+    }
+
+    /**
+     * Valida la jugada propuesta. Si es válida, la confirma. Si es inválida,
+     * revierte el tablero y la mano al estado guardado al inicio del turno.
+     *
+     * @param gruposPropuestos El estado del tablero que el jugador armó en la
+     * UI.
+     */
     // En la clase Modelo.java
-    public void actualizarGruposEnTablero(List<GrupoDTO> gruposPropuestos) {
-        // 1. Crear una nueva lista de grupos para el tablero interno del modelo.
+    public void terminarTurno(List<GrupoDTO> gruposPropuestos) {
+        System.out.println("\n[MODELO] Intentando terminar turno...");
+        actualizarGruposEnTablero(gruposPropuestos);
+
+        boolean tableroValido = this.tablero.getFichasEnTablero().stream()
+                .noneMatch(g -> "Invalido".equals(g.getTipo()));
+
+        // --- LÓGICA DE PRIMERA JUGADA ---
+        if (tableroValido && !primerMovimientoRealizado) {
+            int puntosJugada = calcularPuntos(this.tablero.getFichasEnTablero());
+            System.out.println("[MODELO] Verificando primera jugada. Puntos: " + puntosJugada);
+            if (puntosJugada < 30) {
+                System.out.println("[MODELO] >> ERROR: La primera jugada debe sumar 30 puntos o más.");
+                tableroValido = false; // La jugada no es válida si no cumple el requisito de puntos.
+            }
+        }
+
+        if (tableroValido) {
+            System.out.println("[MODELO] >> ÉXITO: La jugada es válida.");
+            if (!primerMovimientoRealizado) {
+                primerMovimientoRealizado = true; // Marca que la primera jugada ya se hizo.
+                System.out.println("[MODELO] Primera jugada completada exitosamente.");
+            }
+
+            // Actualizar la mano del jugador
+            List<Integer> idsEnTablero = new ArrayList<>();
+            this.tablero.getFichasEnTablero().forEach(g -> g.getFichas().forEach(f -> idsEnTablero.add(f.getId())));
+            this.jugador.getManoJugador().getFichasEnMano().removeIf(f -> idsEnTablero.contains(f.getId()));
+
+            iniciarTurno(); // Guardar el nuevo estado válido.
+
+            // --- LÓGICA DE VICTORIA ---
+            if (this.jugador.getManoJugador().getFichasEnMano().isEmpty()) {
+                System.out.println("[MODELO] ¡JUEGO TERMINADO! El jugador ha ganado.");
+                // Aquí podrías añadir una notificación de victoria.
+                // notificarObservadores(TipoEvento.JUEGO_TERMINADO);
+            }
+
+        } else {
+            System.out.println("[MODELO] >> FALLO: Reviertiendo tablero y mano al estado anterior.");
+            this.tablero = this.tableroAlInicioDelTurno;
+            this.jugador.setManoJugador(this.manoAlInicioDelTurno);
+        }
+
+        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
+        notificarObservadores(TipoEvento.REPINTAR_MANO);
+    }
+
+    /**
+     * Calcula el valor en puntos de una lista de grupos. Los comodines no suman
+     * puntos.
+     */
+    private int calcularPuntos(List<Grupo> grupos) {
+        int totalPuntos = 0;
+        for (Grupo grupo : grupos) {
+            for (Ficha ficha : grupo.getFichas()) {
+                if (!ficha.isComodin()) {
+                    totalPuntos += ficha.getNumero();
+                }
+            }
+        }
+        return totalPuntos;
+    }
+
+    // --- Métodos de Lógica de Juego y Validación ---
+    /**
+     * Recibe los grupos desde la UI, los valida individualmente y actualiza el
+     * estado temporal del tablero.
+     */
+    private void actualizarGruposEnTablero(List<GrupoDTO> gruposPropuestos) {
         List<Grupo> nuevosGruposDelTablero = new ArrayList<>();
 
         for (GrupoDTO grupoDTO : gruposPropuestos) {
-            // 2. Convertir las fichas del DTO a la entidad Ficha del modelo.
             List<Ficha> fichasDelGrupo = grupoDTO.getFichasGrupo().stream()
-                    .map(fichaDTO -> new Ficha(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(), fichaDTO.getColor(), fichaDTO.isComodin()))
+                    .map(dto -> new Ficha(dto.getIdFicha(), dto.getNumeroFicha(), dto.getColor(), dto.isComodin()))
                     .collect(Collectors.toList());
 
-            // 3. Validar el grupo y determinar su tipo.
-            String tipoGrupoValidado = "Invalido"; // Por defecto, el grupo es inválido.
-
-            // Un grupo debe tener al menos 3 fichas para ser válido.
+            String tipoGrupoValidado = "Invalido";
             if (fichasDelGrupo.size() >= 3) {
                 if (esEscaleraValida(fichasDelGrupo)) {
                     tipoGrupoValidado = "escalera";
                 } else if (esTerciaValida(fichasDelGrupo)) {
-                    tipoGrupoValidado = "tercia"; // O "cuarta", etc. Usaremos "tercia" como genérico.
+                    tipoGrupoValidado = "tercia";
                 }
             }
 
-            // 4. Crear el nuevo grupo con el tipo validado y añadirlo a nuestra lista.
-            Grupo grupoValidado = new Grupo(tipoGrupoValidado, fichasDelGrupo.size(), fichasDelGrupo);
-            nuevosGruposDelTablero.add(grupoValidado);
-            System.out.println("Grupo validado: " +grupoValidado);
+            nuevosGruposDelTablero.add(new Grupo(tipoGrupoValidado, fichasDelGrupo.size(), fichasDelGrupo));
         }
-
-        // 5. Reemplazar la lista de grupos antigua del tablero con la nueva, ya validada.
         tablero.setFichasEnTablero(nuevosGruposDelTablero);
-
-        // 6. Notificar a la vista que el tablero se ha actualizado para que se repinte.
-        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO);
     }
 
     /**
-     * Verifica si una lista de fichas forma una escalera válida. Regla: 3 o más
-     * fichas del mismo color con números consecutivos.
-     *
-     * @param fichas La lista de fichas a validar.
-     * @return true si es una escalera válida, false en caso contrario.
+     * Verifica si una lista de fichas forma una tercia (o cuarta) válida,
+     * considerando los comodines. Regla: Mismo número, colores diferentes.
+     */
+    private boolean esTerciaValida(List<Ficha> fichas) {
+        if (fichas == null || fichas.size() < 3 || fichas.size() > 4) {
+            return false;
+        }
+
+        // Separamos las fichas reales de los comodines
+        List<Ficha> fichasReales = fichas.stream().filter(f -> !f.isComodin()).collect(Collectors.toList());
+
+        // Si no hay fichas reales (puros comodines), la jugada es válida.
+        if (fichasReales.isEmpty()) {
+            return true;
+        }
+
+        // Verificamos que todas las fichas reales tengan el mismo número
+        int numeroDelGrupo = fichasReales.get(0).getNumero();
+        for (Ficha f : fichasReales) {
+            if (f.getNumero() != numeroDelGrupo) {
+                return false;
+            }
+        }
+
+        // Verificamos que las fichas reales no tengan colores repetidos
+        long coloresUnicos = fichasReales.stream().map(Ficha::getColor).distinct().count();
+        if (coloresUnicos < fichasReales.size()) {
+            return false;
+        }
+
+        return true; // Si pasó las pruebas, es válida.
+    }
+
+    /**
+     * Verifica si una lista de fichas forma una escalera válida, considerando
+     * los comodines. Regla: Números consecutivos, mismo color.
      */
     private boolean esEscaleraValida(List<Ficha> fichas) {
         if (fichas == null || fichas.size() < 3) {
             return false;
         }
 
-        // Ordenar las fichas por número para facilitar la validación.
-        fichas.sort(Comparator.comparingInt(Ficha::getNumero));
+        // Separamos las fichas reales de los comodines
+        List<Ficha> fichasReales = fichas.stream().filter(f -> !f.isComodin()).collect(Collectors.toList());
+        int numComodines = fichas.size() - fichasReales.size();
 
-        // Comprobar que todas las fichas sean del mismo color.
-        Color primerColor = fichas.get(0).getColor();
-        for (int i = 1; i < fichas.size(); i++) {
-            if (!fichas.get(i).getColor().equals(primerColor)) {
-                return false; // Colores diferentes, no es escalera.
+        // Si hay menos de 2 fichas reales, es imposible determinar el color o la secuencia.
+        // Una escalera de puros comodines es válida.
+        if (fichasReales.size() < 2) {
+            return true;
+        }
+
+        // Verificamos que todas las fichas reales sean del mismo color
+        Color colorDelGrupo = fichasReales.get(0).getColor();
+        for (Ficha f : fichasReales) {
+            if (!f.getColor().equals(colorDelGrupo)) {
+                return false;
             }
         }
 
-        // Comprobar que los números sean consecutivos.
-        for (int i = 0; i < fichas.size() - 1; i++) {
-            if (fichas.get(i + 1).getNumero() != fichas.get(i).getNumero() + 1) {
-                return false; // Números no consecutivos.
-            }
+        // Ordenamos las fichas reales por número
+        fichasReales.sort(Comparator.comparingInt(Ficha::getNumero));
+
+        // Contamos cuántos "huecos" hay en la secuencia
+        int huecos = 0;
+        for (int i = 0; i < fichasReales.size() - 1; i++) {
+            // La diferencia de números menos 1 nos da el número de fichas faltantes
+            huecos += (fichasReales.get(i + 1).getNumero() - fichasReales.get(i).getNumero() - 1);
         }
 
-        return true; // Si pasó todas las pruebas, es una escalera válida.
+        // La jugada es válida si tenemos suficientes comodines para llenar los huecos
+        return numComodines >= huecos;
     }
 
-    /**
-     * Verifica si una lista de fichas forma una tercia (o cuarta) válida.
-     * Regla: 3 o 4 fichas del mismo número pero de colores diferentes.
-     *
-     * @param fichas La lista de fichas a validar.
-     * @return true si es una tercia válida, false en caso contrario.
-     */
-    private boolean esTerciaValida(List<Ficha> fichas) {
-        if (fichas == null || fichas.size() < 3 || fichas.size() > 4) {
-            return false; // Debe tener 3 o 4 fichas.
-        }
+    // --- Métodos de Ayuda (Copias Profundas) ---
+    private Tablero copiaProfundaTablero(Tablero original) {
+        Tablero copia = new Tablero();
+        List<Grupo> gruposCopia = original.getFichasEnTablero().stream()
+                .map(g -> {
+                    List<Ficha> fichasCopia = g.getFichas().stream()
+                            .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                            .collect(Collectors.toList());
+                    return new Grupo(g.getTipo(), g.getNumFichas(), fichasCopia);
+                })
+                .collect(Collectors.toList());
+        copia.setFichasEnTablero(gruposCopia);
+        copia.setMazo(new ArrayList<>(original.getMazo()));
+        return copia;
+    }
 
-        // Comprobar que todas tengan el mismo número.
-        int primerNumero = fichas.get(0).getNumero();
-        for (int i = 1; i < fichas.size(); i++) {
-            if (fichas.get(i).getNumero() != primerNumero) {
-                return false; // Números diferentes, no es tercia.
-            }
-        }
+    private Mano copiaProfundaMano(Mano original) {
+        Mano copia = new Mano();
+        List<Ficha> fichasCopia = original.getFichasEnMano().stream()
+                .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                .collect(Collectors.toList());
+        copia.setFichasEnMano(fichasCopia);
+        copia.setCantidadFichasEnMano(fichasCopia.size());
+        return copia;
+    }
 
-        // Comprobar que no haya colores repetidos.
-        List<Color> colores = fichas.stream().map(Ficha::getColor).collect(Collectors.toList());
-        long coloresUnicos = colores.stream().distinct().count();
-        if (coloresUnicos != fichas.size()) {
-            return false; // Hay colores repetidos.
-        }
+    // --- Getters, Observadores y otros métodos ---
+    @Override
+    public JuegoDTO getTablero() {
+        JuegoDTO juegoDTO = new JuegoDTO();
+        List<GrupoDTO> gruposDTO = this.tablero.getFichasEnTablero().stream()
+                .map(grupo -> {
+                    List<FichaJuegoDTO> fichasDTO = grupo.getFichas().stream()
+                            .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                            .collect(Collectors.toList());
+                    return new GrupoDTO(grupo.getTipo(), grupo.getFichas().size(), fichasDTO);
+                })
+                .collect(Collectors.toList());
+        juegoDTO.setGruposEnTablero(gruposDTO);
+        juegoDTO.setFichasMazo(this.tablero.getMazo().size());
+        return juegoDTO;
+    }
 
-        return true; // Si pasó todas las pruebas, es una tercia válida.
+    @Override
+    public List<FichaJuegoDTO> getMano() {
+        return jugador.getManoJugador().getFichasEnMano().stream()
+                .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                .collect(Collectors.toList());
     }
 
     public void notificarObservadores(TipoEvento tipoEvento) {
@@ -195,279 +295,28 @@ public class Modelo implements IModelo {
     }
 
     public void agregarObservador(Observador obs) {
-        observadores.add(obs);
+        if (!observadores.contains(obs)) {
+            observadores.add(obs);
+        }
     }
 
-//    public void colocarFicha(FichaJuegoDTO fichaDTO, int x, int y) {
-//        // 1. Crear la ficha a colocar
-//        Ficha fichaAColocar = fichaDTO.toFicha(x, y);
-//
-//        // 2. Eliminar la ficha de la mano
-//        eliminarFichaDeMano(fichaAColocar);
-//
-//        // 3. Quitar la ficha de cualquier grupo donde ya esté
-//        for (Grupo g : tablero.getFichasEnTablero()) {
-//            g.getFichas().removeIf(f -> f.getId() == fichaAColocar.getId());
-//        }
-//
-//        // 4. Agregar la ficha directamente a la lista de fichas del tablero
-//        List<Ficha> todasFichas = new ArrayList<>();
-//        for (Grupo g : tablero.getFichasEnTablero()) {
-//            todasFichas.addAll(g.getFichas());
-//        }
-//        todasFichas.add(fichaAColocar);
-//
-//        // 5. Limpiar grupos actuales y reorganizar con TODAS las fichas
-//        tablero.getFichasEnTablero().clear();
-//        reorganizarGruposTablero(todasFichas);
-//
-//        // 6. Notificar a los observadores
-//        notificarObservadores(TipoEvento.ACTUALIZAR_JUGADA);
-//
-//        System.out.println("Ficha colocada y grupos reorganizados correctamente: " + fichaAColocar);
-//    }
-//
-//    public void reorganizarGruposTablero(List<Ficha> todasFichas) {
-//        List<Ficha> fichasOrdenadas = new ArrayList<>(todasFichas);
-//        fichasOrdenadas.sort(Comparator.comparingInt(Ficha::getY).thenComparingInt(Ficha::getX));
-//
-//        List<Grupo> gruposFinales = new ArrayList<>();
-//        boolean[] usadas = new boolean[fichasOrdenadas.size()];
-//
-//        for (int i = 0; i < fichasOrdenadas.size(); i++) {
-//            if (usadas[i]) {
-//                continue;
-//            }
-//            Ficha base = fichasOrdenadas.get(i);
-//
-//            // --- ESCALERA ---
-//            List<Ficha> escalera = new ArrayList<>();
-//            escalera.add(base);
-//            for (int j = i + 1; j < fichasOrdenadas.size(); j++) {
-//                if (usadas[j]) {
-//                    continue;
-//                }
-//                Ficha siguiente = fichasOrdenadas.get(j);
-//                Ficha ultima = escalera.get(escalera.size() - 1);
-//
-//                boolean mismaFila = Math.abs(siguiente.getY() - ultima.getY()) <= 5;
-//                boolean mismoColor = siguiente.getColor().equals(ultima.getColor());
-//                boolean consecutivo = siguiente.getNumero() == ultima.getNumero() + 1;
-//                boolean xCorrecto = siguiente.getX() - ultima.getX() == 29;
-//
-//                if (mismaFila && mismoColor && consecutivo && xCorrecto) {
-//                    escalera.add(siguiente);
-//                }
-//            }
-//
-//            if (escalera.size() >= 3) {
-//                for (Ficha f : escalera) {
-//                    usadas[fichasOrdenadas.indexOf(f)] = true;
-//                }
-//                gruposFinales.add(new Grupo("escalera", escalera.size(), new ArrayList<>(escalera)));
-//                continue;
-//            }
-//
-//            // --- MISMO NÚMERO (LÓGICA CORREGIDA) ---
-//            List<Ficha> candidatos = new ArrayList<>();
-//            // Agrega la ficha base y busca otras con el mismo número en la misma fila
-//            candidatos.add(base);
-//            for (int j = i + 1; j < fichasOrdenadas.size(); j++) {
-//                if (usadas[j]) {
-//                    continue;
-//                }
-//
-//                Ficha potencial = fichasOrdenadas.get(j);
-//                boolean mismoNumero = potencial.getNumero() == base.getNumero();
-//                boolean mismaFila = Math.abs(potencial.getY() - base.getY()) <= 5;
-//
-//                if (mismoNumero && mismaFila) {
-//                    candidatos.add(potencial);
-//                }
-//            }
-//
-//            // Si hay suficientes candidatos para formar un grupo, búscalos
-//            if (candidatos.size() >= 3) {
-//                // Ordena los candidatos por su posición X para verificar adyacencia
-//                candidatos.sort(Comparator.comparingInt(Ficha::getX));
-//
-//                List<Ficha> grupoActual = new ArrayList<>();
-//
-//                for (Ficha fichaCandidata : candidatos) {
-//                    // Si el grupo está vacío o la ficha actual está pegada a la anterior
-//                    if (grupoActual.isEmpty() || (fichaCandidata.getX() - grupoActual.get(grupoActual.size() - 1).getX() < 44)) { // 44 = ~1.5 * ancho de ficha
-//                        // Y además no tiene un color repetido
-//                        if (grupoActual.stream().noneMatch(f -> f.getColor().equals(fichaCandidata.getColor()))) {
-//                            grupoActual.add(fichaCandidata);
-//                        }
-//                    } else {
-//                        // Si la ficha está muy lejos, el grupo anterior se termina.
-//                        // Verificamos si el grupo que acabamos de formar es válido
-//                        if (grupoActual.size() >= 3) {
-//                            gruposFinales.add(new Grupo("numero", grupoActual.size(), new ArrayList<>(grupoActual)));
-//                            for (Ficha f : grupoActual) {
-//                                usadas[fichasOrdenadas.indexOf(f)] = true;
-//                            }
-//                        }
-//                        // Empezamos un nuevo grupo con la ficha actual (que estaba separada)
-//                        grupoActual.clear();
-//                        // Comprobamos que no se repita el color antes de añadir
-//                        if (grupoActual.stream().noneMatch(f -> f.getColor().equals(fichaCandidata.getColor()))) {
-//                            grupoActual.add(fichaCandidata);
-//                        }
-//                    }
-//                }
-//
-//                // Al final del bucle, revisa el último grupo que se estaba formando
-//                if (grupoActual.size() >= 3) {
-//                    gruposFinales.add(new Grupo("numero", grupoActual.size(), new ArrayList<>(grupoActual)));
-//                    for (Ficha f : grupoActual) {
-//                        usadas[fichasOrdenadas.indexOf(f)] = true;
-//                    }
-//                }
-//            }
-//            // Si después de todo, la ficha 'base' no se usó en ningún grupo de "mismo número" válido, trátala como no establecida.
-//            if (!usadas[i]) {
-//                gruposFinales.add(new Grupo("No establecido", 1, new ArrayList<>(List.of(base))));
-//                usadas[i] = true;
-//            }
-//        }
-//
-//        tablero.setFichasEnTablero(gruposFinales);
-//        System.out.println("Grupos reorganizados correctamente: " + gruposFinales);
-//    }
-    /**
-     * Metodo para repartir la mano de un solo jugador en la vista.
-     *
-     * @param jugador
-     */
     public void repartirMano(Jugador jugador) {
         List<Ficha> mazo = tablero.getMazo();
         List<Ficha> fichasMano = new ArrayList<>();
-        for (int i = 0; i < 40; i++) {
-            fichasMano.add(mazo.remove(0)); // quita del mazo
+        for (int i = 0; i < 14; i++) {
+            if (!mazo.isEmpty()) {
+                fichasMano.add(mazo.remove(0));
+            }
         }
-
-        Mano mano = jugador.getManoJugador();
-        mano.setFichasEnMano(fichasMano);
-        mano.setCantidadFichasEnMano(fichasMano.size());
+        jugador.getManoJugador().setFichasEnMano(fichasMano);
     }
 
-    /**
-     * Metodo para tomar una ficha del mazo y notificar a la vista.
-     */
     public void tomarFichaMazo() {
-        Ficha fichaTomada = tablero.tomarFichaMazo();
-        boolean tomada = jugador.agregarFichaAJugador(fichaTomada);
-
-        if (tomada) {
+        if (!tablero.getMazo().isEmpty()) {
+            Ficha fichaTomada = tablero.tomarFichaMazo();
+            jugador.agregarFichaAJugador(fichaTomada);
             notificarObservadores(TipoEvento.REPINTAR_MANO);
             notificarObservadores(TipoEvento.TOMO_FICHA);
         }
-
     }
-
-////////////////////////////////METODOS FUERTES/////////////////////////////////////////////////////
-//    private void eliminarFichaDeMano(Ficha ficha) {
-//        for (Grupo grupo : jugador.getManoJugador().getGruposMano()) {
-//            boolean removida = grupo.getFichas().removeIf(f -> f.getId() == ficha.getId());
-//            if (removida) {
-//                grupo.setNumFichas(grupo.getFichas().size());
-//                System.out.println("Ficha eliminada de la mano: " + ficha);
-//                break; // ya se eliminó, no seguir buscando
-//            }
-//        }
-//    }
-//
-//    public Tablero copiaTablero(Tablero original) {
-//        System.out.println("[DEBUG] Iniciando copia profunda del tablero...");
-//        Tablero copia = new Tablero();
-//        List<Grupo> gruposCopia = new ArrayList<>();
-//
-//        for (Grupo g : original.getFichasEnTablero()) {
-//            System.out.println("[DEBUG] Copiando grupo: " + g.getTipo() + " con " + g.getFichas().size() + " fichas.");
-//            List<Ficha> fichasCopia = new ArrayList<>();
-//            for (Ficha f : g.getFichas()) {
-//                Ficha fCopia = new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin(), f.getX(), f.getY());
-//                fichasCopia.add(fCopia);
-//                System.out.println("[DEBUG]   Copiada ficha ID=" + f.getId() + " Num=" + f.getNumero());
-//            }
-//            Grupo gCopia = new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
-//            gruposCopia.add(gCopia);
-//        }
-//
-//        copia.setFichasEnTablero(gruposCopia);
-//        copia.setMazo(tablero.getMazo());
-//        System.out.println("[DEBUG] Copia de tablero finalizada.");
-//        return copia;
-//    }
-//
-//    public void iniciarTurno() {
-//        System.out.println("[DEBUG] Iniciando turno...");
-//        tableroAnterior = copiaTablero(tablero); // Esto ya hace una copia profunda, ¡bien!
-//
-//        // Asegúrate de hacer una copia profunda de las fichas en la mano también
-//        fichasJugadorAlInicioTurno = new ArrayList<>();
-//        for (Grupo g : jugador.getManoJugador().getGruposMano()) {
-//            for (Ficha f : g.getFichas()) {
-//                // Crea un nuevo objeto Ficha para la copia
-//                fichasJugadorAlInicioTurno.add(new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()));
-//            }
-//        }
-//        System.out.println("[DEBUG] Se guardaron " + fichasJugadorAlInicioTurno.size() + " fichas del jugador al inicio del turno.");
-//    }
-//
-//    public boolean terminarTurno() {
-//        System.out.println("[DEBUG] Intentando terminar turno...");
-//
-//        // 1. Validar el estado final del tablero
-//        boolean tableroValido = true;
-//        for (Grupo g : tablero.getFichasEnTablero()) {
-//            // Un grupo es inválido si no está bien formado O tiene menos de 3 fichas.
-//            if ("No establecido".equals(g.getTipo()) || g.getFichas().size() < 3) {
-//                tableroValido = false;
-//                System.out.println("[DEBUG] Movimiento inválido detectado. Grupo: " + g.getTipo() + ", Tamaño: " + g.getFichas().size());
-//                break; // Si uno es inválido, todo el tablero lo es.
-//            }
-//        }
-//
-//        // 2. Actuar según la validación
-//        if (tableroValido) {
-//            // --- CASO DE ÉXITO ---
-//            System.out.println("[DEBUG] Todos los grupos son válidos. Turno finalizado correctamente.");
-//            // Se consolida el estado actual como el nuevo "estado anterior" para el próximo turno.
-//            iniciarTurno();
-//            notificarObservadores(TipoEvento.ACTUALIZAR_JUGADA);
-//            return true;
-//
-//        } else {
-//            // --- CASO DE FALLO (AQUÍ ESTÁ LA CORRECCIÓN) ---
-//            System.out.println("[DEBUG] No se puede terminar el turno, revirtiendo cambios.");
-//
-//            // a. Restaurar el tablero a su estado inicial
-//            tablero = copiaTablero(tableroAnterior);
-//            System.out.println("[DEBUG] Tablero restaurado.");
-//
-//            // b. Restaurar la mano del jugador COMPLETAMENTE
-//            Mano manoJugador = jugador.getManoJugador();
-//            manoJugador.getGruposMano().clear(); // Limpia la mano actual
-//
-//            // Vuelve a crear la mano usando la copia guardada
-//            List<Ficha> manoRestauradaFichas = new ArrayList<>();
-//            for (Ficha f : fichasJugadorAlInicioTurno) {
-//                manoRestauradaFichas.add(new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()));
-//            }
-//
-//            Grupo grupoManoRestaurado = new Grupo("mano", manoRestauradaFichas.size(), manoRestauradaFichas);
-//            manoJugador.getGruposMano().add(grupoManoRestaurado);
-//            manoJugador.setFichasEnMano(manoRestauradaFichas.size());
-//            System.out.println("[DEBUG] Mano del jugador restaurada.");
-//
-//            // c. Notificar a la Vista para que se repinte todo
-//            notificarObservadores(TipoEvento.REPINTAR_MANO);
-//            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO); // Este evento debería forzar el repintado del tablero
-//            notificarObservadores(TipoEvento.ACTUALIZAR_JUGADA);
-//            return false;
-//        }
-//    }
 }

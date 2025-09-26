@@ -15,124 +15,111 @@ public class FichaUI extends JPanel {
     private int numero;
     private Color color;
     private boolean comodin;
-    private int mouseX, mouseY;
     private Point originalLocation;
     private JPanel originalParent;
     private Origen origen;
     private Controlador controlador;
-
-    //no escencial:
     private VistaTablero vista;
+
+    private JComponent glassPane;
+    private Point glassPaneOffset;
 
     public enum Origen {
         MANO, TABLERO
     }
 
-    public FichaUI(int idFicha, int numero, Color color, boolean comodin,
-            Controlador controlador, VistaTablero vista) {
+    public FichaUI(int idFicha, int numero, Color color, boolean comodin, Controlador controlador, VistaTablero vista) {
         this.vista = vista;
         this.idFicha = idFicha;
         this.numero = numero;
         this.color = color;
         this.comodin = comodin;
         this.controlador = controlador;
-        setSize(25, 40);
-        setPreferredSize(new Dimension(25, 40));
-        setOpaque(false);
-        initDrag();
-    }
-
-    public FichaUI(int idFicha, int numero, Color color, boolean comodin,
-            Controlador controlador, Point originalLocation, VistaTablero vista) {
-        this.vista = vista;
-        this.originalLocation = originalLocation;
-        this.idFicha = idFicha;
-        this.numero = numero;
-        this.color = color;
-        this.comodin = comodin;
-        this.controlador = controlador;
-        setSize(25, 40);
-        setPreferredSize(new Dimension(25, 40));
+        setSize(28, 45); // Ajustado a la altura estándar que manejamos
+        setPreferredSize(new Dimension(28, 45));
         setOpaque(false);
         initDrag();
     }
 
     private void initDrag() {
         MouseAdapter ma = new MouseAdapter() {
-            private JComponent glassPane;
-            private Point glassPaneOffset;
-
             @Override
             public void mousePressed(MouseEvent e) {
-                mouseX = e.getX();
-                mouseY = e.getY();
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
+                glassPaneOffset = e.getPoint();
 
-                // --- ORDEN CORREGIDO ---
-                // 1. PRIMERO, obtenemos una referencia a la ventana y al glassPane.
-                //    Mientras la ficha aún está en su panel, sabemos que tiene un "ancestro" JFrame.
+                // **ORDEN CORREGIDO Y CRUCIAL:**
+                // 1. PRIMERO obtenemos la referencia a la ventana y al glassPane.
                 JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(FichaUI.this);
-
-                // Agregamos una comprobación para evitar cualquier error.
                 if (frame == null) {
-                    System.err.println("Error: No se pudo encontrar el JFrame contenedor.");
                     return;
                 }
                 glassPane = (JComponent) frame.getGlassPane();
 
-                // 2. AHORA SÍ, si la ficha venía del tablero, le decimos que la recoja.
-                //    En este punto, ya no importa que la ficha se "desconecte" de la ventana,
-                //    porque ya guardamos la referencia al glassPane.
+                // 2. AHORA SÍ, si la ficha venía del tablero, le decimos que la recoja (y posiblemente divida el grupo).
                 if (origen == Origen.TABLERO) {
-                    TableroUI panelTablero = vista.getPanelTablero();
-                    panelTablero.recogerFichaDeGrupo(FichaUI.this);
+                    vista.getPanelTablero().recogerFichaDeGrupo(FichaUI.this);
                 }
 
-                // 3. El resto del código para mover la ficha al glassPane se queda igual.
-                glassPane.setVisible(true);
-                glassPane.setLayout(null);
-                Point locOnGlass = SwingUtilities.convertPoint(FichaUI.this, 0, 0, glassPane);
-                glassPaneOffset = new Point(mouseX, mouseY);
+                // 3. Movemos la ficha al glassPane para arrastrarla libremente.
+                Point locOnGlass = SwingUtilities.convertPoint(originalParent, getLocation(), glassPane);
+                setLocation(locOnGlass);
 
-                // Como la ficha ya fue removida por recogerFichaDeGrupo si venía del tablero,
-                // esta línea solo es necesaria si venía de la mano. No hace daño dejarla.
+                // El 'originalParent' podría ya no existir si el grupo se dividió, 
+                // pero la ficha ya no está en él, así que esta línea es segura.
                 originalParent.remove(FichaUI.this);
 
-                setLocation(locOnGlass);
                 glassPane.add(FichaUI.this);
+                glassPane.setVisible(true);
                 glassPane.revalidate();
                 glassPane.repaint();
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (glassPane == null) {
+                    return;
+                }
                 Point glassPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), glassPane);
                 setLocation(glassPoint.x - glassPaneOffset.x, glassPoint.y - glassPaneOffset.y);
-                glassPane.repaint();
+
+                // Lógica de resaltado
+                TableroUI panelTablero = vista.getPanelTablero();
+                Point puntoEnTablero = SwingUtilities.convertPoint(FichaUI.this, new Point(0, 0), panelTablero);
+                boolean dentro = panelTablero.contains(puntoEnTablero);
+                if (dentro) {
+                    panelTablero.resaltarCeldaEn(puntoEnTablero);
+                } else {
+                    panelTablero.limpiarResaltado();
+                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                TableroUI panelTablero = vista.getPanelTablero();
-                Point releasePoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
-
-                if (glassPane != null) {
-                    glassPane.remove(FichaUI.this);
-                    glassPane.setVisible(false);
+                if (glassPane == null) {
+                    return;
                 }
+                TableroUI panelTablero = vista.getPanelTablero();
 
-                // --- LÓGICA DE LÍMITES CORREGIDA ---
-                // Comprobamos si el punto de soltado está dentro de los límites 0,0 y el ancho/alto del panel.
-                boolean dentroDelTablero = releasePoint.x >= 0 && releasePoint.y >= 0
-                        && releasePoint.x < panelTablero.getWidth()
-                        && releasePoint.y < panelTablero.getHeight();
+                panelTablero.limpiarResaltado();
+                Point dropPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
+
+                glassPane.remove(FichaUI.this);
+                glassPane.setVisible(false);
+
+                // LÓGICA DE LÍMITES CORREGIDA
+                boolean dentroDelTablero = dropPoint.x >= 0 && dropPoint.y >= 0
+                        && dropPoint.x < panelTablero.getWidth()
+                        && dropPoint.y < panelTablero.getHeight();
 
                 if (dentroDelTablero) {
                     origen = Origen.TABLERO;
-                    panelTablero.procesarFichaSoltada(FichaUI.this, releasePoint);
+                    // LLAMADA CORREGIDA PARA FUSIONAR GRUPOS
+                    Component dropTarget = panelTablero.getComponentAt(dropPoint);
+                    panelTablero.procesarFichaSoltada(FichaUI.this, dropTarget, dropPoint);
                 } else {
-                    // Devolver a la mano si se suelta fuera
+                    // Devolver a la mano
                     setLocation(originalLocation);
                     originalParent.add(FichaUI.this);
                     originalParent.revalidate();
@@ -140,9 +127,7 @@ public class FichaUI extends JPanel {
                     origen = Origen.MANO;
                 }
             }
-
         };
-
         addMouseListener(ma);
         addMouseMotionListener(ma);
     }
@@ -150,20 +135,17 @@ public class FichaUI extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         g.setColor(color);
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
         g.setColor(Color.WHITE);
-
-        // Texto centrado
         FontMetrics fm = g.getFontMetrics();
         String texto = comodin ? "★" : String.valueOf(numero);
         int x = (getWidth() - fm.stringWidth(texto)) / 2;
-        int y = (getHeight() + fm.getAscent()) / 2 - 2;
+        int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
         g.drawString(texto, x, y);
     }
 
-    // Getters y setters
+    // <editor-fold defaultstate="collapsed" desc="Getters y Setters">
     public int getIdFicha() {
         return idFicha;
     }
@@ -187,5 +169,5 @@ public class FichaUI extends JPanel {
     public boolean isComodin() {
         return comodin;
     }
-
+    // </editor-fold>
 }

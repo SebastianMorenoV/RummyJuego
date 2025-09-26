@@ -126,7 +126,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
         // 1. La Vista recolecta el estado de su componente TableroUI.
-        List<GrupoDTO> gruposPropuestos = this.tableroUI.generarListaDeGrupoDTOs(this.tableroUI.getGruposUI());
+        //    Llamamos al método sin parámetros.
+        List<GrupoDTO> gruposPropuestos = this.tableroUI.generarListaDeGrupoDTOs();
 
         // 2. La Vista llama al Controlador con los datos ya listos.
         control.terminarTurno(gruposPropuestos);
@@ -329,7 +330,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         //Crear Tablero
         tableroUI = new TableroUI(modelo, control, this);
         tableroUI.setLocation(130, 130);
-        tableroUI.setSize(640, 242);
+        tableroUI.setSize(660, 245);
         tableroUI.setOpaque(false);
         GUIjuego.add(tableroUI);
         GUIjuego.setComponentZOrder(tableroUI, GUIjuego.getComponentCount() - 2);
@@ -350,7 +351,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
 
     public void pintarFichasMano(Controlador controlador, IModelo modelo) {
-        
+
         List<FichaJuegoDTO> fichasMano = modelo.getMano();
         // Posicion inicial de las fichas dentro de ManoUI.
         int xPos = 10;
