@@ -2,7 +2,6 @@ package Vista;
 
 import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
-import DTO.GrupoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;
@@ -25,18 +24,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private Controlador control;
     private TableroUI tableroUI;
-    private IModelo modelo;
     private ManoUI manoUI;
     private MazoUI mazoUI;
 
-    public VistaTablero(Controlador control, IModelo modelo) {
+    public VistaTablero(Controlador control) {
         this.control = control;
-        this.modelo = modelo;
         this.setSize(920, 550);
         this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.control.iniciarJuego();
         this.setVisible(true);
         initComponents();
     }
@@ -58,7 +54,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
@@ -132,10 +128,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         javax.swing.SwingUtilities.invokeLater(() -> {
             switch (tipoEvento) {
                 case INCIALIZAR_FICHAS:
-                    iniciarComponentesDeJuego();
+                    iniciarComponentesDeJuego(modelo);
                     break;
                 case REPINTAR_MANO:
-                    repintarMano();
+                    repintarMano(modelo);
                     break;
                 case ACTUALIZAR_TABLERO_TEMPORAL:
                     if (tableroUI != null) {
@@ -155,7 +151,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     }
                     break;
                 case TOMO_FICHA:
-                    repintarMazo();
+                    repintarMazo(modelo);
                     break;
             }
         });
@@ -197,11 +193,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    private void iniciarComponentesDeJuego() {
-        crearTablero();
+    private void iniciarComponentesDeJuego(IModelo modelo) {
+        crearTablero(modelo);
         crearManoUI();
-        repintarMano();
-        crearMazo();
+        repintarMano(modelo);
+        crearMazo(modelo);
         cargarJugadores();
 
         // Añadimos el fondo al final de todo para que esté en la capa inferior.
@@ -211,7 +207,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.repaint();
     }
 
-    private void crearTablero() {
+    private void crearTablero(IModelo modelo) {
         if (tableroUI == null) {
             tableroUI = new TableroUI(modelo, control, this);
             tableroUI.setLocation(130, 130);
@@ -229,7 +225,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    private void repintarMano() {
+    private void repintarMano(IModelo modelo) {
         if (manoUI == null) {
             return;
         }
@@ -251,7 +247,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         manoUI.repaint();
     }
 
-    private void crearMazo() {
+    private void crearMazo(IModelo modelo) {
         if (mazoUI == null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
             mazoUI = new MazoUI(String.valueOf(fichasRestantes), control);
@@ -261,7 +257,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    private void repintarMazo() {
+    private void repintarMazo(IModelo modelo) {
         if (mazoUI != null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
             mazoUI.setNumeroFichasRestantes(String.valueOf(fichasRestantes));

@@ -16,7 +16,7 @@ public class Ficha {
     int numero;
     Color color;
     boolean comodin;
-    
+
     public Ficha() {
     }
 
@@ -57,6 +57,5 @@ public class Ficha {
     public String toString() {
         return "Ficha{" + "id=" + id + ", numero=" + numero + ", color=" + color + ", comodin=" + comodin + '}';
     }
-
 
 }

@@ -1,38 +1,41 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Entidades;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- *
- * @author moren
- */
 public class Mano {
 
-    private int cantidadFichasEnMano;
     private List<Ficha> fichasEnMano;
 
     public Mano() {
         fichasEnMano = new ArrayList<>();
     }
 
-    public Mano(int cantidadFichasEnMano, List<Ficha> fichasEnMano) {
-        this.cantidadFichasEnMano = cantidadFichasEnMano;
-        this.fichasEnMano = fichasEnMano;
+    /**
+     * Remueve de la mano las fichas que fueron jugadas en el tablero.
+     */
+    public void removerFichasJugadas(List<Integer> idsFichasEnTablero) {
+        this.fichasEnMano.removeIf(ficha -> idsFichasEnTablero.contains(ficha.getId()));
     }
 
-    public int getCantidadFichasEnMano() {
-        return cantidadFichasEnMano;
+    /**
+     * Crea una copia profunda de la mano.
+     */
+    public Mano copiaProfunda() {
+        Mano copia = new Mano();
+        List<Ficha> fichasCopia = this.fichasEnMano.stream()
+                .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                .collect(Collectors.toList());
+        copia.setFichasEnMano(fichasCopia);
+        return copia;
     }
 
-    public void setCantidadFichasEnMano(int cantidadFichasEnMano) {
-        this.cantidadFichasEnMano = cantidadFichasEnMano;
+    public boolean estaVacia() {
+        return this.fichasEnMano.isEmpty();
     }
 
+    // --- Getters y Setters ---
     public List<Ficha> getFichasEnMano() {
         return fichasEnMano;
     }
@@ -40,8 +43,4 @@ public class Mano {
     public void setFichasEnMano(List<Ficha> fichasEnMano) {
         this.fichasEnMano = fichasEnMano;
     }
-
-  
-
-
 }

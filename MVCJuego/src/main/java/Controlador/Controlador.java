@@ -37,4 +37,7 @@ public class Controlador {
     public void terminarTurno() {
         modelo.terminarTurno();
     }
+//    public void regresarFichaAMano(int idFicha) {
+//        modelo.regresarFichaAMano(idFicha);
+//    }
 }

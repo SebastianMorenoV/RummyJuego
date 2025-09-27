@@ -19,10 +19,8 @@ public class Main {
     public static void main(String[] args) {
         Modelo modelo = new Modelo();
         Controlador controlador = new Controlador(modelo);
-        VistaTablero vista = new VistaTablero(controlador , modelo);
-
+        VistaTablero vista = new VistaTablero(controlador);
         modelo.agregarObservador(vista);
-        
         controlador.iniciarJuego();
     }
     

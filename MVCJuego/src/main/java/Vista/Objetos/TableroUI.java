@@ -26,13 +26,9 @@ public class TableroUI extends JPanel {
 
     private final int filas = 5;
     private final int columnas = 22;
-
-    // --- NUEVO ALMACENAMIENTO PARA LAS FICHAS ---
-    // Mantiene el estado visual de las fichas en el tablero. La clave es el ID de la ficha.
     private final Map<Integer, FichaUI> fichasEnTablero;
     private final Map<Integer, FichaUI> fichasEnTableroValidas;
     private final Map<Integer, Point> posicionesValidas;
-
     private final IModelo modelo;
     private final Controlador control;
     private final VistaTablero vista;
@@ -50,7 +46,6 @@ public class TableroUI extends JPanel {
         setLayout(null);
     }
 
-    // ... paintComponent se queda igual ...
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -319,7 +314,6 @@ public class TableroUI extends JPanel {
         this.setComponentZOrder(feedbackPanel, getComponentCount() - 1); // Ponerlo al fondo
     }
 
-    // --- Métodos de Ayuda (sin cambios) ---
     private Point calcularCeldaParaPunto(Point puntoEnPixeles) {
         int anchoCelda = getWidth() / columnas;
         int altoCelda = getHeight() / filas;

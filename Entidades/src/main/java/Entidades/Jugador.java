@@ -1,19 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Entidades;
 
-/**
- *
- * @author moren
- */
 public class Jugador {
+
     String nickname;
     String grupoColor;
     Mano manoJugador;
-    
+
     public Jugador() {
+        this.manoJugador = new Mano();
     }
 
     public Jugador(String nickname, String grupoColor, Mano manoJugador) {
@@ -22,33 +16,31 @@ public class Jugador {
         this.manoJugador = manoJugador;
     }
 
-    public String getNickname() {
-        return nickname;
+    public void agregarFichaAJugador(Ficha ficha) {
+        this.manoJugador.getFichasEnMano().add(ficha);
     }
 
-    public String getGrupoColor() {
-        return grupoColor;
+    /**
+     * Verifica si el jugador ha ganado (no tiene fichas en la mano).
+     */
+    public boolean haGanado() {
+        return this.manoJugador.estaVacia();
     }
 
+    // --- Getters y Setters ---
     public Mano getManoJugador() {
         return manoJugador;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public void setGrupoColor(String grupoColor) {
-        this.grupoColor = grupoColor;
     }
 
     public void setManoJugador(Mano manoJugador) {
         this.manoJugador = manoJugador;
     }
-    
-    public boolean agregarFichaAJugador(Ficha ficha){
-        return manoJugador.getFichasEnMano().add(ficha);
+
+    public String getNickname() {
+        return nickname;
     }
-    
-    
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
