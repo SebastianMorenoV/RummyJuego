@@ -8,6 +8,7 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import java.awt.Cursor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,6 +28,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private ManoUI manoUI;
     private MazoUI mazoUI;
 
+    /**
+     * Constructor que recibe el control para poder ejecutar la logica hacia el
+     * siguiente componente de MVC.
+     *
+     * @param control el control de el mvc.
+     */
     public VistaTablero(Controlador control) {
         this.control = control;
         this.setSize(920, 550);
@@ -54,14 +61,14 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
             }
         });
         GUIjuego.add(btnFinalizarTurno);
-        btnFinalizarTurno.setBounds(790, 260, 100, 100);
+        btnFinalizarTurno.setBounds(800, 290, 90, 50);
 
         panelFichasArmadas.setBackground(new java.awt.Color(23, 57, 134));
 
@@ -121,47 +128,53 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel panelFichasArmadas;
     // End of variables declaration//GEN-END:variables
-
+    /**
+     * Metodo implementado por la interfaz observer
+     *
+     * @param modelo el modelo enteró con sus datos actualizados.
+     * @param tipoEvento el tipo de evento que se solicito , desde modelo.
+     */
     @Override
     public void actualiza(IModelo modelo, TipoEvento tipoEvento) {
-        // Usamos SwingUtilities para asegurar que las actualizaciones de UI ocurran en el hilo correcto.
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            switch (tipoEvento) {
-                case INCIALIZAR_FICHAS:
-                    iniciarComponentesDeJuego(modelo);
-                    break;
-                case REPINTAR_MANO:
-                    repintarMano(modelo);
-                    break;
-                case ACTUALIZAR_TABLERO_TEMPORAL:
-                    if (tableroUI != null) {
-                        // Llamamos al repintado sin guardar el estado
-                        tableroUI.repintarTablero(false);
-                    }
-                    break;
-                case JUGADA_VALIDA_FINALIZADA:
-                    if (tableroUI != null) {
-                        // Llamamos al repintado y le decimos que guarde el estado
-                        tableroUI.repintarTablero(true);
-                    }
-                    break;
-                case JUGADA_INVALIDA_REVERTIR:
-                    if (tableroUI != null) {
-                        tableroUI.revertirCambiosVisuales();
-                    }
-                    break;
-                case TOMO_FICHA:
-                    repintarMazo(modelo);
-                    break;
-            }
-        });
+
+        switch (tipoEvento) {
+            case INCIALIZAR_FICHAS:
+                iniciarComponentesDeJuego(modelo);
+                break;
+            case REPINTAR_MANO:
+                repintarMano(modelo);
+                break;
+            case ACTUALIZAR_TABLERO_TEMPORAL:
+                if (tableroUI != null) {
+                    // Llamamos al repintado sin guardar el estado
+                    tableroUI.repintarTablero(false);
+                }
+                break;
+            case JUGADA_VALIDA_FINALIZADA:
+                if (tableroUI != null) {
+                    // Llamamos al repintado y le decimos que guarde el estado
+                    tableroUI.repintarTablero(true);
+                }
+                break;
+            case JUGADA_INVALIDA_REVERTIR:
+                if (tableroUI != null) {
+                    tableroUI.revertirCambiosVisuales();
+                }
+                break;
+            case TOMO_FICHA:
+                repintarMazo(modelo);
+                break;
+        }
+
     }
 
     public TableroUI getPanelTablero() {
         return tableroUI;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Método para cargar avatares de jugadores">
+    /**
+     * Metodo para cargar las imagenes de jugadores aun no terminado.
+     */
     private void cargarJugadores() {
         String rutaImagen = "src/main/resources/avatares/avatar.png";
         try {
@@ -192,21 +205,23 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
         }
     }
-
+    /**
+     * Metodo que pinta los componentes necesarios para la vista.
+     * Los crea con su estructura base.
+     * @param modelo el modelo de donde se sacan los datos para crearse.
+     */
     private void iniciarComponentesDeJuego(IModelo modelo) {
         crearTablero(modelo);
         crearManoUI();
         repintarMano(modelo);
         crearMazo(modelo);
         cargarJugadores();
-
-        // Añadimos el fondo al final de todo para que esté en la capa inferior.
         GUIjuego.add(fondo);
 
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
-
+    
     private void crearTablero(IModelo modelo) {
         if (tableroUI == null) {
             tableroUI = new TableroUI(modelo, control, this);
@@ -224,7 +239,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             GUIjuego.add(manoUI);
         }
     }
-
+    /**
+     * Metodo que repinta la mano colocandole las fichas necesarias para mostrarse.
+     * @param modelo el modelo que pasa los datos a actualizar.
+     */
     private void repintarMano(IModelo modelo) {
         if (manoUI == null) {
             return;
@@ -253,6 +271,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             mazoUI = new MazoUI(String.valueOf(fichasRestantes), control);
             mazoUI.setLocation(800, 150);
             mazoUI.setSize(70, 90);
+            mazoUI.setCursor(new Cursor(HAND_CURSOR) {
+            });
             GUIjuego.add(mazoUI);
         }
     }
@@ -261,6 +281,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (mazoUI != null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
             mazoUI.setNumeroFichasRestantes(String.valueOf(fichasRestantes));
+            mazoUI.setCursor(new Cursor(HAND_CURSOR) {
+            });
         }
     }
 }

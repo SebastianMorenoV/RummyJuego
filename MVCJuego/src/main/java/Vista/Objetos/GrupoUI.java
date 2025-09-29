@@ -12,15 +12,12 @@ import javax.swing.JPanel;
 public class GrupoUI extends JPanel {
 
     private List<FichaUI> fichas;
-    // Mantenemos las constantes que definimos
     private final int FICHA_ANCHO = 28;
     private final int FICHA_ALTO = 45;
     private final int ESPACIO_ENTRE_FICHAS = 2;
 
     public GrupoUI() {
         this.fichas = new ArrayList<>();
-        // **CAMBIO CLAVE:** Ya no usamos un FlowLayout.
-        // Al ponerlo en null, nosotros tomamos el control total del posicionamiento interno.
         setLayout(null);
         setOpaque(false);
     }
@@ -32,19 +29,16 @@ public class GrupoUI extends JPanel {
     @Override
     public void doLayout() {
         super.doLayout();
-        int x = 0; // La primera ficha empieza en la coordenada 0 del panel.
+        int x = 0; 
         for (Component comp : getComponents()) {
             if (comp instanceof FichaUI) {
-                // Posicionamos cada ficha una al lado de la otra.
                 comp.setBounds(x, 0, FICHA_ANCHO, FICHA_ALTO);
                 x += FICHA_ANCHO + ESPACIO_ENTRE_FICHAS; // Avanzamos la posición para la siguiente.
             }
         }
     }
 
-    // El resto de los métodos no necesitan cambios, ya que revalidate()
-    // automáticamente llamará a nuestro nuevo doLayout().
-    // <editor-fold defaultstate="collapsed" desc="Resto de métodos de GrupoUI (sin cambios)">
+  
     public void setFichas(List<FichaUI> nuevasFichas) {
         this.removeAll();
         this.fichas.clear();
@@ -59,8 +53,6 @@ public class GrupoUI extends JPanel {
 
     public void agregarFicha(FichaUI ficha, Point puntoDeSoltado) {
         int indiceDeInsercion = this.fichas.size();
-
-        // El cálculo del índice ahora es más simple con nuestro layout manual.
         int xRelativo = puntoDeSoltado.x;
         int posicionDeCorte = (FICHA_ANCHO + ESPACIO_ENTRE_FICHAS) / 2;
 
@@ -111,11 +103,9 @@ public class GrupoUI extends JPanel {
 
     /**
      * Devuelve el índice (posición) de una ficha en la lista interna.
-     *
      * @param ficha La ficha a buscar.
      * @return El índice de la ficha, o -1 si no se encuentra.
      */
-    // En la clase Vista.Objetos.GrupoUI.java
     public int getIndiceDeFicha(FichaUI ficha) {
         for (int i = 0; i < fichas.size(); i++) {
             if (fichas.get(i).getIdFicha() == ficha.getIdFicha()) {
@@ -130,5 +120,5 @@ public class GrupoUI extends JPanel {
     public List<FichaUI> getFichas() {
         return fichas;
     }
-    // </editor-fold>
+
 }

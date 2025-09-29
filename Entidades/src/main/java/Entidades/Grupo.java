@@ -1,10 +1,15 @@
 package Entidades;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Esta clase representa la entidad grupo. Cada grupo se compone de fichas y
+ * tiene su tipo.
+ *
+ * @author Sebastian Moreno
+ */
 public class Grupo {
 
     private String tipo;
@@ -17,6 +22,10 @@ public class Grupo {
         this.fichas = fichas;
     }
 
+    /**
+     * Este metodo valida dependiendo el tamaño el tipo y tambien otorga la
+     * responsabilidad a métodos auxiliares. Establece el tipo, de el grupo.
+     */
     public void validarYEstablecerTipo() {
         this.numFichas = this.fichas.size();
 
@@ -101,7 +110,18 @@ public class Grupo {
     }
 
     /**
-     * Calcula los puntos del grupo.
+     * Calcula y devuelve el valor total en puntos de este grupo de fichas.
+     * La puntuación se determina según el tipo de grupo:
+     * Tercia: El valor de la ficha base (ignorando comodines)
+     * multiplicado por el número total de fichas en el grupo.
+     * Escalera: La suma de los valores individuales de cada ficha.
+     * El valor de los comodines se deduce a partir de su posición relativa a
+     * una ficha "ancla" no comodín.
+     * Si un grupo está compuesto enteramente por comodines, se utiliza el valor
+     * 13 como base para el cálculo. 
+     *
+     * @return El total de puntos del grupo como un entero. Si el tipo de grupo no es ni "tercia" ni
+     * "escalera", el método devuelve 0.
      */
     public int calcularPuntos() {
         if (!"escalera".equals(tipo) && !"tercia".equals(tipo)) {

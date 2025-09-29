@@ -1,14 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package Entidades;
 
 import java.awt.Color;
 
 /**
- *
- * @author moren
+ * Esta clase representa a una ficha en el sistema.
+ * @author Sebastian Moreno
  */
 public class Ficha {
 

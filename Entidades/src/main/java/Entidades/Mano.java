@@ -3,7 +3,12 @@ package Entidades;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+/**
+ * Esta clase representa la mano de un jugador
+ * Se compone de fichas.
+ * Funciona para colocar fichas en un tablero.
+ * @author Sebastian Moreno
+ */
 public class Mano {
 
     private List<Ficha> fichasEnMano;
@@ -21,6 +26,7 @@ public class Mano {
 
     /**
      * Crea una copia profunda de la mano.
+     * Creando un nuevo arreglo filtrado por un stream.
      */
     public Mano copiaProfunda() {
         Mano copia = new Mano();
@@ -30,7 +36,10 @@ public class Mano {
         copia.setFichasEnMano(fichasCopia);
         return copia;
     }
-
+    /**
+     * Metodo para determinar que la mano esta vacia.
+     * @return true si esta vacia , false si tiene alguna ficha.
+     */
     public boolean estaVacia() {
         return this.fichasEnMano.isEmpty();
     }

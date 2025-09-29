@@ -39,17 +39,12 @@ public class MazoUI extends JPanel implements MouseListener {
 
     }
 
-    // El método que se ejecutará al hacer clic con el mouse
     @Override
     public void mouseClicked(MouseEvent e) {
-        System.out.println("¡El mazo ha sido clickeado! Cordenada X:" + e.getX() + " Cordenada Y:" + e.getY());
-        // Aquí puedes agregar la lógica que necesitas al hacer clic,
-        // como repartir una nueva ficha, etc.
         control.pasarTurno();
     }
 
-    // Los siguientes métodos deben ser implementados por MouseListener,
-    // aunque no los uses, son obligatorios.
+ 
     @Override
     public void mousePressed(MouseEvent e) {
     }
