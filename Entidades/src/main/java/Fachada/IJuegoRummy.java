@@ -22,6 +22,8 @@ public interface IJuegoRummy {
     void colocarFichasEnTablero(List<Grupo> nuevosGrupos);
 
     boolean validarYFinalizarTurno();
+    
+    void revertirCambiosDelTurno();
 
     List<Ficha> getManoJugador();
 
