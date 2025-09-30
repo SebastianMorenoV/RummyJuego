@@ -8,12 +8,15 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 /**
  * Esta clase representa la vistaGeneral de el tablero y todos sus elementos de
@@ -235,14 +238,39 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
+    private javax.swing.JScrollPane scrollPaneMano;
+    
     private void crearManoUI() {
         if (manoUI == null) {
-            manoUI = new ManoUI();
-            manoUI.setLocation(160, 380);
-            manoUI.setSize(580, 120);
-            GUIjuego.add(manoUI);
-        }
+        manoUI = new ManoUI();
+        manoUI.setSize(580, 120);
+        
+        // Crear el JScrollPane que contiene la mano
+        scrollPaneMano = new JScrollPane(manoUI);
+        scrollPaneMano.setLocation(160, 380);
+        scrollPaneMano.setSize(580, 120);
+        
+        // Configurar scroll horizontal y vertical a la IZQUIERDA
+        scrollPaneMano.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPaneMano.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        
+        // IMPORTANTE: Poner el scrollbar vertical a la IZQUIERDA
+        scrollPaneMano.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        
+        scrollPaneMano.getHorizontalScrollBar().setUnitIncrement(16); // Scroll más suave
+        scrollPaneMano.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPaneMano.setBorder(null); // Sin borde
+        scrollPaneMano.setOpaque(false);
+        scrollPaneMano.getViewport().setOpaque(false);
+        
+        // Personalizar ancho de la barra de scroll vertical
+        scrollPaneMano.getVerticalScrollBar().setPreferredSize(new java.awt.Dimension(10, 0));
+        
+        // Agregar el scrollPane al panel principal
+        GUIjuego.add(scrollPaneMano);
     }
+    }
+    
     /**
      * Metodo que repinta la mano colocandole las fichas necesarias para mostrarse.
      * @param modelo el modelo que pasa los datos a actualizar.
