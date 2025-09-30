@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 
 public class TableroUI extends JPanel {
 
@@ -162,6 +163,10 @@ public class TableroUI extends JPanel {
      */
     public void revertirCambiosVisuales() {
         System.out.println("[VISTA] Revertiendo cambios visuales...");
+        JOptionPane.showMessageDialog(this,
+            "Revertiendo cambios visuales...",
+            "[VISTA]",
+            JOptionPane.WARNING_MESSAGE);
 
         // 1. Elimina TODOS los componentes actuales del panel.
         removeAll();

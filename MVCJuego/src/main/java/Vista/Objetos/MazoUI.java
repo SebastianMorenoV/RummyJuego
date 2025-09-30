@@ -13,6 +13,7 @@ import java.awt.Graphics;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
@@ -42,6 +43,10 @@ public class MazoUI extends JPanel implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         control.pasarTurno();
+        JOptionPane.showMessageDialog(null,
+            "Ficha agarrada, Turno terminado",
+            "VISTA",
+            JOptionPane.WARNING_MESSAGE);
     }
 
  

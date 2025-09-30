@@ -171,6 +171,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     public TableroUI getPanelTablero() {
         return tableroUI;
     }
+    
+    public ManoUI getPanelMano(){
+        return manoUI;
+    }
 
     /**
      * Metodo para cargar las imagenes de jugadores aun no terminado.
