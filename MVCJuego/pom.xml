@@ -19,4 +19,5 @@
         <maven.compiler.release>17</maven.compiler.release>
         <exec.mainClass>com.itson.mvcjuego.MVCJuego</exec.mainClass>
     </properties>
+    <name>MVCJuego</name>
 </project>

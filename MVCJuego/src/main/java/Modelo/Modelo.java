@@ -35,7 +35,12 @@ public class Modelo implements IModelo {
     }
 
     public void tomarFichaMazo() {
+        // revertir jugada temporal del tablero
+        juego.revertirCambiosDelTurno();
         juego.jugadorTomaFichaDelMazo();
+        
+        // revierte el tablero
+        notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         notificarObservadores(TipoEvento.REPINTAR_MANO);
         notificarObservadores(TipoEvento.TOMO_FICHA);
     }

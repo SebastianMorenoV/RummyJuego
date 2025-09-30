@@ -12,10 +12,10 @@ import Entidades.Tablero;
 
 import java.util.List;
 
-
 /**
- * Fachada que encapsula toda la lógica y el estado del juego de Rummy.
- * No conoce la Vista ni los Observadores. Su única responsabilidad es gestionar el juego.
+ * Fachada que encapsula toda la lógica y el estado del juego de Rummy. No
+ * conoce la Vista ni los Observadores. Su única responsabilidad es gestionar el
+ * juego.
  */
 public class JuegoRummyFachada implements IJuegoRummy {
 
@@ -33,7 +33,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
         this.jugador = new Jugador();
         this.primerMovimientoRealizado = false;
     }
-    
+
     /**
      * Prepara el juego, crea el mazo, reparte las fichas e inicia el primer
      * turno.
@@ -60,7 +60,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
     /**
      * Actualiza el tablero con los grupos de fichas que el jugador intenta
      * colocar. Esta es una jugada temporal hasta que se termina el turno.
-     * @param nuevosGrupos son los grupos que desea agregar el jugador , por defecto grupos de 1 ficha.
+     *
+     * @param nuevosGrupos son los grupos que desea agregar el jugador , por
+     * defecto grupos de 1 ficha.
      */
     @Override
     public void colocarFichasEnTablero(List<Grupo> nuevosGrupos) {
@@ -74,8 +76,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
      * cambios. Si no, revierte el tablero y la mano del jugador al estado de
      * inicio de turno.
      *
-     * @return  true si la jugada fue válida y se confirmó, false
-     * si fue inválida y se revirtió.
+     * @return true si la jugada fue válida y se confirmó, false si fue inválida
+     * y se revirtió.
      */
     @Override
     public boolean validarYFinalizarTurno() {
@@ -87,6 +89,14 @@ public class JuegoRummyFachada implements IJuegoRummy {
             revertirCambiosTurno();
             return false;
         }
+    }
+
+    /**
+     * Funcionalidad de revertir los cambios del turno actual.
+     */
+    @Override
+    public void revertirCambiosDelTurno() {
+        revertirCambiosTurno();
     }
 
     // --- Métodos Internos ---
