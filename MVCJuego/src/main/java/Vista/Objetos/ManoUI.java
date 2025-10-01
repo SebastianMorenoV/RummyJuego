@@ -23,35 +23,39 @@ public class ManoUI extends JPanel {
     /**
      * Agrega una ficha a la mano y la posiciona automáticamente
      */
-    public void agregarFicha(FichaUI ficha) {
-        fichas.add(ficha);
-        actualizarPosicionesFichas();
-        this.add(ficha);
-        this.revalidate();
-        this.repaint();
-    }
+        public void agregarFicha(FichaUI ficha) {
+            fichas.add(ficha); 
+            //actualizarPosicionesFichas(); 
+            int separacion = 40; // separación entre fichas 
+            int x = 20 + fichas.size() * separacion; // posición horizontal 
+            int y = getHeight() / 2 - ficha.getHeight() / 2; // centrado vertical 
+            ficha.setLocation(x, y); 
+            this.add(ficha); 
+            this.revalidate(); 
+            this.repaint();
+        }
     
     /**
      * Actualiza las posiciones de todas las fichas y ajusta el tamaño del panel
      */
-    private void actualizarPosicionesFichas() {
-        int anchoNecesario = MARGEN_IZQUIERDO + (fichas.size() * SEPARACION_FICHAS) + 50;
-        
-        // Si necesitamos más espacio, ajustamos el tamaño preferido del panel
-        if (fichas.size() > FICHAS_PARA_SCROLL) {
-            setPreferredSize(new Dimension(anchoNecesario, 150));
-        } else {
-            setPreferredSize(new Dimension(870, 150));
-        }
-        
-        // Posicionamos cada ficha
-        for (int i = 0; i < fichas.size(); i++) {
-            FichaUI ficha = fichas.get(i);
-            int x = MARGEN_IZQUIERDO + (i * SEPARACION_FICHAS);
-            int y = getHeight() / 2 - ficha.getHeight() / 2;
-            ficha.setLocation(x, y);
-        }
-    }
+//    private void actualizarPosicionesFichas() {
+//    int fichasPorFila = 14;      // máximo de fichas por fila
+//    int separacion = 40;         // separación horizontal entre fichas
+//    int margenIzquierdo = 20;    // margen inicial
+//    int alturaFila = 60;         // separación vertical entre filas
+//
+//    for (int i = 0; i < fichas.size(); i++) {
+//        FichaUI ficha = fichas.get(i);
+//
+//        int fila = i / fichasPorFila;             // calculamos en qué fila va
+//        int columna = i % fichasPorFila;          // posición dentro de la fila
+//
+//        int x = margenIzquierdo + (columna * separacion);
+//        int y = 20 + (fila * alturaFila);         // 20 de margen arriba + filas
+//
+//        ficha.setLocation(x, y);
+//    }
+//    }
     
     /**
      * Limpia todas las fichas de la mano

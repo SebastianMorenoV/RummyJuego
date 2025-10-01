@@ -45,6 +45,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         initComponents();
+        
     }
 
 
@@ -238,36 +239,24 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    private javax.swing.JScrollPane scrollPaneMano;
     
     private void crearManoUI() {
         if (manoUI == null) {
         manoUI = new ManoUI();
+        manoUI.setLocation(160, 380);
         manoUI.setSize(580, 120);
-        
-        // Crear el JScrollPane que contiene la mano
-        scrollPaneMano = new JScrollPane(manoUI);
-        scrollPaneMano.setLocation(160, 380);
-        scrollPaneMano.setSize(580, 120);
-        
-        // Configurar scroll horizontal y vertical a la IZQUIERDA
-        scrollPaneMano.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scrollPaneMano.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        
-        // IMPORTANTE: Poner el scrollbar vertical a la IZQUIERDA
-        scrollPaneMano.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        
-        scrollPaneMano.getHorizontalScrollBar().setUnitIncrement(16); // Scroll más suave
-        scrollPaneMano.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPaneMano.setBorder(null); // Sin borde
-        scrollPaneMano.setOpaque(false);
-        scrollPaneMano.getViewport().setOpaque(false);
-        
-        // Personalizar ancho de la barra de scroll vertical
-        scrollPaneMano.getVerticalScrollBar().setPreferredSize(new java.awt.Dimension(10, 0));
-        
-        // Agregar el scrollPane al panel principal
-        GUIjuego.add(scrollPaneMano);
+
+        // ScrollPane con scroll vertical obligatorio y horizontal si se necesita
+        JScrollPane scrollPane = new JScrollPane(
+                manoUI,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+
+        scrollPane.setBounds(160, 380, 580, 120); // mismas medidas
+        scrollPane.setBorder(null);
+
+        GUIjuego.add(scrollPane);
     }
     }
     
