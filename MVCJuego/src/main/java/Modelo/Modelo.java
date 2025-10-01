@@ -89,19 +89,20 @@ public class Modelo implements IModelo {
                 .collect(Collectors.toList());
     }
 
-    // --- Métodos de ayuda para conversión DTO <-> Entidad ---
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
         List<Ficha> fichas = dto.getFichasGrupo().stream()
-                .map(fDto -> new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(), fDto.getColor(), fDto.isComodin()))
+                .map(fDto -> new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(), fDto.getColor(), fDto.isComodin(), fDto.getFila(), fDto.getColumna()))
                 .collect(Collectors.toList());
-        return new Grupo("Temporal", fichas.size(), fichas);
+        // Asegúrate de tener un constructor en la Entidad Grupo que acepte fila y columna
+        return new Grupo("Temporal", fichas.size(), fichas, dto.getFila(), dto.getColumna());
     }
 
     private GrupoDTO convertirGrupoEntidadADto(Grupo g) {
         List<FichaJuegoDTO> fichasDTO = g.getFichas().stream()
-                .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin(), f.getFila(), f.getColumna()))
                 .collect(Collectors.toList());
-        return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO);
+        // Usa el constructor del DTO que acepta fila y columna
+        return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO, g.getFila(), g.getColumna());
     }
 
     // --- Métodos del Patrón Observador (sin cambios) ---

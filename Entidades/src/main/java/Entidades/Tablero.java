@@ -115,16 +115,42 @@ public class Tablero {
      */
     public Tablero copiaProfunda() {
         Tablero copia = new Tablero();
+
+        // 1. Crea una copia profunda de la lista de grupos en el tablero.
         List<Grupo> gruposCopia = this.fichasEnTablero.stream()
                 .map(g -> {
+                    // Para cada grupo 'g', crea una copia profunda de su lista de fichas.
                     List<Ficha> fichasCopia = g.getFichas().stream()
-                            .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                            .map(f -> new Ficha(
+                            f.getId(),
+                            f.getNumero(),
+                            f.getColor(),
+                            f.isComodin(),
+                            f.getFila(), // FIX 2: Pasa la fila de la ficha original 'f'.
+                            f.getColumna() // FIX 2: Pasa la columna de la ficha original 'f'.
+                    ))
                             .collect(Collectors.toList());
-                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
+
+                    // Crea el nuevo grupo con la lista de fichas ya copiada.
+                    return new Grupo(
+                            g.getTipo(),
+                            fichasCopia.size(),
+                            fichasCopia,
+                            g.getFila(), // FIX 1: Usa 'g' en lugar del 'dto' que no existe.
+                            g.getColumna() // FIX 1: Usa 'g' en lugar del 'dto' que no existe.
+                    );
                 })
                 .collect(Collectors.toList());
+
         copia.setFichasEnTablero(gruposCopia);
-        copia.setMazo(new ArrayList<>(this.mazo));
+
+        // 2. Crea una copia profunda del mazo.
+        List<Ficha> mazoCopia = this.mazo.stream()
+                .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin())) // Las fichas del mazo no tienen posición
+                .collect(Collectors.toList());
+
+        copia.setMazo(mazoCopia); // FIX 3: Asigna la copia profunda del mazo.
+
         return copia;
     }
 

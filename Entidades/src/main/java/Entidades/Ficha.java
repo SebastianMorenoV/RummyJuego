@@ -1,10 +1,10 @@
-
 package Entidades;
 
 import java.awt.Color;
 
 /**
  * Esta clase representa a una ficha en el sistema.
+ *
  * @author Sebastian Moreno
  */
 public class Ficha {
@@ -13,8 +13,16 @@ public class Ficha {
     int numero;
     Color color;
     boolean comodin;
+    private int fila = -1; // -1 indica que no está en el tablero
+    private int columna = -1;
 
     public Ficha() {
+    }
+
+    public Ficha(int id, int numero, Color color, boolean comodin, int fila, int columna) {
+        // ... tu código ...
+        this.fila = fila;
+        this.columna = columna;
     }
 
     public Ficha(int numero, Color color, boolean comodin) {
@@ -48,6 +56,27 @@ public class Ficha {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getFila() {
+        return fila;
+    }
+
+    public void setFila(int fila) {
+        this.fila = fila;
+    }
+
+    public int getColumna() {
+        return columna;
+    }
+
+    public void setColumna(int columna) {
+        this.columna = columna;
+    }
+
+    public void setPosicion(int fila, int columna) {
+        this.fila = fila;
+        this.columna = columna;
     }
 
     @Override

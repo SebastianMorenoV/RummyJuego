@@ -16,14 +16,26 @@ public class Grupo {
     private int numFichas;
     private List<Ficha> fichas;
     boolean esTemporal;
+    int fila;
+    int columna;
 
-    public Grupo(String tipo, int numFichas, List<Ficha> fichas) {
+    public Grupo(String tipo, int numFichas, List<Ficha> fichas, int fila1, int columna1) {
         this.tipo = tipo;
         this.numFichas = numFichas;
         this.fichas = fichas;
         this.esTemporal = true; 
     }
 
+    public Grupo(String tipo, int numFichas, List<Ficha> fichas, boolean esTemporal, int fila, int columna) {
+        this.tipo = tipo;
+        this.numFichas = numFichas;
+        this.fichas = fichas;
+        this.esTemporal = esTemporal;
+        this.fila = fila;
+        this.columna = columna;
+    }
+
+    
     /**
      * Este metodo valida dependiendo el tamaño el tipo y tambien otorga la
      * responsabilidad a métodos auxiliares. Establece el tipo, de el grupo.
@@ -179,4 +191,22 @@ public class Grupo {
     public void setValidado() {
         this.esTemporal = false;
     }
+
+    public int getFila() {
+        return fila;
+    }
+
+    public void setFila(int fila) {
+        this.fila = fila;
+    }
+
+    public int getColumna() {
+        return columna;
+    }
+
+    public void setColumna(int columna) {
+        this.columna = columna;
+    }
+    
+    
 }
