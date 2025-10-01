@@ -51,10 +51,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButton1 = new javax.swing.JButton();
         GUIjuego = new javax.swing.JPanel();
         btnFinalizarTurno = new javax.swing.JLabel();
         panelFichasArmadas = new javax.swing.JPanel();
         fondo = new javax.swing.JLabel();
+
+        jButton1.setText("jButton1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -129,6 +132,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JPanel GUIjuego;
     private javax.swing.JLabel btnFinalizarTurno;
     private javax.swing.JLabel fondo;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel panelFichasArmadas;
     // End of variables declaration//GEN-END:variables
     /**
