@@ -249,8 +249,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         // ScrollPane con scroll vertical obligatorio y horizontal si se necesita
         JScrollPane scrollPane = new JScrollPane(
                 manoUI,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         );
 
         scrollPane.setBounds(160, 380, 580, 120); // mismas medidas

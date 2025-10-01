@@ -43,10 +43,13 @@ public class MazoUI extends JPanel implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         control.pasarTurno();
-        JOptionPane.showMessageDialog(null,
+        System.out.println("[VISTA] Ficha agarrada, Turno terminado");
+        /*JOptionPane.showMessageDialog(null,
             "Ficha agarrada, Turno terminado",
             "VISTA",
             JOptionPane.WARNING_MESSAGE);
+        Texto innecesario
+        */
     }
 
  

@@ -163,11 +163,15 @@ public class TableroUI extends JPanel {
      */
     public void revertirCambiosVisuales() {
         System.out.println("[VISTA] Revertiendo cambios visuales...");
+        /*
+        *
         JOptionPane.showMessageDialog(this,
             "Revertiendo cambios visuales...",
             "[VISTA]",
             JOptionPane.WARNING_MESSAGE);
-
+        Texto innecesario
+        *
+        */
         // 1. Elimina TODOS los componentes actuales del panel.
         removeAll();
         fichasEnTablero.clear();
