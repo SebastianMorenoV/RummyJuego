@@ -15,11 +15,13 @@ public class Grupo {
     private String tipo;
     private int numFichas;
     private List<Ficha> fichas;
+    boolean esTemporal;
 
     public Grupo(String tipo, int numFichas, List<Ficha> fichas) {
         this.tipo = tipo;
         this.numFichas = numFichas;
         this.fichas = fichas;
+        this.esTemporal = true; 
     }
 
     /**
@@ -168,5 +170,13 @@ public class Grupo {
 
     public void setFichas(List<Ficha> fichas) {
         this.fichas = fichas;
+    }
+    
+    public boolean esTemporal() {
+        return esTemporal;
+    }
+
+    public void setValidado() {
+        this.esTemporal = false;
     }
 }

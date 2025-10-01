@@ -11,6 +11,7 @@ import Entidades.Mano;
 import Entidades.Tablero;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Fachada que encapsula toda la lógica y el estado del juego de Rummy. No
@@ -66,6 +67,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
      */
     @Override
     public void colocarFichasEnTablero(List<Grupo> nuevosGrupos) {
+
+        // 3. El resto de tu lógica se mantiene
         // La lógica de validación de los grupos se mantiene en la entidad Grupo
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
         this.tablero.setFichasEnTablero(nuevosGrupos);
@@ -83,12 +86,15 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public boolean validarYFinalizarTurno() {
         boolean esPrimerMovimiento = !this.primerMovimientoRealizado;
         if (tablero.esJugadaValida(esPrimerMovimiento)) {
+            // La jugada es válida.
             confirmarCambiosTurno();
             return true;
+
         } else {
             revertirCambiosTurno();
             return false;
         }
+        
     }
 
     /**
@@ -104,6 +110,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
         if (!primerMovimientoRealizado) {
             this.primerMovimientoRealizado = true;
         }
+        //this.tablero.getFichasEnTablero().forEach(Grupo::setValidado);
 
         // Orquesta la actualización de la mano del jugador
         List<Integer> idsEnTablero = this.tablero.getTodosLosIdsDeFichas();
@@ -116,6 +123,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
     private void revertirCambiosTurno() {
         this.tablero = this.tableroAlInicioDelTurno;
         this.jugador.setManoJugador(this.manoAlInicioDelTurno);
+        System.out.println("Se revirtieron cambios en turno, mano guardada");
         // El estado guardado se mantiene, no se vuelve a llamar a guardarEstadoTurno()
     }
 
@@ -144,4 +152,31 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public boolean haGanadoElJugador() {
         return this.jugador.haGanado();
     }
+
+    @Override
+    public boolean intentarRegresarFichaAMano(int idFicha) {
+        // Filtramos para quedarnos solo con los grupos que NO son temporales.
+        for (Grupo grupoValidado : this.tablero.getFichasEnTablero().stream().filter(g -> !g.esTemporal()).toList()) {
+
+            for (Ficha ficha : grupoValidado.getFichas()) {
+                if (ficha.getId() == idFicha) {
+                    System.out.println("Ficha encontrada en grupo permanente. No se puede regresar.");
+                    // Encontrada en un grupo antiguo. No se puede mover.
+                    return false;
+                }
+            }
+        }
+
+        // Si el bucle termina, la ficha no está en un grupo permanente y se puede mover.
+        // ... el resto de tu lógica para remover la ficha y agregarla a la mano ...
+        Ficha fichaParaRegresar = this.tablero.removerFicha(idFicha);
+
+        if (fichaParaRegresar != null) {
+            this.jugador.agregarFichaAJugador(fichaParaRegresar);
+            return true;
+        }
+
+        return false; // No se encontró la ficha para remover
+    }
+    
 }

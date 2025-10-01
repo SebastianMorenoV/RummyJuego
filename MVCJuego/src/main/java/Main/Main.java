@@ -21,7 +21,14 @@ public class Main {
         Controlador controlador = new Controlador(modelo);
         VistaTablero vista = new VistaTablero(controlador);
         modelo.agregarObservador(vista);
+        
+        VistaTablero vistaJugadoresEnEspera = new VistaTablero(controlador);
+        modelo.agregarObservador(vistaJugadoresEnEspera);
+        
+        
         controlador.iniciarJuego();
+      
+        
     }
     
 }

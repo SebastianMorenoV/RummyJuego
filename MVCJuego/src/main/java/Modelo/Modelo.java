@@ -116,4 +116,19 @@ public class Modelo implements IModelo {
             observer.actualiza(this, tipoEvento);
         }
     }
+    
+    public void regresarFichaAMano(int idFicha) {
+        // Se delega la logica y la validacion a la fachada del juego
+        boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
+        
+        if (fueRegresadaExitosamente) {// exito: La ficha era temporal y volvió a la mano.
+            // notificamos a la vista para que actualice el tablero y la mano.
+            notificarObservadores(TipoEvento.REPINTAR_MANO);
+            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+        } else { // fallo: La ficha pertenece a un grupo ya validado
+            // notificamos a la vista que la jugada es invalida y debe revertir
+            // el movimiento visual de la ficha
+            notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+        }
+    }
 }

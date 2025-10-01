@@ -32,4 +32,6 @@ public interface IJuegoRummy {
     int getCantidadFichasMazo();
 
     boolean haGanadoElJugador();
+    
+    boolean intentarRegresarFichaAMano(int idFicha);
 }

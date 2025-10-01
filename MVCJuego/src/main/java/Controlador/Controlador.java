@@ -32,12 +32,13 @@ public class Controlador {
 
     public void colocarFicha(List<GrupoDTO> grupos) {
         modelo.colocarFicha(grupos);
+        
     }
 
     public void terminarTurno() {
         modelo.terminarTurno();
     }
-//    public void regresarFichaAMano(int idFicha) {
-//        modelo.regresarFichaAMano(idFicha);
-//    }
+    public void regresarFichaAMano(int idFicha) {
+        modelo.regresarFichaAMano(idFicha);
+    }
 }

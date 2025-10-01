@@ -25,7 +25,7 @@ public class ManoUI extends JPanel {
      */
     public void agregarFicha(FichaUI ficha) {
         fichas.add(ficha);
-        actualizarPosicionesFichas();
+        //actualizarPosicionesFichas();
         this.add(ficha);
         this.revalidate();
         this.repaint();
@@ -34,24 +34,24 @@ public class ManoUI extends JPanel {
     /**
      * Actualiza las posiciones de todas las fichas y ajusta el tamaño del panel
      */
-    private void actualizarPosicionesFichas() {
-        int anchoNecesario = MARGEN_IZQUIERDO + (fichas.size() * SEPARACION_FICHAS) + 50;
-        
-        // Si necesitamos más espacio, ajustamos el tamaño preferido del panel
-        if (fichas.size() > FICHAS_PARA_SCROLL) {
-            setPreferredSize(new Dimension(anchoNecesario, 150));
-        } else {
-            setPreferredSize(new Dimension(870, 150));
-        }
-        
-        // Posicionamos cada ficha
-        for (int i = 0; i < fichas.size(); i++) {
-            FichaUI ficha = fichas.get(i);
-            int x = MARGEN_IZQUIERDO + (i * SEPARACION_FICHAS);
-            int y = getHeight() / 2 - ficha.getHeight() / 2;
-            ficha.setLocation(x, y);
-        }
-    }
+//    private void actualizarPosicionesFichas() {
+//        int anchoNecesario = MARGEN_IZQUIERDO + (fichas.size() * SEPARACION_FICHAS) + 50;
+//        
+//        // Si necesitamos más espacio, ajustamos el tamaño preferido del panel
+//        if (fichas.size() > FICHAS_PARA_SCROLL) {
+//            setPreferredSize(new Dimension(anchoNecesario, 150));
+//        } else {
+//            setPreferredSize(new Dimension(870, 150));
+//        }
+//        
+//        // Posicionamos cada ficha
+//        for (int i = 0; i < fichas.size(); i++) {
+//            FichaUI ficha = fichas.get(i);
+//            int x = MARGEN_IZQUIERDO + (i * SEPARACION_FICHAS);
+//            int y = getHeight() / 2 - ficha.getHeight() / 2;
+//            ficha.setLocation(x, y);
+//        }
+//    }
     
     /**
      * Limpia todas las fichas de la mano
@@ -76,5 +76,20 @@ public class ManoUI extends JPanel {
         // Fondo marrón redondeado
         g.setColor(new Color(156, 113, 17));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+    }
+    
+    public void removerFicha(FichaUI ficha) {
+        if (fichas.remove(ficha)) { // <-- PASO CLAVE: Remueve de la lista
+            this.remove(ficha); // Remueve visualmente
+            // Opcional: Reorganizar las fichas restantes si es necesario
+            this.revalidate();
+            this.repaint();
+        }
+
+    }
+
+    public void limpiarMano() {
+        this.removeAll(); // Limpia visualmente
+        this.fichas.clear(); // Limpia la lista lógica
     }
 }
