@@ -41,4 +41,12 @@ public class Controlador {
     public void regresarFichaAMano(int idFicha) {
         modelo.regresarFichaAMano(idFicha);
     }
+    
+    public void ordenarManoPorNumero() {
+        modelo.ordenarManoPorNumero();
+    }
+
+    public void ordenarManoPorGrupos() {
+        modelo.ordenarManoPorGrupos();
+    }
 }

@@ -9,6 +9,7 @@ import Entidades.Grupo;
 import Entidades.Jugador;
 import Entidades.Mano;
 import Entidades.Tablero;
+import java.util.Comparator;
 
 import java.util.List;
 
@@ -144,7 +145,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public boolean haGanadoElJugador() {
         return this.jugador.haGanado();
     }
-    
+
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
         // Filtramos para quedarnos solo con los grupos que NO son temporales.
@@ -168,5 +169,26 @@ public class JuegoRummyFachada implements IJuegoRummy {
         }
 
         return false; // No se encontró la ficha para remover
+    }
+
+    @Override
+    public void ordenarManoPorNumero() {
+        if (jugador != null && jugador.getManoJugador() != null) {
+            List<Ficha> mano = jugador.getManoJugador().getFichasEnMano();
+            mano.sort(Comparator.comparingInt(Ficha::getNumero)
+                    .thenComparing(f -> f.getColor().toString()));
+        }
+    }
+
+    @Override
+    public void ordenarManoPorGrupos() {
+        if (jugador != null && jugador.getManoJugador() != null) {
+            List<Ficha> mano = jugador.getManoJugador().getFichasEnMano();
+
+            // FUNCIÓN: Ordenar por NÚMERO primero, luego por COLOR.
+            // Útil para encontrar GRUPOS/TERCIAS (7-Rojo, 7-Azul, 7-Negro).
+            mano.sort(Comparator.comparingInt(Ficha::getNumero)
+                    .thenComparing(f -> f.getColor().toString()));
+        }
     }
 }

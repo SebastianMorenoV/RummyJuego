@@ -54,6 +54,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private void initComponents() {
 
         GUIjuego = new javax.swing.JPanel();
+        btnOrdenarMayorAMenor = new javax.swing.JLabel();
+        btnOrdenarPorGrupos = new javax.swing.JLabel();
         btnFinalizarTurno = new javax.swing.JLabel();
         panelFichasArmadas = new javax.swing.JPanel();
         fondo = new javax.swing.JLabel();
@@ -62,6 +64,26 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         GUIjuego.setBackground(new java.awt.Color(0, 0, 0));
         GUIjuego.setLayout(null);
+
+        btnOrdenarMayorAMenor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button.png"))); // NOI18N
+        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOrdenarMayorAMenor.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnOrdenarMayorAMenorMouseClicked(evt);
+            }
+        });
+        GUIjuego.add(btnOrdenarMayorAMenor);
+        btnOrdenarMayorAMenor.setBounds(820, 280, 50, 29);
+
+        btnOrdenarPorGrupos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button (1).png"))); // NOI18N
+        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOrdenarPorGrupos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnOrdenarPorGruposMouseClicked(evt);
+            }
+        });
+        GUIjuego.add(btnOrdenarPorGrupos);
+        btnOrdenarPorGrupos.setBounds(820, 241, 50, 29);
 
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -73,7 +95,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         });
         GUIjuego.add(btnFinalizarTurno);
-        btnFinalizarTurno.setBounds(800, 290, 90, 50);
+        btnFinalizarTurno.setBounds(800, 320, 90, 50);
 
         panelFichasArmadas.setBackground(new java.awt.Color(23, 57, 134));
 
@@ -128,10 +150,22 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
+    private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
+        // TODO add your handling code here:
+        control.ordenarManoPorGrupos();
+    }//GEN-LAST:event_btnOrdenarPorGruposMouseClicked
+
+    private void btnOrdenarMayorAMenorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarMayorAMenorMouseClicked
+        // TODO add your handling code here:
+        control.ordenarManoPorNumero();
+    }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel GUIjuego;
     private javax.swing.JLabel btnFinalizarTurno;
+    private javax.swing.JLabel btnOrdenarMayorAMenor;
+    private javax.swing.JLabel btnOrdenarPorGrupos;
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel panelFichasArmadas;
     // End of variables declaration//GEN-END:variables
@@ -315,7 +349,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (mazoUI == null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
             mazoUI = new MazoUI(String.valueOf(fichasRestantes), control);
-            mazoUI.setLocation(800, 150);
+            mazoUI.setLocation(807, 140);
             mazoUI.setSize(70, 90);
             mazoUI.setCursor(new Cursor(HAND_CURSOR) {
             });
