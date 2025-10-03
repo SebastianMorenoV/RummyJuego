@@ -95,14 +95,14 @@ public class Modelo implements IModelo {
         List<Ficha> fichas = dto.getFichasGrupo().stream()
                 .map(fDto -> new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(), fDto.getColor(), fDto.isComodin()))
                 .collect(Collectors.toList());
-        return new Grupo("Temporal", fichas.size(), fichas);
+        return new Grupo("Temporal", fichas.size(), fichas, dto.getFila(), dto.getColumna());
     }
 
     private GrupoDTO convertirGrupoEntidadADto(Grupo g) {
         List<FichaJuegoDTO> fichasDTO = g.getFichas().stream()
                 .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
                 .collect(Collectors.toList());
-        return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO);
+        return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO, g.getFila(), g.getColumna());
     }
 
     // --- Métodos del Patrón Observador (sin cambios) ---

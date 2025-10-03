@@ -120,7 +120,7 @@ public class Tablero {
                     List<Ficha> fichasCopia = g.getFichas().stream()
                             .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
                             .collect(Collectors.toList());
-                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
+                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia, g.getFila(), g.getColumna());
                 })
                 .collect(Collectors.toList());
         copia.setFichasEnTablero(gruposCopia);
@@ -178,9 +178,8 @@ public class Tablero {
         }
         Collections.shuffle(this.mazo);
     }
-    
-    //GETS Y SETS//
 
+    //GETS Y SETS//
     public List<Grupo> getFichasEnTablero() {
         return fichasEnTablero;
     }

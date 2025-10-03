@@ -14,14 +14,18 @@ public class GrupoDTO {
     private String tipo;       // "escalera" o "numero"
     private int cantidad;      // en vez de mandar todas las fichas
     private List<FichaJuegoDTO> fichasGrupo; // un String para mostrar fácil en UI (ej: "1R, 2R, 3R")
+    private int fila;
+    private int columna;
 
     public GrupoDTO() {
     }
 
-    public GrupoDTO(String tipo, int cantidad, List<FichaJuegoDTO> fichasGrupo) {
+    public GrupoDTO(String tipo, int cantidad, List<FichaJuegoDTO> fichasGrupo, int fila, int columna) {
         this.tipo = tipo;
         this.cantidad = cantidad;
         this.fichasGrupo = fichasGrupo;
+        this.fila = fila;
+        this.columna = columna;
     }
 
     public String getTipo() {
@@ -48,11 +52,24 @@ public class GrupoDTO {
         this.fichasGrupo = fichasGrupo;
     }
 
+    public int getFila() {
+        return fila;
+    }
+
+    public void setFila(int fila) {
+        this.fila = fila;
+    }
+
+    public int getColumna() {
+        return columna;
+    }
+
+    public void setColumna(int columna) {
+        this.columna = columna;
+    }
+
     @Override
     public String toString() {
         return "GrupoDTO{" + "tipo=" + tipo + ", cantidad=" + cantidad + ", fichasGrupo=" + fichasGrupo + '}';
     }
-
-    
-    
 }

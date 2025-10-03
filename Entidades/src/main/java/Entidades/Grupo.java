@@ -16,13 +16,16 @@ public class Grupo {
     private int numFichas;
     private List<Ficha> fichas;
     boolean esTemporal;
-    
+    private int fila;
+    private int columna;
 
-    public Grupo(String tipo, int numFichas, List<Ficha> fichas) {
+    public Grupo(String tipo, int numFichas, List<Ficha> fichas, int fila, int columna) {
         this.tipo = tipo;
         this.numFichas = numFichas;
         this.fichas = fichas;
         this.esTemporal = true;
+        this.fila = fila;
+        this.columna = columna;
     }
 
     /**
@@ -113,18 +116,17 @@ public class Grupo {
     }
 
     /**
-     * Calcula y devuelve el valor total en puntos de este grupo de fichas.
-     * La puntuación se determina según el tipo de grupo:
-     * Tercia: El valor de la ficha base (ignorando comodines)
-     * multiplicado por el número total de fichas en el grupo.
-     * Escalera: La suma de los valores individuales de cada ficha.
-     * El valor de los comodines se deduce a partir de su posición relativa a
-     * una ficha "ancla" no comodín.
-     * Si un grupo está compuesto enteramente por comodines, se utiliza el valor
-     * 13 como base para el cálculo. 
+     * Calcula y devuelve el valor total en puntos de este grupo de fichas. La
+     * puntuación se determina según el tipo de grupo: Tercia: El valor de la
+     * ficha base (ignorando comodines) multiplicado por el número total de
+     * fichas en el grupo. Escalera: La suma de los valores individuales de cada
+     * ficha. El valor de los comodines se deduce a partir de su posición
+     * relativa a una ficha "ancla" no comodín. Si un grupo está compuesto
+     * enteramente por comodines, se utiliza el valor 13 como base para el
+     * cálculo.
      *
-     * @return El total de puntos del grupo como un entero. Si el tipo de grupo no es ni "tercia" ni
-     * "escalera", el método devuelve 0.
+     * @return El total de puntos del grupo como un entero. Si el tipo de grupo
+     * no es ni "tercia" ni "escalera", el método devuelve 0.
      */
     public int calcularPuntos() {
         if (!"escalera".equals(tipo) && !"tercia".equals(tipo)) {
@@ -172,7 +174,15 @@ public class Grupo {
     public void setFichas(List<Ficha> fichas) {
         this.fichas = fichas;
     }
-    
+
+    public int getFila() {
+        return fila;
+    }
+
+    public int getColumna() {
+        return columna;
+    }
+
     public boolean esTemporal() {
         return esTemporal;
     }

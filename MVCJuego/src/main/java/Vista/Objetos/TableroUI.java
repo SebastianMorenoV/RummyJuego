@@ -130,9 +130,10 @@ public class TableroUI extends JPanel {
                     if (!grupoActual.isEmpty()) {
                         List<FichaJuegoDTO> fichasDTO = new ArrayList<>();
                         for (FichaUI fichaUI : grupoActual) {
-                            fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(), fichaUI.getColor(), fichaUI.isComodin()));
+                            Point celda = calcularCeldaParaPunto(fichaUI.getLocation());
+                            fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(), fichaUI.getColor(), fichaUI.isComodin(), celda.y, celda.x));
                         }
-                        gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO));
+                        gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c));
                     }
                 }
             }
@@ -180,7 +181,7 @@ public class TableroUI extends JPanel {
         List<GrupoDTO> gruposRestaurados = generarGruposDesdeCeldas();
 
         for (GrupoDTO grupo : gruposRestaurados) {
-            grupo.setTipo("Valido"); 
+            grupo.setTipo("Valido");
         }
 
         if (gruposRestaurados != null) {
@@ -245,23 +246,19 @@ public class TableroUI extends JPanel {
                     continue;
                 }
 
-                // Encuentra la primera ficha del grupo para usar su posición como ancla.
-                int primeraFichaId = grupoDTO.getFichasGrupo().get(0).getIdFicha();
-                FichaUI primeraFichaUI = fichasEnTablero.get(primeraFichaId);
-
-                if (primeraFichaUI == null) {
-                    // Si la ficha ancla no existe en la vista, no podemos hacer nada con este grupo.
-                    continue;
-                }
-                Point celdaAncla = calcularCeldaParaPunto(primeraFichaUI.getLocation());
+                Point celdaAncla = new Point(grupoDTO.getColumna(), grupoDTO.getFila());
 
                 // Reposiciona todas las fichas del grupo para que estén juntas a partir del ancla.
                 for (int i = 0; i < grupoDTO.getFichasGrupo().size(); i++) {
-                    int idFichaActual = grupoDTO.getFichasGrupo().get(i).getIdFicha();
-                    FichaUI fichaActualUI = fichasEnTablero.get(idFichaActual);
-                    if (fichaActualUI != null) {
-                        centrarYPosicionarFicha(fichaActualUI, celdaAncla.y, celdaAncla.x + i);
+                    FichaJuegoDTO fichaDTO = grupoDTO.getFichasGrupo().get(i);
+                    FichaUI fichaActualUI = fichasEnTablero.get(fichaDTO.getIdFicha());
+
+                    if (fichaActualUI == null) { // La ficha no está, la creamos
+                        fichaActualUI = new FichaUI(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(), fichaDTO.getColor(), fichaDTO.isComodin(), control, vista);
+                        fichasEnTablero.put(fichaDTO.getIdFicha(), fichaActualUI);
+                        this.add(fichaActualUI);
                     }
+                    centrarYPosicionarFicha(fichaActualUI, celdaAncla.y, celdaAncla.x + i);
                 }
 
                 // Dibuja el panel de feedback alrededor del grupo ya posicionado.
@@ -334,7 +331,7 @@ public class TableroUI extends JPanel {
         int y = (fila * altoCelda) + (altoCelda - ficha.getHeight()) / 2;
         ficha.setLocation(x, y);
     }
-    
+
     public Map<Integer, FichaUI> getFichasEnTableroValidas() {
         return fichasEnTableroValidas;
     }
@@ -342,6 +339,4 @@ public class TableroUI extends JPanel {
     public Map<Integer, FichaUI> getFichasEnTablero() {
         return fichasEnTablero;
     }
-    
-    
 }
