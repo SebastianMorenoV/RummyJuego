@@ -134,13 +134,4 @@ public class Modelo implements IModelo {
         }
     }
     
-    public void ordenarManoPorNumero() {
-        juego.ordenarManoPorNumero(); 
-        notificarObservadores(TipoEvento.REPINTAR_MANO); 
-    }
-
-    public void ordenarManoPorGrupos() {
-        juego.ordenarManoPorGrupos();
-        notificarObservadores(TipoEvento.REPINTAR_MANO);
-    }
 }

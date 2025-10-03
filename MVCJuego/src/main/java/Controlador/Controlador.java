@@ -42,11 +42,4 @@ public class Controlador {
         modelo.regresarFichaAMano(idFicha);
     }
     
-    public void ordenarManoPorNumero() {
-        modelo.ordenarManoPorNumero();
-    }
-
-    public void ordenarManoPorGrupos() {
-        modelo.ordenarManoPorGrupos();
-    }
 }

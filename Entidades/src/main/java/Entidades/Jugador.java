@@ -5,6 +5,7 @@ public class Jugador {
     String nickname;
     String grupoColor;
     Mano manoJugador;
+    boolean estaEnTurno;//proximamente...
 
     public Jugador() {
         this.manoJugador = new Mano();

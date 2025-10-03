@@ -35,7 +35,4 @@ public interface IJuegoRummy {
     
     boolean intentarRegresarFichaAMano(int idFicha);
     
-    void ordenarManoPorNumero();
-
-    void ordenarManoPorGrupos();
 }
