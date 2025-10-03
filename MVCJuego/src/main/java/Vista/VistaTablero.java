@@ -245,9 +245,20 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             manoUI = new ManoUI();
             manoUI.setLocation(160, 380);
             manoUI.setSize(580, 120);
-            GUIjuego.add(manoUI);
+
+            // ScrollPane con scroll vertical obligatorio y horizontal si se necesita
+            JScrollPane scrollPane = new JScrollPane(
+                    manoUI,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            );
+
+            scrollPane.setBounds(160, 380, 580, 120); // mismas medidas
+            scrollPane.setBorder(null);
+
+            GUIjuego.add(scrollPane);
         }
-    }
+    }    
     
     /**
      * Metodo que repinta la mano colocandole las fichas necesarias para mostrarse.
