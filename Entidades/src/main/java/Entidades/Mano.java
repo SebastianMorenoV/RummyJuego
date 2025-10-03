@@ -52,4 +52,8 @@ public class Mano {
     public void setFichasEnMano(List<Ficha> fichasEnMano) {
         this.fichasEnMano = fichasEnMano;
     }
+    
+    public void removerFichasPorId(List<Integer> ids) {
+        this.fichasEnMano.removeIf(ficha -> ids.contains(ficha.getId()));
+    }
 }

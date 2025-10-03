@@ -12,7 +12,9 @@ import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FichaUI extends JPanel {
 
@@ -101,8 +103,12 @@ public class FichaUI extends JPanel {
                 if (glassPane == null) {
                     return;
                 }
+
                 TableroUI panelTablero = vista.getPanelTablero();
+                ManoUI panelMano = vista.getPanelMano();
+
                 Point dropPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelTablero);
+                Point dropPointEnMano = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), panelMano);
 
                 glassPane.remove(FichaUI.this);
                 glassPane.setVisible(false);
@@ -111,31 +117,63 @@ public class FichaUI extends JPanel {
                         && dropPoint.x < panelTablero.getWidth()
                         && dropPoint.y < panelTablero.getHeight();
 
+                boolean dentroDeMano = dropPointEnMano.x >= 0 && dropPointEnMano.y >= 0
+                        && dropPointEnMano.x < panelMano.getWidth()
+                        && dropPointEnMano.y < panelMano.getHeight();
+
                 if (dentroDelTablero) {
                     // Si la ficha ya estaba en el tablero, primero la quitamos de su celda vieja.
                     if (origen == Origen.TABLERO) {
                         panelTablero.removerFicha(FichaUI.this.idFicha);
+
                     }
 
                     // Intentamos colocar la ficha en una nueva celda.
                     boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, dropPoint);
 
                     if (colocada) {
-                        // Si se pudo colocar, su nuevo origen es el tablero.
                         origen = Origen.TABLERO;
+
+                        // --- BORRA ESTA LÍNEA ---
+                        // vista.getPanelMano().removerFichaDeGruposInternos(FichaUI.this.idFicha);
+                        // Notifica al controlador (esto está bien)
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                         control.colocarFicha(gruposColocados);
                     } else {
                         // Si no había espacio, la devolvemos a su origen (la mano).
                         devolverFichaAlOrigen();
                     }
+                } else if (dentroDeMano) {
+                    // Solo tiene sentido hacer esto si la ficha venia del tablero
+                    if (origen == Origen.TABLERO) {
+                        TableroUI tablero = vista.getPanelTablero();
+                        Map<Integer, FichaUI> fichasValidadas = tablero.getFichasEnTableroValidas();
+
+                        if (fichasValidadas.containsValue(FichaUI.this)) {
+                            devolverFichaAlOrigen();
+                        } else {
+                            control.regresarFichaAMano(FichaUI.this.idFicha);
+                            List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
+                            control.colocarFicha(gruposColocados);
+                            //control.colocarFicha(new GrupoDTO("Temporal", 1, new ArrayList<>, ));
+                        }
+
+                    } else {
+                        /*si su origen no es tablero entonces es mano por lo que se debe
+                        quedar donde mismo*/
+                        devolverFichaAlOrigen();//para que se repinte
+                    }
+
                 } else {
-                    // Si se soltó fuera del tablero, también la devolvemos.
+                    //se solto en cualquier otro lado
+                    // La devolvemos a su panel y posición originales.
                     devolverFichaAlOrigen();
                 }
 
                 panelTablero.revalidate();
                 panelTablero.repaint();
+                panelMano.revalidate();
+                panelMano.repaint();
             }
 
             private void devolverFichaAlOrigen() {
@@ -143,7 +181,8 @@ public class FichaUI extends JPanel {
                 originalParent.add(FichaUI.this);
                 originalParent.revalidate();
                 originalParent.repaint();
-                origen = Origen.MANO;
+                //origen = Origen.MANO; aqui esto estaba mal por que tambien cambiaba el origen a mano si la soltabas en 
+                //otro lado q no fuera el tablero o la mano
             }
         };
         addMouseListener(ma);

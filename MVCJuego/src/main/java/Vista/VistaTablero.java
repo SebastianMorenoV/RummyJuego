@@ -2,6 +2,7 @@ package Vista;
 
 import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
+import DTO.GrupoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -120,6 +122,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
         if (tableroUI != null) {
+            List<GrupoDTO> gruposColocados = tableroUI.generarGruposDesdeCeldas();
+            control.colocarFicha(gruposColocados);
             control.terminarTurno();
         }
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
@@ -176,7 +180,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
     
     public ManoUI getPanelMano(){
-        return manoUI;
+        return this.manoUI;
     }
 
     /**
@@ -242,37 +246,17 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     
     private void crearManoUI() {
         if (manoUI == null) {
-        manoUI = new ManoUI();
-        manoUI.setSize(580, 120);
-        
-        // Crear el JScrollPane que contiene la mano
-        scrollPaneMano = new JScrollPane(manoUI);
-        scrollPaneMano.setLocation(160, 380);
-        scrollPaneMano.setSize(580, 120);
-        
-        // Configurar scroll horizontal y vertical a la IZQUIERDA
-        scrollPaneMano.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scrollPaneMano.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        
-        // IMPORTANTE: Poner el scrollbar vertical a la IZQUIERDA
-        scrollPaneMano.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        
-        scrollPaneMano.getHorizontalScrollBar().setUnitIncrement(16); // Scroll más suave
-        scrollPaneMano.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPaneMano.setBorder(null); // Sin borde
-        scrollPaneMano.setOpaque(false);
-        scrollPaneMano.getViewport().setOpaque(false);
-        
-        // Personalizar ancho de la barra de scroll vertical
-        scrollPaneMano.getVerticalScrollBar().setPreferredSize(new java.awt.Dimension(10, 0));
-        
-        // Agregar el scrollPane al panel principal
-        GUIjuego.add(scrollPaneMano);
-    }
+            manoUI = new ManoUI();
+            manoUI.setLocation(160, 380);
+            manoUI.setSize(580, 120);
+            GUIjuego.add(manoUI);
+        }
     }
     
     /**
-     * Metodo que repinta la mano colocandole las fichas necesarias para mostrarse.
+     * Metodo que repinta la mano colocandole las fichas necesarias para
+     * mostrarse.
+     *
      * @param modelo el modelo que pasa los datos a actualizar.
      */
     private void repintarMano(IModelo modelo) {
@@ -282,17 +266,47 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         manoUI.removeAll();
 
         List<FichaJuegoDTO> fichasMano = modelo.getMano();
+
+        // 1. Crear una lista o conjunto de las FichasUI que ya están en el tablero.
+        // Esto es para no tener que buscarlas en cada iteración del bucle.
+        Collection<FichaUI> fichasEnTablero = tableroUI.getFichasEnTablero().values();
+        Collection<FichaUI> fichasValidasEnTablero = tableroUI.getFichasEnTableroValidas().values();
+
         for (FichaJuegoDTO fichaDTO : fichasMano) {
-            FichaUI fichaUI = new FichaUI(
-                    fichaDTO.getIdFicha(),
-                    fichaDTO.getNumeroFicha(),
-                    fichaDTO.getColor(),
-                    fichaDTO.isComodin(),
-                    control, this
-            );
-            fichaUI.setOrigen(FichaUI.Origen.MANO);
-            manoUI.add(fichaUI);
+            // 2. Variable para saber si encontramos la ficha en el tablero.
+            boolean yaEstaEnTablero = false;
+
+            // 3. Revisamos si la ficha (por su ID) está en alguna de las colecciones del tablero.
+            for (FichaUI fichaTablero : fichasEnTablero) {
+                if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
+                    yaEstaEnTablero = true;
+                    break; // La encontramos, no hace falta seguir buscando en esta lista.
+                }
+            }
+
+            if (!yaEstaEnTablero) { // Si aún no la hemos encontrado, buscamos en la otra lista.
+                for (FichaUI fichaTablero : fichasValidasEnTablero) {
+                    if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
+                        yaEstaEnTablero = true;
+                        break; // La encontramos, salimos del bucle.
+                    }
+                }
+            }
+
+            // 4. Si después de buscar en ambas listas, la ficha NO está en el tablero, la agregamos a la mano.
+            if (!yaEstaEnTablero) {
+                FichaUI fichaUI = new FichaUI(
+                        fichaDTO.getIdFicha(),
+                        fichaDTO.getNumeroFicha(),
+                        fichaDTO.getColor(),
+                        fichaDTO.isComodin(),
+                        control, this
+                );
+                fichaUI.setOrigen(FichaUI.Origen.MANO);
+                manoUI.add(fichaUI);
+            }
         }
+
         manoUI.revalidate();
         manoUI.repaint();
     }

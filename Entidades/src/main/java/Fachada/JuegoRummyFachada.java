@@ -68,6 +68,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public void colocarFichasEnTablero(List<Grupo> nuevosGrupos) {
         // La lógica de validación de los grupos se mantiene en la entidad Grupo
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
+        for (Grupo nuevosGrupo : nuevosGrupos) {
+            System.out.println("Grupo: " + nuevosGrupo.getTipo() + " fichas: " + nuevosGrupo.getFichas());
+        }
         this.tablero.setFichasEnTablero(nuevosGrupos);
     }
 
@@ -143,5 +146,30 @@ public class JuegoRummyFachada implements IJuegoRummy {
     @Override
     public boolean haGanadoElJugador() {
         return this.jugador.haGanado();
+    }
+    
+    @Override
+    public boolean intentarRegresarFichaAMano(int idFicha) {
+        // Filtramos para quedarnos solo con los grupos que NO son temporales.
+        for (Grupo grupoValidado : this.tablero.getFichasEnTablero().stream().filter(g -> !g.esTemporal()).toList()) {
+
+            for (Ficha ficha : grupoValidado.getFichas()) {
+                if (ficha.getId() == idFicha) {
+                    // Encontrada en un grupo antiguo. No se puede mover.
+                    return false;
+                }
+            }
+        }
+
+        // Si el bucle termina, la ficha no está en un grupo permanente y se puede mover.
+        // ... el resto de tu lógica para remover la ficha y agregarla a la mano ...
+        Ficha fichaParaRegresar = this.tablero.removerFicha(idFicha);
+
+        if (fichaParaRegresar != null) {
+            //this.jugador.agregarFichaAJugador(fichaParaRegresar);
+            return true;
+        }
+
+        return false; // No se encontró la ficha para remover
     }
 }
