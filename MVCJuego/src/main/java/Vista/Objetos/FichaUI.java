@@ -28,7 +28,6 @@ public class FichaUI extends JPanel {
     private JPanel originalParent;
     private Origen origen;
 
-    // El glassPane se usa para un arrastre fluido por toda la ventana.
     private JComponent glassPane;
     private Point glassPaneOffset;
 
@@ -44,16 +43,13 @@ public class FichaUI extends JPanel {
         this.numero = numero;
         this.color = color;
         this.comodin = comodin;
-        // El controlador ya no es necesario aquí, pero lo mantenemos por si acaso.
 
-        // Usamos las dimensiones que acordamos para un encaje perfecto.
         setSize(28, 45);
         setPreferredSize(new Dimension(28, 45));
         setOpaque(false);
         initDrag();
     }
 
-    // Este constructor con Point ya no es necesario con la nueva lógica, pero se puede mantener.
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
             Controlador controlador, Point originalLocation, VistaTablero vista) {
         this.control = controlador;
@@ -134,9 +130,6 @@ public class FichaUI extends JPanel {
                     if (colocada) {
                         origen = Origen.TABLERO;
 
-                        // --- BORRA ESTA LÍNEA ---
-                        // vista.getPanelMano().removerFichaDeGruposInternos(FichaUI.this.idFicha);
-                        // Notifica al controlador (esto está bien)
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                         control.colocarFicha(gruposColocados);
                     } else {
@@ -181,8 +174,6 @@ public class FichaUI extends JPanel {
                 originalParent.add(FichaUI.this);
                 originalParent.revalidate();
                 originalParent.repaint();
-                //origen = Origen.MANO; aqui esto estaba mal por que tambien cambiaba el origen a mano si la soltabas en 
-                //otro lado q no fuera el tablero o la mano
             }
         };
         addMouseListener(ma);

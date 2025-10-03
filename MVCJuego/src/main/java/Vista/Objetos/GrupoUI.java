@@ -109,11 +109,9 @@ public class GrupoUI extends JPanel {
     public int getIndiceDeFicha(FichaUI ficha) {
         for (int i = 0; i < fichas.size(); i++) {
             if (fichas.get(i).getIdFicha() == ficha.getIdFicha()) {
-                System.out.println("[DEBUG - GrupoUI] Ficha encontrada en el índice: " + i);
                 return i;
             }
         }
-        System.err.println("[DEBUG - GrupoUI] ADVERTENCIA: No se encontró la ficha en el grupo.");
         return -1;
     }
 

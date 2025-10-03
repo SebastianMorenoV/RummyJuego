@@ -68,9 +68,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public void colocarFichasEnTablero(List<Grupo> nuevosGrupos) {
         // La lógica de validación de los grupos se mantiene en la entidad Grupo
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
-        for (Grupo nuevosGrupo : nuevosGrupos) {
-            System.out.println("Grupo: " + nuevosGrupo.getTipo() + " fichas: " + nuevosGrupo.getFichas());
-        }
         this.tablero.setFichasEnTablero(nuevosGrupos);
     }
 

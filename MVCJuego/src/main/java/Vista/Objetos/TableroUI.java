@@ -104,7 +104,6 @@ public class TableroUI extends JPanel {
      * Genera los grupos basándose en el estado visual actual del tablero.
      */
     public List<GrupoDTO> generarGruposDesdeCeldas() {
-        // 1. Construir una representación de la cuadrícula a partir del Map
         FichaUI[][] celdasTemporales = new FichaUI[filas][columnas];
         for (FichaUI ficha : fichasEnTablero.values()) {
             Point celda = calcularCeldaParaPunto(ficha.getLocation());
@@ -113,7 +112,6 @@ public class TableroUI extends JPanel {
             }
         }
 
-        // 2. Usar la misma lógica de antes sobre la cuadrícula temporal
         List<GrupoDTO> gruposEncontrados = new ArrayList<>();
         boolean[][] visitadas = new boolean[filas][columnas];
 
@@ -159,45 +157,41 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Restaura visualmente el tablero a la última disposición guardada.
+     * Restaura visualmente el tablero a la última disposición guardada. Esta
+     * versión es completamente autónoma y reconstruye los feedbacks basándose
+     * en su propio estado visual guardado, sin consultar al modelo.
      */
     public void revertirCambiosVisuales() {
-        // 1. Elimina TODOS los componentes actuales del panel.
         removeAll();
         fichasEnTablero.clear();
 
-        // 2. Vuelve a añadir solo las fichas del último estado válido en su posición exacta.
         for (Map.Entry<Integer, FichaUI> entry : fichasEnTableroValidas.entrySet()) {
             Integer idFicha = entry.getKey();
             FichaUI ficha = entry.getValue();
             Point pos = posicionesValidas.get(idFicha);
 
-            // Se vuelve a añadir la ficha al panel y al mapa de estado actual.
             add(ficha);
-            System.out.println("Ficha TableroUI: " + ficha);
-            ficha.setLocation(pos);
+            if (pos != null) {
+                ficha.setLocation(pos);
+            }
             fichasEnTablero.put(idFicha, ficha);
         }
 
-        // 3. Limpia CUALQUIER panel de feedback que haya quedado.
-        // Esta es la parte crucial que faltaba.
-        for (Component c : getComponents()) {
-            if (c instanceof JPanel && !(c instanceof FichaUI)) {
-                remove(c);
-            }
+        List<GrupoDTO> gruposRestaurados = generarGruposDesdeCeldas();
+
+        for (GrupoDTO grupo : gruposRestaurados) {
+            grupo.setTipo("Valido"); 
         }
 
-        // 4. Redibuja los feedbacks correctos basados en el estado revertido del modelo.
-        JuegoDTO juegoRevertido = modelo.getTablero();
-        if (juegoRevertido != null && juegoRevertido.getGruposEnTablero() != null) {
-            for (GrupoDTO grupoDTO : juegoRevertido.getGruposEnTablero()) {
+        if (gruposRestaurados != null) {
+            for (GrupoDTO grupoDTO : gruposRestaurados) {
                 if (grupoDTO.getFichasGrupo().isEmpty()) {
                     continue;
                 }
 
-                // Usamos la posición guardada de la primera ficha para dibujar el borde.
                 int primeraFichaId = grupoDTO.getFichasGrupo().get(0).getIdFicha();
                 Point posFicha = posicionesValidas.get(primeraFichaId);
+
                 if (posFicha != null) {
                     Point celdaAncla = calcularCeldaParaPunto(posFicha);
                     dibujarFeedbackParaGrupo(grupoDTO, celdaAncla);
@@ -221,7 +215,6 @@ public class TableroUI extends JPanel {
         }
         List<GrupoDTO> gruposDelModelo = juego.getGruposEnTablero();
 
-        // 1. Crear un conjunto de IDs de fichas que son válidas según el modelo.
         Set<Integer> idsValidosDelModelo = new HashSet<>();
         if (gruposDelModelo != null) {
             for (GrupoDTO grupo : gruposDelModelo) {
@@ -231,8 +224,6 @@ public class TableroUI extends JPanel {
             }
         }
 
-        // 2. Eliminar del tablero las fichas que el modelo ya no considera parte de la jugada.
-        // (Por ejemplo, si una ficha se regresó a la mano).
         Iterator<Map.Entry<Integer, FichaUI>> iter = fichasEnTablero.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<Integer, FichaUI> entry = iter.next();
@@ -242,14 +233,12 @@ public class TableroUI extends JPanel {
             }
         }
 
-        // 3. Eliminar todos los paneles de feedback viejos para redibujarlos.
         for (Component c : getComponents()) {
             if (c instanceof JPanel && !(c instanceof FichaUI)) {
                 remove(c);
             }
         }
 
-        // 4. Reorganizar las fichas en grupos contiguos y pintar el feedback.
         if (gruposDelModelo != null) {
             for (GrupoDTO grupoDTO : gruposDelModelo) {
                 if (grupoDTO.getFichasGrupo().isEmpty()) {
@@ -283,7 +272,6 @@ public class TableroUI extends JPanel {
         revalidate();
         repaint();
 
-        // 5. Lógica para guardar el estado visual si la jugada final es válida.
         if (esJugadaFinal) {
             boolean todaLaJugadaEsValida = true;
             if (gruposDelModelo != null) {
@@ -296,10 +284,8 @@ public class TableroUI extends JPanel {
             }
 
             if (todaLaJugadaEsValida) {
-                System.out.println("[VISTA] Jugada final válida. Guardando estado visual.");
                 guardarEstadoVisualValido();
             } else {
-                System.out.println("[VISTA] Jugada final contenía grupos inválidos. No se guarda el estado visual.");
             }
         }
     }
