@@ -162,8 +162,6 @@ public class TableroUI extends JPanel {
      * Restaura visualmente el tablero a la última disposición guardada.
      */
     public void revertirCambiosVisuales() {
-        System.out.println("[VISTA] Revertiendo cambios visuales...");
-
         // 1. Elimina TODOS los componentes actuales del panel.
         removeAll();
         fichasEnTablero.clear();
@@ -176,6 +174,7 @@ public class TableroUI extends JPanel {
 
             // Se vuelve a añadir la ficha al panel y al mapa de estado actual.
             add(ficha);
+            System.out.println("Ficha TableroUI: " + ficha);
             ficha.setLocation(pos);
             fichasEnTablero.put(idFicha, ficha);
         }
@@ -211,99 +210,80 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Sincroniza el tablero visual con el estado del Modelo. Este método
-     * reconstruye el tablero, creando las fichas que faltan y eliminando las
-     * que sobran para ser un reflejo fiel del modelo.
+     * Sincroniza el tablero visual con el estado del Modelo. Esta versión
+     * respeta las posiciones elegidas por el jugador, reposiciona los grupos y
+     * actualiza los feedbacks visuales.
      */
     public void repintarTablero(boolean esJugadaFinal) {
-        // 1. Obtiene los datos del modelo (la única fuente de verdad).
         JuegoDTO juego = modelo.getTablero();
         if (juego == null) {
             return;
         }
         List<GrupoDTO> gruposDelModelo = juego.getGruposEnTablero();
-        if (gruposDelModelo == null) {
-            gruposDelModelo = new ArrayList<>(); // Previene errores si la lista es nula
-        }
 
-        // 2. Crea un conjunto de todos los IDs de fichas que deberían estar en el tablero.
-        Set<Integer> idsDelModelo = new HashSet<>();
-        for (GrupoDTO grupo : gruposDelModelo) {
-            for (FichaJuegoDTO fichaDTO : grupo.getFichasGrupo()) {
-                idsDelModelo.add(fichaDTO.getIdFicha());
+        // 1. Crear un conjunto de IDs de fichas que son válidas según el modelo.
+        Set<Integer> idsValidosDelModelo = new HashSet<>();
+        if (gruposDelModelo != null) {
+            for (GrupoDTO grupo : gruposDelModelo) {
+                for (FichaJuegoDTO ficha : grupo.getFichasGrupo()) {
+                    idsValidosDelModelo.add(ficha.getIdFicha());
+                }
             }
         }
 
-        // 3. Elimina del panel las FichaUI que ya no existen en el modelo.
+        // 2. Eliminar del tablero las fichas que el modelo ya no considera parte de la jugada.
+        // (Por ejemplo, si una ficha se regresó a la mano).
         Iterator<Map.Entry<Integer, FichaUI>> iter = fichasEnTablero.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<Integer, FichaUI> entry = iter.next();
-            if (!idsDelModelo.contains(entry.getKey())) {
+            if (!idsValidosDelModelo.contains(entry.getKey())) {
                 this.remove(entry.getValue()); // Quitar del panel
                 iter.remove(); // Quitar del mapa de control
             }
         }
 
-        // 4. Crea y añade las FichaUI que están en el modelo pero faltan en la vista.
-        for (GrupoDTO grupo : gruposDelModelo) {
-            for (FichaJuegoDTO fichaDTO : grupo.getFichasGrupo()) {
-                if (!fichasEnTablero.containsKey(fichaDTO.getIdFicha())) {
-                    FichaUI nuevaFicha = new FichaUI(
-                            fichaDTO.getIdFicha(),
-                            fichaDTO.getNumeroFicha(),
-                            fichaDTO.getColor(),
-                            fichaDTO.isComodin(),
-                            control,
-                            vista // La instancia de VistaTablero a la que pertenece este panel
-                    );
-                    nuevaFicha.setOrigen(FichaUI.Origen.TABLERO);
-
-                    this.add(nuevaFicha);
-                    fichasEnTablero.put(nuevaFicha.getIdFicha(), nuevaFicha);
-                }
-            }
-        }
-
-        // 5. Limpia todos los paneles de feedback antiguos antes de volver a dibujar.
+        // 3. Eliminar todos los paneles de feedback viejos para redibujarlos.
         for (Component c : getComponents()) {
             if (c instanceof JPanel && !(c instanceof FichaUI)) {
                 remove(c);
             }
         }
 
-        // 6. Reposiciona sistemáticamente TODOS los grupos y dibuja su feedback.
-        int filaActual = 0;
-        for (GrupoDTO grupoDTO : gruposDelModelo) {
-            if (grupoDTO.getFichasGrupo().isEmpty()) {
-                continue;
-            }
-
-            // Colocamos cada grupo en una nueva fila, empezando en la columna 1.
-            Point celdaAnclaGrupo = new Point(1, filaActual);
-
-            // Reposiciona todas las fichas del grupo una al lado de la otra.
-            for (int i = 0; i < grupoDTO.getFichasGrupo().size(); i++) {
-                int idFichaActual = grupoDTO.getFichasGrupo().get(i).getIdFicha();
-                FichaUI fichaActualUI = fichasEnTablero.get(idFichaActual);
-                if (fichaActualUI != null) {
-                    centrarYPosicionarFicha(fichaActualUI, celdaAnclaGrupo.y, celdaAnclaGrupo.x + i);
+        // 4. Reorganizar las fichas en grupos contiguos y pintar el feedback.
+        if (gruposDelModelo != null) {
+            for (GrupoDTO grupoDTO : gruposDelModelo) {
+                if (grupoDTO.getFichasGrupo().isEmpty()) {
+                    continue;
                 }
-            }
 
-            // Dibuja el borde de feedback para el grupo ya posicionado.
-            dibujarFeedbackParaGrupo(grupoDTO, celdaAnclaGrupo);
+                // Encuentra la primera ficha del grupo para usar su posición como ancla.
+                int primeraFichaId = grupoDTO.getFichasGrupo().get(0).getIdFicha();
+                FichaUI primeraFichaUI = fichasEnTablero.get(primeraFichaId);
 
-            filaActual++; // Pasa a la siguiente fila para el próximo grupo.
-            if (filaActual >= this.filas) {
-                break; // Evita salirse de los límites si hay demasiados grupos.
+                if (primeraFichaUI == null) {
+                    // Si la ficha ancla no existe en la vista, no podemos hacer nada con este grupo.
+                    continue;
+                }
+                Point celdaAncla = calcularCeldaParaPunto(primeraFichaUI.getLocation());
+
+                // Reposiciona todas las fichas del grupo para que estén juntas a partir del ancla.
+                for (int i = 0; i < grupoDTO.getFichasGrupo().size(); i++) {
+                    int idFichaActual = grupoDTO.getFichasGrupo().get(i).getIdFicha();
+                    FichaUI fichaActualUI = fichasEnTablero.get(idFichaActual);
+                    if (fichaActualUI != null) {
+                        centrarYPosicionarFicha(fichaActualUI, celdaAncla.y, celdaAncla.x + i);
+                    }
+                }
+
+                // Dibuja el panel de feedback alrededor del grupo ya posicionado.
+                dibujarFeedbackParaGrupo(grupoDTO, celdaAncla);
             }
         }
 
-        // 7. Revalida y repinta el panel para mostrar todos los cambios.
         revalidate();
         repaint();
 
-        // 8. Lógica para guardar el estado visual solo si la jugada final es válida.
+        // 5. Lógica para guardar el estado visual si la jugada final es válida.
         if (esJugadaFinal) {
             boolean todaLaJugadaEsValida = true;
             if (gruposDelModelo != null) {
@@ -368,9 +348,13 @@ public class TableroUI extends JPanel {
         int y = (fila * altoCelda) + (altoCelda - ficha.getHeight()) / 2;
         ficha.setLocation(x, y);
     }
-
+    
     public Map<Integer, FichaUI> getFichasEnTableroValidas() {
         return fichasEnTableroValidas;
+    }
+
+    public Map<Integer, FichaUI> getFichasEnTablero() {
+        return fichasEnTablero;
     }
     
     

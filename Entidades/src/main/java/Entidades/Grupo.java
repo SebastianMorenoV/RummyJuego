@@ -16,12 +16,13 @@ public class Grupo {
     private int numFichas;
     private List<Ficha> fichas;
     boolean esTemporal;
+    
 
     public Grupo(String tipo, int numFichas, List<Ficha> fichas) {
         this.tipo = tipo;
         this.numFichas = numFichas;
         this.fichas = fichas;
-        this.esTemporal = true; 
+        this.esTemporal = true;
     }
 
     /**

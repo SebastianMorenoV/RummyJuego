@@ -12,6 +12,7 @@ import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -124,18 +125,20 @@ public class FichaUI extends JPanel {
                     // Si la ficha ya estaba en el tablero, primero la quitamos de su celda vieja.
                     if (origen == Origen.TABLERO) {
                         panelTablero.removerFicha(FichaUI.this.idFicha);
+
                     }
-                    
+
                     // Intentamos colocar la ficha en una nueva celda.
                     boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, dropPoint);
-                    System.out.println("Id ficha en tablero: " + FichaUI.this.getIdFicha());
 
                     if (colocada) {
-                        // Si se pudo colocar, su nuevo origen es el tablero.
                         origen = Origen.TABLERO;
+
+                        // --- BORRA ESTA LÍNEA ---
+                        // vista.getPanelMano().removerFichaDeGruposInternos(FichaUI.this.idFicha);
+                        // Notifica al controlador (esto está bien)
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                         control.colocarFicha(gruposColocados);
-                        System.out.println("1");
                     } else {
                         // Si no había espacio, la devolvemos a su origen (la mano).
                         devolverFichaAlOrigen();
@@ -144,19 +147,18 @@ public class FichaUI extends JPanel {
                     // Solo tiene sentido hacer esto si la ficha venia del tablero
                     if (origen == Origen.TABLERO) {
                         TableroUI tablero = vista.getPanelTablero();
-                        Map<Integer, FichaUI> fichasValidadas =  tablero.getFichasEnTableroValidas();
-                        
-                        if(fichasValidadas.containsValue(FichaUI.this)){
-                            System.out.println("Caiste");
-                            //panelTablero.removerFicha(FichaUI.this.idFicha);
+                        Map<Integer, FichaUI> fichasValidadas = tablero.getFichasEnTableroValidas();
+
+                        if (fichasValidadas.containsValue(FichaUI.this)) {
                             devolverFichaAlOrigen();
-                        }else{
-                            System.out.println("Intentando regresar ficha a la mano con ID: " + FichaUI.this.idFicha);
+                        } else {
                             control.regresarFichaAMano(FichaUI.this.idFicha);
+                            List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
+                            control.colocarFicha(gruposColocados);
+                            //control.colocarFicha(new GrupoDTO("Temporal", 1, new ArrayList<>, ));
                         }
-                        
-                    }
-                    else{
+
+                    } else {
                         /*si su origen no es tablero entonces es mano por lo que se debe
                         quedar donde mismo*/
                         devolverFichaAlOrigen();//para que se repinte
