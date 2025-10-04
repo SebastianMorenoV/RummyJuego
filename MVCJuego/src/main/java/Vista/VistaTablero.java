@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import javax.swing.JScrollPane;
 
 /**
  * Esta clase representa la vistaGeneral de el tablero y todos sus elementos de
@@ -318,16 +319,25 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    private javax.swing.JScrollPane scrollPaneMano;
-
     private void crearManoUI() {
         if (manoUI == null) {
             manoUI = new ManoUI();
             manoUI.setLocation(160, 380);
             manoUI.setSize(580, 120);
-            GUIjuego.add(manoUI);
+
+            // ScrollPane con scroll vertical obligatorio y horizontal si se necesita
+            JScrollPane scrollPane = new JScrollPane(
+                    manoUI,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            );
+
+            scrollPane.setBounds(160, 380, 580, 120); 
+            scrollPane.setBorder(null);
+
+            GUIjuego.add(scrollPane);
         }
-    }
+    }    
 
     /**
      * Metodo que repinta la mano colocandole las fichas necesarias para
