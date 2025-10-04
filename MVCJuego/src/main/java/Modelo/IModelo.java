@@ -14,5 +14,4 @@ import java.util.List;
  */
 public interface IModelo {
     public JuegoDTO getTablero();
-    public  List<FichaJuegoDTO> getMano();
 }

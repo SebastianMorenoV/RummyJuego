@@ -65,8 +65,8 @@ public class FichaUI extends JPanel {
         MouseAdapter ma = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!vista.esMiTurno()) {
-                    return; //Si NO es turno del jugador, ignora el clic y detiene toda la logica que intente hacer
+                if (getParent() != null && !getParent().isEnabled()) {
+                    return;
                 }
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
@@ -90,15 +90,22 @@ public class FichaUI extends JPanel {
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (getParent() != null && !getParent().isEnabled()) {
+                    return;
+                }
                 if (glassPane == null) {
                     return;
                 }
+
                 Point glassPoint = SwingUtilities.convertPoint(FichaUI.this, e.getPoint(), glassPane);
                 setLocation(glassPoint.x - glassPaneOffset.x, glassPoint.y - glassPaneOffset.y);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                if (getParent() != null && !getParent().isEnabled()) {
+                    return;
+                }
                 if (glassPane == null) {
                     return;
                 }

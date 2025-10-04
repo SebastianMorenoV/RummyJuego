@@ -1,5 +1,6 @@
 package Modelo;
 
+import DTO.ActualizacionDTO;
 import DTO.FichaJuegoDTO;
 import DTO.GrupoDTO;
 import DTO.JuegoDTO;
@@ -9,6 +10,7 @@ import Fachada.IJuegoRummy;
 import Fachada.JuegoRummyFachada;
 import Vista.Observador;
 import Vista.TipoEvento;
+import static Vista.TipoEvento.TOMO_FICHA;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ public class Modelo implements IModelo {
     private List<Observador> observadores;
     private final IJuegoRummy juego;
     private List<GrupoDTO> gruposDeTurnoDTO;
+    private Observador enTurno;
 
     public Modelo() {
         this.observadores = new ArrayList<>();
@@ -30,9 +33,11 @@ public class Modelo implements IModelo {
         this.gruposDeTurnoDTO = new ArrayList<>();
     }
 
-    // --- Métodos que delegan la lógica del juego a la Fachada ---
     public void iniciarJuego() {
+        enTurno = observadores.get(0);
+
         juego.iniciarPartida();
+
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
 
@@ -45,6 +50,16 @@ public class Modelo implements IModelo {
         notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         notificarObservadores(TipoEvento.REPINTAR_MANO);
         notificarObservadores(TipoEvento.TOMO_FICHA);
+        // 2. Llama a la Fachada para que cambie el contador de jugador interno
+        juego.siguienteTurno();
+
+        // 3. Actualiza la variable 'enTurno' del Modelo para que apunte al nuevo jugador
+        int indiceActual = observadores.indexOf(enTurno);
+        enTurno = observadores.get((indiceActual + 1) % observadores.size());
+
+        // 4. Envía UNA SOLA notificación que lo actualiza todo.
+        // Usamos CAMBIO_DE_TURNO como el evento principal que refresca toda la vista.
+        notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
     }
 
     public void colocarFicha(List<GrupoDTO> gruposPropuestos) {
@@ -65,7 +80,11 @@ public class Modelo implements IModelo {
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
         if (jugadaFueValida) {
+            // Lógica para cambiar de turno
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
+            int indiceActual = observadores.indexOf(enTurno);
+            enTurno = observadores.get((indiceActual + 1) % observadores.size());
+            notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
             if (juego.haGanadoElJugador()) {
                 // notificarObservadores(TipoEvento.JUEGO_TERMINADO);
             }
@@ -103,13 +122,6 @@ public class Modelo implements IModelo {
         return dto;
     }
 
-    @Override
-    public List<FichaJuegoDTO> getMano() {
-        return juego.getManoJugador().stream()
-                .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
-                .collect(Collectors.toList());
-    }
-
     // --- Métodos de ayuda para conversión DTO <-> Entidad ---
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
         List<Ficha> fichas = dto.getFichasGrupo().stream()
@@ -134,8 +146,47 @@ public class Modelo implements IModelo {
     }
 
     public void notificarObservadores(TipoEvento tipoEvento) {
-        for (Observador observer : new ArrayList<>(this.observadores)) {
-            observer.actualiza(this, tipoEvento);
+        // Itera sobre todos los observadores para enviarles una actualización personalizada.
+        for (Observador observer : this.observadores) {
+            // 1. Obtenemos el índice del observador para saber qué jugador es.
+            int indiceJugador = observadores.indexOf(observer);
+
+            // 2. Pedimos a la fachada la mano de ESE jugador específico.
+            List<Ficha> manoEntidad = juego.getManoDeJugador(indiceJugador);
+
+            // 3. La convertimos a una lista de DTOs de fichas.
+            List<FichaJuegoDTO> manoDTO = manoEntidad.stream()
+                    .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                    .collect(Collectors.toList());
+
+            // 4. Creamos el DTO con la mano específica de este jugador.
+            boolean esSuTurno = observer.equals(enTurno);
+            ActualizacionDTO dto = new ActualizacionDTO(tipoEvento, esSuTurno, manoDTO);
+            /*
+             * Decide a quién enviar la notificación basado en el tipo de evento.
+             */
+            switch (tipoEvento) {
+                // --- CASOS GLOBALES: Notificar a TODOS ---
+                case INCIALIZAR_FICHAS:
+                case ACTUALIZAR_TABLERO_TEMPORAL:
+                case JUGADA_VALIDA_FINALIZADA:
+                case JUGADA_INVALIDA_REVERTIR:
+                case CAMBIO_DE_TURNO:
+                case TOMO_FICHA:
+                    observer.actualiza(this, dto);
+                    break;
+
+                // --- CASOS ESPECÍFICOS: Notificar solo al jugador EN TURNO ---
+                case REPINTAR_MANO:
+                    if (esSuTurno) {
+                        observer.actualiza(this, dto);
+                    }
+                    break;
+
+                // Si hay un evento no contemplado, no se notifica para evitar errores.
+                default:
+                    break;
+            }
         }
     }
 

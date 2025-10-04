@@ -26,7 +26,6 @@ public class MazoUI extends JPanel implements MouseListener {
     String numeroFichasRestantes;
     Controlador control;
 
-    
     public MazoUI(String numeroFichasRestantes, Controlador control) {
         this.control = control;
         this.numeroFichasRestantes = numeroFichasRestantes;
@@ -42,14 +41,16 @@ public class MazoUI extends JPanel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (!isEnabled()) {
+            return;
+        }
         control.pasarTurno();
         JOptionPane.showMessageDialog(null,
-            "Ficha agarrada, Turno terminado",
-            "VISTA",
-            JOptionPane.WARNING_MESSAGE);
+                "Ficha agarrada, Turno terminado",
+                "VISTA",
+                JOptionPane.WARNING_MESSAGE);
     }
 
- 
     @Override
     public void mousePressed(MouseEvent e) {
     }
@@ -70,7 +71,7 @@ public class MazoUI extends JPanel implements MouseListener {
         this.numeroFichasRestantes = numeroFichasRestantes;
         repaint();
     }
-    
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
 package Fachada;
 
 import Entidades.Ficha;
@@ -11,9 +7,9 @@ import Entidades.Jugador;
 import java.util.List;
 
 /**
- * Interfaz que define el contrato para la lógica del juego de Rummy. Actúa como
- * una abstracción entre el Modelo y la implementación concreta del juego.
- */
+ 
+Interfaz que define el contrato para la lógica del juego de Rummy. Actúa como
+una abstracción entre el Modelo y la implementación concreta del juego.*/
 public interface IJuegoRummy {
 
     void iniciarPartida();
@@ -25,14 +21,14 @@ public interface IJuegoRummy {
     boolean validarYFinalizarTurno();
 
     void siguienteTurno();
-    
+
     Jugador getJugadorActual();
 
     void revertirCambiosDelTurno();
 
-    List<Ficha> getManoJugador();
-
     List<Grupo> getGruposEnTablero();
+
+    List<Ficha> getManoDeJugador(int indiceJugador);
 
     int getCantidadFichasMazo();
 

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Fachada;
 
 import Entidades.Ficha;
@@ -176,8 +172,11 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     // --- Getters para que el Modelo consulte el estado y cree los DTOs ---
     @Override
-    public List<Ficha> getManoJugador() {
-        return this.getJugadorActual().getManoJugador().getFichasEnMano();
+    public List<Ficha> getManoDeJugador(int indiceJugador) {
+        if (indiceJugador >= 0 && indiceJugador < jugadores.size()) {
+            return jugadores.get(indiceJugador).getManoJugador().getFichasEnMano();
+        }
+        return new ArrayList<>();
     }
 
     @Override

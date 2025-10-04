@@ -1,17 +1,14 @@
 package Vista;
 
 import Controlador.Controlador;
+import DTO.ActualizacionDTO;
 import DTO.FichaJuegoDTO;
-import DTO.GrupoDTO;
-import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
-import static com.sun.java.accessibility.util.AWTEventMonitor.addActionListener;
-import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,9 +19,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 
 /**
  * Esta clase representa la vistaGeneral de el tablero y todos sus elementos de
@@ -38,8 +32,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
-    private final int idJugador;
-    private boolean esMiTurno = false;
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -47,20 +39,14 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      *
      * @param control el control de el mvc.
      */
-    public VistaTablero(Controlador control, int idJugador) {
+    public VistaTablero(Controlador control) {
         this.control = control;
-        this.idJugador = idJugador;
         this.setSize(920, 550);
         this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         initComponents();
-    }
-
-    @Override
-    public int getIdJugador() {
-        return this.idJugador;
     }
 
 
@@ -157,9 +143,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
-        if (esMiTurno) {
-            control.terminarTurno();
-        }
+        control.terminarTurno();
+
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
@@ -182,101 +167,85 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JPanel panelFichasArmadas;
     // End of variables declaration//GEN-END:variables
     /**
-     * Metodo implementado por la interfaz observer
+     * Metodo implementado por la interfaz Observer. Reacciona a las
+     * notificaciones del Modelo para actualizar la interfaz gráfica.
      *
-     * @param modelo el modelo enteró con sus datos actualizados.
-     * @param tipoEvento el tipo de evento que se solicito , desde modelo.
+     * @param modelo El modelo del juego.
+     * @param dto El paquete de datos con el evento y el estado del turno.
      */
     @Override
-    public void actualiza(IModelo modelo, TipoEvento tipoEvento) {
+    public void actualiza(IModelo modelo, ActualizacionDTO dto) {
 
-        switch (tipoEvento) {
-            case INCIALIZAR_FICHAS:
-                iniciarComponentesDeJuego(modelo);
-                actualizarEstadoTurno(modelo);
-                break;
-            case TURNO_CAMBIADO:
-                actualizarEstadoTurno(modelo); // Actualiza el título y los controles
-                if (tableroUI != null) {
-                    
-                    tableroUI.repintarTablero(true);
+        // PRIMERO: Revisa si es el evento de inicialización.
+        if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
+            // Si es la inicialización, solo creamos los componentes y terminamos.
+            // NO intentamos habilitar/deshabilitar nada todavía.
+            iniciarComponentesDeJuego(modelo, dto);
+            habilitarControles(dto.esMiTurno());
+            return; // ¡Importante! Salimos del método para no ejecutar el resto.
+        }
+
+        // PARA TODOS LOS DEMÁS EVENTOS:
+        // 1. Ahora sí, con los componentes ya creados, habilitamos o deshabilitamos la UI.
+        habilitarControles(dto.esMiTurno());
+
+        // 2. Procesamos el evento específico.
+        switch (dto.getTipoEvento()) {
+            case CAMBIO_DE_TURNO:
+                if (dto.esMiTurno()) {
+                    setTitle("Rummy - ¡Es tu turno!");
+                } else {
+                    setTitle("Rummy - Esperando al oponente...");
                 }
-                repintarMano(modelo); // Repinta la mano 
-                repintarMazo(modelo); // Actualiza el contador de fichas del mazo
                 break;
+
             case REPINTAR_MANO:
-                repintarMano(modelo);
+                repintarMano(modelo, dto);
                 break;
+
             case ACTUALIZAR_TABLERO_TEMPORAL:
                 if (tableroUI != null) {
-                    // Llamamos al repintado sin guardar el estado
                     tableroUI.repintarTablero(false);
                 }
                 break;
+
             case JUGADA_VALIDA_FINALIZADA:
                 if (tableroUI != null) {
-                    // Llamamos al repintado y le decimos que guarde el estado
                     tableroUI.repintarTablero(true);
                 }
                 break;
+
             case JUGADA_INVALIDA_REVERTIR:
                 if (tableroUI != null) {
                     tableroUI.revertirCambiosVisuales();
                 }
                 break;
+
             case TOMO_FICHA:
                 repintarMazo(modelo);
                 break;
-
         }
 
-        btnOrdenarMayorAMenor.addMouseListener(new MouseAdapter() {
+        btnOrdenarMayorAMenor.addMouseListener(
+                new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent event) {
-                repintarManoOrdenadaPorNumero(modelo);
+            public void mouseClicked(MouseEvent event
+            ) {
+                repintarManoOrdenadaPorNumero(modelo, dto);
             }
-        });
+        }
+        );
 
-        btnOrdenarPorGrupos.addMouseListener(new MouseAdapter() {
+        btnOrdenarPorGrupos.addMouseListener(
+                new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent event) {
-                repintarManoOrdenadaPorGrupos(modelo);
+            public void mouseClicked(MouseEvent event
+            ) {
+                repintarManoOrdenadaPorGrupos(modelo, dto);
             }
-        });
-
-    }
-
-    /**
-     * *
-     * Comprobar el turno con un false o true. Devuelve el resultado.
-     */
-    public boolean esMiTurno() {
-        return this.esMiTurno;
-    }
-
-    private void actualizarEstadoTurno(IModelo modelo) {
-        JuegoDTO juegoDTO = modelo.getTablero();
-        this.esMiTurno = ("Jugador " + (this.idJugador + 1)).equals(juegoDTO.getJugadorActual());
-
-        // Dependiendo si es turno del jugador o no, se activa o desactiva el uso del mazo
-        this.btnFinalizarTurno.setEnabled(this.esMiTurno);
-        if (mazoUI != null) {
-            this.mazoUI.setEnabled(this.esMiTurno);
         }
+        );
 
-        // Igualmente con el tablero y mano
-        if (manoUI != null) {
-            this.manoUI.setEnabled(this.esMiTurno);
-        }
-        if (tableroUI != null) {
-            this.tableroUI.setEnabled(this.esMiTurno);
-        }
-
-        if (this.esMiTurno) {
-            this.setTitle("Rummy Juego - Tu turno");
-        } else {
-            this.setTitle("Rummy Juego - Esperando a " + juegoDTO.getJugadorActual());
-        }
     }
 
     public TableroUI getPanelTablero() {
@@ -327,12 +296,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      *
      * @param modelo el modelo de donde se sacan los datos para crearse.
      */
-    private void iniciarComponentesDeJuego(IModelo modelo) {
+    private void iniciarComponentesDeJuego(IModelo modelo, ActualizacionDTO dto) {
         crearTablero(modelo);
         crearManoUI();
-        repintarMano(modelo);
+        repintarMano(modelo, dto);
         crearMazo(modelo);
         cargarJugadores();
+        btnFinalizarTurno.setVisible(false);
         GUIjuego.add(fondo);
 
         GUIjuego.revalidate();
@@ -365,13 +335,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      *
      * @param modelo el modelo que pasa los datos a actualizar.
      */
-    private void repintarMano(IModelo modelo) {
+    private void repintarMano(IModelo modelo, ActualizacionDTO dto) {
         if (manoUI == null) {
             return;
         }
         manoUI.removeAll();
 
-        List<FichaJuegoDTO> fichasMano = modelo.getMano();
+        List<FichaJuegoDTO> fichasMano = dto.getManoDelJugador();
 
         validacionesDeManoUI(fichasMano);
     }
@@ -397,13 +367,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-    private void repintarManoOrdenadaPorGrupos(IModelo modelo) {
+    private void repintarManoOrdenadaPorGrupos(IModelo modelo, ActualizacionDTO dto) {
         if (manoUI == null) {
             return;
         }
         manoUI.removeAll();
 
-        List<FichaJuegoDTO> fichasMano = modelo.getMano();
+        List<FichaJuegoDTO> fichasMano = dto.getManoDelJugador();
 
         // Ordenamos la lista localmente
         fichasMano.sort(Comparator.comparingInt(FichaJuegoDTO::getNumeroFicha));
@@ -411,13 +381,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     }
 
-    private void repintarManoOrdenadaPorNumero(IModelo modelo) {
+    private void repintarManoOrdenadaPorNumero(IModelo modelo, ActualizacionDTO dto) {
         if (manoUI == null) {
             return;
         }
         manoUI.removeAll();
 
-        List<FichaJuegoDTO> fichasMano = modelo.getMano();
+        List<FichaJuegoDTO> fichasMano = dto.getManoDelJugador();
 
         // CUIDADO: Ordenamos la lista SÓLO para esta vista.
         fichasMano.sort(Comparator.comparing((FichaJuegoDTO f) -> f.getColor().toString())
@@ -465,4 +435,24 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         manoUI.repaint();
     }
 
+    public void habilitarControles(boolean estaEnTurno) {
+        // Asegúrate de que los componentes no sean nulos antes de usarlos
+        if (mazoUI != null) {
+            mazoUI.setEnabled(estaEnTurno);
+        }
+        if (btnFinalizarTurno != null) {
+            btnFinalizarTurno.setVisible(estaEnTurno);
+        }
+
+        // ----- ESTA ES LA LÍNEA CLAVE -----
+        // Antes: manoUI.setEnabled(false);
+        // Ahora:
+        if (manoUI != null) {
+            manoUI.setEnabled(estaEnTurno);
+        }
+
+        if (tableroUI != null) {
+            tableroUI.setEnabled(estaEnTurno);
+        }
+    }
 }
