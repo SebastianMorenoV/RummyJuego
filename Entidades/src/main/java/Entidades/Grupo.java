@@ -16,16 +16,12 @@ public class Grupo {
     private int numFichas;
     private List<Ficha> fichas;
     boolean esTemporal;
-    private int fila;
-    private int columna;
 
-    public Grupo(String tipo, int numFichas, List<Ficha> fichas, int fila, int columna) {
+    public Grupo(String tipo, int numFichas, List<Ficha> ficha) {
         this.tipo = tipo;
         this.numFichas = numFichas;
-        this.fichas = fichas;
+        this.fichas = ficha; // <-- CORRECCIÓN APLICADA
         this.esTemporal = true;
-        this.fila = fila;
-        this.columna = columna;
     }
 
     /**
@@ -173,14 +169,6 @@ public class Grupo {
 
     public void setFichas(List<Ficha> fichas) {
         this.fichas = fichas;
-    }
-
-    public int getFila() {
-        return fila;
-    }
-
-    public int getColumna() {
-        return columna;
     }
 
     public boolean esTemporal() {

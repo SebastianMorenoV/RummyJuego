@@ -3,6 +3,7 @@ package Vista;
 import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
 import DTO.GrupoDTO;
+import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;
@@ -32,11 +33,13 @@ import javax.swing.ScrollPaneConstants;
  * @author benja
  */
 public class VistaTablero extends javax.swing.JFrame implements Observador {
-    
+
     private Controlador control;
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
+    private final int idJugador;
+    private boolean esMiTurno = false;
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -44,14 +47,20 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      *
      * @param control el control de el mvc.
      */
-    public VistaTablero(Controlador control) {
+    public VistaTablero(Controlador control, int idJugador) {
         this.control = control;
+        this.idJugador = idJugador;
         this.setSize(920, 550);
         this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         initComponents();
+    }
+
+    @Override
+    public int getIdJugador() {
+        return this.idJugador;
     }
 
 
@@ -148,21 +157,19 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
-        if (tableroUI != null) {
-            List<GrupoDTO> gruposColocados = tableroUI.generarGruposDesdeCeldas();
-            control.colocarFicha(gruposColocados);
+        if (esMiTurno) {
             control.terminarTurno();
         }
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_btnOrdenarPorGruposMouseClicked
 
     private void btnOrdenarMayorAMenorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarMayorAMenorMouseClicked
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
 
 
@@ -182,10 +189,20 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      */
     @Override
     public void actualiza(IModelo modelo, TipoEvento tipoEvento) {
-        
+
         switch (tipoEvento) {
             case INCIALIZAR_FICHAS:
                 iniciarComponentesDeJuego(modelo);
+                actualizarEstadoTurno(modelo);
+                break;
+            case TURNO_CAMBIADO:
+                actualizarEstadoTurno(modelo); // Actualiza el título y los controles
+                if (tableroUI != null) {
+                    
+                    tableroUI.repintarTablero(true);
+                }
+                repintarMano(modelo); // Repinta la mano 
+                repintarMazo(modelo); // Actualiza el contador de fichas del mazo
                 break;
             case REPINTAR_MANO:
                 repintarMano(modelo);
@@ -210,29 +227,62 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case TOMO_FICHA:
                 repintarMazo(modelo);
                 break;
-            
+
         }
-        
+
         btnOrdenarMayorAMenor.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {
                 repintarManoOrdenadaPorNumero(modelo);
             }
         });
-        
+
         btnOrdenarPorGrupos.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {
                 repintarManoOrdenadaPorGrupos(modelo);
             }
         });
-        
+
     }
-    
+
+    /**
+     * *
+     * Comprobar el turno con un false o true. Devuelve el resultado.
+     */
+    public boolean esMiTurno() {
+        return this.esMiTurno;
+    }
+
+    private void actualizarEstadoTurno(IModelo modelo) {
+        JuegoDTO juegoDTO = modelo.getTablero();
+        this.esMiTurno = ("Jugador " + (this.idJugador + 1)).equals(juegoDTO.getJugadorActual());
+
+        // Dependiendo si es turno del jugador o no, se activa o desactiva el uso del mazo
+        this.btnFinalizarTurno.setEnabled(this.esMiTurno);
+        if (mazoUI != null) {
+            this.mazoUI.setEnabled(this.esMiTurno);
+        }
+
+        // Igualmente con el tablero y mano
+        if (manoUI != null) {
+            this.manoUI.setEnabled(this.esMiTurno);
+        }
+        if (tableroUI != null) {
+            this.tableroUI.setEnabled(this.esMiTurno);
+        }
+
+        if (this.esMiTurno) {
+            this.setTitle("Rummy Juego - Tu turno");
+        } else {
+            this.setTitle("Rummy Juego - Esperando a " + juegoDTO.getJugadorActual());
+        }
+    }
+
     public TableroUI getPanelTablero() {
         return tableroUI;
     }
-    
+
     public ManoUI getPanelMano() {
         return this.manoUI;
     }
@@ -245,27 +295,27 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         try {
             Path path = new File(rutaImagen).toPath();
             byte[] imagenAvatarBytes = Files.readAllBytes(path);
-            
+
             JugadorUI jugador1 = new JugadorUI("Sebastian", 7, imagenAvatarBytes);
             jugador1.setSize(150, 150);
             jugador1.setLocation(-10, -10);
             GUIjuego.add(jugador1);
-            
+
             JugadorUI jugador2 = new JugadorUI("Benjamin", 15, imagenAvatarBytes);
             jugador2.setSize(150, 150);
             jugador2.setLocation(-10, 360);
             GUIjuego.add(jugador2);
-            
+
             JugadorUI jugador3 = new JugadorUI("Luciano", 10, imagenAvatarBytes);
             jugador3.setSize(150, 150);
             jugador3.setLocation(760, -10);
             GUIjuego.add(jugador3);
-            
+
             JugadorUI jugador4 = new JugadorUI("Mr.Fitch", 5, imagenAvatarBytes);
             jugador4.setSize(150, 150);
             jugador4.setLocation(760, 360);
             GUIjuego.add(jugador4);
-            
+
         } catch (IOException e) {
             System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
         }
@@ -284,11 +334,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         crearMazo(modelo);
         cargarJugadores();
         GUIjuego.add(fondo);
-        
+
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
-    
+
     private void crearTablero(IModelo modelo) {
         if (tableroUI == null) {
             tableroUI = new TableroUI(modelo, control, this);
@@ -297,9 +347,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             GUIjuego.add(tableroUI);
         }
     }
-    
+
     private javax.swing.JScrollPane scrollPaneMano;
-    
+
     private void crearManoUI() {
         if (manoUI == null) {
             manoUI = new ManoUI();
@@ -320,12 +370,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             return;
         }
         manoUI.removeAll();
-        
+
         List<FichaJuegoDTO> fichasMano = modelo.getMano();
 
         validacionesDeManoUI(fichasMano);
     }
-    
+
     private void crearMazo(IModelo modelo) {
         if (mazoUI == null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
@@ -337,7 +387,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             GUIjuego.add(mazoUI);
         }
     }
-    
+
     private void repintarMazo(IModelo modelo) {
         if (mazoUI != null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
@@ -346,27 +396,27 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             });
         }
     }
-    
+
     private void repintarManoOrdenadaPorGrupos(IModelo modelo) {
         if (manoUI == null) {
             return;
         }
         manoUI.removeAll();
-        
+
         List<FichaJuegoDTO> fichasMano = modelo.getMano();
 
         // Ordenamos la lista localmente
         fichasMano.sort(Comparator.comparingInt(FichaJuegoDTO::getNumeroFicha));
         validacionesDeManoUI(fichasMano);
-        
+
     }
-    
+
     private void repintarManoOrdenadaPorNumero(IModelo modelo) {
         if (manoUI == null) {
             return;
         }
         manoUI.removeAll();
-        
+
         List<FichaJuegoDTO> fichasMano = modelo.getMano();
 
         // CUIDADO: Ordenamos la lista SÓLO para esta vista.
@@ -374,12 +424,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 .thenComparingInt(FichaJuegoDTO::getNumeroFicha));
         validacionesDeManoUI(fichasMano);
     }
-    
+
     public void validacionesDeManoUI(List<FichaJuegoDTO> fichasMano) {
         // APLICAMOS LA LÓGICA DE FILTRADO QUE TIENES
         Collection<FichaUI> fichasEnTablero = tableroUI.getFichasEnTablero().values();
         Collection<FichaUI> fichasValidasEnTablero = tableroUI.getFichasEnTableroValidas().values();
-        
+
         for (FichaJuegoDTO fichaDTO : fichasMano) {
             boolean yaEstaEnTablero = false;
             for (FichaUI fichaTablero : fichasEnTablero) {
@@ -388,7 +438,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     break; // La encontramos, no hace falta seguir buscando en esta lista.
                 }
             }
-            
+
             if (!yaEstaEnTablero) { // Si aún no la hemos encontrado, buscamos en la otra lista.
                 for (FichaUI fichaTablero : fichasValidasEnTablero) {
                     if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
@@ -414,5 +464,5 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         manoUI.revalidate();
         manoUI.repaint();
     }
-    
+
 }

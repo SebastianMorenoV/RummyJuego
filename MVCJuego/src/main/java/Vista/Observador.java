@@ -9,7 +9,9 @@ import Modelo.IModelo;
 /**
  *
  * @author moren
+ * @author chris
  */
 public interface Observador {
     public void actualiza(IModelo modelo, TipoEvento tipoEvento);
+    public int getIdJugador();
 }

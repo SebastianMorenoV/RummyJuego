@@ -6,6 +6,7 @@ package Fachada;
 
 import Entidades.Ficha;
 import Entidades.Grupo;
+import Entidades.Jugador;
 
 import java.util.List;
 
@@ -22,7 +23,11 @@ public interface IJuegoRummy {
     void colocarFichasEnTablero(List<Grupo> nuevosGrupos);
 
     boolean validarYFinalizarTurno();
+
+    void siguienteTurno();
     
+    Jugador getJugadorActual();
+
     void revertirCambiosDelTurno();
 
     List<Ficha> getManoJugador();
@@ -32,7 +37,7 @@ public interface IJuegoRummy {
     int getCantidadFichasMazo();
 
     boolean haGanadoElJugador();
-    
+
     boolean intentarRegresarFichaAMano(int idFicha);
-    
+
 }

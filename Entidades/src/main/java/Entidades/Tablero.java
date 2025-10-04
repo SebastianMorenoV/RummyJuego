@@ -120,7 +120,7 @@ public class Tablero {
                     List<Ficha> fichasCopia = g.getFichas().stream()
                             .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
                             .collect(Collectors.toList());
-                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia, g.getFila(), g.getColumna());
+                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
                 })
                 .collect(Collectors.toList());
         copia.setFichasEnTablero(gruposCopia);

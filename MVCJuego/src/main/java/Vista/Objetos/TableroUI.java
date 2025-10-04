@@ -229,8 +229,8 @@ public class TableroUI extends JPanel {
         while (iter.hasNext()) {
             Map.Entry<Integer, FichaUI> entry = iter.next();
             if (!idsValidosDelModelo.contains(entry.getKey())) {
-                this.remove(entry.getValue()); // Quitar del panel
-                iter.remove(); // Quitar del mapa de control
+                this.remove(entry.getValue());
+                iter.remove();
             }
         }
 
@@ -248,12 +248,12 @@ public class TableroUI extends JPanel {
 
                 Point celdaAncla = new Point(grupoDTO.getColumna(), grupoDTO.getFila());
 
-                // Reposiciona todas las fichas del grupo para que estén juntas a partir del ancla.
+                // Reposicionar las fichas
                 for (int i = 0; i < grupoDTO.getFichasGrupo().size(); i++) {
                     FichaJuegoDTO fichaDTO = grupoDTO.getFichasGrupo().get(i);
                     FichaUI fichaActualUI = fichasEnTablero.get(fichaDTO.getIdFicha());
 
-                    if (fichaActualUI == null) { // La ficha no está, la creamos
+                    if (fichaActualUI == null) {
                         fichaActualUI = new FichaUI(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(), fichaDTO.getColor(), fichaDTO.isComodin(), control, vista);
                         fichasEnTablero.put(fichaDTO.getIdFicha(), fichaActualUI);
                         this.add(fichaActualUI);
@@ -261,7 +261,6 @@ public class TableroUI extends JPanel {
                     centrarYPosicionarFicha(fichaActualUI, celdaAncla.y, celdaAncla.x + i);
                 }
 
-                // Dibuja el panel de feedback alrededor del grupo ya posicionado.
                 dibujarFeedbackParaGrupo(grupoDTO, celdaAncla);
             }
         }

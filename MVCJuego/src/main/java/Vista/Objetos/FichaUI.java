@@ -65,6 +65,9 @@ public class FichaUI extends JPanel {
         MouseAdapter ma = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (!vista.esMiTurno()) {
+                    return; //Si NO es turno del jugador, ignora el clic y detiene toda la logica que intente hacer
+                }
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
                 glassPaneOffset = e.getPoint();

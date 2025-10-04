@@ -9,7 +9,9 @@ import Entidades.Grupo;
 import Entidades.Jugador;
 import Entidades.Mano;
 import Entidades.Tablero;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 
 import java.util.List;
 
@@ -22,7 +24,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     // --- Atributos de Estado del Juego  ---
     private Tablero tablero;
-    private Jugador jugador;
+    private List<Jugador> jugadores;
+    private int jugadorActual;
     private boolean primerMovimientoRealizado;
 
     // --- Atributos para Revertir Turno ---
@@ -31,7 +34,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     public JuegoRummyFachada() {
         this.tablero = new Tablero();
-        this.jugador = new Jugador();
+        this.jugadores = new ArrayList<>();
+        this.jugadorActual = 0;
         this.primerMovimientoRealizado = false;
     }
 
@@ -41,21 +45,44 @@ public class JuegoRummyFachada implements IJuegoRummy {
      */
     @Override
     public void iniciarPartida() {
-        this.jugador = new Jugador("Sebas", "B1", new Mano());
+        //Se crean dos jugadores, uno en cada vista del juego
+        this.jugadores.add(new Jugador("Jugador 1", "B1", new Mano()));
+        this.jugadores.add(new Jugador("Jugador 2", "B2", new Mano()));
+
         this.tablero.crearMazoCompleto();
-        this.tablero.repartirMano(jugador, 14);
+
+        for (Jugador jugador : this.jugadores) {
+            this.tablero.repartirMano(jugador, 14);
+        }
+
         guardarEstadoTurno();
     }
 
     /**
-     * El jugador toma una ficha del mazo y la agrega a su mano.
+     * Se obtiene al jugador que actualmente tenga su turno.
+     */
+    public Jugador getJugadorActual() {
+        return this.jugadores.get(this.jugadorActual);
+    }
+
+    /**
+     * El jugador actual toma una ficha del mazo y la agrega a su mano.
      */
     @Override
     public void jugadorTomaFichaDelMazo() {
         Ficha fichaTomada = tablero.tomarFichaMazo();
         if (fichaTomada != null) {
-            jugador.agregarFichaAJugador(fichaTomada);
+            getJugadorActual().agregarFichaAJugador(fichaTomada);
         }
+    }
+
+    /**
+     * Se pasa al siguiente turno, dandole el turno al siguiente jugador.
+     */
+    @Override
+    public void siguienteTurno() {
+        this.jugadorActual = (this.jugadorActual + 1) % this.jugadores.size();
+        guardarEstadoTurno();
     }
 
     /**
@@ -73,12 +100,34 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
+     * Compara el estado actual del tablero con el que se guardo al inicio del
+     * turno para confirmar si el jugador movio alguna ficha o no.
+     *
+     * @return true si se movieron fichas, false si no.
+     */
+    private boolean haCambiadoElTablero() {
+        // Se obtienen los IDs de las fichas]
+        List<Integer> idsActuales = this.tablero.getTodosLosIdsDeFichas();
+        List<Integer> idsInicioTurno = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
+
+        // Comparamos las cantidades. Si es distinta a la que se habia guardado, significa que hubo un cambio en el tablero
+        if (idsActuales.size() != idsInicioTurno.size()) {
+            return true;
+        }
+
+        // Si tienen el mismo tamaño, comparamos los IDs.
+        // Usamos el hashset para ignorar el orden de estas.
+        return !new HashSet<>(idsActuales).equals(new HashSet<>(idsInicioTurno));
+    }
+
+    /**
      * Valida la jugada actual en el tablero. Si es válida, confirma los
      * cambios. Si no, revierte el tablero y la mano del jugador al estado de
-     * inicio de turno.
+     * inicio de turno. Si el jugador decide por si mismo, finalizar el turno,
+     * se da por terminado y pasa el turno al siguiente jugador.
      *
-     * @return true si la jugada fue válida y se confirmó, false si fue inválida
-     * y se revirtió.
+     * @return true si la jugada fue valida y/o se confirmo, false si fue
+     * invalida y se revirtio.
      */
     @Override
     public boolean validarYFinalizarTurno() {
@@ -106,9 +155,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
             this.primerMovimientoRealizado = true;
         }
 
-        // Orquesta la actualización de la mano del jugador
+        // Orquesta la actualizacion de la mano del jugador
         List<Integer> idsEnTablero = this.tablero.getTodosLosIdsDeFichas();
-        this.jugador.getManoJugador().removerFichasJugadas(idsEnTablero);
+        this.getJugadorActual().getManoJugador().removerFichasJugadas(idsEnTablero);
 
         // Prepara el siguiente turno
         guardarEstadoTurno();
@@ -116,19 +165,19 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     private void revertirCambiosTurno() {
         this.tablero = this.tableroAlInicioDelTurno;
-        this.jugador.setManoJugador(this.manoAlInicioDelTurno);
+        this.getJugadorActual().setManoJugador(this.manoAlInicioDelTurno);
         // El estado guardado se mantiene, no se vuelve a llamar a guardarEstadoTurno()
     }
 
     private void guardarEstadoTurno() {
         this.tableroAlInicioDelTurno = this.tablero.copiaProfunda();
-        this.manoAlInicioDelTurno = this.jugador.getManoJugador().copiaProfunda();
+        this.manoAlInicioDelTurno = this.getJugadorActual().getManoJugador().copiaProfunda();
     }
 
     // --- Getters para que el Modelo consulte el estado y cree los DTOs ---
     @Override
     public List<Ficha> getManoJugador() {
-        return this.jugador.getManoJugador().getFichasEnMano();
+        return this.getJugadorActual().getManoJugador().getFichasEnMano();
     }
 
     @Override
@@ -143,9 +192,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     @Override
     public boolean haGanadoElJugador() {
-        return this.jugador.haGanado();
+        return this.getJugadorActual().haGanado();
     }
-    
+
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
         // Filtramos para quedarnos solo con los grupos que NO son temporales.
@@ -170,5 +219,5 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
         return false; // No se encontró la ficha para remover
     }
-    
+
 }

@@ -94,10 +94,6 @@ public class FichaJuegoDTO {
         this.columna = columna;
     }
 
-    public Ficha toFicha(int x, int y) {
-        return new Ficha(this.idFicha, this.numeroFicha, this.color, this.comodin);
-    }
-
     @Override
     public String toString() {
         return "FichaJuegoDTO{" + "idFicha=" + idFicha + ", numeroFicha=" + numeroFicha + ", color=" + color + ", comodin=" + comodin + '}';

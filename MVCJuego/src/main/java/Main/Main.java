@@ -7,6 +7,7 @@ package Main;
 import Controlador.Controlador;
 import Modelo.Modelo;
 import Vista.VistaTablero;
+
 /**
  *
  * @author benja
@@ -19,16 +20,16 @@ public class Main {
     public static void main(String[] args) {
         Modelo modelo = new Modelo();
         Controlador controlador = new Controlador(modelo);
-        VistaTablero vista = new VistaTablero(controlador);
-        modelo.agregarObservador(vista);
-        
-        VistaTablero vistaJugadoresEnEspera = new VistaTablero(controlador);
-        modelo.agregarObservador(vistaJugadoresEnEspera);
-        
-        
+
+        // Creas la vista para el Jugador 1 (ID 0)
+        VistaTablero vistaJugador1 = new VistaTablero(controlador, 0);
+        modelo.agregarObservador(vistaJugador1);
+
+        // Creas la vista para el Jugador 2 (ID 1)
+        VistaTablero vistaJugador2 = new VistaTablero(controlador, 1);
+        modelo.agregarObservador(vistaJugador2);
+
         controlador.iniciarJuego();
-      
-        
     }
-    
+
 }
