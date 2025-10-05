@@ -17,6 +17,10 @@ public class Jugador {
         this.manoJugador = manoJugador;
     }
 
+    /**
+     *  Agrega una ficha a la mano del jugador 
+     * @param ficha 
+     */
     public void agregarFichaAJugador(Ficha ficha) {
         this.manoJugador.getFichasEnMano().add(ficha);
     }

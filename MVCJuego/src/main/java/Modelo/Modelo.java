@@ -33,6 +33,14 @@ public class Modelo implements IModelo {
         this.gruposDeTurnoDTO = new ArrayList<>();
     }
 
+    /**
+     * Metodo para iniciar el juego. Indicamos que el primero jugador del turno
+     * sera el 0 de la lista de observadores, despues le hablamos a la fachada
+     * para iniciar la partida que basicamente se añaden los jugadores, se
+     * añaden al mazo las fichas y se reparten de este mismo mazo las fichas a
+     * los jugadores, despues notificamos al observer que el tipo de evento es
+     * inicializar_Fichas para que se pinten en la mano
+     */
     public void iniciarJuego() {
         enTurno = observadores.get(0);
 
@@ -41,6 +49,19 @@ public class Modelo implements IModelo {
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
 
+    /**
+     * Metodo para tomar una ficha del mazo. Este metodo nos sirve para cuando
+     * un jugador no puede hacer alguna jugada o movimiento y tiene que tomar
+     * una ficha del mazo, comenzando con revertir los cambios del turno por si
+     * movio algo o coloco una ficha generando un grupo invalido para poder
+     * notificar a los observadores y regresar todo tipo de movimiento a como
+     * estaba en el inicio de su turno. Despues de esto el metodo llama a la
+     * fachada para indicar que es turno del siguiente jugador, despues
+     * actualiza a la variable "enTurno" para que sea el siguiente jugador el
+     * que este en turno, por ultimo se notifica al observador del TipoEvento de
+     * cambio de turno para indicar en el titulo de la vista que esta en turno o
+     * en espera
+     */
     public void tomarFichaMazo() {
         // revertir jugada temporal del tablero
         juego.revertirCambiosDelTurno();
@@ -62,6 +83,14 @@ public class Modelo implements IModelo {
         notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
     }
 
+    /**
+     * Metodo utilizado para colocar una ficha en el tablero. Primero obtenemos
+     * los grupos que se esten creando en el turno para convertirlos de DTO a
+     * entidad, despues llamamos al metodo "colocarFichasEnTablero" desde la
+     * fachada para despues actualizar el tablero temporalmente
+     *
+     * @param gruposPropuestos
+     */
     public void colocarFicha(List<GrupoDTO> gruposPropuestos) {
         this.gruposDeTurnoDTO = gruposPropuestos;
 
@@ -76,6 +105,13 @@ public class Modelo implements IModelo {
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
     }
 
+    /**
+     * Metodo en el que se termina un turno de un jugador. Primero obtenemos
+     * desde la fachada si la jugada fue valida y la guardamos en un booleano.
+     * si la jugada fue valida se repinta el tablero con el tipoEvento de
+     * jugada_valida_finalizar y se le pasa el turno al siguiente jugador . Si
+     * la jugada fue invalida se revierten los cambios hechos en el turno
+     */
     public void terminarTurno() {
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
@@ -190,6 +226,17 @@ public class Modelo implements IModelo {
         }
     }
 
+    /**
+     * Metodo para regresar la ficha a la mano. primero se calcula si la ficha
+     * fue regresada exitosamente con "boolean fueRegresadaExitosamente", si
+     * este booleano es true esto indica que la ficha era temporal y regreso a
+     * la mano para despues notificar a los observadores, actualizar el tablero
+     * y repintar la mano. si el booleano es false esto nos indica que la ficha
+     * ya pertenece a un grupo validado dentro del tablero, por lo que solo se
+     * revierten los cambios y la ficha regresa a su origen
+     *
+     * @param idFicha para indicar que ficha se quiere regresar
+     */
     public void regresarFichaAMano(int idFicha) {
         // Se delega la logica y la validacion a la fachada del juego
         boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);

@@ -177,20 +177,14 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     @Override
     public void actualiza(IModelo modelo, ActualizacionDTO dto) {
 
-        // PRIMERO: Revisa si es el evento de inicialización.
         if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
-            // Si es la inicialización, solo creamos los componentes y terminamos.
-            // NO intentamos habilitar/deshabilitar nada todavía.
             iniciarComponentesDeJuego(modelo, dto);
             habilitarControles(dto.esMiTurno());
-            return; // ¡Importante! Salimos del método para no ejecutar el resto.
+            return; 
         }
 
-        // PARA TODOS LOS DEMÁS EVENTOS:
-        // 1. Ahora sí, con los componentes ya creados, habilitamos o deshabilitamos la UI.
         habilitarControles(dto.esMiTurno());
 
-        // 2. Procesamos el evento específico.
         switch (dto.getTipoEvento()) {
             case CAMBIO_DE_TURNO:
                 if (dto.esMiTurno()) {
@@ -258,7 +252,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
 
     /**
-     * Metodo para cargar las imagenes de jugadores aun no terminado.
+     * Metodo para cargar las imagenes de jugadores aun no terminado.MOCK
      */
     private void cargarJugadores() {
         String rutaImagen = "src/main/resources/avatares/avatar.png";
@@ -309,7 +303,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
-
+    /**
+     * Metodo para crear el Tablero visualmente.
+     * @param modelo
+     */
     private void crearTablero(IModelo modelo) {
         if (tableroUI == null) {
             tableroUI = new TableroUI(modelo, control, this);
@@ -319,25 +316,27 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
+    /**
+     * Metodo para crear la Mano visualmente.
+     */
     private void crearManoUI() {
         if (manoUI == null) {
             manoUI = new ManoUI();
             manoUI.setLocation(160, 380);
             manoUI.setSize(580, 120);
 
-            // ScrollPane con scroll vertical obligatorio y horizontal si se necesita
             JScrollPane scrollPane = new JScrollPane(
                     manoUI,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
             );
 
-            scrollPane.setBounds(160, 380, 580, 120); 
+            scrollPane.setBounds(160, 380, 580, 120);
             scrollPane.setBorder(null);
 
             GUIjuego.add(scrollPane);
         }
-    }    
+    }
 
     /**
      * Metodo que repinta la mano colocandole las fichas necesarias para
@@ -356,6 +355,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         validacionesDeManoUI(fichasMano);
     }
 
+    
+    /**
+     * Metodo para crear el mazo visual en el tablero.
+     *
+     * @param modelo para obtener las fichas restantes del juego
+     */
     private void crearMazo(IModelo modelo) {
         if (mazoUI == null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
@@ -368,6 +373,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
+    /**
+     * Metodo para repintar el mazo o "actualizar" dentro del tablero. actualiza
+     * el numero de fichas restantes en el juego.
+     *
+     * @param modelo para obtener las fichas restantes del juego
+     */
     private void repintarMazo(IModelo modelo) {
         if (mazoUI != null) {
             int fichasRestantes = modelo.getTablero().getFichasMazo();
@@ -377,6 +388,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
+     /**
+     * 
+     * Metodo que repinta la mano del jugador en la interfaz con un orden de "Grupos". 
+     * ordenando las fichas por grupos en la mano
+     * @param modelo
+     * @param dto objeto con la info del jugador actualizada (mano)
+     */
     private void repintarManoOrdenadaPorGrupos(IModelo modelo, ActualizacionDTO dto) {
         if (manoUI == null) {
             return;
@@ -385,12 +403,19 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         List<FichaJuegoDTO> fichasMano = dto.getManoDelJugador();
 
-        // Ordenamos la lista localmente
         fichasMano.sort(Comparator.comparingInt(FichaJuegoDTO::getNumeroFicha));
         validacionesDeManoUI(fichasMano);
 
     }
 
+    /**
+     *
+     * Metodo que repinta la mano del jugador en la interfaz con un orden de
+     * "Numero". ordenando las fichas por numero en la mano
+     *
+     * @param modelo
+     * @param dto objeto con la info del jugador actualizada (mano)
+     */
     private void repintarManoOrdenadaPorNumero(IModelo modelo, ActualizacionDTO dto) {
         if (manoUI == null) {
             return;
@@ -399,14 +424,19 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         List<FichaJuegoDTO> fichasMano = dto.getManoDelJugador();
 
-        // CUIDADO: Ordenamos la lista SÓLO para esta vista.
         fichasMano.sort(Comparator.comparing((FichaJuegoDTO f) -> f.getColor().toString())
                 .thenComparingInt(FichaJuegoDTO::getNumeroFicha));
         validacionesDeManoUI(fichasMano);
     }
 
+    /**
+     * Metodo para hacer validaciones en ManoUI. Valida si una ficha ya esta
+     * colocada en el tablero para no mostrarla en la mano o si todavia
+     * pertenece a la mano para no duplicarla
+     *
+     * @param fichasMano fichas que tiene la mano
+     */
     public void validacionesDeManoUI(List<FichaJuegoDTO> fichasMano) {
-        // APLICAMOS LA LÓGICA DE FILTRADO QUE TIENES
         Collection<FichaUI> fichasEnTablero = tableroUI.getFichasEnTablero().values();
         Collection<FichaUI> fichasValidasEnTablero = tableroUI.getFichasEnTableroValidas().values();
 
@@ -415,20 +445,19 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             for (FichaUI fichaTablero : fichasEnTablero) {
                 if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
                     yaEstaEnTablero = true;
-                    break; // La encontramos, no hace falta seguir buscando en esta lista.
+                    break; 
                 }
             }
 
-            if (!yaEstaEnTablero) { // Si aún no la hemos encontrado, buscamos en la otra lista.
+            if (!yaEstaEnTablero) { 
                 for (FichaUI fichaTablero : fichasValidasEnTablero) {
                     if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
                         yaEstaEnTablero = true;
-                        break; // La encontramos, salimos del bucle.
+                        break; 
                     }
                 }
             }
 
-            // 4. Si después de buscar en ambas listas, la ficha NO está en el tablero, la agregamos a la mano.
             if (!yaEstaEnTablero) {
                 FichaUI fichaUI = new FichaUI(
                         fichaDTO.getIdFicha(),
@@ -445,8 +474,14 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         manoUI.repaint();
     }
 
+    /**
+     * Metodo que deja al jugador "jugar" en un turno. basicamente si no esta en
+     * turno se le bloquea el mazo, el boton de finalizar turno la mano y el
+     * tablero para que no pueda manipular el turno del que si esta en turno.
+     *
+     * @param estaEnTurno para verificar que este en turno
+     */
     public void habilitarControles(boolean estaEnTurno) {
-        // Asegúrate de que los componentes no sean nulos antes de usarlos
         if (mazoUI != null) {
             mazoUI.setEnabled(estaEnTurno);
         }
@@ -454,9 +489,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             btnFinalizarTurno.setVisible(estaEnTurno);
         }
 
-        // ----- ESTA ES LA LÍNEA CLAVE -----
-        // Antes: manoUI.setEnabled(false);
-        // Ahora:
         if (manoUI != null) {
             manoUI.setEnabled(estaEnTurno);
         }

@@ -102,7 +102,7 @@ public class GrupoUI extends JPanel {
     }
 
     /**
-     * Devuelve el índice (posición) de una ficha en la lista interna.
+     * Devuelve el indice (posicion) de una ficha en la lista interna.
      * @param ficha La ficha a buscar.
      * @return El índice de la ficha, o -1 si no se encuentra.
      */

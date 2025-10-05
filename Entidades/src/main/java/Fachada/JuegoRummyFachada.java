@@ -194,6 +194,14 @@ public class JuegoRummyFachada implements IJuegoRummy {
         return this.getJugadorActual().haGanado();
     }
 
+    /**
+     * Metodo en el que se regresan fichas a la mano. filtra por grupos no temporales para que no sean regresables cuando
+     * su grupo es valido y si esa validacion ya pasa y la ficha esta en un grupo invalido se intenta regresar a la mano
+     * y y se elimina la ficha del tablero, si la ficha se regreso a la mano regresa true, si no un false indicando que
+     * no fue regresada exitosamente
+     * @param idFicha
+     * @return 
+     */
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
         // Filtramos para quedarnos solo con los grupos que NO son temporales.
@@ -212,7 +220,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
         Ficha fichaParaRegresar = this.tablero.removerFicha(idFicha);
 
         if (fichaParaRegresar != null) {
-            //this.jugador.agregarFichaAJugador(fichaParaRegresar);
             return true;
         }
 

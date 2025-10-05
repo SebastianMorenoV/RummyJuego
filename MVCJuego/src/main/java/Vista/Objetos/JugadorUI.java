@@ -34,7 +34,6 @@ public class JugadorUI extends JPanel {
             try {
                 this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));
             } catch (IOException e) {
-                // Si hay un error, el objeto será null y se dibujará el avatar por defecto
                 this.avatarImage = null;
                 System.err.println("Error al decodificar la imagen del avatar: " + e.getMessage());
             }
@@ -72,7 +71,7 @@ public class JugadorUI extends JPanel {
         int avatarX = cardX + (cardWidth - avatarSize) / 2;
         int avatarY = cardY + (int) (cardHeight * 0.08);
 
-        // Si el objeto ya está decodificado, solo lo dibujamos
+        // Si el objeto ya esta decodificado, solo lo dibujamos
         if (avatarImage != null) {
             g2d.setClip(new Ellipse2D.Double(avatarX, avatarY, avatarSize, avatarSize));
             g2d.drawImage(avatarImage, avatarX, avatarY, avatarSize, avatarSize, this);

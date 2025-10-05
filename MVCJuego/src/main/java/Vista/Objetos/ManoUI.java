@@ -22,8 +22,8 @@ public class ManoUI extends JPanel {
 
     public ManoUI() {
         fichas = new ArrayList<>();
-        setPreferredSize(new Dimension(870, 150)); // altura ajustada para la mano
-        setOpaque(false); // dejamos transparente para que se vea el fondo marrón redondo
+        setPreferredSize(new Dimension(870, 150)); 
+        setOpaque(false);
 
     }
 
@@ -56,7 +56,7 @@ public class ManoUI extends JPanel {
     }
     
     /**
-     * Este método es llamado por Swing para posicionar y ordenar todos los componentes (fichas dentro)
+     * Este metodo es llamado por Swing para posicionar y ordenar todos los componentes (fichas dentro)
      * del contenedor (el panel ManoUI).
      * Aquí definimos la lógica de "wrapping" para colocar las fichas en filas sucesivas.
      */
@@ -75,21 +75,21 @@ public class ManoUI extends JPanel {
     }
     
     /**
-     * Este método le dice al JScrollPane qué tan grande debe ser el panel.
+     * Este metodo le dice al JScrollPane qué tan grande debe ser el panel.
      * El ancho es fijo, pero el alto crece a medida que se añaden filas.
      */
     @Override
     public Dimension getPreferredSize() {
         int numComponentes = getComponentCount();
         if (numComponentes == 0) {
-            // Devuelve un tamaño mínimo para que el panel vacío sea visible
+            
             return new Dimension(580, 120);
         }
 
         // El ancho siempre es el mismo, basado en 14 fichas por fila
         int panelWidth = MARGEN_IZQUIERDO + (FICHAS_POR_FILA * SEPARACION_HORIZONTAL);
         
-        // El alto se calcula basado en cuántas filas se necesitan
+        // El alto se calcula basado en cuantas filas se necesitan
         int numFilas = (int) Math.ceil((double) numComponentes / FICHAS_POR_FILA);
         int panelHeight = (numFilas * ALTURA_FILA) + (2 * MARGEN_VERTICAL);
         
@@ -101,15 +101,13 @@ public class ManoUI extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Fondo marrón redondeado
         g.setColor(new Color(156, 113, 17));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
     }
 
     public void removerFicha(FichaUI ficha) {
-        if (fichas.remove(ficha)) { // <-- PASO CLAVE: Remueve de la lista
-            this.remove(ficha); // Remueve visualmente
-            // Opcional: Reorganizar las fichas restantes si es necesario
+        if (fichas.remove(ficha)) { 
+            this.remove(ficha); 
             this.revalidate();
             this.repaint();
         }
@@ -117,7 +115,7 @@ public class ManoUI extends JPanel {
     }
 
     public void limpiarMano() {
-        this.removeAll(); // Limpia visualmente
-        this.fichas.clear(); // Limpia la lista lógica
+        this.removeAll(); 
+        this.fichas.clear(); 
     }
 }

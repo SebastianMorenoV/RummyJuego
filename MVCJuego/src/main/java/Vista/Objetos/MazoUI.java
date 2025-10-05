@@ -31,7 +31,6 @@ public class MazoUI extends JPanel implements MouseListener {
         this.numeroFichasRestantes = numeroFichasRestantes;
         setPreferredSize(new Dimension(40, 70));
 
-        // Agrega el MouseListener al componente en el constructor
         addMouseListener(this);
     }
 
@@ -76,11 +75,9 @@ public class MazoUI extends JPanel implements MouseListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Fondo marrón (redondeado, más grande)
         g.setColor(new Color(156, 113, 17));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
 
-        // Dimensiones del rectángulo blanco interior
         int margenX = 10;
         int margenY = 15;
         int anchoBlanco = getWidth() - 2 * margenX;
@@ -88,11 +85,9 @@ public class MazoUI extends JPanel implements MouseListener {
         int posX = margenX;
         int posY = margenY;
 
-        // Rectángulo blanco centrado
         g.setColor(new Color(239, 220, 168));
         g.fillRoundRect(posX, posY, anchoBlanco, altoBlanco, 20, 20);
 
-        // Número centrado dentro del rectángulo blanco en negrita
         g.setColor(Color.BLACK);
         Font original = g.getFont();
         Font bold = original.deriveFont(Font.BOLD, original.getSize() + 6);
@@ -103,13 +98,11 @@ public class MazoUI extends JPanel implements MouseListener {
         int y = posY + (altoBlanco + fm.getAscent()) / 2 - 2;
         g.drawString(numeroFichasRestantes, x, y);
 
-        // Restaurar la fuente original
         g.setFont(original);
     }
 
     public void actualizarNumeroFichas(int nuevoNumero) {
         this.numeroFichasRestantes = String.valueOf(nuevoNumero);
-        // Repinta el componente para mostrar el nuevo número
         repaint();
     }
 }

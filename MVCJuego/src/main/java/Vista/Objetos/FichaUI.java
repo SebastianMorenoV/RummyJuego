@@ -102,6 +102,12 @@ public class FichaUI extends JPanel {
             }
 
             @Override
+            /**
+             * Este metodo determina donde fue soltada la ficha (en el
+             * tablero, en la mano o fuera de ambos).
+             * En base a donde se haya soltado realiza las acciones correspondientes, como colocarla en una nueva celda,
+             * devolverla a su posicion original o regresar la ficha desde el tablero a la mano. 
+             */
             public void mouseReleased(MouseEvent e) {
                 if (getParent() != null && !getParent().isEnabled()) {
                     return;
@@ -143,7 +149,7 @@ public class FichaUI extends JPanel {
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                         control.colocarFicha(gruposColocados);
                     } else {
-                        // Si no había espacio, la devolvemos a su origen (la mano).
+                        // Si no habia espacio, la devolvemos a su origen (la mano).
                         devolverFichaAlOrigen();
                     }
                 } else if (dentroDeMano) {
@@ -158,7 +164,6 @@ public class FichaUI extends JPanel {
                             control.regresarFichaAMano(FichaUI.this.idFicha);
                             List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                             control.colocarFicha(gruposColocados);
-                            //control.colocarFicha(new GrupoDTO("Temporal", 1, new ArrayList<>, ));
                         }
 
                     } else {
@@ -168,8 +173,8 @@ public class FichaUI extends JPanel {
                     }
 
                 } else {
-                    //se solto en cualquier otro lado
-                    // La devolvemos a su panel y posición originales.
+                    // se solto en cualquier otro lado
+                    // La devolvemos a su panel y posicion originales.
                     devolverFichaAlOrigen();
                 }
 
