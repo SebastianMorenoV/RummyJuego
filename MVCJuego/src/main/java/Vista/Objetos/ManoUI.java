@@ -1,6 +1,5 @@
 package Vista.Objetos;
 
-import DTO.GrupoDTO;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -28,7 +27,7 @@ public class ManoUI extends JPanel {
     }
 
     /**
-     * Agrega una ficha a la mano y la posiciona automáticamente
+     * Agrega una ficha a la mano y la posiciona automáticamente.
      */
     public void agregarFicha(FichaUI ficha) {
         fichas.add(ficha);
@@ -38,7 +37,7 @@ public class ManoUI extends JPanel {
     }
 
     /**
-     * Limpia todas las fichas de la mano
+     * Limpia todas las fichas de la mano.
      */
     @Override
     public void removeAll() {
@@ -46,14 +45,7 @@ public class ManoUI extends JPanel {
         super.removeAll();
     }
 
-    /**
-     * Obtiene la cantidad de fichas en la mano
-     *
-     * @return
-     */
-    public int getCantidadFichas() {
-        return fichas.size();
-    }
+
     
     /**
      * Este metodo es llamado por Swing para posicionar y ordenar todos los componentes (fichas dentro)
@@ -105,6 +97,11 @@ public class ManoUI extends JPanel {
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
     }
 
+    /**
+     * Metodo que remueve la ficha de la mano.
+     * remueve el componente visual
+     * @param ficha la ficha que removera
+     */
     public void removerFicha(FichaUI ficha) {
         if (fichas.remove(ficha)) { 
             this.remove(ficha); 
@@ -114,8 +111,16 @@ public class ManoUI extends JPanel {
 
     }
 
+    /**
+     * Metodo para limpiar la manoUI.
+     * remueve los componentes visuales de ficha y limpia la lista interna de la clase.
+     */
     public void limpiarMano() {
         this.removeAll(); 
         this.fichas.clear(); 
+    }
+    
+    public int getCantidadFichas() {
+        return fichas.size();
     }
 }

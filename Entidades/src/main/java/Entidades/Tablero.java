@@ -63,18 +63,6 @@ public class Tablero {
     }
 
     /**
-     * Metodo auxiliar para tener los ids de las fichas que hay en el tablero.
-     *
-     * @return lista de todos los ids de las fichas que hay en el tablero.
-     */
-    public List<Integer> getTodosLosIdsDeFichas() {
-        return this.fichasEnTablero.stream()
-                .flatMap(grupo -> grupo.getFichas().stream())
-                .map(Ficha::getId)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Busca y remueve una ficha específica del tablero por su ID.       Si un
      * grupo queda vacío después de remover la ficha, el grupo es eliminado.
      *
@@ -103,29 +91,6 @@ public class Tablero {
             }
         }
         return null;
-    }
-
-    /**
-     * Este metodo auxiliar crea una copia de el tablero antes de empezar el
-     * movimiento. Basicamente filtra todos los grupos que existen al inicio y
-     * los guarda en un nuevo arreglo. tambien crea la copia de el mazo en ese
-     * momento.
-     *
-     * @return El tablero copiado.
-     */
-    public Tablero copiaProfunda() {
-        Tablero copia = new Tablero();
-        List<Grupo> gruposCopia = this.fichasEnTablero.stream()
-                .map(g -> {
-                    List<Ficha> fichasCopia = g.getFichas().stream()
-                            .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
-                            .collect(Collectors.toList());
-                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
-                })
-                .collect(Collectors.toList());
-        copia.setFichasEnTablero(gruposCopia);
-        copia.setMazo(new ArrayList<>(this.mazo));
-        return copia;
     }
 
     /**
@@ -177,6 +142,43 @@ public class Tablero {
             this.mazo.add(new Ficha(ids.remove(0), 0, Color.GRAY, true));
         }
         Collections.shuffle(this.mazo);
+    }
+    
+    //METODOS AUXILIARES
+    
+    /**
+     * Metodo auxiliar para tener los ids de las fichas que hay en el tablero.
+     *
+     * @return lista de todos los ids de las fichas que hay en el tablero.
+     */
+    public List<Integer> getTodosLosIdsDeFichas() {
+        return this.fichasEnTablero.stream()
+                .flatMap(grupo -> grupo.getFichas().stream())
+                .map(Ficha::getId)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Este metodo auxiliar crea una copia de el tablero antes de empezar el
+     * movimiento. Basicamente filtra todos los grupos que existen al inicio y
+     * los guarda en un nuevo arreglo. tambien crea la copia de el mazo en ese
+     * momento.
+     *
+     * @return El tablero copiado.
+     */
+    public Tablero copiaProfunda() {
+        Tablero copia = new Tablero();
+        List<Grupo> gruposCopia = this.fichasEnTablero.stream()
+                .map(g -> {
+                    List<Ficha> fichasCopia = g.getFichas().stream()
+                            .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                            .collect(Collectors.toList());
+                    return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
+                })
+                .collect(Collectors.toList());
+        copia.setFichasEnTablero(gruposCopia);
+        copia.setMazo(new ArrayList<>(this.mazo));
+        return copia;
     }
 
     //GETS Y SETS//

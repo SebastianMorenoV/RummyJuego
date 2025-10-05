@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.JOptionPane;
 
 public class TableroUI extends JPanel {
 
@@ -71,7 +70,7 @@ public class TableroUI extends JPanel {
     public boolean colocarFichaEnCelda(FichaUI ficha, Point punto) {
         Point celda = calcularCeldaParaPunto(punto);
 
-        // Verificamos si la celda está ocupada
+        // Verificamos si la celda esta ocupada
         for (FichaUI fichaExistente : fichasEnTablero.values()) {
             Point celdaExistente = calcularCeldaParaPunto(fichaExistente.getLocation());
             if (celdaExistente.equals(celda)) {
@@ -81,7 +80,7 @@ public class TableroUI extends JPanel {
 
         centrarYPosicionarFicha(ficha, celda.y, celda.x);
         this.add(ficha);
-        fichasEnTablero.put(ficha.getIdFicha(), ficha); // <-- La guardamos en el Map
+        fichasEnTablero.put(ficha.getIdFicha(), ficha); 
 
         this.revalidate();
         this.repaint();
@@ -286,6 +285,11 @@ public class TableroUI extends JPanel {
         }
     }
 
+    /**
+     * Metodo que dibuja una linea de color dependiendo el estado del grupo.
+     * @param grupo grupo sobre el que se pintara la linea
+     * @param celdaInicio 
+     */
     private void dibujarFeedbackParaGrupo(GrupoDTO grupo, Point celdaInicio) {
         int anchoCelda = getWidth() / columnas;
         int altoCelda = getHeight() / filas;
@@ -315,6 +319,11 @@ public class TableroUI extends JPanel {
         this.setComponentZOrder(feedbackPanel, getComponentCount() - 1); // Ponerlo al fondo
     }
 
+    /**
+     * Metodo que calcula una celda en el TableroUI dependiendo de la posicion en pixeles que cayo la ficha.
+     * @param puntoEnPixeles donde cayo la ficha
+     * @return un punto de pixeles donde pintar
+     */
     private Point calcularCeldaParaPunto(Point puntoEnPixeles) {
         int anchoCelda = getWidth() / columnas;
         int altoCelda = getHeight() / filas;
@@ -323,6 +332,12 @@ public class TableroUI extends JPanel {
         return new Point(col, fila);
     }
 
+    /**
+     * Metodo que agarra la ficha y la centra dentro del panel dependiendo de la fila y columna.
+     * @param ficha ficha a pintar
+     * @param fila fila donde pintar la ficha
+     * @param columna columna donde pintar la ficha
+     */
     private void centrarYPosicionarFicha(FichaUI ficha, int fila, int columna) {
         int anchoCelda = getWidth() / columnas;
         int altoCelda = getHeight() / filas;

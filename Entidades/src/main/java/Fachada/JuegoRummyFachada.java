@@ -6,7 +6,6 @@ import Entidades.Jugador;
 import Entidades.Mano;
 import Entidades.Tablero;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 
 import java.util.List;
@@ -56,7 +55,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Se obtiene al jugador que actualmente tenga su turno.
+     * @return 
      */
+    @Override
     public Jugador getJugadorActual() {
         return this.jugadores.get(this.jugadorActual);
     }
@@ -93,27 +94,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
         // La lógica de validación de los grupos se mantiene en la entidad Grupo
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
         this.tablero.setFichasEnTablero(nuevosGrupos);
-    }
-
-    /**
-     * Compara el estado actual del tablero con el que se guardo al inicio del
-     * turno para confirmar si el jugador movio alguna ficha o no.
-     *
-     * @return true si se movieron fichas, false si no.
-     */
-    private boolean haCambiadoElTablero() {
-        // Se obtienen los IDs de las fichas]
-        List<Integer> idsActuales = this.tablero.getTodosLosIdsDeFichas();
-        List<Integer> idsInicioTurno = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
-
-        // Comparamos las cantidades. Si es distinta a la que se habia guardado, significa que hubo un cambio en el tablero
-        if (idsActuales.size() != idsInicioTurno.size()) {
-            return true;
-        }
-
-        // Si tienen el mismo tamaño, comparamos los IDs.
-        // Usamos el hashset para ignorar el orden de estas.
-        return !new HashSet<>(idsActuales).equals(new HashSet<>(idsInicioTurno));
     }
 
     /**
@@ -170,25 +150,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
         this.manoAlInicioDelTurno = this.getJugadorActual().getManoJugador().copiaProfunda();
     }
 
-    // --- Getters para que el Modelo consulte el estado y cree los DTOs ---
-    @Override
-    public List<Ficha> getManoDeJugador(int indiceJugador) {
-        if (indiceJugador >= 0 && indiceJugador < jugadores.size()) {
-            return jugadores.get(indiceJugador).getManoJugador().getFichasEnMano();
-        }
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<Grupo> getGruposEnTablero() {
-        return this.tablero.getFichasEnTablero();
-    }
-
-    @Override
-    public int getCantidadFichasMazo() {
-        return this.tablero.getMazo().size();
-    }
-
     @Override
     public boolean haGanadoElJugador() {
         return this.getJugadorActual().haGanado();
@@ -224,6 +185,25 @@ public class JuegoRummyFachada implements IJuegoRummy {
         }
 
         return false; // No se encontró la ficha para remover
+    }
+    
+    // --- Getters para que el Modelo consulte el estado y cree los DTOs ---
+    @Override
+    public List<Ficha> getManoDeJugador(int indiceJugador) {
+        if (indiceJugador >= 0 && indiceJugador < jugadores.size()) {
+            return jugadores.get(indiceJugador).getManoJugador().getFichasEnMano();
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Grupo> getGruposEnTablero() {
+        return this.tablero.getFichasEnTablero();
+    }
+
+    @Override
+    public int getCantidadFichasMazo() {
+        return this.tablero.getMazo().size();
     }
 
 }

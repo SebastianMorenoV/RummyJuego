@@ -11,9 +11,9 @@ import java.util.List;
  * @author benja
  */
 public class GrupoDTO {
-    private String tipo;       // "escalera" o "numero"
-    private int cantidad;      // en vez de mandar todas las fichas
-    private List<FichaJuegoDTO> fichasGrupo; // un String para mostrar fácil en UI (ej: "1R, 2R, 3R")
+    private String tipo;       
+    private int cantidad;     
+    private List<FichaJuegoDTO> fichasGrupo; 
     private int fila;
     private int columna;
 

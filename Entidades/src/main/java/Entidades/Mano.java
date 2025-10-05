@@ -19,6 +19,7 @@ public class Mano {
 
     /**
      * Remueve de la mano las fichas que fueron jugadas en el tablero.
+     * @param idsFichasEnTablero
      */
     public void removerFichasJugadas(List<Integer> idsFichasEnTablero) {
         this.fichasEnMano.removeIf(ficha -> idsFichasEnTablero.contains(ficha.getId()));
@@ -27,6 +28,7 @@ public class Mano {
     /**
      * Crea una copia profunda de la mano.
      * Creando un nuevo arreglo filtrado por un stream.
+     * @return 
      */
     public Mano copiaProfunda() {
         Mano copia = new Mano();
@@ -53,7 +55,4 @@ public class Mano {
         this.fichasEnMano = fichasEnMano;
     }
     
-    public void removerFichasPorId(List<Integer> ids) {
-        this.fichasEnMano.removeIf(ficha -> ids.contains(ficha.getId()));
-    }
 }

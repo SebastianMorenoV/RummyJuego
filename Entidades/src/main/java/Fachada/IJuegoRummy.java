@@ -7,9 +7,9 @@ import Entidades.Jugador;
 import java.util.List;
 
 /**
- 
-Interfaz que define el contrato para la lógica del juego de Rummy. Actúa como
-una abstracción entre el Modelo y la implementación concreta del juego.*/
+* Interfaz que define el contrato para la lógica del juego de Rummy. Actua como
+* una abstracción entre el Modelo y la implementación concreta del juego.
+*/
 public interface IJuegoRummy {
 
     void iniciarPartida();

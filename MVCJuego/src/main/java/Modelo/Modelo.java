@@ -71,15 +71,13 @@ public class Modelo implements IModelo {
         notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         notificarObservadores(TipoEvento.REPINTAR_MANO);
         notificarObservadores(TipoEvento.TOMO_FICHA);
-        // 2. Llama a la Fachada para que cambie el contador de jugador interno
+        // Llama a la Fachada para que cambie el contador de jugador interno
         juego.siguienteTurno();
 
-        // 3. Actualiza la variable 'enTurno' del Modelo para que apunte al nuevo jugador
+        // Actualiza la variable 'enTurno' del Modelo para que apunte al nuevo jugador
         int indiceActual = observadores.indexOf(enTurno);
         enTurno = observadores.get((indiceActual + 1) % observadores.size());
 
-        // 4. Envía UNA SOLA notificación que lo actualiza todo.
-        // Usamos CAMBIO_DE_TURNO como el evento principal que refresca toda la vista.
         notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
     }
 
@@ -94,12 +92,10 @@ public class Modelo implements IModelo {
     public void colocarFicha(List<GrupoDTO> gruposPropuestos) {
         this.gruposDeTurnoDTO = gruposPropuestos;
 
-        // 1. El Modelo se encarga de convertir DTOs a Entidades
         List<Grupo> nuevosGrupos = gruposPropuestos.stream()
                 .map(this::convertirGrupoDtoAEntidad)
                 .collect(Collectors.toList());
 
-        // 2. Llama a la fachada con las entidades
         juego.colocarFichasEnTablero(nuevosGrupos);
 
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
@@ -130,6 +126,86 @@ public class Modelo implements IModelo {
         notificarObservadores(TipoEvento.REPINTAR_MANO);
     }
 
+    // --- Métodos del Patron Observador ---
+    public void agregarObservador(Observador obs) {
+        if (obs != null && !observadores.contains(obs)) {
+            observadores.add(obs);
+        }
+    }
+
+    /**
+     * Notifica a los observadores sobre un cambio en el estado del juego.
+     * envian una actualizacion personalizada segun el tipo de evento.
+     * @param tipoEvento el evento que ocurrio para indicar a quien le llegara la notificacion.
+     */
+    public void notificarObservadores(TipoEvento tipoEvento) {
+        // Itera sobre todos los observadores para enviarles una actualización personalizada.
+        for (Observador observer : this.observadores) {
+            // Obtenemos el indice del observador para saber que jugador es.
+            int indiceJugador = observadores.indexOf(observer);
+
+            // Pedimos a la fachada la mano de ESE jugador especifico
+            List<Ficha> manoEntidad = juego.getManoDeJugador(indiceJugador);
+
+            // La convertimos a una lista de DTOs de fichas
+            List<FichaJuegoDTO> manoDTO = manoEntidad.stream()
+                    .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                    .collect(Collectors.toList());
+
+            // Creamos el DTO con la mano especifica de este jugador.
+            boolean esSuTurno = observer.equals(enTurno);
+            ActualizacionDTO dto = new ActualizacionDTO(tipoEvento, esSuTurno, manoDTO);
+            /*
+             * Decide a quien enviar la notificacion basado en el tipo de evento.
+             */
+            switch (tipoEvento) {
+                case INCIALIZAR_FICHAS:
+                case ACTUALIZAR_TABLERO_TEMPORAL:
+                case JUGADA_VALIDA_FINALIZADA:
+                case JUGADA_INVALIDA_REVERTIR:
+                case CAMBIO_DE_TURNO:
+                case TOMO_FICHA:
+                    observer.actualiza(this, dto);
+                    break;
+
+                case REPINTAR_MANO:
+                    if (esSuTurno) {
+                        observer.actualiza(this, dto);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Metodo para regresar la ficha a la mano. primero se calcula si la ficha
+     * fue regresada exitosamente con "boolean fueRegresadaExitosamente", si
+     * este booleano es true esto indica que la ficha era temporal y regreso a
+     * la mano para despues notificar a los observadores, actualizar el tablero
+     * y repintar la mano. si el booleano es false esto nos indica que la ficha
+     * ya pertenece a un grupo validado dentro del tablero, por lo que solo se
+     * revierten los cambios y la ficha regresa a su origen
+     *
+     * @param idFicha para indicar que ficha se quiere regresar
+     */
+    public void regresarFichaAMano(int idFicha) {
+        boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
+
+        if (fueRegresadaExitosamente) {// exito: La ficha era temporal y volvio a la mano.
+
+            // notificamos a la vista para que actualice el tablero y la mano.
+            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+            notificarObservadores(TipoEvento.REPINTAR_MANO);
+        } else { // fallo: La ficha pertenece a un grupo ya validado
+            // notificamos a la vista que la jugada es invalida y debe revertir
+            // el movimiento visual de la ficha
+            notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+        }
+    }
+    
     // --- Getters que convierten Entidades a DTOs para la Vista ---
     @Override
     public JuegoDTO getTablero() {
@@ -157,7 +233,7 @@ public class Modelo implements IModelo {
         dto.setJugadorActual(juego.getJugadorActual().getNickname());
         return dto;
     }
-
+    
     // --- Métodos de ayuda para conversión DTO <-> Entidad ---
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
         List<Ficha> fichas = dto.getFichasGrupo().stream()
@@ -170,87 +246,8 @@ public class Modelo implements IModelo {
         List<FichaJuegoDTO> fichasDTO = g.getFichas().stream()
                 .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
                 .collect(Collectors.toList());
-        // La posición real se determinará en la Vista. Pasamos 0,0 como placeholders.
+
         return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO, 0, 0);
-    }
-
-    // --- Métodos del Patrón Observador (sin cambios) ---
-    public void agregarObservador(Observador obs) {
-        if (obs != null && !observadores.contains(obs)) {
-            observadores.add(obs);
-        }
-    }
-
-    public void notificarObservadores(TipoEvento tipoEvento) {
-        // Itera sobre todos los observadores para enviarles una actualización personalizada.
-        for (Observador observer : this.observadores) {
-            // 1. Obtenemos el índice del observador para saber qué jugador es.
-            int indiceJugador = observadores.indexOf(observer);
-
-            // 2. Pedimos a la fachada la mano de ESE jugador específico.
-            List<Ficha> manoEntidad = juego.getManoDeJugador(indiceJugador);
-
-            // 3. La convertimos a una lista de DTOs de fichas.
-            List<FichaJuegoDTO> manoDTO = manoEntidad.stream()
-                    .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
-                    .collect(Collectors.toList());
-
-            // 4. Creamos el DTO con la mano específica de este jugador.
-            boolean esSuTurno = observer.equals(enTurno);
-            ActualizacionDTO dto = new ActualizacionDTO(tipoEvento, esSuTurno, manoDTO);
-            /*
-             * Decide a quién enviar la notificación basado en el tipo de evento.
-             */
-            switch (tipoEvento) {
-                // --- CASOS GLOBALES: Notificar a TODOS ---
-                case INCIALIZAR_FICHAS:
-                case ACTUALIZAR_TABLERO_TEMPORAL:
-                case JUGADA_VALIDA_FINALIZADA:
-                case JUGADA_INVALIDA_REVERTIR:
-                case CAMBIO_DE_TURNO:
-                case TOMO_FICHA:
-                    observer.actualiza(this, dto);
-                    break;
-
-                // --- CASOS ESPECÍFICOS: Notificar solo al jugador EN TURNO ---
-                case REPINTAR_MANO:
-                    if (esSuTurno) {
-                        observer.actualiza(this, dto);
-                    }
-                    break;
-
-                // Si hay un evento no contemplado, no se notifica para evitar errores.
-                default:
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Metodo para regresar la ficha a la mano. primero se calcula si la ficha
-     * fue regresada exitosamente con "boolean fueRegresadaExitosamente", si
-     * este booleano es true esto indica que la ficha era temporal y regreso a
-     * la mano para despues notificar a los observadores, actualizar el tablero
-     * y repintar la mano. si el booleano es false esto nos indica que la ficha
-     * ya pertenece a un grupo validado dentro del tablero, por lo que solo se
-     * revierten los cambios y la ficha regresa a su origen
-     *
-     * @param idFicha para indicar que ficha se quiere regresar
-     */
-    public void regresarFichaAMano(int idFicha) {
-        // Se delega la logica y la validacion a la fachada del juego
-        boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
-
-        if (fueRegresadaExitosamente) {// exito: La ficha era temporal y volvió a la mano.
-
-            // notificamos a la vista para que actualice el tablero y la mano.
-            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
-            notificarObservadores(TipoEvento.REPINTAR_MANO);
-        } else { // fallo: La ficha pertenece a un grupo ya validado
-            // notificamos a la vista que la jugada es invalida y debe revertir
-            // el movimiento visual de la ficha
-            notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
-        }
     }
 
 }

@@ -16,7 +16,7 @@ public class ActualizacionDTO {
 
     private final TipoEvento tipoEvento;
     private final boolean esMiTurno;
-    private final List<FichaJuegoDTO> manoDelJugador; // <-- NUEVO CAMPO
+    private final List<FichaJuegoDTO> manoDelJugador; 
 
     public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno, List<FichaJuegoDTO> manoDelJugador) {
         this.tipoEvento = tipoEvento;
@@ -24,15 +24,27 @@ public class ActualizacionDTO {
         this.manoDelJugador = manoDelJugador;
     }
 
+    /**
+     * Metodo que obtiene el tipo de evento que se realizo en el juego.
+     * @return 
+     */
     public TipoEvento getTipoEvento() {
         return tipoEvento;
     }
 
+    /**
+     * Metodo que indica el si es el turno de un jugador.
+     * @return 
+     */
     public boolean esMiTurno() {
         return esMiTurno;
     }
 
-    public List<FichaJuegoDTO> getManoDelJugador() { // <-- NUEVO GETTER
+    /**
+     * Metodo que obtiene la mano de un jugador.
+     * @return 
+     */
+    public List<FichaJuegoDTO> getManoDelJugador() {
         return manoDelJugador;
     }
 }

@@ -13,23 +13,21 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
- * Clase de presentación para dibujar un jugador en la interfaz de usuario.
- * El avatar es reemplazado por una imagen proporcionada como un array de bytes.
+ * Clase de presentación para dibujar un jugador en la interfaz de usuario. El
+ * avatar es reemplazado por una imagen proporcionada como un array de bytes.
+ *
  * @author Sebastian Moreno
  */
 public class JugadorUI extends JPanel {
 
-    // Cambia el tipo de dato a BufferedImage
     private BufferedImage avatarImage;
     private int fichasRestantes;
     private String nombreJugador;
 
-    // Constructor de la clase
     public JugadorUI(String nombreJugador, int fichasRestantes, byte[] imagenAvatarBytes) {
         this.nombreJugador = nombreJugador;
         this.fichasRestantes = fichasRestantes;
-        
-        // Decodifica la imagen UNA SOLA VEZ en el constructor
+
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
             try {
                 this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));
@@ -38,8 +36,8 @@ public class JugadorUI extends JPanel {
                 System.err.println("Error al decodificar la imagen del avatar: " + e.getMessage());
             }
         }
-        
-        setPreferredSize(new Dimension(200, 200)); 
+
+        setPreferredSize(new Dimension(200, 200));
         setOpaque(false);
     }
 
@@ -53,8 +51,8 @@ public class JugadorUI extends JPanel {
 
         int panelWidth = getWidth();
         int panelHeight = getHeight();
-        
-        int margin = 15; 
+
+        int margin = 15;
         int cardX = margin;
         int cardY = margin;
         int cardWidth = panelWidth - (2 * margin);
@@ -79,7 +77,7 @@ public class JugadorUI extends JPanel {
         } else {
             drawDefaultAvatar(g2d, avatarX, avatarY, avatarSize);
         }
-        
+
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.BOLD, (int) (cardWidth * 0.11)));
         FontMetrics fm = g2d.getFontMetrics();
@@ -105,11 +103,11 @@ public class JugadorUI extends JPanel {
         int chipsWidth = fm.stringWidth(chipsText);
         g2d.drawString(chipsText, chipBoxX + (chipBoxWidth - chipsWidth) / 2, chipBoxY + fm.getAscent() + (chipBoxHeight - fm.getHeight()) / 2);
     }
-    
+
     private void drawDefaultAvatar(Graphics2D g2d, int avatarX, int avatarY, int avatarSize) {
         g2d.setColor(Color.BLACK);
         g2d.fillOval(avatarX, avatarY, avatarSize, avatarSize);
-        
+
         g2d.setColor(Color.WHITE);
         int headSize = (int) (avatarSize * 0.4);
         g2d.fillOval(avatarX + (avatarSize - headSize) / 2, avatarY + (int) (avatarSize * 0.15), headSize, headSize);
@@ -117,12 +115,21 @@ public class JugadorUI extends JPanel {
         int bodyHeight = (int) (avatarSize * 0.5);
         g2d.fillArc(avatarX + (int) (avatarSize * 0.1), avatarY + (int) (avatarSize * 0.5), (int) (avatarSize * 0.8), bodyHeight, 0, 180);
     }
-    
+
+    /**
+     * Metodo para settear el numero de fichas restantes de un jugador.
+     * El numero de fichas restante sale debajo del nombre de un jugador
+     * @param fichasRestantes 
+     */
     public void setFichasRestantes(int fichasRestantes) {
         this.fichasRestantes = fichasRestantes;
         repaint();
     }
 
+    /**
+     * Metodo para settear la imagen o "avatar" de un jugador.
+     * @param imagenAvatarBytes 
+     */
     public void setImagenAvatar(byte[] imagenAvatarBytes) {
         // Vuelve a decodificar la imagen si se actualiza
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
@@ -135,7 +142,11 @@ public class JugadorUI extends JPanel {
         }
         repaint();
     }
-    
+
+    /**
+     * Metodo para settear el nombre de un jugador.
+     * @param nombreJugador 
+     */
     public void setNombreJugador(String nombreJugador) {
         this.nombreJugador = nombreJugador;
         repaint();

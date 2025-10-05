@@ -2,9 +2,8 @@ package Vista;
 
 /**
  *
- * Clase enum para identificar tipo de jugada.
- *
- *
+ * Clase enum para identificar tipo de jugada del juego.
+ * 
  * @author Sebastian Moreno
  */
 public enum TipoEvento {

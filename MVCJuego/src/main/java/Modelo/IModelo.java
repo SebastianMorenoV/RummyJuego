@@ -4,9 +4,7 @@
  */
 package Modelo;
 
-import DTO.FichaJuegoDTO;
 import DTO.JuegoDTO;
-import java.util.List;
 
 /**
  *

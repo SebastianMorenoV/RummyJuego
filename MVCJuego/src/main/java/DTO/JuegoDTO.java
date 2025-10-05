@@ -11,12 +11,14 @@ import java.util.List;
  * @author benja
  */
 public class JuegoDTO {
+
     private String jugadorActual;
     private List<JugadorDTO> jugadores;
     private List<GrupoDTO> gruposEnTablero;
-    private int fichasMazo;     // solo cantidad, no toda la lista
-    private String mensaje;     // para mostrar en la UI
+    private int fichasMazo;
+    private String mensaje;
     private String evento;
+
     public JuegoDTO() {
     }
 
@@ -75,5 +77,5 @@ public class JuegoDTO {
     public void setEvento(String evento) {
         this.evento = evento;
     }
-    
+
 }

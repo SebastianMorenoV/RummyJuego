@@ -20,7 +20,7 @@ public class Grupo {
     public Grupo(String tipo, int numFichas, List<Ficha> ficha) {
         this.tipo = tipo;
         this.numFichas = numFichas;
-        this.fichas = ficha; // <-- CORRECCIÓN APLICADA
+        this.fichas = ficha; 
         this.esTemporal = true;
     }
 
@@ -71,6 +71,7 @@ public class Grupo {
     /**
      * Verifica si el grupo es una escalera válida (mismo color, números
      * consecutivos).
+     * @return 
      */
     public boolean esEscaleraValida() {
         if (this.fichas == null || this.fichas.size() < 3) {

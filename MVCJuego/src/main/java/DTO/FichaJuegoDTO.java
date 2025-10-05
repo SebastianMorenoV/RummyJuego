@@ -4,7 +4,6 @@
  */
 package DTO;
 
-import Entidades.Ficha;
 import java.awt.Color;
 
 /**
@@ -46,6 +45,7 @@ public class FichaJuegoDTO {
 
     }
 
+    // Getters and setters
     public int getNumeroFicha() {
         return numeroFicha;
     }

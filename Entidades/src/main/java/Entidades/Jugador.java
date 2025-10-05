@@ -5,7 +5,6 @@ public class Jugador {
     String nickname;
     String grupoColor;
     Mano manoJugador;
-    boolean estaEnTurno;//proximamente...
 
     public Jugador() {
         this.manoJugador = new Mano();
@@ -19,7 +18,7 @@ public class Jugador {
 
     /**
      *  Agrega una ficha a la mano del jugador 
-     * @param ficha 
+     * @param ficha ficha que se agrega a la mano
      */
     public void agregarFichaAJugador(Ficha ficha) {
         this.manoJugador.getFichasEnMano().add(ficha);

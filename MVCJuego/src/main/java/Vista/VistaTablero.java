@@ -58,7 +58,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnOrdenarMayorAMenor = new javax.swing.JLabel();
         btnOrdenarPorGrupos = new javax.swing.JLabel();
         btnFinalizarTurno = new javax.swing.JLabel();
-        panelFichasArmadas = new javax.swing.JPanel();
         fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -97,22 +96,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         });
         GUIjuego.add(btnFinalizarTurno);
         btnFinalizarTurno.setBounds(800, 320, 90, 50);
-
-        panelFichasArmadas.setBackground(new java.awt.Color(23, 57, 134));
-
-        javax.swing.GroupLayout panelFichasArmadasLayout = new javax.swing.GroupLayout(panelFichasArmadas);
-        panelFichasArmadas.setLayout(panelFichasArmadasLayout);
-        panelFichasArmadasLayout.setHorizontalGroup(
-            panelFichasArmadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 640, Short.MAX_VALUE)
-        );
-        panelFichasArmadasLayout.setVerticalGroup(
-            panelFichasArmadasLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 120, Short.MAX_VALUE)
-        );
-
-        GUIjuego.add(panelFichasArmadas);
-        panelFichasArmadas.setBounds(130, 0, 640, 120);
 
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
         fondo.setText("jLabel1");
@@ -165,7 +148,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JLabel btnOrdenarMayorAMenor;
     private javax.swing.JLabel btnOrdenarPorGrupos;
     private javax.swing.JLabel fondo;
-    private javax.swing.JPanel panelFichasArmadas;
     // End of variables declaration//GEN-END:variables
     /**
      * Metodo implementado por la interfaz Observer. Reacciona a las
@@ -243,16 +225,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     }
 
-    public TableroUI getPanelTablero() {
-        return tableroUI;
-    }
-
-    public ManoUI getPanelMano() {
-        return this.manoUI;
-    }
-
     /**
-     * Metodo para cargar las imagenes de jugadores aun no terminado.MOCK
+     * Metodo para cargar los jugadores aun no terminado (MOCK).
      */
     private void cargarJugadores() {
         String rutaImagen = "src/main/resources/avatares/avatar.png";
@@ -286,8 +260,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
 
     /**
-     * Metodo que pinta los componentes necesarios para la vista. Los crea con
-     * su estructura base.
+     * Metodo que pinta los componentes necesarios para la vista. 
+     * Los crea con su estructura base.
      *
      * @param modelo el modelo de donde se sacan los datos para crearse.
      */
@@ -304,20 +278,20 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.repaint();
     }
     /**
-     * Metodo para crear el Tablero visualmente.
+     * Metodo para crear el panel del Tablero visualmente.
      * @param modelo
      */
     private void crearTablero(IModelo modelo) {
         if (tableroUI == null) {
             tableroUI = new TableroUI(modelo, control, this);
             tableroUI.setLocation(130, 130);
-            // El tamaño ya está definido dentro de la clase TableroUI (660, 245)
+
             GUIjuego.add(tableroUI);
         }
     }
 
     /**
-     * Metodo para crear la Mano visualmente.
+     * Metodo para crear la el panel de la Mano visualmente.
      */
     private void crearManoUI() {
         if (manoUI == null) {
@@ -496,5 +470,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (tableroUI != null) {
             tableroUI.setEnabled(estaEnTurno);
         }
+    }
+    
+    public TableroUI getPanelTablero() {
+        return tableroUI;
+    }
+
+    public ManoUI getPanelMano() {
+        return this.manoUI;
     }
 }

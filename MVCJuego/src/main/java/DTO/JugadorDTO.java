@@ -10,8 +10,8 @@ package DTO;
  */
 public class JugadorDTO {
     private String nombre;
-    private int fichasRestantes;   // en vez de mandar toda la lista
-    private boolean esTurno;       // bandera para la vista
+    private int fichasRestantes;
+    private boolean esTurno;
 
     public JugadorDTO() {
     }

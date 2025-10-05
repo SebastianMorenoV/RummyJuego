@@ -12,7 +12,6 @@ import javax.swing.*;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +87,11 @@ public class FichaUI extends JPanel {
                 glassPane.repaint();
             }
 
+            /**
+             * Metodo para arrastrar las fichasUI que estan en la mano.
+             * se pueden colocar de la mano al tablero o viceversa
+             * @param e 
+             */
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (getParent() != null && !getParent().isEnabled()) {
@@ -101,13 +105,12 @@ public class FichaUI extends JPanel {
                 setLocation(glassPoint.x - glassPaneOffset.x, glassPoint.y - glassPaneOffset.y);
             }
 
-            @Override
             /**
-             * Este metodo determina donde fue soltada la ficha (en el
-             * tablero, en la mano o fuera de ambos).
+             * Este metodo determina donde fue soltada la ficha (en el tablero, en la mano o fuera de ambos).
              * En base a donde se haya soltado realiza las acciones correspondientes, como colocarla en una nueva celda,
              * devolverla a su posicion original o regresar la ficha desde el tablero a la mano. 
              */
+            @Override
             public void mouseReleased(MouseEvent e) {
                 if (getParent() != null && !getParent().isEnabled()) {
                     return;
@@ -134,7 +137,7 @@ public class FichaUI extends JPanel {
                         && dropPointEnMano.y < panelMano.getHeight();
 
                 if (dentroDelTablero) {
-                    // Si la ficha ya estaba en el tablero, primero la quitamos de su celda vieja.
+
                     if (origen == Origen.TABLERO) {
                         panelTablero.removerFicha(FichaUI.this.idFicha);
 
@@ -184,6 +187,11 @@ public class FichaUI extends JPanel {
                 panelMano.repaint();
             }
 
+            /**
+             * Metodo que devuelve la ficha a su origen.
+             * si la ficha fue movida a un lugar en el cual no puede colocarse o que necesita volver por una jugada 
+             * invalida regresa a su lugar de origen que es donde estaba colocada.
+             */
             private void devolverFichaAlOrigen() {
                 setLocation(originalLocation);
                 originalParent.add(FichaUI.this);
