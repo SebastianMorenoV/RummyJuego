@@ -109,7 +109,7 @@ public class Controlador {
         }).start();
 
         try {
-            ensamblador.enviar("192.168.1.70", 8000, "lucianobarcelo:REGISTRAR:9001");
+            ensamblador.enviar("192.168.1.70", 8000, "lucianobarcelo:REGISTRAR:9002");
         } catch (IOException ex) {
             Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
         }

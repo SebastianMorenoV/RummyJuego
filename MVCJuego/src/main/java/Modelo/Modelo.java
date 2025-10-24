@@ -73,7 +73,9 @@ public class Modelo implements IModelo,PropertyChangeListener {
 
                 // 3. Procesa (si es válido)
                 if (grupoMovido != null) {
+                    System.out.println("Se intento colocar ficha");
                     this.colocarFicha(grupoMovido); // Llama a su propia lógica
+                    
                 } else {
                     System.err.println("[Modelo] Error: No se pudo deserializar el payload: " + payload);
                 }
