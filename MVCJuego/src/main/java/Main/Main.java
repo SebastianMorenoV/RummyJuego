@@ -30,6 +30,7 @@ public class Main {
         VistaTablero vistaJugador2 = new VistaTablero(controlador);
         modelo.agregarObservador(vistaJugador2);
 
+        controlador.crearYUnirseAPartida();
         controlador.iniciarJuego();
     }
 

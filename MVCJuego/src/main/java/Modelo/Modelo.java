@@ -11,6 +11,8 @@ import Fachada.JuegoRummyFachada;
 import Vista.Observador;
 import Vista.TipoEvento;
 import static Vista.TipoEvento.TOMO_FICHA;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
  * lógica del juego (a través de la fachada) con la Vista (a través del patrón
  * Observer) y manejar la conversión de datos entre Entidades y DTOs.
  */
-public class Modelo implements IModelo {
+public class Modelo implements IModelo,PropertyChangeListener {
 
     private List<Observador> observadores;
     private final IJuegoRummy juego;
@@ -47,6 +49,39 @@ public class Modelo implements IModelo {
         juego.iniciarPartida();
 
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
+    }
+    
+    /**
+     * Reacciona a eventos que le llegan.
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
+        String evento = evt.getPropertyName();
+
+        if (evento.equals("MOVIMIENTO_RECIBIDO")) {
+            System.out.println("[Modelo] Evento 'MOVIMIENTO_RECIBIDO' detectado!");
+
+            try {
+                // --- ¡CAMBIO AQUÍ! ---
+
+                // 1. Recibe el payload (string) crudo del evento
+                String payload = (String) evt.getNewValue();
+
+                // 2. ¡El Modelo DESERIALIZA aquí!
+                List<GrupoDTO> grupoMovido = (List<GrupoDTO>) GrupoDTO.deserializar(payload);
+
+                // 3. Procesa (si es válido)
+                if (grupoMovido != null) {
+                    this.colocarFicha(grupoMovido); // Llama a su propia lógica
+                } else {
+                    System.err.println("[Modelo] Error: No se pudo deserializar el payload: " + payload);
+                }
+
+            } catch (Exception e) {
+                System.err.println("[Modelo] Error al procesar evento: " + e.getMessage());
+            }
+        }
     }
 
     /**

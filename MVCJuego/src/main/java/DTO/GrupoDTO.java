@@ -4,6 +4,7 @@
  */
 package DTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,6 +67,84 @@ public class GrupoDTO {
 
     public void setColumna(int columna) {
         this.columna = columna;
+    }
+    
+    /**
+     * (ACTUALIZADO) Serializa los datos del grupo en un string plano para el
+     * payload.
+     *
+     * Formato: tipo;cantidad;fila;columna;fichaData1|fichaData2|fichaData3
+     * Donde 'fichaData' es el string de FichaJuegoDTO.serializar()
+     * @return 
+     */
+    public String serializarParaPayload() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(this.tipo).append(";");
+        sb.append(this.cantidad).append(";");
+        sb.append(this.fila).append(";");
+        sb.append(this.columna);
+
+        if (this.fichasGrupo != null && !this.fichasGrupo.isEmpty()) {
+            sb.append(";"); // Separador antes de la lista
+
+            for (int i = 0; i < this.fichasGrupo.size(); i++) {
+                FichaJuegoDTO ficha = this.fichasGrupo.get(i);
+
+                // --- ¡CAMBIO CLAVE AQUÍ! ---
+                // Ya no usamos ficha.toString(), usamos ficha.serializar()
+                sb.append(ficha.serializar());
+
+                // Añadir el separador de lista '|' si no es la última ficha
+                if (i < this.fichasGrupo.size() - 1) {
+                    sb.append("|");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * (NUEVO) Método estático (factory) para crear un GrupoDTO completo desde
+     * el payload recibido por el servidor.
+     *
+     * @param payload El string de payload (ej: "TERCIA;3;4;7;ficha1|ficha2")
+     * @return una nueva instancia de GrupoDTO
+     */
+    public static GrupoDTO deserializar(String payload) {
+        try {
+            // Dividimos en 5 partes MÁXIMO. La 5ta parte es "todo lo demás" (las fichas)
+            String[] partesGrupo = payload.split(";", 5);
+
+            String tipo = partesGrupo[0];
+            int cantidad = Integer.parseInt(partesGrupo[1]);
+            int fila = Integer.parseInt(partesGrupo[2]);
+            int columna = Integer.parseInt(partesGrupo[3]);
+
+            List<FichaJuegoDTO> fichas = new ArrayList<>();
+
+            // Revisar si la 5ta parte (índice 4) existe y no está vacía
+            if (partesGrupo.length == 5 && !partesGrupo[4].isEmpty()) {
+
+                // OJO: split() usa regex. El pipe '|' es un carácter especial,
+                // por eso debemos "escaparlo" con doble backslash: \\|
+                String[] dataFichas = partesGrupo[4].split("\\|");
+
+                for (String fichaData : dataFichas) {
+                    FichaJuegoDTO ficha = FichaJuegoDTO.deserializar(fichaData);
+                    if (ficha != null) {
+                        fichas.add(ficha);
+                    }
+                }
+            }
+
+            return new GrupoDTO(tipo, cantidad, fichas, fila, columna);
+
+        } catch (Exception e) {
+            System.err.println("ERROR al deserializar GrupoDTO: " + payload);
+            e.printStackTrace();
+            return null; // Devuelve null si el formato es incorrecto
+        }
     }
 
     @Override
