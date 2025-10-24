@@ -146,6 +146,34 @@ public class GrupoDTO {
             return null; // Devuelve null si el formato es incorrecto
         }
     }
+    
+    /**
+     * (NUEVO) Método estático para deserializar un payload que contiene
+     * MÚLTIPLES grupos separados por '$'.
+     *
+     * @param payloadLote El string de payload (ej:
+     * "grupoPayload1$grupoPayload2")
+     * @return una LISTA de GrupoDTO
+     */
+    public static List<GrupoDTO> deserializarLista(String payloadLote) {
+        List<GrupoDTO> listaGrupos = new ArrayList<>();
+
+        // 1. Divide el lote en payloads de grupos individuales
+        // Usamos "\\$" porque '$' es un carácter especial en regex
+        String[] payloadsIndividuales = payloadLote.split("\\$");
+
+        // 2. Deserializa cada payload individual
+        for (String payload : payloadsIndividuales) {
+            if (payload != null && !payload.isEmpty()) {
+                // Llama al método deserializar() que ya teníamos
+                GrupoDTO grupo = GrupoDTO.deserializar(payload);
+                if (grupo != null) {
+                    listaGrupos.add(grupo);
+                }
+            }
+        }
+        return listaGrupos;
+    }
 
     @Override
     public String toString() {

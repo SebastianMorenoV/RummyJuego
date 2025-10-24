@@ -36,38 +36,43 @@ public class Controlador {
     }
 
     /**
-     * (ACTUALIZADO) Metodo que le habla al modelo para colocar fichas y
-     * notifica al servidor.
-     *
-     * @param grupos lista de grupos con las fichas a colocar.
+     * (ACTUALIZADO) 1. Le dice al Modelo que coloque la ficha (para la UI
+     * local). 2. Serializa la LISTA ENTERA de DTOs a un solo String. 3. Le dice
+     * al Ensamblador que envíe ESE ÚNICO String.
      */
     public void colocarFicha(List<GrupoDTO> grupos) {
         // 1. Actualiza el modelo local PRIMERO
         modelo.colocarFicha(grupos);
 
         // --- INICIO DE CAMBIOS ---
-        // Datos de conexión (deberían ser variables, pero seguimos tu ejemplo)
-        String miId = "lucianobarcelo";
-        String ipServidor = "192.168.1.70";
-        int puertoServidor = 8000;
+        if (grupos == null || grupos.isEmpty()) {
+            return; // No hay nada que enviar
+        }
 
-        // 2. Itera sobre CADA grupo que el jugador colocó
-        for (GrupoDTO grupo : grupos) {
-            try {
-                // 3. Serializa el grupo a un string plano
-                String payload = grupo.serializarParaPayload();
-
-                // 4. Construye el mensaje de red correcto
-                //    Formato:  ID:COMANDO:PAYLOAD
-                String mensaje = miId + ":MOVER:" + payload;
-
-                // 5. Envía el mensaje al servidor (que lo reenviará a todos)
-                System.out.println("[Controlador] Enviando MOVIMIENTO: " + mensaje);
-                ensamblador.enviar(ipServidor, puertoServidor, mensaje);
-
-            } catch (IOException ex) {
-                Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
+        // 2. Serializa CADA grupo y únelos con un delimitador (ej: '$')
+        StringBuilder payloadBuilder = new StringBuilder();
+        for (int i = 0; i < grupos.size(); i++) {
+            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            if (i < grupos.size() - 1) {
+                payloadBuilder.append("$"); // Delimitador ENTRE grupos
             }
+        }
+        String payloadCompleto = payloadBuilder.toString();
+
+        // 3. Envía UN SOLO mensaje con el payload completo
+        try {
+            // (Estos datos deberían ser variables de instancia)
+            String miId = "lucianobarcelo";
+            String ipServidor = "192.168.1.70";
+            int puertoServidor = 8000;
+
+            String mensaje = miId + ":MOVER:" + payloadCompleto;
+
+            System.out.println("[Controlador] Enviando MOVIMIENTO (lote): " + mensaje);
+            ensamblador.enviar(ipServidor, puertoServidor, mensaje);
+
+        } catch (IOException ex) {
+            Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
         }
         // --- FIN DE CAMBIOS ---
     }
