@@ -98,16 +98,16 @@ public class Controlador {
                 Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
             }
         }).start();
-        ensamblador.configurarComoCliente("lucianobarcelo");
+        ensamblador.configurarComoCliente("lucianobarcelo", this.modelo);
 
         new Thread(() -> {
             try {
-                ensamblador.iniciarListener(9001);
+                ensamblador.iniciarListener(9002);
             } catch (IOException ex) {
                 Logger.getLogger(Controlador.class.getName()).log(Level.SEVERE, null, ex);
             }
         }).start();
-        
+
         try {
             ensamblador.enviar("192.168.1.70", 8000, "lucianobarcelo:REGISTRAR:9001");
         } catch (IOException ex) {
