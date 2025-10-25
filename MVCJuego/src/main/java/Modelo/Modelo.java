@@ -11,10 +11,14 @@ import Fachada.JuegoRummyFachada;
 import Vista.Observador;
 import Vista.TipoEvento;
 import static Vista.TipoEvento.TOMO_FICHA;
+import com.mycompany.tcpejemplo.iDespachador;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -22,12 +26,13 @@ import java.util.stream.Collectors;
  * lógica del juego (a través de la fachada) con la Vista (a través del patrón
  * Observer) y manejar la conversión de datos entre Entidades y DTOs.
  */
-public class Modelo implements IModelo,PropertyChangeListener {
+public class Modelo implements IModelo, PropertyChangeListener {
 
     private List<Observador> observadores;
     private final IJuegoRummy juego;
     private List<GrupoDTO> gruposDeTurnoDTO;
     private Observador enTurno;
+    private iDespachador despachador;
 
     public Modelo() {
         this.observadores = new ArrayList<>();
@@ -154,24 +159,30 @@ public class Modelo implements IModelo,PropertyChangeListener {
         notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
     }
 
-    /**
-     * Metodo utilizado para colocar una ficha en el tablero. Primero obtenemos
-     * los grupos que se esten creando en el turno para convertirlos de DTO a
-     * entidad, despues llamamos al metodo "colocarFichasEnTablero" desde la
-     * fachada para despues actualizar el tablero temporalmente
-     *
-     * @param gruposPropuestos
-     */
-    public void colocarFicha(List<GrupoDTO> gruposPropuestos) {
-        this.gruposDeTurnoDTO = gruposPropuestos;
+    public void setDespachador(iDespachador despachador) {
+        this.despachador = despachador;
+    }
 
-        List<Grupo> nuevosGrupos = gruposPropuestos.stream()
-                .map(this::convertirGrupoDtoAEntidad)
-                .collect(Collectors.toList());
-
-        juego.colocarFichasEnTablero(nuevosGrupos);
-
+    public void colocarFicha(List<GrupoDTO> grupos) {
+        // 1. Lógica del juego local...
+        this.gruposDeTurnoDTO = grupos;
+        StringBuilder payloadBuilder = new StringBuilder();
+        for (int i = 0; i < grupos.size(); i++) {
+            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            if (i < grupos.size() - 1) {
+                payloadBuilder.append("$"); // Delimitador ENTRE grupos
+            }
+        }
+        String payloadCompleto = payloadBuilder.toString();
+        // 2. Serialización...
+        String mensaje = "BenjaminSoto:MOVER:" + payloadCompleto;
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+        try {
+            // El modelo simplemente dice "envía esto". No sabe ni le importa a dónde va.
+            this.despachador.enviar(mensaje);
+        } catch (IOException ex) {
+            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -209,7 +220,9 @@ public class Modelo implements IModelo,PropertyChangeListener {
     /**
      * Notifica a los observadores sobre un cambio en el estado del juego.
      * envian una actualizacion personalizada segun el tipo de evento.
-     * @param tipoEvento el evento que ocurrio para indicar a quien le llegara la notificacion.
+     *
+     * @param tipoEvento el evento que ocurrio para indicar a quien le llegara
+     * la notificacion.
      */
     public void notificarObservadores(TipoEvento tipoEvento) {
         // Itera sobre todos los observadores para enviarles una actualización personalizada.
@@ -278,7 +291,7 @@ public class Modelo implements IModelo,PropertyChangeListener {
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         }
     }
-    
+
     // --- Getters que convierten Entidades a DTOs para la Vista ---
     @Override
     public JuegoDTO getTablero() {
@@ -306,7 +319,7 @@ public class Modelo implements IModelo,PropertyChangeListener {
         dto.setJugadorActual(juego.getJugadorActual().getNickname());
         return dto;
     }
-    
+
     // --- Métodos de ayuda para conversión DTO <-> Entidad ---
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
         List<Ficha> fichas = dto.getFichasGrupo().stream()

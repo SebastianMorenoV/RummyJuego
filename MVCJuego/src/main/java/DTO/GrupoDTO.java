@@ -28,7 +28,7 @@ public class GrupoDTO {
         this.fila = fila;
         this.columna = columna;
     }
-
+    
     public String getTipo() {
         return tipo;
     }
