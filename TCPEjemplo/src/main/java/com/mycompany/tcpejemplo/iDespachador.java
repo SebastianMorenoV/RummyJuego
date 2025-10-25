@@ -1,0 +1,16 @@
+
+package com.mycompany.tcpejemplo;
+
+import java.io.IOException;
+
+/**
+ * Contrato para el TRANSPORTE DE ENVÍO.
+ * Define "cómo enviar" un mensaje a un destino.
+ */
+public interface iDespachador {
+    // Para el Servidor (necesita especificar el destino cada vez)
+    void enviar(String host, int puerto, String mensaje) throws IOException;
+
+    // Para el Cliente (usa un destino pre-configurado)
+    void enviar(String mensaje) throws IOException;
+}
