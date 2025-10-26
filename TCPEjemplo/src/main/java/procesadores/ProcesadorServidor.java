@@ -1,4 +1,4 @@
-package com.mycompany.tcpejemplo.procesadores;
+package procesadores;
 
 import contratos.iControladorBlackboard;
 import contratos.iDespachador;

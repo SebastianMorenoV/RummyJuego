@@ -1,7 +1,7 @@
 // Archivo: ServerTCP.java (Reemplaza completamente el anterior)
-package com.mycompany.tcpejemplo.sockets;
+package sockets;
 
-import com.mycompany.tcpejemplo.utils.PeticionCliente;
+import utils.PeticionCliente;
 import contratos.iListener;
 import contratos.iProcesador;
 import java.io.*;

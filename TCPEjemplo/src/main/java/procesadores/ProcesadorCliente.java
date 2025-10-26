@@ -1,4 +1,4 @@
-package com.mycompany.tcpejemplo.procesadores;
+package procesadores;
 
 // ¡YA NO IMPORTA DTO.GrupoDTO!
 import contratos.iProcesador;

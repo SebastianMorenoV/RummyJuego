@@ -2,8 +2,8 @@ package com.mycompany.tcpejemplo;
 // Archivo: DespachadorAsincrono.java
 
 
-import com.mycompany.tcpejemplo.utils.MensajeEncolado;
-import com.mycompany.tcpejemplo.sockets.ClienteTCP;
+import utils.MensajeEncolado;
+import sockets.ClienteTCP;
 import contratos.iDespachador;
 
 import java.io.IOException;

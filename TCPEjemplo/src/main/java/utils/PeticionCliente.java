@@ -1,4 +1,4 @@
-package com.mycompany.tcpejemplo.utils;
+package utils;
 
 // Archivo: PeticionCliente.java
 import java.net.Socket;

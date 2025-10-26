@@ -1,4 +1,4 @@
-package com.mycompany.tcpejemplo.sockets;
+package sockets;
 
 import contratos.iDespachador;
 import java.io.*;

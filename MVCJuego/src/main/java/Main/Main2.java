@@ -8,7 +8,7 @@ package Main;
 import Controlador.Controlador;
 import Modelo.Modelo;
 import Vista.VistaTablero;
-import com.mycompany.tcpejemplo.utils.ComponentesRedCliente;
+import utils.ComponentesRedCliente;
 import com.mycompany.tcpejemplo.EnsambladorCliente;
 import java.io.IOException;
 

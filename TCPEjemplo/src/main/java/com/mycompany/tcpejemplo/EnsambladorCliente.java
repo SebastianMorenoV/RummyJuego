@@ -1,9 +1,9 @@
 package com.mycompany.tcpejemplo;
 
-import com.mycompany.tcpejemplo.utils.ComponentesRedCliente;
-import com.mycompany.tcpejemplo.procesadores.ProcesadorCliente;
-import com.mycompany.tcpejemplo.sockets.ClienteTCP;
-import com.mycompany.tcpejemplo.sockets.ServerTCP;
+import utils.ComponentesRedCliente;
+import procesadores.ProcesadorCliente;
+import sockets.ClienteTCP;
+import sockets.ServerTCP;
 import contratos.iDespachador;
 import contratos.iListener;
 

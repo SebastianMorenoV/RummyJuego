@@ -1,4 +1,4 @@
-package com.mycompany.tcpejemplo.utils;
+package utils;
 
 import contratos.iDespachador;
 import contratos.iListener;
