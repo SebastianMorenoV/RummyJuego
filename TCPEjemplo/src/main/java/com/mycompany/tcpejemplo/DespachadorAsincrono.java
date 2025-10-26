@@ -4,7 +4,8 @@ package com.mycompany.tcpejemplo;
 
 import com.mycompany.tcpejemplo.utils.MensajeEncolado;
 import com.mycompany.tcpejemplo.sockets.ClienteTCP;
-import com.mycompany.tcpejemplo.interfaces.iDespachador;
+import contratos.iDespachador;
+
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

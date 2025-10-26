@@ -1,8 +1,6 @@
 package com.mycompany.tcpejemplo.sockets;
 
-
-
-import com.mycompany.tcpejemplo.interfaces.iDespachador;
+import contratos.iDespachador;
 import java.io.*;
 import java.net.Socket;
 

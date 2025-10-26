@@ -9,7 +9,7 @@ import Controlador.Controlador;
 import Modelo.Modelo;
 import Vista.VistaTablero;
 import com.mycompany.tcpejemplo.utils.ComponentesRedCliente;
-import com.mycompany.tcpejemplo.Ensamblador;
+import com.mycompany.tcpejemplo.EnsambladorCliente;
 import java.io.IOException;
 
 /**
@@ -40,10 +40,10 @@ public class Main2 {
         int miPuertoDeEscucha = 9003; // El puerto donde ESTE cliente escuchará
 
         // --- 3. Ensamblaje de Componentes de Red ---
-        // Se le pide a la "fábrica" (Ensamblador) que construya y conecte
+        // Se le pide a la "fábrica" (EnsambladorCliente) que construya y conecte
         // los objetos de red.
         System.out.println("[Main] Iniciando ensamblaje de red...");
-        ComponentesRedCliente misComponentesDeRed = Ensamblador.ensamblarCliente(
+        ComponentesRedCliente misComponentesDeRed = EnsambladorCliente.ensamblarCliente(
                 miId,
                 ipServidor,
                 puertoServidor,

@@ -9,8 +9,10 @@ package DTO;
  * @author benja
  */
 public class JugadorDTO {
+
     private String nombre;
     private int fichasRestantes;
+    private ManoDTO manoDTO;
     private boolean esTurno;
 
     public JugadorDTO() {
@@ -45,5 +47,13 @@ public class JugadorDTO {
     public void setEsTurno(boolean esTurno) {
         this.esTurno = esTurno;
     }
-    
+
+    public ManoDTO getManoDTO() {
+        return manoDTO;
+    }
+
+    public void setManoDTO(ManoDTO manoDTO) {
+        this.manoDTO = manoDTO;
+    }
+
 }

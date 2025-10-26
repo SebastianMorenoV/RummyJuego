@@ -1,14 +1,12 @@
 package com.mycompany.tcpejemplo;
 
 import com.mycompany.tcpejemplo.utils.ComponentesRedCliente;
-import com.mycompany.tcpejemplo.procesadores.ProcesadorServidor;
 import com.mycompany.tcpejemplo.procesadores.ProcesadorCliente;
 import com.mycompany.tcpejemplo.sockets.ClienteTCP;
 import com.mycompany.tcpejemplo.sockets.ServerTCP;
-import com.mycompany.tcpejemplo.interfaces.iProcesador;
-import com.mycompany.tcpejemplo.interfaces.iDespachador;
-import com.mycompany.tcpejemplo.interfaces.iListener;
-import java.io.IOException;
+import contratos.iDespachador;
+import contratos.iListener;
+
 // Importa el listener genérico de Java
 import java.beans.PropertyChangeListener;
 
@@ -22,13 +20,13 @@ import java.beans.PropertyChangeListener;
  * componentes de red para el cliente o el servidor. No guarda ningún estado; su
  * único trabajo es ensamblar.
  */
-public final class Ensamblador {
+public final class EnsambladorCliente {
 
     /**
      * Constructor privado para evitar que esta clase de utilidad sea
      * instanciada.
      */
-    private Ensamblador() {
+    private EnsambladorCliente() {
     }
 
     /**
@@ -65,16 +63,4 @@ public final class Ensamblador {
         return new ComponentesRedCliente(despachador, listener);
     }
 
-    public static iListener ensamblarServidor() {
-        System.out.println("[Ensamblador] Ensamblando componentes para SERVIDOR...");
-
-        // CAMBIO CLAVE: En lugar de un ClienteTCP directo, creas el DespachadorAsincrono.
-        iDespachador despachador = new DespachadorAsincrono();
-
-        iProcesador logicaServidor = new ProcesadorServidor(despachador);
-        iListener listener = new ServerTCP(logicaServidor);
-
-        System.out.println("[Ensamblador] Ensamblaje de SERVIDOR finalizado.");
-        return listener;
-    }
 }

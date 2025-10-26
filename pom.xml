@@ -10,6 +10,7 @@
         <module>MVCJuego</module>
         <module>BlackBoardServer</module>
         <module>TCPEjemplo</module>
+        <module>interfaces</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

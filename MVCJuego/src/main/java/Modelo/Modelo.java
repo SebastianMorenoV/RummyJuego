@@ -11,7 +11,7 @@ import Fachada.JuegoRummyFachada;
 import Vista.Observador;
 import Vista.TipoEvento;
 import static Vista.TipoEvento.TOMO_FICHA;
-import com.mycompany.tcpejemplo.interfaces.iDespachador;
+import contratos.iDespachador;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;

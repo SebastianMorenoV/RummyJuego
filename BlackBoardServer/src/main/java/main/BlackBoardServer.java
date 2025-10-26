@@ -1,11 +1,10 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
+package main;
 
-package com.itson.blackboardserver;
-
-import com.mycompany.tcpejemplo.Ensamblador;
-import com.mycompany.tcpejemplo.interfaces.iListener;
+import contratos.iListener;
+import ensamblador.EnsambladorServidor;
 import java.io.IOException;
 
 /**
@@ -15,17 +14,13 @@ import java.io.IOException;
 public class BlackBoardServer {
 
     public static void main(String[] args) {
-        // 1. Configuración del Servidor
         final int PUERTO_DE_ESCUCHA = 5000;
         System.out.println("Iniciando Servidor de Rummy...");
 
-        // 2. Ensamblaje de los componentes del servidor
-        // (Necesitarás un método para esto en tu clase Ensamblador)
-        iListener listenerServidor = Ensamblador.ensamblarServidor();
+        // 2. Llama al EnsambladorServidor correcto
+        iListener listenerServidor = EnsambladorServidor.ensamblarServidor();
 
         // 3. Poner el servidor a escuchar
-        // Esta llamada bloqueará el programa, manteniéndolo en un bucle infinito
-        // para aceptar conexiones de jugadores.
         try {
             System.out.println("[Servidor Main] Escuchando en el puerto " + PUERTO_DE_ESCUCHA);
             listenerServidor.iniciar(PUERTO_DE_ESCUCHA);

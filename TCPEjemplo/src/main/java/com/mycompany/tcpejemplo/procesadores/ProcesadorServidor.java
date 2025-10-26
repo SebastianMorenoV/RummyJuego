@@ -1,7 +1,9 @@
 package com.mycompany.tcpejemplo.procesadores;
 
-import com.mycompany.tcpejemplo.interfaces.iProcesador;
-import com.mycompany.tcpejemplo.interfaces.iDespachador;
+import contratos.iControladorBlackboard;
+import contratos.iDespachador;
+import contratos.iProcesador;
+import contratos.iResultadoComando;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,74 +16,73 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProcesadorServidor implements iProcesador {
 
     // Correcto: El servidor necesita un directorio para saber a quién enviar mensajes.
-    private final Map<String, ClienteInfo> directorioClientes = new ConcurrentHashMap<>();
+    private final Map<String, ClienteInfo> directorioRed;
 
     // Correcto: Depende de la interfaz, no de una clase concreta. Mantiene el desacoplamiento.
+    private final iControladorBlackboard controladorBlackboard;
     private final iDespachador despachador;
 
-    public ProcesadorServidor(iDespachador despachador) {
-        if (despachador == null) {
-            throw new IllegalArgumentException("El despachador no puede ser nulo");
-        }
+    public ProcesadorServidor(iControladorBlackboard controlador, iDespachador despachador) {
+        this.controladorBlackboard = controlador;
         this.despachador = despachador;
+        this.directorioRed = new ConcurrentHashMap<>();
     }
 
     @Override
     public String procesar(String ipCliente, String mensaje) {
         String[] partes = mensaje.split(":", 3);
-        if (partes.length < 2) {
-            return "ERROR: Mensaje malformado";
-        }
-
         String idCliente = partes[0];
         String comando = partes[1];
         String payload = (partes.length > 2) ? partes[2] : "";
 
-        // Lógica para registrar un nuevo cliente en el directorio.
+        // --- Lógica de Red ---
         if (comando.equals("REGISTRAR")) {
+            // El payload de REGISTRAR debe ser el puerto
             try {
                 int puertoCliente = Integer.parseInt(payload);
-                directorioClientes.put(idCliente, new ClienteInfo(ipCliente, puertoCliente));
-                System.out.println("[BlackBoard] Cliente " + idCliente + " registrado en **" + ipCliente + ":" + puertoCliente + "**");
-                return "REGISTRADO_OK";
-            } catch (NumberFormatException e) {
+                directorioRed.put(idCliente, new ClienteInfo(ipCliente, puertoCliente));
+                System.out.println("[Procesador] " + idCliente + " conectado desde " + ipCliente + ":" + puertoCliente);
+            } catch (Exception e) {
                 return "ERROR: Puerto inválido";
             }
+            // OJO: El payload que le pasamos al blackboard aquí podría ser diferente
+            // (ej. la mano), pero por ahora pasamos el payload crudo.
         }
 
-        // Lógica para reenviar (broadcast) un movimiento a los demás jugadores.
-        if (comando.equals("MOVER")) {
-            System.out.println("[BlackBoard] " + idCliente + " (" + ipCliente + ") movió datos: " + payload);
+        // --- Lógica de Componente ---
+        // 1. Traduce la llamada de red a una llamada al componente
+        // Aquí pasamos un payload "vacío" para REGISTRAR, asumiendo que 
+        // el payload original era solo el puerto.
+        String payloadParaBlackboard = comando.equals("REGISTRAR") ? "" : payload;
 
-            String msgUpdate = "MOVIMIENTO_RECIBIDO:" + idCliente + ":" + payload;
+        iResultadoComando resultado = controladorBlackboard.procesarComando(idCliente, comando, payloadParaBlackboard);
 
-            // Itera sobre el directorio para notificar a todos menos al remitente.
-            for (Map.Entry<String, ClienteInfo> entry : directorioClientes.entrySet()) {
-                if (entry.getKey().equals(idCliente)) {
-                    continue; // No notificar a sí mismo
-                }
+        // --- Lógica de Red (Salida) ---
+        // 2. Ejecuta las instrucciones de "broadcast" del resultado
+        for (String msgBroadcast : resultado.getMensajesBroadcast()) {
+            enviarBroadcast(idCliente, msgBroadcast);
+        }
 
-                String idDestino = entry.getKey();
-                ClienteInfo infoDestino = entry.getValue();
+        // 3. Devuelve la respuesta al cliente original
+        return resultado.getRespuestaAlRemitente();
+    }
 
-                new Thread(() -> {
-                    try {
-                        System.out.println("[BlackBoard] Reenviando a " + idDestino + " en " + infoDestino.getHost() + ":" + infoDestino.getPuerto());
-
-                        // LÍNEA INCORRECTA (la que tienes ahora y causa el error):
-                        // this.despachador.enviar(msgUpdate);
-                        // LÍNEA CORRECTA (la que debes poner):
-                        this.despachador.enviar(infoDestino.getHost(), infoDestino.getPuerto(), msgUpdate);
-
-                    } catch (IOException e) {
-                        System.err.println("[BlackBoard] Error al notificar a " + idDestino + ": " + e.getMessage());
-                    }
-                }).start();
+    /**
+     * Método de ayuda para enviar un mensaje a todos menos al remitente.
+     */
+    private void enviarBroadcast(String idRemitente, String mensaje) {
+        for (Map.Entry<String, ClienteInfo> entry : directorioRed.entrySet()) {
+            if (entry.getKey().equals(idRemitente)) {
+                continue;
             }
-            return "MOVIMIENTO_RECIBIDO_OK"; // Respuesta al cliente original
-        }
 
-        return "COMANDO_DESCONOCIDO";
+            ClienteInfo infoDestino = entry.getValue();
+            try {
+                despachador.enviar(infoDestino.getHost(), infoDestino.getPuerto(), mensaje);
+            } catch (IOException e) {
+                System.err.println("[Procesador] Error en broadcast: " + e.getMessage());
+            }
+        }
     }
 
     // Clase interna para almacenar la información de conexión de cada cliente.

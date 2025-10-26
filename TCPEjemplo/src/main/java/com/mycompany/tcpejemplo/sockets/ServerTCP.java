@@ -2,8 +2,8 @@
 package com.mycompany.tcpejemplo.sockets;
 
 import com.mycompany.tcpejemplo.utils.PeticionCliente;
-import com.mycompany.tcpejemplo.interfaces.iProcesador;
-import com.mycompany.tcpejemplo.interfaces.iListener;
+import contratos.iListener;
+import contratos.iProcesador;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -23,14 +23,14 @@ public class ServerTCP implements iListener {
         }
         this.procesador = procesador;
         this.colaDeEntrada = new LinkedBlockingQueue<>();
-        
+
         // Inicia el hilo "cocinero" que procesará la cola.
         new Thread(this::procesarCola).start();
     }
 
     /**
-     * El hilo del "Mesero". Su único trabajo es aceptar conexiones,
-     * leer el mensaje y ponerlo en la cola. Es súper rápido.
+     * El hilo del "Mesero". Su único trabajo es aceptar conexiones, leer el
+     * mensaje y ponerlo en la cola. Es súper rápido.
      */
     @Override
     public void iniciar(int puerto) throws IOException {
@@ -41,16 +41,18 @@ public class ServerTCP implements iListener {
             try {
                 // 1. Acepta la conexión del cliente.
                 Socket socketCliente = serverSocket.accept();
-                
+
                 // 2. Lee el mensaje (la orden).
                 DataInputStream in = new DataInputStream(socketCliente.getInputStream());
                 String msgRecibido = in.readUTF();
-                
+
                 // 3. Pone la orden en la cola para que el "cocinero" la tome.
                 colaDeEntrada.put(new PeticionCliente(socketCliente, msgRecibido));
-                
+
             } catch (IOException e) {
-                if (ejecutando) System.err.println("[Listener] Error al aceptar conexión: " + e.getMessage());
+                if (ejecutando) {
+                    System.err.println("[Listener] Error al aceptar conexión: " + e.getMessage());
+                }
             } catch (InterruptedException e) {
                 ejecutando = false;
                 Thread.currentThread().interrupt();
@@ -59,8 +61,8 @@ public class ServerTCP implements iListener {
     }
 
     /**
-     * El hilo del "Cocinero". Trabaja en segundo plano.
-     * Toma peticiones de la cola, las procesa y envía la respuesta.
+     * El hilo del "Cocinero". Trabaja en segundo plano. Toma peticiones de la
+     * cola, las procesa y envía la respuesta.
      */
     private void procesarCola() {
         System.out.println("[Procesador de Cola] Hilo de procesamiento (cocinero) iniciado.");
@@ -73,7 +75,7 @@ public class ServerTCP implements iListener {
 
                 // 2. Procesa la orden usando la lógica del servidor. Esta es la parte "lenta".
                 String respuesta = this.procesador.procesar(peticion.ipCliente, peticion.mensajeRecibido);
-                
+
                 // 3. Envía la respuesta al cliente.
                 DataOutputStream out = new DataOutputStream(peticion.socketCliente.getOutputStream());
                 out.writeUTF(respuesta);
@@ -89,7 +91,8 @@ public class ServerTCP implements iListener {
                 if (peticion != null && peticion.socketCliente != null) {
                     try {
                         peticion.socketCliente.close();
-                    } catch (IOException ex) { /* Ignorar */ }
+                    } catch (IOException ex) {
+                        /* Ignorar */ }
                 }
             }
         }
