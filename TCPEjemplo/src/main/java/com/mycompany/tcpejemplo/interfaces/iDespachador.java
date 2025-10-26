@@ -1,5 +1,5 @@
 
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.interfaces;
 
 import java.io.IOException;
 

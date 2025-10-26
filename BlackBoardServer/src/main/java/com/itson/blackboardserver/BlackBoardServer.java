@@ -5,7 +5,7 @@
 package com.itson.blackboardserver;
 
 import com.mycompany.tcpejemplo.Ensamblador;
-import com.mycompany.tcpejemplo.iListener;
+import com.mycompany.tcpejemplo.interfaces.iListener;
 import java.io.IOException;
 
 /**

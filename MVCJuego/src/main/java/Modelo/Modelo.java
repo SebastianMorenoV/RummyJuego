@@ -11,7 +11,7 @@ import Fachada.JuegoRummyFachada;
 import Vista.Observador;
 import Vista.TipoEvento;
 import static Vista.TipoEvento.TOMO_FICHA;
-import com.mycompany.tcpejemplo.iDespachador;
+import com.mycompany.tcpejemplo.interfaces.iDespachador;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -33,6 +33,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private List<GrupoDTO> gruposDeTurnoDTO;
     private Observador enTurno;
     private iDespachador despachador;
+    private String miId;
 
     public Modelo() {
         this.observadores = new ArrayList<>();
@@ -50,80 +51,71 @@ public class Modelo implements IModelo, PropertyChangeListener {
      */
     public void iniciarJuego() {
         enTurno = observadores.get(0);
-
         juego.iniciarPartida();
-
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
+
     /**
      * Reacciona a eventos que le llegan.
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-
         String evento = evt.getPropertyName();
 
         if (evento.equals("MOVIMIENTO_RECIBIDO")) {
             System.out.println("[Modelo] Evento 'MOVIMIENTO_RECIBIDO' detectado!");
 
             try {
-                // 1. Recibe el payload (string) crudo del evento
                 String payload = (String) evt.getNewValue();
-
-                // --- ¡CAMBIO CLAVE AQUÍ! ---
-                // 2. ¡El Modelo DESERIALIZA la LISTA!
-                // Llama al nuevo método estático 'deserializarLista'
-                // Ya no hay 'cast', esto DEVUELVE la lista que querías.
                 List<GrupoDTO> gruposMovidos = GrupoDTO.deserializarLista(payload);
 
-                // 3. Procesa (si es válido)
                 if (gruposMovidos != null && !gruposMovidos.isEmpty()) {
                     System.out.println("Se intento colocar ficha (remoto)");
-
-                    // (OJO: 'colocarFicha' actualiza 'gruposDeTurnoDTO'
-                    // lo cual es para el jugador LOCAL)
-                    // Es mejor crear un método que maneje grupos remotos
-                    this.colocarFicha(gruposMovidos);
+                    
+                    this.actualizarVistaTemporal(gruposMovidos);
 
                 } else {
                     System.err.println("[Modelo] Error: No se pudo deserializar el payload: " + payload);
                 }
 
             } catch (Exception e) {
-                // Imprime el stack trace para ver el error completo
                 System.err.println("[Modelo] Error al procesar evento: " + e.getMessage());
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * (NUEVO - RECOMENDADO) Procesa una LISTA de grupos que llegaron desde la
-     * red (de otro jugador). Llama a la fachada y notifica a los observadores.
-     */
-    public void actualizarTableroConGruposRemotos(List<GrupoDTO> gruposRemotos) {
-        System.out.println("[Modelo] Actualizando tablero con " + gruposRemotos.size() + " grupos remotos.");
+    private void actualizarVistaTemporal(List<GrupoDTO> gruposPropuestos) {
+        this.gruposDeTurnoDTO = gruposPropuestos;
 
-        // 1. Convierte los DTOs a Entidades
-        List<Grupo> nuevosGrupos = gruposRemotos.stream()
+        // (Opcional, pero basado en tu código viejo, esto también debería ir aquí)
+        List<Grupo> nuevosGrupos = gruposPropuestos.stream()
                 .map(this::convertirGrupoDtoAEntidad)
                 .collect(Collectors.toList());
-
-        // 2. Llama a la fachada para colocar las fichas
         juego.colocarFichasEnTablero(nuevosGrupos);
 
-        // 3. Valida el turno en esta máquina
-        // (Esto es crucial para que la lógica de todos esté sincronizada)
-        boolean jugadaFueValida = juego.validarYFinalizarTurno();
+        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+    }
 
-        // 4. Notifica a la VISTA para que se repinte
-        if (jugadaFueValida) {
-            notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
-        } else {
-            // Si el movimiento de otro jugador fue inválido, hay un problema de lógica
-            System.err.println("[Modelo] ¡ERROR GRAVE! Movimiento remoto resultó ser inválido.");
-            juego.revertirCambiosDelTurno();
-            notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+    public void colocarFicha(List<GrupoDTO> grupos) {
+        // 1. Llama al método que SÓLO pinta localmente
+        this.actualizarVistaTemporal(grupos);
+
+        // 2. Serializa y envía el mensaje a la red
+        StringBuilder payloadBuilder = new StringBuilder();
+        for (int i = 0; i < grupos.size(); i++) {
+            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            if (i < grupos.size() - 1) {
+                payloadBuilder.append("$"); // Delimitador ENTRE grupos
+            }
+        }
+        String payloadCompleto = payloadBuilder.toString();
+        String mensaje = this.miId + ":MOVER:" + payloadCompleto;
+
+        try {
+            this.despachador.enviar(mensaje);
+        } catch (IOException ex) {
+            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -157,32 +149,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
         enTurno = observadores.get((indiceActual + 1) % observadores.size());
 
         notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
-    }
-
-    public void setDespachador(iDespachador despachador) {
-        this.despachador = despachador;
-    }
-
-    public void colocarFicha(List<GrupoDTO> grupos) {
-        // 1. Lógica del juego local...
-        this.gruposDeTurnoDTO = grupos;
-        StringBuilder payloadBuilder = new StringBuilder();
-        for (int i = 0; i < grupos.size(); i++) {
-            payloadBuilder.append(grupos.get(i).serializarParaPayload());
-            if (i < grupos.size() - 1) {
-                payloadBuilder.append("$"); // Delimitador ENTRE grupos
-            }
-        }
-        String payloadCompleto = payloadBuilder.toString();
-        // 2. Serialización...
-        String mensaje = "BenjaminSoto:MOVER:" + payloadCompleto;
-        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
-        try {
-            // El modelo simplemente dice "envía esto". No sabe ni le importa a dónde va.
-            this.despachador.enviar(mensaje);
-        } catch (IOException ex) {
-            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     /**
@@ -334,6 +300,15 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 .collect(Collectors.toList());
 
         return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO, 0, 0);
+    }
+
+    /*SETTERS*/
+    public void setDespachador(iDespachador despachador) {
+        this.despachador = despachador;
+    }
+
+    public void setMiId(String miId) {
+        this.miId = miId;
     }
 
 }

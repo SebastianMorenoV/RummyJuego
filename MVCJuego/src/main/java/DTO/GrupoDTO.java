@@ -164,6 +164,7 @@ public class GrupoDTO {
 
         // 2. Deserializa cada payload individual
         for (String payload : payloadsIndividuales) {
+            System.out.println(payload);
             if (payload != null && !payload.isEmpty()) {
                 // Llama al método deserializar() que ya teníamos
                 GrupoDTO grupo = GrupoDTO.deserializar(payload);

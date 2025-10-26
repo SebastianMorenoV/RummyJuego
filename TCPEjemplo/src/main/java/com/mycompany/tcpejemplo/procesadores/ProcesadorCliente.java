@@ -1,6 +1,7 @@
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.procesadores;
 
 // ¡YA NO IMPORTA DTO.GrupoDTO!
+import com.mycompany.tcpejemplo.interfaces.iProcesador;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 

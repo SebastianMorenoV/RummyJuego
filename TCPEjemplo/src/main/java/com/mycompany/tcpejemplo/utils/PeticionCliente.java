@@ -1,11 +1,11 @@
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.utils;
+
 // Archivo: PeticionCliente.java
-
-
 import java.net.Socket;
 
 // Contenedor para pasar la petición del "mesero" al "cocinero".
 public class PeticionCliente {
+
     public final Socket socketCliente;
     public final String mensajeRecibido;
     public final String ipCliente;

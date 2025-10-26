@@ -1,5 +1,7 @@
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.procesadores;
 
+import com.mycompany.tcpejemplo.interfaces.iProcesador;
+import com.mycompany.tcpejemplo.interfaces.iDespachador;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

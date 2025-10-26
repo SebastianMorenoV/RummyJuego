@@ -1,6 +1,9 @@
 // Archivo: ServerTCP.java (Reemplaza completamente el anterior)
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.sockets;
 
+import com.mycompany.tcpejemplo.utils.PeticionCliente;
+import com.mycompany.tcpejemplo.interfaces.iProcesador;
+import com.mycompany.tcpejemplo.interfaces.iListener;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;

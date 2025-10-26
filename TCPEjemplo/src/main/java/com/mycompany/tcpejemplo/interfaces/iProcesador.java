@@ -1,5 +1,5 @@
 
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.interfaces;
 
 /**
  * Contrato para la LÓGICA de la aplicación.

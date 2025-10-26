@@ -1,5 +1,13 @@
 package com.mycompany.tcpejemplo;
 
+import com.mycompany.tcpejemplo.utils.ComponentesRedCliente;
+import com.mycompany.tcpejemplo.procesadores.ProcesadorServidor;
+import com.mycompany.tcpejemplo.procesadores.ProcesadorCliente;
+import com.mycompany.tcpejemplo.sockets.ClienteTCP;
+import com.mycompany.tcpejemplo.sockets.ServerTCP;
+import com.mycompany.tcpejemplo.interfaces.iProcesador;
+import com.mycompany.tcpejemplo.interfaces.iDespachador;
+import com.mycompany.tcpejemplo.interfaces.iListener;
 import java.io.IOException;
 // Importa el listener genérico de Java
 import java.beans.PropertyChangeListener;

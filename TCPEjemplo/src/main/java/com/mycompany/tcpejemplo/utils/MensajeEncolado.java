@@ -1,4 +1,4 @@
-package com.mycompany.tcpejemplo;
+package com.mycompany.tcpejemplo.utils;
 // Archivo: MensajeEncolado.java
 // Esta clase es solo un paquete para guardar el mensaje y su destino juntos.
 
