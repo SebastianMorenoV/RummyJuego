@@ -1,26 +1,63 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
 package main;
 
-import contratos.iListener;
-import ensamblador.EnsambladorServidor;
-import java.io.IOException;
+// 1. Importa las clases concretas QUE VA A CREAR
+import control.ControladorBlackboard;
+import directorio.Directorio;
+import pizarra.EstadoJuegoPizarra;
+import com.mycompany.tcpejemplo.DespachadorAsincrono; // Necesaria para el Directorio
 
-/**
- *
- * @author benja
- */
+// 2. Importa el Ensamblador y las Interfaces
+import Ensambladores.EnsambladorServidor;
+import contratos.iEnsambladorServidor;
+import contratos.iControladorBlackboard;
+import contratos.iDespachador;
+import contratos.iDirectorio;
+import contratos.iListener;
+import contratos.iObservador; // Necesaria para conectar Pizarra y Controlador
+import contratos.iAgenteConocimiento; // Para la lista de agentes
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class BlackBoardServer {
 
     public static void main(String[] args) {
         final int PUERTO_DE_ESCUCHA = 5000;
         System.out.println("Iniciando Servidor de Rummy...");
 
-        // 2. Llama al EnsambladorServidor correcto
-        iListener listenerServidor = EnsambladorServidor.ensamblarServidor();
+        // --- 1. CREACIÓN DE COMPONENTES (Lógica movida desde el ensamblador) ---
+        
+        // 1.A. Crear Despachador (El que envía)
+        iDespachador despachador = new DespachadorAsincrono();
 
-        // 3. Poner el servidor a escuchar
+        // 1.B. Crear Directorio (El que sabe "dónde viven")
+        iDirectorio directorio = new Directorio(despachador);
+
+        // 1.C. Crear Pizarra (El estado)
+        EstadoJuegoPizarra pizarra = new EstadoJuegoPizarra(); 
+
+        // 1.D. Crear Controlador y Agentes (La inteligencia)
+        List<iAgenteConocimiento> agentes = new ArrayList<>();
+        // ... (Aquí agregarías tus agentes: new AgenteMovimiento(pizarra), etc.)
+        iControladorBlackboard controladorBlackboard = new ControladorBlackboard(agentes, directorio);
+
+        // 1.E. Conectar Pizarra -> Controlador (Observer)
+        pizarra.addObservador((iObservador) controladorBlackboard);
+
+        // --- 2. ENSAMBLAJE DE RED (Usando el módulo externo) ---
+        
+        // 2.A. Instanciar el ensamblador
+        iEnsambladorServidor ensamblador = new EnsambladorServidor();
+        
+        // 2.B. Llamar al método e INYECTAR los componentes ya creados
+        iListener listenerServidor = ensamblador.ensamblarRedServidor(
+                pizarra, 
+                despachador, 
+                directorio
+        );
+
+        // --- 3. Iniciar el Servidor ---
         try {
             System.out.println("[Servidor Main] Escuchando en el puerto " + PUERTO_DE_ESCUCHA);
             listenerServidor.iniciar(PUERTO_DE_ESCUCHA);

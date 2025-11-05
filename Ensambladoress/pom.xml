@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.itson</groupId>
-    <artifactId>BlackBoardServer</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <parent>
+        <groupId>com.itson</groupId>
+        <artifactId>RummyGame</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>Ensambladoress</artifactId>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -16,20 +19,9 @@
             <artifactId>TCPEjemplo</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Dtos</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Ensambladoress</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>22</maven.compiler.release>
-        <exec.mainClass>com.itson.blackboardserver.BlackBoardServer</exec.mainClass>
+        <maven.compiler.release>24</maven.compiler.release>
+        <exec.mainClass>com.itson.ensambladoress.Ensambladoress</exec.mainClass>
     </properties>
 </project>

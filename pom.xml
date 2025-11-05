@@ -12,6 +12,7 @@
         <module>TCPEjemplo</module>
         <module>interfaces</module>
         <module>Dtos</module>
+        <module>Ensambladoress</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

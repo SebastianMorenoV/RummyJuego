@@ -3,11 +3,11 @@ package control;
 import contratos.iAgenteConocimiento;
 import contratos.iControladorBlackboard;
 import contratos.iDirectorio;
+import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import observer.iObservador;
 import pizarra.EstadoJuegoPizarra;
 
 // ¡Implementa la nueva interfaz!

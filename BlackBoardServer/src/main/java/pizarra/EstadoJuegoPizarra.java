@@ -2,12 +2,12 @@ package pizarra;
 // O donde vivirá tu blackboard
 
 import DTO.GrupoDTO;
+import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import observer.iObservador;
 
 /**
  * El Pizarrón 📌 Implementación concreta que almacena el estado de la partida.
