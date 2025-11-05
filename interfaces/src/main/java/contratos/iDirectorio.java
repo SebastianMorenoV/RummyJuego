@@ -15,4 +15,6 @@ public interface iDirectorio {
     public void removeJugador(String idJugador);
 
     public void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje);
+
+    void enviarATodos(String mensaje);
 }

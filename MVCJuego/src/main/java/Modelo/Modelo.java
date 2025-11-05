@@ -32,7 +32,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private List<Observador> observadores;
     private final IJuegoRummy juego;
     private List<GrupoDTO> gruposDeTurnoDTO;
-    private Observador enTurno;
+    private boolean esMiTurno;
     private iDespachador despachador;
     private String miId;
 
@@ -40,6 +40,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         this.observadores = new ArrayList<>();
         this.juego = new JuegoRummyFachada();
         this.gruposDeTurnoDTO = new ArrayList<>();
+        this.esMiTurno = false;
     }
 
     /**
@@ -49,7 +50,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * dibujen las fichas iniciales en la mano.
      */
     public void iniciarJuego() {
-        enTurno = observadores.get(0);
         juego.iniciarPartida();
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
@@ -60,6 +60,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
+        String payloadd = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         if (evento.equals("MOVIMIENTO_RECIBIDO")) {
             System.out.println("[Modelo] Evento 'MOVIMIENTO_RECIBIDO' detectado!");
@@ -82,6 +83,15 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 e.printStackTrace();
             }
         }
+
+        if (evento.equals("TURNO_CAMBIADO")) {
+            System.out.println("[Modelo] Evento 'TURNO_CAMBIADO' detectado! Nuevo turno: " + payloadd);
+            String nuevoJugadorId = payloadd;
+
+            this.esMiTurno = nuevoJugadorId.equals(this.miId);
+
+            notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
+        }
     }
 
     private void actualizarVistaTemporal(List<GrupoDTO> gruposPropuestos) {
@@ -96,7 +106,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     public void colocarFicha(List<GrupoDTO> grupos) {
-
+        if (!this.esMiTurno) {
+            System.out.println("[Modelo] Acción 'colocarFicha' ignorada. No es mi turno.");
+            return;
+        }
         // 1. Llama al método que SÓLO pinta localmente
         this.actualizarVistaTemporal(grupos);
 
@@ -119,59 +132,84 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Método para que el jugador tome una ficha del mazo cuando no puede
-     * realizar una jugada válida. Primero revierte cualquier movimiento
-     * temporal del turno para regresar el tablero a su estado inicial y
-     * notificar a los observadores. Luego toma la ficha del mazo, avanza al
-     * siguiente jugador actualizando la variable 'enTurno' y finalmente
-     * notifica el cambio de turno para actualizar la vista.
+     * REFACTORIZADO: 1. Ejecuta la lógica local. 2. Notifica a la UI local. 3.
+     * ENVÍA el comando "TOMAR_FICHA" al servidor para que avance el turno.
      */
     public void tomarFichaMazo() {
-        // Revertir jugada temporal del tablero
+        if (!this.esMiTurno) {
+            System.out.println("[Modelo] Acción 'tomarFichaMazo' ignorada. No es mi turno.");
+            return;
+        }
+        // 1. Lógica local (exactamente como la tenías)
         juego.revertirCambiosDelTurno();
         juego.jugadorTomaFichaDelMazo();
 
-        // Revierte el tablero
+        // 2. Notificaciones locales (exactamente como las tenías)
         notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         notificarObservadores(TipoEvento.REPINTAR_MANO);
         notificarObservadores(TipoEvento.TOMO_FICHA);
-        // Llama a la Fachada para que cambie el contador de jugador interno
-        juego.siguienteTurno();
 
-        // Actualiza la variable 'enTurno' del Modelo para que apunte al nuevo jugador
-        int indiceActual = observadores.indexOf(enTurno);
-        enTurno = observadores.get((indiceActual + 1) % observadores.size());
-
-        notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
+        // 3. ¡Lógica de red!
+        // Le dice al servidor que avance el turno.
+        try {
+            String mensaje = this.miId + ":TOMAR_FICHA:"; // Nuevo comando
+            this.despachador.enviar(mensaje);
+        } catch (IOException ex) {
+            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
-     * Finaliza el turno del jugador. Se valida la jugada desde la fachada. Si
-     * es válida, se notifica, se cambia al siguiente jugador y se indica el
-     * cambio de turno. Si es inválida, se revierten los movimientos realizados.
-     * Finalmente, se repinta la mano del jugador.
+     * REFACTORIZADO: 1. Valida la lógica local. 2. Si es válida, notifica a la
+     * UI local y ENVÍA el comando "FINALIZAR_TURNO". 3. Si es inválida, solo
+     * notifica a la UI local.
      */
     public void terminarTurno() {
+        if (!this.esMiTurno) {
+            System.out.println("[Modelo] Acción 'terminarTurno' ignorada. No es mi turno.");
+            return;
+        }
+        // 1. Lógica local (como la tenías)
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
         if (jugadaFueValida) {
-
-            // Lógica para cambiar de turno
+            // 2. Notificación local
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
 
-            int indiceActual = observadores.indexOf(enTurno);
-
-            enTurno = observadores.get((indiceActual + 1) % observadores.size());
-
-            notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
-
-            if (juego.haGanadoElJugador()) {
-                // notificarObservadores(TipoEvento.JUEGO_TERMINADO);
+            // 3. ¡Lógica de red!
+            // Le dice al servidor que la jugada fue válida y que avance el turno.
+            try {
+                // El payload podría ser el estado final del tablero
+                String payloadJuego = serializarJuegoFinal(); // (Necesitarás este método)
+                String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego;
+                this.despachador.enviar(mensaje);
+            } catch (IOException ex) {
+                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         } else {
+            // 4. Lógica local de jugada inválida (como la tenías)
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         }
+
+        // Esto se queda, para repintar la mano si la jugada fue inválida
         notificarObservadores(TipoEvento.REPINTAR_MANO);
+    }
+
+    /**
+     * Método de ayuda para serializar el estado final del tablero en un
+     * `FINALIZAR_TURNO`. Reutiliza la lógica de `colocarFicha`.
+     */
+    private String serializarJuegoFinal() {
+        List<GrupoDTO> grupos = this.gruposDeTurnoDTO; // Asume que esto tiene el estado final
+        StringBuilder payloadBuilder = new StringBuilder();
+        for (int i = 0; i < grupos.size(); i++) {
+            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            if (i < grupos.size() - 1) {
+                payloadBuilder.append("$"); // Delimitador ENTRE grupos
+            }
+        }
+        return payloadBuilder.toString();
     }
 
     // Métodos del Patron Observador
@@ -190,22 +228,16 @@ public class Modelo implements IModelo, PropertyChangeListener {
      */
     public void notificarObservadores(TipoEvento tipoEvento) {
 
-        // Itera sobre todos los observadores para enviarles una actualización personalizada.
         for (Observador observer : this.observadores) {
-
-            // Obtenemos el indice del observador para saber que jugador es.
             int indiceJugador = observadores.indexOf(observer);
-
-            // Pedimos a la fachada la mano de ESE jugador especifico
             List<Ficha> manoEntidad = juego.getManoDeJugador(indiceJugador);
-
-            // La convertimos a una lista de DTOs de fichas
             List<FichaJuegoDTO> manoDTO = manoEntidad.stream()
                     .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
                     .collect(Collectors.toList());
 
-            // Creamos el DTO con la mano especifica de este jugador.
-            boolean esSuTurno = observer.equals(enTurno);
+            // --- LÓGICA SIMPLIFICADA ---
+            // Ya no compara observadores, solo usa el booleano.
+            boolean esSuTurno = this.esMiTurno;
             ActualizacionDTO dto = new ActualizacionDTO(tipoEvento, esSuTurno, manoDTO);
 
             /*
@@ -242,6 +274,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * @param idFicha para indicar que ficha se quiere regresar
      */
     public void regresarFichaAMano(int idFicha) {
+        if (!this.esMiTurno) {
+            System.out.println("[Modelo] Acción 'regresarFichaAMano' ignorada. No es mi turno.");
+            return;
+        }
         boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
 
         if (fueRegresadaExitosamente) { // EXITO: La ficha era temporal y volvio a la mano.
@@ -277,7 +313,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
             }
             dto.setGruposEnTablero(this.gruposDeTurnoDTO);
         } else {
-            
+
             // Si no coinciden, creamos DTOs que no tengan posicion en si.
             List<GrupoDTO> gruposDTO = gruposDelJuego.stream()
                     .map(this::convertirGrupoEntidadADto)

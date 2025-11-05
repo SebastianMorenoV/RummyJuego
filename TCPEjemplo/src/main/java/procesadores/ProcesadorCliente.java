@@ -34,26 +34,12 @@ public class ProcesadorCliente implements iProcesador {
 
     @Override
     public String procesar(String ipServidor, String mensaje) {
-        // El servidor envía: "MOVIMIENTO_RECIBIDO:ID_JUGADOR:PAYLOAD"
-        String[] partes = mensaje.split(":", 3);
+        String[] partes = mensaje.split(":", 2); // Dividir solo en 2: COMANDO y PAYLOAD
+        String comando = partes[0];
+        String payload = (partes.length > 1) ? partes[1] : "";
 
-        // Si no es un mensaje de movimiento, solo log
-        if (partes.length < 3 || !partes[0].equals("MOVIMIENTO_RECIBIDO")) {
-            System.out.println("\n[" + miId + " NOTIFICACIÓN]: " + mensaje);
-            return "CLIENTE_RECIBIDO_OK";
-        }
+        support.firePropertyChange(comando, null, payload);
 
-        // Es un movimiento
-        String idJugadorQueMovio = partes[1];
-        String payload = partes[2]; // Este es el string crudo
-
-        System.out.println("\n[" + miId + " MOVIMIENTO RECIBIDO] de " + idJugadorQueMovio);
-        System.out.println("[" + miId + "] Disparando evento 'MOVIMIENTO_RECIBIDO' con payload: " + payload);
-
-        // Dispara el evento pasando el PAYLOAD (STRING) crudo.
-        // El Modelo (que está escuchando) se encargará de deserializarlo.
-        support.firePropertyChange("MOVIMIENTO_RECIBIDO", null, payload);
-
-        return "CLIENTE_EVENTO_DISPARADO_OK";
+        return "CLIENTE_RECIBIDO_OK";
     }
 }

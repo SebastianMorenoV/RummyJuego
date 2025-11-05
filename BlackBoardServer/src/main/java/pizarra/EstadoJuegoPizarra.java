@@ -22,7 +22,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     private final Map<String, DatosJugador> estadoJugadores;
     private final List<iObservador> observadores;
-
+    private String ultimoTableroSerializado = "";
     /**
      * Mantiene el orden de los turnos.
      */
@@ -34,7 +34,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * Índice del jugador que tiene el turno actual.
      */
     private int indiceTurnoActual;
-
     private final int JUGADORES_PARA_INICIAR = 2; // Jugadores activos por ahora.
 
     /**
@@ -105,16 +104,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     @Override
-    public void actualizarMano(String id, String payloadMano) {
-        DatosJugador datos = estadoJugadores.get(id);
-        if (datos != null) {
-            datos.setManoSerializada(payloadMano);
-            System.out.println("[Pizarra] Mano de '" + id + "' actualizada.");
-            notificarObservadores("MOVIMIENTO");
-        }
-    }
-
-    @Override
     public String getMano(String id) {
         DatosJugador datos = estadoJugadores.get(id);
         return (datos != null) ? datos.getManoSerializada() : null;
@@ -131,10 +120,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public synchronized void avanzarTurno() {
         if (indiceTurnoActual != -1) {
-            // Avanza al siguiente jugador, o vuelve al primero (circular)
             indiceTurnoActual = (indiceTurnoActual + 1) % ordenDeTurnos.size();
             String idSiguiente = ordenDeTurnos.get(indiceTurnoActual);
             System.out.println("[Pizarra] Turno de: " + idSiguiente);
+
+            // ¡Notifica al Controlador!
             notificarObservadores("AVANZAR_TURNO");
         }
     }
@@ -154,42 +144,51 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
     @Override
     public String getJugador() {
-        return new String("Jugador 1");
+        if (indiceTurnoActual == -1 || ordenDeTurnos.isEmpty()) {
+            return null; // O un ID por defecto
+        }
+        return ordenDeTurnos.get(indiceTurnoActual);
     }
 
+    /**
+     * (NUEVO) Método para que el Controlador obtenga el último tablero válido
+     */
+    public String getUltimoTableroSerializado() {
+        return this.ultimoTableroSerializado;
+    }
+
+    /**
+     * REFACTORIZADO: Ahora maneja los nuevos comandos.
+     */
     @Override
     public boolean procesarComando(String idCliente, String comando, String payload) {
 
         switch (comando) {
             case "REGISTRAR":
-                // El procesador ya manejó la parte de RED (Directorio)
-                // Aquí manejamos la parte de LÓGICA (Pizarra)
-
-                registrarJugador(idCliente, payload); // payload aquí es ""
+                registrarJugador(idCliente, payload); // payload es ""
                 return true;
 
             case "MOVER":
-                System.out.println("[Pizarra] Recibido MOVER. Deserializando payload crudo...");
+                // Solo guarda el payload del movimiento, no hace nada más.
+                // El Controlador lo usará para el broadcast.
+                this.ultimoTableroSerializado = payload;
+                System.out.println("[Pizarra] " + idCliente + " movió (temporal).");
+                notificarObservadores("MOVIMIENTO"); // Notifica al Controlador
+                return true;
 
-                // La pizarra deserializa, igual que modelo
-                List<GrupoDTO> grupos = GrupoDTO.deserializarLista(payload);
+            // --- ¡NUEVOS COMANDOS! ---
+            case "FINALIZAR_TURNO":
+                // El cliente validó, así que guardamos este como el último estado bueno
+                this.ultimoTableroSerializado = payload;
+                System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
+                avanzarTurno(); // ¡Avanza el marcador y notifica!
+                return true;
 
-                if (grupos == null) {
-                    System.err.println("[Pizarra] Error al deserializar payload: " + payload);
-                    return false; // El payload era inválido
-                }
-
-                // Lógica de validación de los grupos
-                // Por ahora, se guardaran en el estado del pizarrón
-                this.gruposEnTablero = grupos;
-
-                // Guardamos el payload crudo para que el Controlador lo use en el broadcast
-                this.ultimoPayloadMovimiento = payload;
-
-                System.out.println("[Pizarra] Se guardaron " + grupos.size() + " grupos del jugador " + idCliente);
-
-                // Notifica al ControladorBlackboard que hubo un movimiento
-                notificarObservadores("MOVIMIENTO");
+            case "TOMAR_FICHA":
+                System.out.println("[Pizarra] " + idCliente + " tomó ficha y finalizó turno.");
+                // Aquí podrías guardar algo si fuera necesario (ej. "TOMO_FICHA")
+                // Pero por ahora, solo avanzamos el turno.
+                avanzarTurno(); // ¡Avanza el marcador y notifica!
                 return true;
 
             default:
