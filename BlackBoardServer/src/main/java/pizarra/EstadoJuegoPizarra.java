@@ -1,5 +1,4 @@
 package pizarra;
-// O donde vivirá tu blackboard
 
 import DTO.GrupoDTO;
 import contratos.iObservador;
@@ -10,29 +9,33 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * El Pizarrón 📌 Implementación concreta que almacena el estado de la partida.
- * Es "tonto" y solo guarda datos. No sabe de red.
+ * El Pizarrón (Blackboard) Implementación concreta que almacena el estado de la
+ * partida. Es "tonto" y solo guarda datos. No sabe de red.
+ *
+ * @author benja
  */
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
-    // --- El Estado Interno del Pizarrón ---
     /**
-     * Almacena el estado de juego de cada jugador (ID -> Datos).
+     * El Estado Interno del Pizarrón Almacena el estado de juego de cada
+     * jugador (ID -> Datos).
      */
     private final Map<String, DatosJugador> estadoJugadores;
     private final List<iObservador> observadores;
+
     /**
      * Mantiene el orden de los turnos.
      */
     private final List<String> ordenDeTurnos;
     private String ultimoPayloadMovimiento;
     private List<GrupoDTO> gruposEnTablero;
+
     /**
      * Índice del jugador que tiene el turno actual.
      */
     private int indiceTurnoActual;
 
-    private final int JUGADORES_PARA_INICIAR = 2; // O los que necesites
+    private final int JUGADORES_PARA_INICIAR = 2; // Jugadores activos por ahora.
 
     /**
      * Clase interna para guardar el estado de CADA jugador. No sabe de IPs ni
@@ -62,13 +65,15 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         this.ordenDeTurnos = java.util.Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
         this.observadores = new ArrayList<>();
-
-        // --- ¡Inicializa los nuevos atributos! ---
         this.gruposEnTablero = new ArrayList<>();
         this.ultimoPayloadMovimiento = "";
     }
 
-    // --- Añade los métodos del Observable ---
+    /**
+     * Añade los métodos del Observable
+     *
+     * @param obs
+     */
     public void addObservador(iObservador obs) {
         if (obs != null && !this.observadores.contains(obs)) {
             this.observadores.add(obs);
@@ -81,7 +86,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         }
     }
 
-    // --- Implementación de la Interfaz iPizarraJuego ---
+    /**
+     * Implementación de la Interfaz iPizarraJuego
+     *
+     * @param id
+     * @param payloadMano
+     */
     @Override
     public void registrarJugador(String id, String payloadMano) {
         // payloadMano es la mano serializada (o "" si es nueva)
@@ -113,7 +123,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public synchronized boolean esTurnoDe(String id) {
         if (indiceTurnoActual == -1) {
-            return false; // El juego no ha comenzado
+            return false; // False = El juego no ha comenzado
         }
         return ordenDeTurnos.get(indiceTurnoActual).equals(id);
     }
@@ -152,15 +162,16 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         switch (comando) {
             case "REGISTRAR":
-                // El procesador ya manejó la parte de RED (Directorio).
-                // Aquí manejamos la parte de LÓGICA (Pizarra).
+                // El procesador ya manejó la parte de RED (Directorio)
+                // Aquí manejamos la parte de LÓGICA (Pizarra)
+
                 registrarJugador(idCliente, payload); // payload aquí es ""
                 return true;
 
             case "MOVER":
                 System.out.println("[Pizarra] Recibido MOVER. Deserializando payload crudo...");
 
-                // ¡LA PIZARRA DESERIALIZA, IGUAL QUE EL MODELO!
+                // La pizarra deserializa, igual que modelo
                 List<GrupoDTO> grupos = GrupoDTO.deserializarLista(payload);
 
                 if (grupos == null) {
@@ -168,8 +179,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     return false; // El payload era inválido
                 }
 
-                // Aquí iría tu lógica de validación de los grupos...
-                // Por ahora, solo los guardamos en el estado del pizarrón.
+                // Lógica de validación de los grupos
+                // Por ahora, se guardaran en el estado del pizarrón
                 this.gruposEnTablero = grupos;
 
                 // Guardamos el payload crudo para que el Controlador lo use en el broadcast
@@ -177,7 +188,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
                 System.out.println("[Pizarra] Se guardaron " + grupos.size() + " grupos del jugador " + idCliente);
 
-                // ¡Notifica al ControladorBlackboard que hubo un movimiento!
+                // Notifica al ControladorBlackboard que hubo un movimiento
                 notificarObservadores("MOVIMIENTO");
                 return true;
 

@@ -3,6 +3,10 @@ package utils;
 import contratos.iDespachador;
 import contratos.iListener;
 
+/**
+ * 
+ * @author chris
+ */
 public class ComponentesRedCliente {
 
     public final iDespachador despachador;

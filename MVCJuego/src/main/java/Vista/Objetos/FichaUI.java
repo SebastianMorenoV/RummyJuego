@@ -15,6 +15,10 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 
+ * @author chris
+ */
 public class FichaUI extends JPanel {
 
     private int idFicha;
@@ -170,14 +174,14 @@ public class FichaUI extends JPanel {
                         }
 
                     } else {
-                        /*si su origen no es tablero entonces es mano por lo que se debe
-                        quedar donde mismo*/
+                        
+                        // Si su origen no es tablero entonces es mano por lo que se debe quedar donde mismo
                         devolverFichaAlOrigen();//para que se repinte
                     }
 
                 } else {
-                    // se solto en cualquier otro lado
-                    // La devolvemos a su panel y posicion originales.
+                    
+                    // Se solto en cualquier otro lado, por lo que la devolvemos a su panel y posicion originales.
                     devolverFichaAlOrigen();
                 }
 
@@ -216,7 +220,7 @@ public class FichaUI extends JPanel {
         g.drawString(texto, x, y);
     }
 
-    // --- Getters y Setters ---
+    // Getters y Setters
     public int getIdFicha() {
         return idFicha;
     }

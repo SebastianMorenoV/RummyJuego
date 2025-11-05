@@ -1,3 +1,4 @@
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -43,10 +44,12 @@ public class JugadorUI extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
         int panelWidth = getWidth();
@@ -117,9 +120,10 @@ public class JugadorUI extends JPanel {
     }
 
     /**
-     * Metodo para settear el numero de fichas restantes de un jugador.
-     * El numero de fichas restante sale debajo del nombre de un jugador
-     * @param fichasRestantes 
+     * Metodo para settear el numero de fichas restantes de un jugador. El
+     * numero de fichas restante sale debajo del nombre de un jugador
+     *
+     * @param fichasRestantes
      */
     public void setFichasRestantes(int fichasRestantes) {
         this.fichasRestantes = fichasRestantes;
@@ -128,16 +132,19 @@ public class JugadorUI extends JPanel {
 
     /**
      * Metodo para settear la imagen o "avatar" de un jugador.
-     * @param imagenAvatarBytes 
+     *
+     * @param imagenAvatarBytes
      */
     public void setImagenAvatar(byte[] imagenAvatarBytes) {
+
         // Vuelve a decodificar la imagen si se actualiza
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
             try {
                 this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));
             } catch (IOException e) {
                 this.avatarImage = null;
-                System.err.println("Error al decodificar la nueva imagen del avatar: " + e.getMessage());
+                System.err.println("Error al decodificar la nueva imagen del avatar: "
+                        + e.getMessage());
             }
         }
         repaint();
@@ -145,7 +152,8 @@ public class JugadorUI extends JPanel {
 
     /**
      * Metodo para settear el nombre de un jugador.
-     * @param nombreJugador 
+     *
+     * @param nombreJugador
      */
     public void setNombreJugador(String nombreJugador) {
         this.nombreJugador = nombreJugador;

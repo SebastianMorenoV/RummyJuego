@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
 
+/**
+ *
+ * @author chris
+ */
 public class ManoUI extends JPanel {
 
-    private List<FichaUI> fichas; // lista de fichas dentro de la mano
+    private List<FichaUI> fichas; // Lista de fichas dentro de la mano
     private static final int MARGEN_IZQUIERDO = 20;
     private static final int FICHAS_POR_FILA = 14;
     private static final int SEPARACION_HORIZONTAL = 38;
@@ -21,7 +25,7 @@ public class ManoUI extends JPanel {
 
     public ManoUI() {
         fichas = new ArrayList<>();
-        setPreferredSize(new Dimension(870, 150)); 
+        setPreferredSize(new Dimension(870, 150));
         setOpaque(false);
 
     }
@@ -45,12 +49,11 @@ public class ManoUI extends JPanel {
         super.removeAll();
     }
 
-
-    
     /**
-     * Este metodo es llamado por Swing para posicionar y ordenar todos los componentes (fichas dentro)
-     * del contenedor (el panel ManoUI).
-     * Aquí definimos la lógica de "wrapping" para colocar las fichas en filas sucesivas.
+     * Este metodo es llamado por Swing para posicionar y ordenar todos los
+     * componentes (fichas dentro) del contenedor (el panel ManoUI). Aquí
+     * definimos la lógica de "wrapping" para colocar las fichas en filas
+     * sucesivas.
      */
     @Override
     public void doLayout() {
@@ -65,30 +68,28 @@ public class ManoUI extends JPanel {
             comp.setBounds(x, y, ANCHO_FICHA, ALTO_FICHA);
         }
     }
-    
+
     /**
-     * Este metodo le dice al JScrollPane qué tan grande debe ser el panel.
-     * El ancho es fijo, pero el alto crece a medida que se añaden filas.
+     * Este metodo le dice al JScrollPane qué tan grande debe ser el panel. El
+     * ancho es fijo, pero el alto crece a medida que se añaden filas.
      */
     @Override
     public Dimension getPreferredSize() {
         int numComponentes = getComponentCount();
         if (numComponentes == 0) {
-            
+
             return new Dimension(580, 120);
         }
 
         // El ancho siempre es el mismo, basado en 14 fichas por fila
         int panelWidth = MARGEN_IZQUIERDO + (FICHAS_POR_FILA * SEPARACION_HORIZONTAL);
-        
+
         // El alto se calcula basado en cuantas filas se necesitan
         int numFilas = (int) Math.ceil((double) numComponentes / FICHAS_POR_FILA);
         int panelHeight = (numFilas * ALTURA_FILA) + (2 * MARGEN_VERTICAL);
-        
+
         return new Dimension(panelWidth, panelHeight);
     }
-
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -98,13 +99,13 @@ public class ManoUI extends JPanel {
     }
 
     /**
-     * Metodo que remueve la ficha de la mano.
-     * remueve el componente visual
+     * Metodo que remueve la ficha de la mano. remueve el componente visual
+     *
      * @param ficha la ficha que removera
      */
     public void removerFicha(FichaUI ficha) {
-        if (fichas.remove(ficha)) { 
-            this.remove(ficha); 
+        if (fichas.remove(ficha)) {
+            this.remove(ficha);
             this.revalidate();
             this.repaint();
         }
@@ -112,14 +113,14 @@ public class ManoUI extends JPanel {
     }
 
     /**
-     * Metodo para limpiar la manoUI.
-     * remueve los componentes visuales de ficha y limpia la lista interna de la clase.
+     * Metodo para limpiar la manoUI. remueve los componentes visuales de ficha
+     * y limpia la lista interna de la clase.
      */
     public void limpiarMano() {
-        this.removeAll(); 
-        this.fichas.clear(); 
+        this.removeAll();
+        this.fichas.clear();
     }
-    
+
     public int getCantidadFichas() {
         return fichas.size();
     }

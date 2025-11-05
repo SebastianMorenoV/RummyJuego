@@ -4,18 +4,20 @@ import procesadores.ProcesadorCliente;
 import sockets.ClienteTCP;
 import sockets.ServerTCP;
 import contratos.iDespachador;
-import contratos.iEnsambladorCliente; // <-- Importa la interfaz
+import contratos.iEnsambladorCliente; // Interfaz
 import contratos.iListener;
 import java.beans.PropertyChangeListener;
 
 /**
- * (REFACTORIZADO) Clase de utilidad tipo "Fábrica" que construye y conecta los
- * componentes de red para el cliente.
+ * Clase de utilidad tipo "Fábrica" que construye y conecta los componentes de
+ * red para el cliente.
+ *
+ * @author benja
  */
 public final class EnsambladorCliente implements iEnsambladorCliente {
 
     public EnsambladorCliente() {
-        // Constructor público (o default)
+    
     }
 
     /**
@@ -23,7 +25,8 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
      */
     @Override
     public iDespachador crearDespachador(String ipServidor, int puertoServidor) {
-        System.out.println("[Ensamblador] Creando Despachador -> (Servidor en " + ipServidor + ":" + puertoServidor + ")...");
+        System.out.println("[Ensamblador] Creando Despachador -> (Servidor en "
+                + ipServidor + ":" + puertoServidor + ")...");
         iDespachador despachador = new ClienteTCP(ipServidor, puertoServidor);
         System.out.println("[Ensamblador] Despachador creado.");
         return despachador;
@@ -34,13 +37,15 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
      */
     @Override
     public iListener crearListener(String miId, PropertyChangeListener oyente) {
-        System.out.println("[Ensamblador] Ensamblando Listener para CLIENTE (" + miId + ")...");
+        System.out.println("[Ensamblador] Ensamblando Listener para CLIENTE "
+                + "(" + miId + ")...");
 
         // 1. Crear la "Lógica de Cliente"
         ProcesadorCliente logicaCliente = new ProcesadorCliente(miId);
 
         // 2. Conectar el Modelo (oyente) para que reciba eventos de la red.
-        System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName() + ") -> ProcesadorCliente");
+        System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()
+                + ") -> ProcesadorCliente");
         logicaCliente.addPropertyChangeListener(oyente);
 
         // 3. Crear el "Mesero" (Listener) e inyectarle la lógica ya conectada.

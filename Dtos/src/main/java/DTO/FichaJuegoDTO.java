@@ -93,7 +93,7 @@ public class FichaJuegoDTO {
     public void setColumna(int columna) {
         this.columna = columna;
     }
-    
+
     /**
      * Convierte la ficha a un string plano usando comas. El Color se convierte
      * a un único número entero (RGB).
@@ -101,8 +101,9 @@ public class FichaJuegoDTO {
      * Formato: idFicha,numeroFicha,rgbColor,comodin,fila,columna
      */
     public String serializar() {
-        // Obtenemos el valor RGB del color. Es un simple 'int'.
-        // Si el color fuera nulo, usamos negro como default.
+        // Obtenemos el valor RGB del color como int
+
+        // Si el color fuera nulo(null), usamos negro como default
         int rgb = (this.color != null) ? this.color.getRGB() : Color.BLACK.getRGB();
 
         return this.idFicha + ","
@@ -145,6 +146,10 @@ public class FichaJuegoDTO {
 
     @Override
     public String toString() {
-        return "FichaJuegoDTO{" + "idFicha=" + idFicha + ", numeroFicha=" + numeroFicha + ", color=" + color + ", comodin=" + comodin + '}';
+        return "FichaJuegoDTO{"
+                + "idFicha=" + idFicha
+                + ", numeroFicha=" + numeroFicha
+                + ", color=" + color
+                + ", comodin=" + comodin + '}';
     }
 }

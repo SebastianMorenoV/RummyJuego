@@ -31,9 +31,9 @@ public class Controlador {
     }
 
     /**
-     * (ACTUALIZADO) 1. Le dice al Modelo que coloque la ficha (para la UI
-     * local). 2. Serializa la LISTA ENTERA de DTOs a un solo String. 3. Le dice
-     * al Ensamblador que envíe ESE ÚNICO String.
+     * Le dice al Modelo que coloque la ficha (para la UI local).
+     * Serializa la LISTA ENTERA de DTOs a un solo String. 3
+     * Le dice al Ensamblador que envíe ESE ÚNICO String.
      */
     public void colocarFicha(List<GrupoDTO> grupos) {
         modelo.colocarFicha(grupos);

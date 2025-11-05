@@ -1,5 +1,9 @@
 package contratos;
 
+/**
+ *
+ * @author benja
+ */
 public interface iAgenteConocimiento {
 
     String getComandoQueManeja();

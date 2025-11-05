@@ -1,5 +1,9 @@
 package Entidades;
 
+/**
+ *
+ * @author chris
+ */
 public class Jugador {
 
     String nickname;
@@ -17,7 +21,8 @@ public class Jugador {
     }
 
     /**
-     *  Agrega una ficha a la mano del jugador 
+     * Agrega una ficha a la mano del jugador
+     *
      * @param ficha ficha que se agrega a la mano
      */
     public void agregarFichaAJugador(Ficha ficha) {

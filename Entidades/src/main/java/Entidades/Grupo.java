@@ -20,7 +20,7 @@ public class Grupo {
     public Grupo(String tipo, int numFichas, List<Ficha> ficha) {
         this.tipo = tipo;
         this.numFichas = numFichas;
-        this.fichas = ficha; 
+        this.fichas = ficha;
         this.esTemporal = true;
     }
 
@@ -54,24 +54,30 @@ public class Grupo {
             return false;
         }
 
-        List<Ficha> fichasReales = this.fichas.stream().filter(f -> !f.isComodin()).collect(Collectors.toList());
+        List<Ficha> fichasReales = this.fichas.stream().filter(f
+                -> !f.isComodin()).collect(Collectors.toList());
         if (fichasReales.isEmpty()) {
             return true; // Puros comodines es válido
         }
+
         int numeroBase = fichasReales.get(0).getNumero();
+
         boolean mismoNumero = fichasReales.stream().allMatch(f -> f.getNumero() == numeroBase);
+
         if (!mismoNumero) {
             return false;
         }
 
         long coloresUnicos = fichasReales.stream().map(Ficha::getColor).distinct().count();
+
         return coloresUnicos == fichasReales.size(); // No debe haber colores repetidos
     }
 
     /**
      * Verifica si el grupo es una escalera válida (mismo color, números
      * consecutivos).
-     * @return 
+     *
+     * @return
      */
     public boolean esEscaleraValida() {
         if (this.fichas == null || this.fichas.size() < 3) {
@@ -113,14 +119,11 @@ public class Grupo {
     }
 
     /**
-     * Calcula y devuelve el valor total en puntos de este grupo de fichas. La
-     * puntuación se determina según el tipo de grupo: Tercia: El valor de la
-     * ficha base (ignorando comodines) multiplicado por el número total de
-     * fichas en el grupo. Escalera: La suma de los valores individuales de cada
-     * ficha. El valor de los comodines se deduce a partir de su posición
-     * relativa a una ficha "ancla" no comodín. Si un grupo está compuesto
-     * enteramente por comodines, se utiliza el valor 13 como base para el
-     * cálculo.
+     * Calcula los puntos del grupo según su tipo. - Tercia: se toma el valor de
+     * la ficha no comodín y se multiplica por la cantidad total de fichas (si
+     * todas son comodines, el valor base es 13). - Escalera: se suman los
+     * valores consecutivos a partir de la primera ficha no comodín (o 13 si
+     * todas son comodines). Si el grupo no es tercia ni escalera, retorna 0.
      *
      * @return El total de puntos del grupo como un entero. Si el tipo de grupo
      * no es ni "tercia" ni "escalera", el método devuelve 0.
@@ -159,7 +162,7 @@ public class Grupo {
         return puntosGrupo;
     }
 
-    // --- Getters y Setters ---
+    // Getters y Setters
     public String getTipo() {
         return tipo;
     }

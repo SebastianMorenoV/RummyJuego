@@ -39,9 +39,9 @@ public class MazoUI extends JPanel implements MouseListener {
     }
 
     /**
-     * Evento MouseClicked del mazo.
-     * solo puede ser clickeado si el jugador esta en turno y si le dan click muestra un MessageDialog que indica que
-     * se agarro una ficha y se termino el turno.s
+     * Evento MouseClicked del mazo. solo puede ser clickeado si el jugador esta
+     * en turno y si le dan click muestra un MessageDialog que indica que se
+     * agarro una ficha y se termino el turno.s
      */
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -73,7 +73,8 @@ public class MazoUI extends JPanel implements MouseListener {
 
     /**
      * Setter para el numero de fichas restantes que debe haber en el mazo.
-     * @param numeroFichasRestantes 
+     *
+     * @param numeroFichasRestantes
      */
     public void setNumeroFichasRestantes(String numeroFichasRestantes) {
         this.numeroFichasRestantes = numeroFichasRestantes;
@@ -112,6 +113,7 @@ public class MazoUI extends JPanel implements MouseListener {
 
     /**
      * Metodo que actualiza el numero de fichas que se muestra en el mazo.
+     *
      * @param nuevoNumero numero que se mostrara
      */
     public void actualizarNumeroFichas(int nuevoNumero) {

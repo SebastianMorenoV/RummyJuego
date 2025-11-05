@@ -6,7 +6,7 @@ import java.util.List;
 /**
  *
  *
- * @author hp
+ * @author Sebastian Moreno
  */
 public class ActualizacionDTO {
 
@@ -14,7 +14,8 @@ public class ActualizacionDTO {
     private final boolean esMiTurno;
     private final List<FichaJuegoDTO> manoDelJugador; 
 
-    public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno, List<FichaJuegoDTO> manoDelJugador) {
+    public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno, 
+            List<FichaJuegoDTO> manoDelJugador) {
         this.tipoEvento = tipoEvento;
         this.esMiTurno = esMiTurno;
         this.manoDelJugador = manoDelJugador;

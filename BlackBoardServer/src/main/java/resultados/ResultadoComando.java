@@ -4,7 +4,10 @@ import contratos.iResultadoComando;
 import java.util.List;
 import java.util.ArrayList;
 
-// ¡Implementa la nueva interfaz!
+/**
+ *
+ * @author Sebastian Moreno
+ */
 public class ResultadoComando implements iResultadoComando {
 
     private final String respuestaAlRemitente;

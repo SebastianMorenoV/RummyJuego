@@ -9,6 +9,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
 
+/**
+ * 
+ * @author Sebastian Moreno
+ */
 public class PanelRound extends JPanel {
 
     public int getRoundTopLeft() {

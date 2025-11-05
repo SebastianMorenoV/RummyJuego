@@ -6,7 +6,6 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.VistaTablero;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -22,6 +21,10 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+/**
+ * 
+ * @author Sebastian Moreno
+ */
 public class TableroUI extends JPanel {
 
     private final int filas = 5;
@@ -80,7 +83,7 @@ public class TableroUI extends JPanel {
 
         centrarYPosicionarFicha(ficha, celda.y, celda.x);
         this.add(ficha);
-        fichasEnTablero.put(ficha.getIdFicha(), ficha); 
+        fichasEnTablero.put(ficha.getIdFicha(), ficha);
 
         this.revalidate();
         this.repaint();
@@ -130,7 +133,8 @@ public class TableroUI extends JPanel {
                         List<FichaJuegoDTO> fichasDTO = new ArrayList<>();
                         for (FichaUI fichaUI : grupoActual) {
                             Point celda = calcularCeldaParaPunto(fichaUI.getLocation());
-                            fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(), fichaUI.getColor(), fichaUI.isComodin(), celda.y, celda.x));
+                            fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(),
+                                    fichaUI.getColor(), fichaUI.isComodin(), celda.y, celda.x));
                         }
                         gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c));
                     }
@@ -253,7 +257,8 @@ public class TableroUI extends JPanel {
                     FichaUI fichaActualUI = fichasEnTablero.get(fichaDTO.getIdFicha());
 
                     if (fichaActualUI == null) {
-                        fichaActualUI = new FichaUI(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(), fichaDTO.getColor(), fichaDTO.isComodin(), control, vista);
+                        fichaActualUI = new FichaUI(fichaDTO.getIdFicha(), fichaDTO.getNumeroFicha(),
+                                fichaDTO.getColor(), fichaDTO.isComodin(), control, vista);
                         fichasEnTablero.put(fichaDTO.getIdFicha(), fichaActualUI);
                         this.add(fichaActualUI);
                     }
@@ -287,8 +292,9 @@ public class TableroUI extends JPanel {
 
     /**
      * Metodo que dibuja una linea de color dependiendo el estado del grupo.
+     *
      * @param grupo grupo sobre el que se pintara la linea
-     * @param celdaInicio 
+     * @param celdaInicio
      */
     private void dibujarFeedbackParaGrupo(GrupoDTO grupo, Point celdaInicio) {
         int anchoCelda = getWidth() / columnas;
@@ -320,7 +326,9 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Metodo que calcula una celda en el TableroUI dependiendo de la posicion en pixeles que cayo la ficha.
+     * Metodo que calcula una celda en el TableroUI dependiendo de la posicion
+     * en pixeles que cayo la ficha.
+     *
      * @param puntoEnPixeles donde cayo la ficha
      * @return un punto de pixeles donde pintar
      */
@@ -333,7 +341,9 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Metodo que agarra la ficha y la centra dentro del panel dependiendo de la fila y columna.
+     * Metodo que agarra la ficha y la centra dentro del panel dependiendo de la
+     * fila y columna.
+     *
      * @param ficha ficha a pintar
      * @param fila fila donde pintar la ficha
      * @param columna columna donde pintar la ficha

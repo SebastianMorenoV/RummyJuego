@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DTO;
 
 import java.util.ArrayList;
@@ -9,12 +5,13 @@ import java.util.List;
 
 /**
  *
- * @author benja
+ * @author chris
  */
 public class GrupoDTO {
-    private String tipo;       
-    private int cantidad;     
-    private List<FichaJuegoDTO> fichasGrupo; 
+
+    private String tipo;
+    private int cantidad;
+    private List<FichaJuegoDTO> fichasGrupo;
     private int fila;
     private int columna;
 
@@ -28,7 +25,7 @@ public class GrupoDTO {
         this.fila = fila;
         this.columna = columna;
     }
-    
+
     public String getTipo() {
         return tipo;
     }
@@ -68,14 +65,14 @@ public class GrupoDTO {
     public void setColumna(int columna) {
         this.columna = columna;
     }
-    
+
     /**
-     * (ACTUALIZADO) Serializa los datos del grupo en un string plano para el
-     * payload.
+     * Serializa los datos del grupo en un string plano para el payload.
      *
      * Formato: tipo;cantidad;fila;columna;fichaData1|fichaData2|fichaData3
      * Donde 'fichaData' es el string de FichaJuegoDTO.serializar()
-     * @return 
+     *
+     * @return
      */
     public String serializarParaPayload() {
         StringBuilder sb = new StringBuilder();
@@ -91,7 +88,6 @@ public class GrupoDTO {
             for (int i = 0; i < this.fichasGrupo.size(); i++) {
                 FichaJuegoDTO ficha = this.fichasGrupo.get(i);
 
-                // --- ¡CAMBIO CLAVE AQUÍ! ---
                 // Ya no usamos ficha.toString(), usamos ficha.serializar()
                 sb.append(ficha.serializar());
 
@@ -105,15 +101,16 @@ public class GrupoDTO {
     }
 
     /**
-     * (NUEVO) Método estático (factory) para crear un GrupoDTO completo desde
-     * el payload recibido por el servidor.
+     * Método estático (factory) para crear un GrupoDTO completo desde el
+     * payload recibido por el servidor.
      *
      * @param payload El string de payload (ej: "TERCIA;3;4;7;ficha1|ficha2")
      * @return una nueva instancia de GrupoDTO
      */
     public static GrupoDTO deserializar(String payload) {
         try {
-            // Dividimos en 5 partes MÁXIMO. La 5ta parte es "todo lo demás" (las fichas)
+
+            // Dividimos en 5 partes como MÁXIMO. La 5ta parte es "todo lo demás" (las fichas)
             String[] partesGrupo = payload.split(";", 5);
 
             String tipo = partesGrupo[0];
@@ -126,8 +123,7 @@ public class GrupoDTO {
             // Revisar si la 5ta parte (índice 4) existe y no está vacía
             if (partesGrupo.length == 5 && !partesGrupo[4].isEmpty()) {
 
-                // OJO: split() usa regex. El pipe '|' es un carácter especial,
-                // por eso debemos "escaparlo" con doble backslash: \\|
+                // split() usa regex. El pipe '|' es un carácter especial, por eso debemos "escaparlo" con doble backslash: \\|
                 String[] dataFichas = partesGrupo[4].split("\\|");
 
                 for (String fichaData : dataFichas) {
@@ -146,10 +142,10 @@ public class GrupoDTO {
             return null; // Devuelve null si el formato es incorrecto
         }
     }
-    
+
     /**
-     * (NUEVO) Método estático para deserializar un payload que contiene
-     * MÚLTIPLES grupos separados por '$'.
+     * Método estático para deserializar un payload que contiene MÚLTIPLES
+     * grupos separados por '$'.
      *
      * @param payloadLote El string de payload (ej:
      * "grupoPayload1$grupoPayload2")
@@ -166,7 +162,8 @@ public class GrupoDTO {
         for (String payload : payloadsIndividuales) {
             System.out.println(payload);
             if (payload != null && !payload.isEmpty()) {
-                // Llama al método deserializar() que ya teníamos
+
+                // Llama al método deserializar()
                 GrupoDTO grupo = GrupoDTO.deserializar(payload);
                 if (grupo != null) {
                     listaGrupos.add(grupo);
@@ -178,6 +175,9 @@ public class GrupoDTO {
 
     @Override
     public String toString() {
-        return "GrupoDTO{" + "tipo=" + tipo + ", cantidad=" + cantidad + ", fichasGrupo=" + fichasGrupo + '}';
+        return "GrupoDTO{" + 
+                "tipo=" + tipo + 
+                ", cantidad=" + cantidad + 
+                ", fichasGrupo=" + fichasGrupo + '}';
     }
 }

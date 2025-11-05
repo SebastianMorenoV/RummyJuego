@@ -7,11 +7,13 @@ import java.net.Socket;
 /**
  * Implementación del TRANSPORTE DE ENVÍO (El "Repartidor"). Sabe cómo
  * conectarse, enviar un mensaje y recibir una respuesta.
+ *
+ * @author Sebastian Moreno
  */
-// En ClienteTCP.java
 public class ClienteTCP implements iDespachador {
-    private String hostFijo; // Renombrado para mayor claridad
-    private int puertoFijo;  // Renombrado para mayor claridad
+
+    private String hostFijo;
+    private int puertoFijo;
 
     // Constructor para el CLIENTE (destino fijo)
     public ClienteTCP(String host, int puerto) {
@@ -23,7 +25,7 @@ public class ClienteTCP implements iDespachador {
     public ClienteTCP() {
     }
 
-    // --- MÉTODO PARA EL CLIENTE ---
+    // MÉTODO CLIENTE
     @Override
     public void enviar(String mensaje) throws IOException {
         if (this.hostFijo == null) {
@@ -33,15 +35,14 @@ public class ClienteTCP implements iDespachador {
         this.enviar(this.hostFijo, this.puertoFijo, mensaje);
     }
 
-    // --- MÉTODO NUEVO PARA EL SERVIDOR ---
+    // MÉTODO SERVIDOR
     @Override
     public void enviar(String host, int puerto, String mensaje) throws IOException {
         System.out.println("[Despachador] Conectando a " + host + ":" + puerto + "...");
-        
+
         // Usa los parámetros 'host' y 'puerto', no las variables de la clase.
-        try (Socket socket = new Socket(host, puerto);
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
-            
+        try (Socket socket = new Socket(host, puerto); DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
+
             out.writeUTF(mensaje);
             System.out.println("[Despachador] Enviado -> " + mensaje);
         }

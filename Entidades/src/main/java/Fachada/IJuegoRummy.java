@@ -9,6 +9,8 @@ import java.util.List;
 /**
 * Interfaz que define el contrato para la lógica del juego de Rummy. Actua como
 * una abstracción entre el Modelo y la implementación concreta del juego.
+* 
+* @author Sebastian Moreno
 */
 public interface IJuegoRummy {
 

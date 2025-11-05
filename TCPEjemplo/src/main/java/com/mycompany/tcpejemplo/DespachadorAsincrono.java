@@ -1,6 +1,4 @@
 package com.mycompany.tcpejemplo;
-// Archivo: DespachadorAsincrono.java
-
 
 import utils.MensajeEncolado;
 import sockets.ClienteTCP;
@@ -10,8 +8,12 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ *
+ * @author Sebastian Moreno
+ */
 public class DespachadorAsincrono implements iDespachador, Runnable {
-    
+
     private final BlockingQueue<MensajeEncolado> colaDeSalida;
     private final iDespachador transportista; // El ClienteTCP real
     private volatile boolean ejecutando = true;
@@ -19,14 +21,14 @@ public class DespachadorAsincrono implements iDespachador, Runnable {
     public DespachadorAsincrono() {
         this.colaDeSalida = new LinkedBlockingQueue<>();
         this.transportista = new ClienteTCP(); // El "obrero" que sabe cómo enviar de verdad
-        
-        // Inicia el hilo "obrero" que vigila la cola.
+
+        // Inicia el hilo "obrero" que vigila la cola
         new Thread(this).start();
     }
 
     /**
-     * Este es el método que llamará el ProcesadorServidor.
-     * Su trabajo es rápido: solo añade el mensaje a la cola y termina.
+     * Este es el método que llamará el ProcesadorServidor Su trabajo es rápido:
+     * solo añade el mensaje a la cola y termina
      */
     @Override
     public void enviar(String host, int puerto, String mensaje) throws IOException {
@@ -38,17 +40,17 @@ public class DespachadorAsincrono implements iDespachador, Runnable {
     }
 
     /**
-     * Este método es para el cliente, no se usa en el servidor.
-     * Lo implementamos por la interfaz, pero lanzamos una excepción.
+     * Este método es para el cliente, no se usa en el servidor. Lo
+     * implementamos por la interfaz, pero lanzamos una excepción.
      */
     @Override
     public void enviar(String mensaje) throws IOException {
         throw new UnsupportedOperationException("Este despachador es para el servidor y requiere un destino.");
     }
-    
+
     /**
-     * Este es el trabajo del hilo "obrero".
-     * Se queda esperando a que lleguen mensajes a la cola y los envía.
+     * Este es el trabajo del hilo "obrero". Se queda esperando a que lleguen
+     * mensajes a la cola y los envía.
      */
     @Override
     public void run() {
@@ -57,10 +59,10 @@ public class DespachadorAsincrono implements iDespachador, Runnable {
             try {
                 // El hilo se bloquea aquí hasta que haya un mensaje en la cola.
                 MensajeEncolado msg = colaDeSalida.take();
-                
+
                 // Cuando hay un mensaje, usa el transportista real para enviarlo.
                 transportista.enviar(msg.host, msg.puerto, msg.mensaje);
-                
+
             } catch (InterruptedException e) {
                 ejecutando = false;
                 Thread.currentThread().interrupt();

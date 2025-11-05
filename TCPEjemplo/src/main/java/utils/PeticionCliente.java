@@ -1,9 +1,12 @@
 package utils;
 
-// Archivo: PeticionCliente.java
 import java.net.Socket;
 
-// Contenedor para pasar la petición del "mesero" al "cocinero".
+/**
+ * Contenedor para pasar la petición del "mesero" al "cocinero".
+ *
+ * @author Sebastian Moreno
+ */
 public class PeticionCliente {
 
     public final Socket socketCliente;

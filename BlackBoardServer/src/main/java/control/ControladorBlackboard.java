@@ -10,17 +10,19 @@ import java.util.List;
 import java.util.Map;
 import pizarra.EstadoJuegoPizarra;
 
-// ¡Implementa la nueva interfaz!
+/**
+ *
+ * @author benja
+ */
 public class ControladorBlackboard implements iControladorBlackboard, iObservador {
 
     private final Map<String, iAgenteConocimiento> agentes;
-    private final iDirectorio directorio; // ¡Ya no se inicializa aquí!
+    private final iDirectorio directorio;
 
-    // Modifica el constructor
     public ControladorBlackboard(List<iAgenteConocimiento> listaDeAgentes, iDirectorio directorio) {
         this.agentes = new HashMap<>();
-        this.directorio = directorio; // ¡Recíbelo!
-
+        this.directorio = directorio; // Recibe el directorio
+        
         for (iAgenteConocimiento agente : listaDeAgentes) {
             this.agentes.put(agente.getComandoQueManeja(), agente);
         }
@@ -31,14 +33,11 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         switch (evento) {
             case "REGISTRAR":
                 System.out.println("[Controlador] Pizarra notificó REGISTRO");
-                // Aquí podrías iniciar la partida si ya están todos
-                // if (pizarra.iniciarPartidaSiCorresponde()) {
-                //     notificarObservadores(pizarra, "PARTIDA_INICIADA");
-                // }
                 break;
 
             case "MOVIMIENTO":
-                // ¡La pizarra notificó un movimiento! Ahora hacemos el broadcast.
+                // La pizarra notifica el movimiento!
+                // Broadcast
 
                 // Obtenemos el ID del jugador que se movió
                 String jugadorQueMovio = pizarra.getJugador();

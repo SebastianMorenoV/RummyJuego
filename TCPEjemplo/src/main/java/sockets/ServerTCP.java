@@ -10,6 +10,10 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ *
+ * @author chris
+ */
 public class ServerTCP implements iListener {
 
     private final iProcesador procesador;
@@ -24,7 +28,7 @@ public class ServerTCP implements iListener {
         this.procesador = procesador;
         this.colaDeEntrada = new LinkedBlockingQueue<>();
 
-        // Inicia el hilo "cocinero" que procesará la cola.
+        // Inicia el hilo "cocinero" que procesará la cola
         new Thread(this::procesarCola).start();
     }
 
@@ -39,14 +43,15 @@ public class ServerTCP implements iListener {
 
         while (ejecutando) {
             try {
-                // 1. Acepta la conexión del cliente.
+
+                // 1. Acepta la conexión del cliente
                 Socket socketCliente = serverSocket.accept();
 
-                // 2. Lee el mensaje (la orden).
+                // 2. Lee el mensaje (la orden)
                 DataInputStream in = new DataInputStream(socketCliente.getInputStream());
                 String msgRecibido = in.readUTF();
 
-                // 3. Pone la orden en la cola para que el "cocinero" la tome.
+                // 3. Pone la orden en la cola para que el "cocinero" la tome
                 colaDeEntrada.put(new PeticionCliente(socketCliente, msgRecibido));
 
             } catch (IOException e) {
@@ -69,6 +74,7 @@ public class ServerTCP implements iListener {
         while (ejecutando) {
             PeticionCliente peticion = null;
             try {
+
                 // 1. Espera a que haya una orden en la cola.
                 peticion = colaDeEntrada.take();
                 System.out.println("[Cocinero] Procesando <- " + peticion.mensajeRecibido + " de **" + peticion.ipCliente + "**");
@@ -92,7 +98,7 @@ public class ServerTCP implements iListener {
                     try {
                         peticion.socketCliente.close();
                     } catch (IOException ex) {
-                        /* Ignorar */ }
+                    }
                 }
             }
         }

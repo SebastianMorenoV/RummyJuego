@@ -11,7 +11,6 @@ import Modelo.IModelo;
  *
  *
  * @author moren
- * @author chris
  */
 public interface Observador {
 

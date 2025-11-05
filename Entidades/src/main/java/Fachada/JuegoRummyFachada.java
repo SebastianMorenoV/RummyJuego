@@ -14,16 +14,18 @@ import java.util.List;
  * Fachada que encapsula toda la lógica y el estado del juego de Rummy. No
  * conoce la Vista ni los Observadores. Su única responsabilidad es gestionar el
  * juego.
+ *
+ * @author Benja
  */
 public class JuegoRummyFachada implements IJuegoRummy {
 
-    // --- Atributos de Estado del Juego  ---
+    // Atributos de Estado del Juego 
     private Tablero tablero;
     private List<Jugador> jugadores;
     private int jugadorActual;
     private boolean primerMovimientoRealizado;
 
-    // --- Atributos para Revertir Turno ---
+    // Atributos para Revertir Turno
     private Tablero tableroAlInicioDelTurno;
     private Mano manoAlInicioDelTurno;
 
@@ -55,7 +57,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Se obtiene al jugador que actualmente tenga su turno.
-     * @return 
+     *
+     * @return
      */
     @Override
     public Jugador getJugadorActual() {
@@ -156,20 +159,25 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Metodo en el que se regresan fichas a la mano. filtra por grupos no temporales para que no sean regresables cuando
-     * su grupo es valido y si esa validacion ya pasa y la ficha esta en un grupo invalido se intenta regresar a la mano
-     * y y se elimina la ficha del tablero, si la ficha se regreso a la mano regresa true, si no un false indicando que
-     * no fue regresada exitosamente
+     * Metodo en el que se regresan fichas a la mano. filtra por grupos no
+     * temporales para que no sean regresables cuando su grupo es valido y si
+     * esa validacion ya pasa y la ficha esta en un grupo invalido se intenta
+     * regresar a la mano y y se elimina la ficha del tablero, si la ficha se
+     * regreso a la mano regresa true, si no un false indicando que no fue
+     * regresada exitosamente
+     *
      * @param idFicha
-     * @return 
+     * @return
      */
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
         // Filtramos para quedarnos solo con los grupos que NO son temporales.
-        for (Grupo grupoValidado : this.tablero.getFichasEnTablero().stream().filter(g -> !g.esTemporal()).toList()) {
+        for (Grupo grupoValidado : this.tablero.getFichasEnTablero().stream().filter(g
+                -> !g.esTemporal()).toList()) {
 
             for (Ficha ficha : grupoValidado.getFichas()) {
                 if (ficha.getId() == idFicha) {
+                    
                     // Encontrada en un grupo antiguo. No se puede mover.
                     return false;
                 }
@@ -177,17 +185,17 @@ public class JuegoRummyFachada implements IJuegoRummy {
         }
 
         // Si el bucle termina, la ficha no está en un grupo permanente y se puede mover.
-        // ... el resto de tu lógica para remover la ficha y agregarla a la mano ...
+        // El resto de tu lógica para remover la ficha y agregarla a la mano
         Ficha fichaParaRegresar = this.tablero.removerFicha(idFicha);
 
         if (fichaParaRegresar != null) {
             return true;
         }
 
-        return false; // No se encontró la ficha para remover
+        return false; // FALSE No se encontró la ficha para remover
     }
-    
-    // --- Getters para que el Modelo consulte el estado y cree los DTOs ---
+
+    // Getters para que el Modelo consulte el estado y cree los DTOs
     @Override
     public List<Ficha> getManoDeJugador(int indiceJugador) {
         if (indiceJugador >= 0 && indiceJugador < jugadores.size()) {

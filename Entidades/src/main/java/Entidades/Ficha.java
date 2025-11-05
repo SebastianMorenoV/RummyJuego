@@ -1,10 +1,10 @@
-
 package Entidades;
 
 import java.awt.Color;
 
 /**
  * Esta clase representa a una ficha en el sistema.
+ *
  * @author Sebastian Moreno
  */
 public class Ficha {
@@ -52,7 +52,11 @@ public class Ficha {
 
     @Override
     public String toString() {
-        return "Ficha{" + "id=" + id + ", numero=" + numero + ", color=" + color + ", comodin=" + comodin + '}';
+        return "Ficha{"
+                + "id=" + id
+                + ", numero=" + numero
+                + ", color=" + color
+                + ", comodin=" + comodin + '}';
     }
 
 }

@@ -162,7 +162,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
             iniciarComponentesDeJuego(modelo, dto);
             habilitarControles(dto.esMiTurno());
-            return; 
+            return;
         }
 
         habilitarControles(dto.esMiTurno());
@@ -260,8 +260,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
 
     /**
-     * Metodo que pinta los componentes necesarios para la vista. 
-     * Los crea con su estructura base.
+     * Metodo que pinta los componentes necesarios para la vista. Los crea con
+     * su estructura base.
      *
      * @param modelo el modelo de donde se sacan los datos para crearse.
      */
@@ -277,8 +277,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
+
     /**
      * Metodo para crear el panel del Tablero visualmente.
+     *
      * @param modelo
      */
     private void crearTablero(IModelo modelo) {
@@ -329,7 +331,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         validacionesDeManoUI(fichasMano);
     }
 
-    
     /**
      * Metodo para crear el mazo visual en el tablero.
      *
@@ -362,10 +363,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
-     /**
-     * 
-     * Metodo que repinta la mano del jugador en la interfaz con un orden de "Grupos". 
-     * ordenando las fichas por grupos en la mano
+    /**
+     *
+     * Metodo que repinta la mano del jugador en la interfaz con un orden de
+     * "Grupos". ordenando las fichas por grupos en la mano
+     *
      * @param modelo
      * @param dto objeto con la info del jugador actualizada (mano)
      */
@@ -419,15 +421,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             for (FichaUI fichaTablero : fichasEnTablero) {
                 if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
                     yaEstaEnTablero = true;
-                    break; 
+                    break;
                 }
             }
 
-            if (!yaEstaEnTablero) { 
+            if (!yaEstaEnTablero) {
                 for (FichaUI fichaTablero : fichasValidasEnTablero) {
                     if (fichaTablero.getIdFicha() == fichaDTO.getIdFicha()) {
                         yaEstaEnTablero = true;
-                        break; 
+                        break;
                     }
                 }
             }
@@ -471,7 +473,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             tableroUI.setEnabled(estaEnTurno);
         }
     }
-    
+
     public TableroUI getPanelTablero() {
         return tableroUI;
     }

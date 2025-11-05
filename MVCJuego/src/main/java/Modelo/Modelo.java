@@ -10,7 +10,6 @@ import Fachada.IJuegoRummy;
 import Fachada.JuegoRummyFachada;
 import Vista.Observador;
 import Vista.TipoEvento;
-import static Vista.TipoEvento.TOMO_FICHA;
 import contratos.iDespachador;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,6 +24,8 @@ import java.util.stream.Collectors;
  * Esta clase representa el modelo en MVC. Su responsabilidad es conectar la
  * lógica del juego (a través de la fachada) con la Vista (a través del patrón
  * Observer) y manejar la conversión de datos entre Entidades y DTOs.
+ *
+ * @author Benja
  */
 public class Modelo implements IModelo, PropertyChangeListener {
 
@@ -42,12 +43,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Metodo para iniciar el juego. Indicamos que el primero jugador del turno
-     * sera el 0 de la lista de observadores, despues le hablamos a la fachada
-     * para iniciar la partida que basicamente se añaden los jugadores, se
-     * añaden al mazo las fichas y se reparten de este mismo mazo las fichas a
-     * los jugadores, despues notificamos al observer que el tipo de evento es
-     * inicializar_Fichas para que se pinten en la mano
+     * Inicia la partida. Se establece al primer jugador como el actual, se
+     * solicita a la fachada inicializar el juego (agregar jugadores, preparar
+     * el mazo y repartir fichas) y se notifica a los observadores para que
+     * dibujen las fichas iniciales en la mano.
      */
     public void iniciarJuego() {
         enTurno = observadores.get(0);
@@ -71,7 +70,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                 if (gruposMovidos != null && !gruposMovidos.isEmpty()) {
                     System.out.println("Se intento colocar ficha (remoto)");
-                    
+
                     this.actualizarVistaTemporal(gruposMovidos);
 
                 } else {
@@ -88,7 +87,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private void actualizarVistaTemporal(List<GrupoDTO> gruposPropuestos) {
         this.gruposDeTurnoDTO = gruposPropuestos;
 
-        // (Opcional, pero basado en tu código viejo, esto también debería ir aquí)
         List<Grupo> nuevosGrupos = gruposPropuestos.stream()
                 .map(this::convertirGrupoDtoAEntidad)
                 .collect(Collectors.toList());
@@ -98,6 +96,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     public void colocarFicha(List<GrupoDTO> grupos) {
+
         // 1. Llama al método que SÓLO pinta localmente
         this.actualizarVistaTemporal(grupos);
 
@@ -120,24 +119,19 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Metodo para tomar una ficha del mazo. Este metodo nos sirve para cuando
-     * un jugador no puede hacer alguna jugada o movimiento y tiene que tomar
-     * una ficha del mazo, comenzando con revertir los cambios del turno por si
-     * movio algo o coloco una ficha generando un grupo invalido para poder
-     * notificar a los observadores y regresar todo tipo de movimiento a como
-     * estaba en el inicio de su turno. Despues de esto el metodo llama a la
-     * fachada para indicar que es turno del siguiente jugador, despues
-     * actualiza a la variable "enTurno" para que sea el siguiente jugador el
-     * que este en turno, por ultimo se notifica al observador del TipoEvento de
-     * cambio de turno para indicar en el titulo de la vista que esta en turno o
-     * en espera
+     * Método para que el jugador tome una ficha del mazo cuando no puede
+     * realizar una jugada válida. Primero revierte cualquier movimiento
+     * temporal del turno para regresar el tablero a su estado inicial y
+     * notificar a los observadores. Luego toma la ficha del mazo, avanza al
+     * siguiente jugador actualizando la variable 'enTurno' y finalmente
+     * notifica el cambio de turno para actualizar la vista.
      */
     public void tomarFichaMazo() {
-        // revertir jugada temporal del tablero
+        // Revertir jugada temporal del tablero
         juego.revertirCambiosDelTurno();
         juego.jugadorTomaFichaDelMazo();
 
-        // revierte el tablero
+        // Revierte el tablero
         notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         notificarObservadores(TipoEvento.REPINTAR_MANO);
         notificarObservadores(TipoEvento.TOMO_FICHA);
@@ -152,21 +146,25 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Metodo en el que se termina un turno de un jugador. Primero obtenemos
-     * desde la fachada si la jugada fue valida y la guardamos en un booleano.
-     * si la jugada fue valida se repinta el tablero con el tipoEvento de
-     * jugada_valida_finalizar y se le pasa el turno al siguiente jugador . Si
-     * la jugada fue invalida se revierten los cambios hechos en el turno
+     * Finaliza el turno del jugador. Se valida la jugada desde la fachada. Si
+     * es válida, se notifica, se cambia al siguiente jugador y se indica el
+     * cambio de turno. Si es inválida, se revierten los movimientos realizados.
+     * Finalmente, se repinta la mano del jugador.
      */
     public void terminarTurno() {
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
         if (jugadaFueValida) {
+
             // Lógica para cambiar de turno
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
+
             int indiceActual = observadores.indexOf(enTurno);
+
             enTurno = observadores.get((indiceActual + 1) % observadores.size());
+
             notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
+
             if (juego.haGanadoElJugador()) {
                 // notificarObservadores(TipoEvento.JUEGO_TERMINADO);
             }
@@ -176,7 +174,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         notificarObservadores(TipoEvento.REPINTAR_MANO);
     }
 
-    // --- Métodos del Patron Observador ---
+    // Métodos del Patron Observador
     public void agregarObservador(Observador obs) {
         if (obs != null && !observadores.contains(obs)) {
             observadores.add(obs);
@@ -191,8 +189,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * la notificacion.
      */
     public void notificarObservadores(TipoEvento tipoEvento) {
+
         // Itera sobre todos los observadores para enviarles una actualización personalizada.
         for (Observador observer : this.observadores) {
+
             // Obtenemos el indice del observador para saber que jugador es.
             int indiceJugador = observadores.indexOf(observer);
 
@@ -207,6 +207,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
             // Creamos el DTO con la mano especifica de este jugador.
             boolean esSuTurno = observer.equals(enTurno);
             ActualizacionDTO dto = new ActualizacionDTO(tipoEvento, esSuTurno, manoDTO);
+
             /*
              * Decide a quien enviar la notificacion basado en el tipo de evento.
              */
@@ -233,32 +234,32 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Metodo para regresar la ficha a la mano. primero se calcula si la ficha
-     * fue regresada exitosamente con "boolean fueRegresadaExitosamente", si
-     * este booleano es true esto indica que la ficha era temporal y regreso a
-     * la mano para despues notificar a los observadores, actualizar el tablero
-     * y repintar la mano. si el booleano es false esto nos indica que la ficha
-     * ya pertenece a un grupo validado dentro del tablero, por lo que solo se
-     * revierten los cambios y la ficha regresa a su origen
+     * Regresa una ficha a la mano según su id. Se intenta devolver la ficha y,
+     * si era temporal, se actualiza el tablero y la mano. Si la ficha ya
+     * formaba parte de un grupo válido, se revierte el movimiento visual
+     * notificando a los observadores.
      *
      * @param idFicha para indicar que ficha se quiere regresar
      */
     public void regresarFichaAMano(int idFicha) {
         boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
 
-        if (fueRegresadaExitosamente) {// exito: La ficha era temporal y volvio a la mano.
+        if (fueRegresadaExitosamente) { // EXITO: La ficha era temporal y volvio a la mano.
 
-            // notificamos a la vista para que actualice el tablero y la mano.
+            // Notificamos a la vista para que actualice el tablero y la mano.
             notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+
             notificarObservadores(TipoEvento.REPINTAR_MANO);
-        } else { // fallo: La ficha pertenece a un grupo ya validado
-            // notificamos a la vista que la jugada es invalida y debe revertir
-            // el movimiento visual de la ficha
+
+        } else { // FALLO: La ficha pertenece a un grupo ya validado
+
+            // Notificamos a la vista que la jugada es invalida y debe revertir
+            // El movimiento visual de la ficha
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         }
     }
 
-    // --- Getters que convierten Entidades a DTOs para la Vista ---
+    // Getters que convierten Entidades a DTOs para la Vista
     @Override
     public JuegoDTO getTablero() {
         JuegoDTO dto = new JuegoDTO();
@@ -268,12 +269,15 @@ public class Modelo implements IModelo, PropertyChangeListener {
         // pues contienen la informacion de posicion que necesitamos.
         if (this.gruposDeTurnoDTO != null && this.gruposDeTurnoDTO.size() == gruposDelJuego.size()) {
             for (int i = 0; i < gruposDelJuego.size(); i++) {
+
                 // Actualizamos el 'tipo' en nuestro DTO con el resultado de la validación
                 String tipoValidado = gruposDelJuego.get(i).getTipo();
+
                 this.gruposDeTurnoDTO.get(i).setTipo(tipoValidado);
             }
             dto.setGruposEnTablero(this.gruposDeTurnoDTO);
         } else {
+            
             // Si no coinciden, creamos DTOs que no tengan posicion en si.
             List<GrupoDTO> gruposDTO = gruposDelJuego.stream()
                     .map(this::convertirGrupoEntidadADto)
@@ -286,23 +290,25 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return dto;
     }
 
-    // --- Métodos de ayuda para conversión DTO <-> Entidad ---
+    // Métodos de ayuda para conversión DTO-Entidad
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
+
         List<Ficha> fichas = dto.getFichasGrupo().stream()
-                .map(fDto -> new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(), fDto.getColor(), fDto.isComodin()))
+                .map(fDto -> new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(),
+                fDto.getColor(), fDto.isComodin()))
                 .collect(Collectors.toList());
         return new Grupo("Temporal", fichas.size(), fichas);
     }
 
     private GrupoDTO convertirGrupoEntidadADto(Grupo g) {
         List<FichaJuegoDTO> fichasDTO = g.getFichas().stream()
-                .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                .map(f -> new FichaJuegoDTO(f.getId(),
+                f.getNumero(), f.getColor(), f.isComodin()))
                 .collect(Collectors.toList());
 
         return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO, 0, 0);
     }
 
-    /*SETTERS*/
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
     }

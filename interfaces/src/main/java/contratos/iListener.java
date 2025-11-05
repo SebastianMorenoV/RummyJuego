@@ -1,17 +1,16 @@
 package contratos;
 
-
-
-
-
 import java.io.IOException;
 
 /**
  * Contrato para cualquier clase que pueda "Escuchar" en un puerto.
  * Es el contrato del "Mesero".
  * No le importa si es TCP, UDP, WebSockets, etc.
+ * 
+ * @author Sebastian Moreno
  */
 public interface iListener {
+    
     /**
      * Inicia el bucle de escucha en el puerto especificado.
      * Este método es bloqueante (debe correr en su propio hilo).

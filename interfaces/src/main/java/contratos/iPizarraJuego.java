@@ -1,5 +1,9 @@
 package contratos;
 
+/**
+ *
+ * @author benja
+ */
 public interface iPizarraJuego {
 
     void registrarJugador(String id, String payloadMano); // Guardas la mano serializada
@@ -13,6 +17,7 @@ public interface iPizarraJuego {
     boolean iniciarPartidaSiCorresponde();
 
     String getMano(String id);
+    
     String getJugador();
 
     boolean procesarComando(String idCliente, String comando, String payload);

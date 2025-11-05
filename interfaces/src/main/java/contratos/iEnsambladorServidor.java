@@ -6,9 +6,11 @@ package contratos;
  * (REFACTORIZADO)
  * Esta interfaz define un ensamblador que CONECTA la lógica de red
  * a los componentes principales del juego.
+ * 
  * @author benja
  */
 public interface iEnsambladorServidor {
+    
    /**
     * Conecta el Procesador y el Listener a los componentes del Blackboard.
     * @param pizarra La instancia de la pizarra ya creada.
@@ -21,4 +23,5 @@ public interface iEnsambladorServidor {
            iDespachador despachador, 
            iDirectorio directorio
    ); 
+   
 }

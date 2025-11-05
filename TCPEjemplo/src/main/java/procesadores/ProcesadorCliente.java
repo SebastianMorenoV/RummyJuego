@@ -1,14 +1,15 @@
 package procesadores;
 
-// ¡YA NO IMPORTA DTO.GrupoDTO!
 import contratos.iProcesador;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 /**
- * (ACTUALIZADO) Lógica del Cliente. NO conoce DTOs. Recibe un mensaje, y si es
+ * Lógica del Cliente. NO conoce DTOs. Recibe un mensaje, y si es
  * "MOVIMIENTO_RECIBIDO", dispara un evento PropertyChange con el PAYLOAD
  * (String) crudo.
+ *
+ * @author Sebastian Moreno
  */
 public class ProcesadorCliente implements iProcesador {
 
@@ -44,7 +45,7 @@ public class ProcesadorCliente implements iProcesador {
 
         // Es un movimiento
         String idJugadorQueMovio = partes[1];
-        String payload = partes[2]; // Este es el string crudo (ej: "TERCIA;3;...")
+        String payload = partes[2]; // Este es el string crudo
 
         System.out.println("\n[" + miId + " MOVIMIENTO RECIBIDO] de " + idJugadorQueMovio);
         System.out.println("[" + miId + "] Disparando evento 'MOVIMIENTO_RECIBIDO' con payload: " + payload);

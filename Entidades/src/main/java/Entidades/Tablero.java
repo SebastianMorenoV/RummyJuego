@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 /**
  * Esta clase representa el tablero de el juego Rummy. Se compone de un arreglo
- * de grupos , que representan los grupos puestos en el tablero. Un mazo de
- * fichas , para ser utilizadas por los jugadores.
+ * de grupos , que representan los grupos puestos en el tablero
+ * Un mazo de fichas , para ser utilizadas por los jugadores.
  *
  * @author Sebastian Moreno
  */
@@ -28,20 +28,21 @@ public class Tablero {
      * tablero es válido para terminar el turno, considerando si es el primer
      * movimiento.
      *
-     * @param esPrimerMovimiento Indica si es la primera jugada del jugador.
+     * @param esPrimerMovimiento Indica si es la primera jugada del jugador
      * @return true si la jugada es completamente válida, false en caso
      * contrario.
      */
     public boolean esJugadaValida(boolean esPrimerMovimiento) {
         // Regla 1: No debe haber grupos temporales o inválidos.
         boolean estructuraValida = this.fichasEnTablero.stream()
-                .noneMatch(g -> "Invalido".equals(g.getTipo()) || "Temporal".equals(g.getTipo()));
+                .noneMatch(g -> "Invalido".equals(g.getTipo())
+                || "Temporal".equals(g.getTipo()));
 
         if (!estructuraValida) {
             return false;
         }
 
-        // Regla 2: Si es el primer movimiento, la suma de puntos debe ser >= 30.
+        // Regla 2: Si es el primer movimiento, la suma de puntos debe ser >= 30
         if (esPrimerMovimiento) {
             int puntos = this.calcularPuntosDeLaJugada();
             if (puntos < 30) {
@@ -52,9 +53,9 @@ public class Tablero {
     }
 
     /**
-     * Calcula la suma de puntos de todos los grupos válidos en el tablero.
+     * Calcula la suma de puntos de todos los grupos válidos en el tablero
      *
-     * @return el numero de puntos validos en la jugada nueva de el jugador.
+     * @return el numero de puntos validos en la jugada nueva de el jugador
      */
     public int calcularPuntosDeLaJugada() {
         return this.fichasEnTablero.stream()
@@ -87,7 +88,9 @@ public class Tablero {
                 if (grupo.getFichas().isEmpty()) {
                     grupoIterator.remove();
                 }
+                
                 return fichaRemovida; // Devolvemos la ficha y terminamos la búsqueda
+                
             }
         }
         return null;
@@ -143,9 +146,7 @@ public class Tablero {
         }
         Collections.shuffle(this.mazo);
     }
-    
-    //METODOS AUXILIARES
-    
+
     /**
      * Metodo auxiliar para tener los ids de las fichas que hay en el tablero.
      *
@@ -157,7 +158,7 @@ public class Tablero {
                 .map(Ficha::getId)
                 .collect(Collectors.toList());
     }
-    
+
     /**
      * Este metodo auxiliar crea una copia de el tablero antes de empezar el
      * movimiento. Basicamente filtra todos los grupos que existen al inicio y
@@ -181,7 +182,7 @@ public class Tablero {
         return copia;
     }
 
-    //GETS Y SETS//
+    // Getter y Setters
     public List<Grupo> getFichasEnTablero() {
         return fichasEnTablero;
     }
