@@ -1,9 +1,9 @@
 package Modelo;
 
-import DTO.ActualizacionDTO;
 import DTO.FichaJuegoDTO;
 import DTO.GrupoDTO;
 import DTO.JuegoDTO;
+import Dtos.ActualizacionDTO;
 import Entidades.Ficha;
 import Entidades.Grupo;
 import Fachada.IJuegoRummy;

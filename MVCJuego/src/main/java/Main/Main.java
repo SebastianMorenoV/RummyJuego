@@ -34,7 +34,7 @@
             // --- 2. Configuración de Red ---
             // Se definen los datos de conexión en un solo lugar.
             String miId = "SebastianM"; // O el ID del jugador actual
-            String ipServidor = "192.168.100.3"; // La IP del servidor central
+            String ipServidor = "192.168.100.80"; // La IP del servidor central
             int puertoServidor = 5000;
             int miPuertoDeEscucha = 9004; // El puerto donde ESTE cliente escuchará
 

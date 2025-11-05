@@ -1,8 +1,8 @@
 package Vista;
 
 import Controlador.Controlador;
-import DTO.ActualizacionDTO;
 import DTO.FichaJuegoDTO;
+import Dtos.ActualizacionDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;

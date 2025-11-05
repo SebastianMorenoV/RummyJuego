@@ -12,5 +12,5 @@ public interface iControladorBlackboard {
      * Recibe los datos "crudos" y devuelve un resultado "genérico".
      * @return un iResultadoComando con las instrucciones para la red.
      */
-    iResultadoComando procesarComando(String idCliente, String comando, String payload);
+    //Prorablemente deberia tener un metodo para hablarle a los agentes (MVCS)
 }

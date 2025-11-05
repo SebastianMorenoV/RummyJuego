@@ -13,4 +13,7 @@ public interface iPizarraJuego {
     boolean iniciarPartidaSiCorresponde();
 
     String getMano(String id);
+    String getJugador();
+
+    boolean procesarComando(String idCliente, String comando, String payload);
 }
