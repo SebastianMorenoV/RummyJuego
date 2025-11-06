@@ -19,13 +19,11 @@ import java.util.List;
  */
 public class JuegoRummyFachada implements IJuegoRummy {
 
-    // Atributos de Estado del Juego 
+    // (El resto de tus atributos...)
     private Tablero tablero;
     private List<Jugador> jugadores;
     private int jugadorActual;
     private boolean primerMovimientoRealizado;
-
-    // Atributos para Revertir Turno
     private Tablero tableroAlInicioDelTurno;
     private Mano manoAlInicioDelTurno;
 
@@ -36,38 +34,23 @@ public class JuegoRummyFachada implements IJuegoRummy {
         this.primerMovimientoRealizado = false;
     }
 
-    /**
-     * Prepara el juego, crea el mazo, reparte las fichas e inicia el primer
-     * turno.
-     */
+    // (iniciarPartida, getJugadorActual, jugadorTomaFichaDelMazo, siguienteTurno, colocarFichasEnTablero, validarYFinalizarTurno, revertirCambiosDelTurno ... van aquí sin cambios)
     @Override
     public void iniciarPartida() {
-        //Se crean dos jugadores, uno en cada vista del juego
         this.jugadores.add(new Jugador("Jugador 1", "B1", new Mano()));
         this.jugadores.add(new Jugador("Jugador 2", "B2", new Mano()));
-
         this.tablero.crearMazoCompleto();
-
         for (Jugador jugador : this.jugadores) {
             this.tablero.repartirMano(jugador, 14);
         }
-
         guardarEstadoTurno();
     }
 
-    /**
-     * Se obtiene al jugador que actualmente tenga su turno.
-     *
-     * @return
-     */
     @Override
     public Jugador getJugadorActual() {
         return this.jugadores.get(this.jugadorActual);
     }
 
-    /**
-     * El jugador actual toma una ficha del mazo y la agrega a su mano.
-     */
     @Override
     public void jugadorTomaFichaDelMazo() {
         Ficha fichaTomada = tablero.tomarFichaMazo();
@@ -76,38 +59,18 @@ public class JuegoRummyFachada implements IJuegoRummy {
         }
     }
 
-    /**
-     * Se pasa al siguiente turno, dandole el turno al siguiente jugador.
-     */
     @Override
     public void siguienteTurno() {
         this.jugadorActual = (this.jugadorActual + 1) % this.jugadores.size();
         guardarEstadoTurno();
     }
 
-    /**
-     * Actualiza el tablero con los grupos de fichas que el jugador intenta
-     * colocar. Esta es una jugada temporal hasta que se termina el turno.
-     *
-     * @param nuevosGrupos son los grupos que desea agregar el jugador , por
-     * defecto grupos de 1 ficha.
-     */
     @Override
     public void colocarFichasEnTablero(List<Grupo> nuevosGrupos) {
-        // La lógica de validación de los grupos se mantiene en la entidad Grupo
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
         this.tablero.setFichasEnTablero(nuevosGrupos);
     }
 
-    /**
-     * Valida la jugada actual en el tablero. Si es válida, confirma los
-     * cambios. Si no, revierte el tablero y la mano del jugador al estado de
-     * inicio de turno. Si el jugador decide por si mismo, finalizar el turno,
-     * se da por terminado y pasa el turno al siguiente jugador.
-     *
-     * @return true si la jugada fue valida y/o se confirmo, false si fue
-     * invalida y se revirtio.
-     */
     @Override
     public boolean validarYFinalizarTurno() {
         boolean esPrimerMovimiento = !this.primerMovimientoRealizado;
@@ -120,9 +83,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
         }
     }
 
-    /**
-     * Funcionalidad de revertir los cambios del turno actual.
-     */
     @Override
     public void revertirCambiosDelTurno() {
         revertirCambiosTurno();
@@ -133,6 +93,13 @@ public class JuegoRummyFachada implements IJuegoRummy {
         if (!primerMovimientoRealizado) {
             this.primerMovimientoRealizado = true;
         }
+
+        // --- ¡AÑADIR ESTO! ---
+        // Marcar todos los grupos en el tablero como validados y permanentes
+        for (Grupo g : this.tablero.getFichasEnTablero()) {
+            g.setValidado(); // Esto pone esTemporal = false
+        }
+        // --- FIN DE LA MODIFICACIÓN ---
 
         // Orquesta la actualizacion de la mano del jugador
         List<Integer> idsEnTablero = this.tablero.getTodosLosIdsDeFichas();
@@ -145,10 +112,10 @@ public class JuegoRummyFachada implements IJuegoRummy {
     private void revertirCambiosTurno() {
         this.tablero = this.tableroAlInicioDelTurno;
         this.getJugadorActual().setManoJugador(this.manoAlInicioDelTurno);
-        // El estado guardado se mantiene, no se vuelve a llamar a guardarEstadoTurno()
     }
 
-    private void guardarEstadoTurno() {
+    @Override
+    public void guardarEstadoTurno() {
         this.tableroAlInicioDelTurno = this.tablero.copiaProfunda();
         this.manoAlInicioDelTurno = this.getJugadorActual().getManoJugador().copiaProfunda();
     }
@@ -159,33 +126,25 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Metodo en el que se regresan fichas a la mano. filtra por grupos no
-     * temporales para que no sean regresables cuando su grupo es valido y si
-     * esa validacion ya pasa y la ficha esta en un grupo invalido se intenta
-     * regresar a la mano y y se elimina la ficha del tablero, si la ficha se
-     * regreso a la mano regresa true, si no un false indicando que no fue
-     * regresada exitosamente
-     *
-     * @param idFicha
-     * @return
+     * Metodo en el que se regresan fichas a la mano. AHORA FUNCIONARÁ porque
+     * `!g.esTemporal()` encontrará los grupos validados.
      */
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
         // Filtramos para quedarnos solo con los grupos que NO son temporales.
         for (Grupo grupoValidado : this.tablero.getFichasEnTablero().stream().filter(g
-                -> !g.esTemporal()).toList()) {
+                -> !g.esTemporal()).toList()) { // <-- Esto ahora funciona
 
             for (Ficha ficha : grupoValidado.getFichas()) {
                 if (ficha.getId() == idFicha) {
-                    
+
                     // Encontrada en un grupo antiguo. No se puede mover.
-                    return false;
+                    return false; // <-- Esto ahora se disparará
                 }
             }
         }
 
         // Si el bucle termina, la ficha no está en un grupo permanente y se puede mover.
-        // El resto de tu lógica para remover la ficha y agregarla a la mano
         Ficha fichaParaRegresar = this.tablero.removerFicha(idFicha);
 
         if (fichaParaRegresar != null) {
@@ -195,7 +154,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
         return false; // FALSE No se encontró la ficha para remover
     }
 
-    // Getters para que el Modelo consulte el estado y cree los DTOs
+    // (El resto de tus Getters van aquí...)
     @Override
     public List<Ficha> getManoDeJugador(int indiceJugador) {
         if (indiceJugador >= 0 && indiceJugador < jugadores.size()) {
@@ -213,5 +172,4 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public int getCantidadFichasMazo() {
         return this.tablero.getMazo().size();
     }
-
 }

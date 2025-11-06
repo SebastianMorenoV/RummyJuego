@@ -20,8 +20,8 @@ public class Main {
         modelo.agregarObservador(vistaJugador1);
 
         // 2. Configuración de Red
-        String miId = "BenjaminSoto";
-        String ipServidor = "192.168.100.80";
+        String miId = "lucianobarceloo";
+        String ipServidor = "172.20.16.1";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9005;
 

@@ -21,6 +21,8 @@ public interface IJuegoRummy {
     void colocarFichasEnTablero(List<Grupo> nuevosGrupos);
 
     boolean validarYFinalizarTurno();
+    
+    void guardarEstadoTurno();
 
     void siguienteTurno();
 

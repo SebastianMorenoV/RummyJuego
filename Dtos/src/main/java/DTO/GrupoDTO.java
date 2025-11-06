@@ -14,18 +14,32 @@ public class GrupoDTO {
     private List<FichaJuegoDTO> fichasGrupo;
     private int fila;
     private int columna;
+    private boolean esTemporal; // --- ¡NUEVO CAMPO! ---
 
     public GrupoDTO() {
+        this.esTemporal = true; // Por defecto es temporal
     }
 
-    public GrupoDTO(String tipo, int cantidad, List<FichaJuegoDTO> fichasGrupo, int fila, int columna) {
+    // --- CONSTRUCTOR ACTUALIZADO ---
+    public GrupoDTO(String tipo, int cantidad, List<FichaJuegoDTO> fichasGrupo, int fila, int columna, boolean esTemporal) {
         this.tipo = tipo;
         this.cantidad = cantidad;
         this.fichasGrupo = fichasGrupo;
         this.fila = fila;
         this.columna = columna;
+        this.esTemporal = esTemporal;
     }
 
+    // --- GETTERS Y SETTERS (Añadir para esTemporal) ---
+    public boolean isEsTemporal() {
+        return esTemporal;
+    }
+
+    public void setEsTemporal(boolean esTemporal) {
+        this.esTemporal = esTemporal;
+    }
+
+    // (El resto de tus getters y setters van aquí...)
     public String getTipo() {
         return tipo;
     }
@@ -69,8 +83,7 @@ public class GrupoDTO {
     /**
      * Serializa los datos del grupo en un string plano para el payload.
      *
-     * Formato: tipo;cantidad;fila;columna;fichaData1|fichaData2|fichaData3
-     * Donde 'fichaData' es el string de FichaJuegoDTO.serializar()
+     * Formato: tipo;cantidad;fila;columna;esTemporal;fichaData1|fichaData2
      *
      * @return
      */
@@ -80,18 +93,15 @@ public class GrupoDTO {
         sb.append(this.tipo).append(";");
         sb.append(this.cantidad).append(";");
         sb.append(this.fila).append(";");
-        sb.append(this.columna);
+        sb.append(this.columna).append(";");
+        sb.append(this.esTemporal); // --- ¡NUEVO CAMPO SERIALIZADO! ---
 
         if (this.fichasGrupo != null && !this.fichasGrupo.isEmpty()) {
             sb.append(";"); // Separador antes de la lista
 
             for (int i = 0; i < this.fichasGrupo.size(); i++) {
                 FichaJuegoDTO ficha = this.fichasGrupo.get(i);
-
-                // Ya no usamos ficha.toString(), usamos ficha.serializar()
                 sb.append(ficha.serializar());
-
-                // Añadir el separador de lista '|' si no es la última ficha
                 if (i < this.fichasGrupo.size() - 1) {
                     sb.append("|");
                 }
@@ -104,27 +114,27 @@ public class GrupoDTO {
      * Método estático (factory) para crear un GrupoDTO completo desde el
      * payload recibido por el servidor.
      *
-     * @param payload El string de payload (ej: "TERCIA;3;4;7;ficha1|ficha2")
+     * @param payload El string de payload (ej:
+     * "TERCIA;3;4;7;false;ficha1|ficha2")
      * @return una nueva instancia de GrupoDTO
      */
     public static GrupoDTO deserializar(String payload) {
         try {
-
-            // Dividimos en 5 partes como MÁXIMO. La 5ta parte es "todo lo demás" (las fichas)
-            String[] partesGrupo = payload.split(";", 5);
+            // --- MODIFICADO ---
+            // Dividimos en 6 partes como MÁXIMO. La 6ta parte es "todo lo demás" (las fichas)
+            String[] partesGrupo = payload.split(";", 6);
 
             String tipo = partesGrupo[0];
             int cantidad = Integer.parseInt(partesGrupo[1]);
             int fila = Integer.parseInt(partesGrupo[2]);
             int columna = Integer.parseInt(partesGrupo[3]);
+            boolean esTemporal = Boolean.parseBoolean(partesGrupo[4]); // --- ¡NUEVO! ---
 
             List<FichaJuegoDTO> fichas = new ArrayList<>();
 
-            // Revisar si la 5ta parte (índice 4) existe y no está vacía
-            if (partesGrupo.length == 5 && !partesGrupo[4].isEmpty()) {
-
-                // split() usa regex. El pipe '|' es un carácter especial, por eso debemos "escaparlo" con doble backslash: \\|
-                String[] dataFichas = partesGrupo[4].split("\\|");
+            // Revisar si la 6ta parte (índice 5) existe y no está vacía
+            if (partesGrupo.length == 6 && !partesGrupo[5].isEmpty()) {
+                String[] dataFichas = partesGrupo[5].split("\\|");
 
                 for (String fichaData : dataFichas) {
                     FichaJuegoDTO ficha = FichaJuegoDTO.deserializar(fichaData);
@@ -134,7 +144,8 @@ public class GrupoDTO {
                 }
             }
 
-            return new GrupoDTO(tipo, cantidad, fichas, fila, columna);
+            return new GrupoDTO(tipo, cantidad, fichas, fila, columna, esTemporal);
+            // --- FIN MODIFICADO ---
 
         } catch (Exception e) {
             System.err.println("ERROR al deserializar GrupoDTO: " + payload);
@@ -154,16 +165,16 @@ public class GrupoDTO {
     public static List<GrupoDTO> deserializarLista(String payloadLote) {
         List<GrupoDTO> listaGrupos = new ArrayList<>();
 
-        // 1. Divide el lote en payloads de grupos individuales
-        // Usamos "\\$" porque '$' es un carácter especial en regex
+        // Si el payload es nulo O ESTÁ VACÍO, no hay nada que
+        // procesar. Devuelve la lista vacía inmediatamente.
+        if (payloadLote == null || payloadLote.isEmpty()) {
+            return listaGrupos;
+        }
+
         String[] payloadsIndividuales = payloadLote.split("\\$");
 
-        // 2. Deserializa cada payload individual
         for (String payload : payloadsIndividuales) {
-            System.out.println(payload);
             if (payload != null && !payload.isEmpty()) {
-
-                // Llama al método deserializar()
                 GrupoDTO grupo = GrupoDTO.deserializar(payload);
                 if (grupo != null) {
                     listaGrupos.add(grupo);
@@ -175,9 +186,9 @@ public class GrupoDTO {
 
     @Override
     public String toString() {
-        return "GrupoDTO{" + 
-                "tipo=" + tipo + 
-                ", cantidad=" + cantidad + 
-                ", fichasGrupo=" + fichasGrupo + '}';
+        return "GrupoDTO{"
+                + "tipo=" + tipo
+                + ", cantidad=" + cantidad
+                + ", fichasGrupo=" + fichasGrupo + '}';
     }
 }

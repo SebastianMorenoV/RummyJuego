@@ -22,7 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 /**
- * 
+ *
  * @author Sebastian Moreno
  */
 public class TableroUI extends JPanel {
@@ -136,7 +136,8 @@ public class TableroUI extends JPanel {
                             fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(),
                                     fichaUI.getColor(), fichaUI.isComodin(), celda.y, celda.x));
                         }
-                        gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c));
+                        gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c, true));
+
                     }
                 }
             }

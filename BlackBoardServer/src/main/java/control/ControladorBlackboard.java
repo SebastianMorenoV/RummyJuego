@@ -33,45 +33,47 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         // Hacemos cast una sola vez para acceder a métodos específicos
         EstadoJuegoPizarra pizarraConcreta = (EstadoJuegoPizarra) pizarra;
 
-        String jugadorActual = pizarra.getJugador(); // El jugador que TIENE el turno
+        // Obtenemos los datos ANTES del switch
+        String jugadorQueMovio = pizarraConcreta.getUltimoJugadorQueMovio();
+        if (jugadorQueMovio == null) {
+            jugadorQueMovio = "ID_DESCONOCIDO"; // Solo como fallback
+        }
         String ultimoPayload = pizarraConcreta.getUltimoTableroSerializado();
+
 
         switch (evento) {
             case "REGISTRAR":
                 System.out.println("[Controlador] Pizarra notificó REGISTRO");
                 boolean partidaIniciada = pizarra.iniciarPartidaSiCorresponde();
                 if (partidaIniciada) {
-                    // Si la partida acaba de iniciar, notificamos a todos
-                    // quién tiene el primer turno.
                     notificarCambioDeTurno(pizarra);
                 }
-
                 break;
 
             case "MOVIMIENTO":
-                // El jugador movió, pero NO ha terminado el turno.
-                String jugadorQueMovio = "ID_DESCONOCIDO"; // Necesitaríamos que la pizarra guarde quién movió
-
-                // Extrae el ID del jugador del payload (si tu serialización lo incluye)
-                // O modifica la pizarra para que guarde "ultimoJugadorQueMovio"
-                // Por ahora, usamos tu lógica anterior:
-                String mensajeMovimiento = "MOVIMIENTO_RECIBIDO:" + jugadorQueMovio + ":" + ultimoPayload;
-                System.out.println("[Controlador] Reenviando MOVIMIENTO a inactivos.");
+                // --- SÍ REENVIAMOS LOS MOVIMIENTOS TEMPORALES ---
+                // Esto es para que los otros jugadores vean el "arrastre"
+                String mensajeMovimiento = "MOVIMIENTO_RECIBIDO:" + ultimoPayload;
+                System.out.println("[Controlador] Reenviando MOVIMIENTO (temporal) a inactivos.");
                 directorio.enviarATurnosInactivos(jugadorQueMovio, mensajeMovimiento);
                 break;
 
-            // --- ¡NUEVO EVENTO! ---
+            
             case "AVANZAR_TURNO":
                 // Esto se llama DESPUÉS de FINALIZAR_TURNO o TOMAR_FICHA
-                String nuevoJugadorEnTurno = pizarra.getJugador(); // Ya es el *nuevo* jugador
+                
+                // --- ¡NUEVA LÓGICA! ---
+                // 1. Transmitir el ESTADO FINAL con un *nuevo comando*.
+                //    (ultimoPayload contiene el estado final de FINALIZAR_TURNO
+                //    o el estado revertido de TOMAR_FICHA).
+                String mensajeMovimientoFinal = "ESTADO_FINAL_TABLERO:" + ultimoPayload;
+                System.out.println("[Controlador] Transmitiendo ESTADO_FINAL_TABLERO a inactivos.");
+                directorio.enviarATurnosInactivos(jugadorQueMovio, mensajeMovimientoFinal);
+                // --- FIN DE NUEVA LÓGICA ---
 
-                if (nuevoJugadorEnTurno != null) {
-                    System.out.println("[Controlador] Notificando cambio de turno a: " + nuevoJugadorEnTurno);
-                    String mensajeTurno = "TURNO_CAMBIADO:" + nuevoJugadorEnTurno;
-
-                    // Notifica a TODOS (incluido el nuevo) de quién es el turno.
-                    directorio.enviarATodos(mensajeTurno);
-                }
+                
+                // 2. Notificar a TODOS quién es el NUEVO jugador en turno.
+                notificarCambioDeTurno(pizarra);
                 break;
 
             default:
@@ -80,7 +82,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * (NUEVO MÉTODO PRIVADO PARA EVITAR REPETIR CÓDIGO) Lee el jugador actual
+     * (MÉTODO PRIVADO) Lee el jugador actual
      * de la pizarra y envía el broadcast a todos.
      */
     private void notificarCambioDeTurno(iPizarraJuego pizarra) {

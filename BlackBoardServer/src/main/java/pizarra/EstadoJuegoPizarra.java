@@ -29,6 +29,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private final List<String> ordenDeTurnos;
     private String ultimoPayloadMovimiento;
     private List<GrupoDTO> gruposEnTablero;
+    private String ultimoJugadorQueMovio;
 
     /**
      * Índice del jugador que tiene el turno actual.
@@ -156,6 +157,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public String getUltimoTableroSerializado() {
         return this.ultimoTableroSerializado;
     }
+    
+    public String getUltimoJugadorQueMovio() {
+        return this.ultimoJugadorQueMovio;
+    }
 
     /**
      * REFACTORIZADO: Ahora maneja los nuevos comandos.
@@ -171,6 +176,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             case "MOVER":
                 // Solo guarda el payload del movimiento, no hace nada más.
                 // El Controlador lo usará para el broadcast.
+                this.ultimoJugadorQueMovio = idCliente;
                 this.ultimoTableroSerializado = payload;
                 System.out.println("[Pizarra] " + idCliente + " movió (temporal).");
                 notificarObservadores("MOVIMIENTO"); // Notifica al Controlador
