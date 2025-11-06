@@ -14,13 +14,12 @@ public class GrupoDTO {
     private List<FichaJuegoDTO> fichasGrupo;
     private int fila;
     private int columna;
-    private boolean esTemporal; // --- ¡NUEVO CAMPO! ---
+    private boolean esTemporal;
 
     public GrupoDTO() {
         this.esTemporal = true; // Por defecto es temporal
     }
 
-    // --- CONSTRUCTOR ACTUALIZADO ---
     public GrupoDTO(String tipo, int cantidad, List<FichaJuegoDTO> fichasGrupo, int fila, int columna, boolean esTemporal) {
         this.tipo = tipo;
         this.cantidad = cantidad;
@@ -29,8 +28,8 @@ public class GrupoDTO {
         this.columna = columna;
         this.esTemporal = esTemporal;
     }
-
-    // --- GETTERS Y SETTERS (Añadir para esTemporal) ---
+    
+    // Getters y Setters
     public boolean isEsTemporal() {
         return esTemporal;
     }
@@ -39,7 +38,6 @@ public class GrupoDTO {
         this.esTemporal = esTemporal;
     }
 
-    // (El resto de tus getters y setters van aquí...)
     public String getTipo() {
         return tipo;
     }
@@ -120,7 +118,7 @@ public class GrupoDTO {
      */
     public static GrupoDTO deserializar(String payload) {
         try {
-            // --- MODIFICADO ---
+
             // Dividimos en 6 partes como MÁXIMO. La 6ta parte es "todo lo demás" (las fichas)
             String[] partesGrupo = payload.split(";", 6);
 
@@ -128,7 +126,7 @@ public class GrupoDTO {
             int cantidad = Integer.parseInt(partesGrupo[1]);
             int fila = Integer.parseInt(partesGrupo[2]);
             int columna = Integer.parseInt(partesGrupo[3]);
-            boolean esTemporal = Boolean.parseBoolean(partesGrupo[4]); // --- ¡NUEVO! ---
+            boolean esTemporal = Boolean.parseBoolean(partesGrupo[4]);
 
             List<FichaJuegoDTO> fichas = new ArrayList<>();
 
@@ -145,7 +143,6 @@ public class GrupoDTO {
             }
 
             return new GrupoDTO(tipo, cantidad, fichas, fila, columna, esTemporal);
-            // --- FIN MODIFICADO ---
 
         } catch (Exception e) {
             System.err.println("ERROR al deserializar GrupoDTO: " + payload);

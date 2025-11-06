@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  *
- * @author Sebastian Moreno (Refactorizado)
+ * @author Sebastian Moreno
  */
 public class BlackBoardServer {
 
@@ -32,7 +32,6 @@ public class BlackBoardServer {
         iDespachador despachador = new DespachadorAsincrono();
 
         // 1.B. Crear Directorio (El que sabe "dónde viven")
-        // ¡MODIFICADO! Ya no necesita el despachador.
         iDirectorio directorio = new Directorio();
 
         // 1.C. Crear Pizarra (El estado)

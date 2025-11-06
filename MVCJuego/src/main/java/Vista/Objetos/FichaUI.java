@@ -9,14 +9,13 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import javax.swing.*;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 
+ *
  * @author chris
  */
 public class FichaUI extends JPanel {
@@ -92,9 +91,10 @@ public class FichaUI extends JPanel {
             }
 
             /**
-             * Metodo para arrastrar las fichasUI que estan en la mano.
-             * se pueden colocar de la mano al tablero o viceversa
-             * @param e 
+             * Metodo para arrastrar las fichasUI que estan en la mano. se
+             * pueden colocar de la mano al tablero o viceversa
+             *
+             * @param e
              */
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -110,9 +110,11 @@ public class FichaUI extends JPanel {
             }
 
             /**
-             * Este metodo determina donde fue soltada la ficha (en el tablero, en la mano o fuera de ambos).
-             * En base a donde se haya soltado realiza las acciones correspondientes, como colocarla en una nueva celda,
-             * devolverla a su posicion original o regresar la ficha desde el tablero a la mano. 
+             * Este metodo determina donde fue soltada la ficha (en el tablero,
+             * en la mano o fuera de ambos). En base a donde se haya soltado
+             * realiza las acciones correspondientes, como colocarla en una
+             * nueva celda, devolverla a su posicion original o regresar la
+             * ficha desde el tablero a la mano.
              */
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -174,13 +176,13 @@ public class FichaUI extends JPanel {
                         }
 
                     } else {
-                        
+
                         // Si su origen no es tablero entonces es mano por lo que se debe quedar donde mismo
                         devolverFichaAlOrigen();//para que se repinte
                     }
 
                 } else {
-                    
+
                     // Se solto en cualquier otro lado, por lo que la devolvemos a su panel y posicion originales.
                     devolverFichaAlOrigen();
                 }
@@ -192,9 +194,10 @@ public class FichaUI extends JPanel {
             }
 
             /**
-             * Metodo que devuelve la ficha a su origen.
-             * si la ficha fue movida a un lugar en el cual no puede colocarse o que necesita volver por una jugada 
-             * invalida regresa a su lugar de origen que es donde estaba colocada.
+             * Metodo que devuelve la ficha a su origen. si la ficha fue movida
+             * a un lugar en el cual no puede colocarse o que necesita volver
+             * por una jugada invalida regresa a su lugar de origen que es donde
+             * estaba colocada.
              */
             private void devolverFichaAlOrigen() {
                 setLocation(originalLocation);

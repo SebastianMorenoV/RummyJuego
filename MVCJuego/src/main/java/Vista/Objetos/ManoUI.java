@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 public class ManoUI extends JPanel {
 
     private List<FichaUI> fichas; // Lista de fichas dentro de la mano
+    
     private static final int MARGEN_IZQUIERDO = 20;
     private static final int FICHAS_POR_FILA = 14;
     private static final int SEPARACION_HORIZONTAL = 38;

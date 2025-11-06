@@ -7,6 +7,7 @@ import java.util.List;
  * @author Sebastian Moreno
  */
 public class ManoDTO {
+
     List<FichaJuegoDTO> fichasEnMano;
 
     public ManoDTO() {
@@ -19,6 +20,4 @@ public class ManoDTO {
     public void setFichasEnMano(List<FichaJuegoDTO> fichasEnMano) {
         this.fichasEnMano = fichasEnMano;
     }
-    
-    
 }

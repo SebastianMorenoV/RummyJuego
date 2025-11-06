@@ -9,7 +9,7 @@ import contratos.iProcesador;
  * Lógica del Servidor. Su diseño es robusto y cumple su función. Sabe qué hacer
  * con "REGISTRAR" y "MOVER". Al recibir "MOVER", reenvía el payload intacto a
  * los demás clientes.
- * 
+ *
  * @author Benja
  */
 public class ProcesadorServidor implements iProcesador {
@@ -60,7 +60,6 @@ public class ProcesadorServidor implements iProcesador {
             return new String("NO_TE_JALASTE"); // O JUGADA_INVALIDA
         }
 
-        // El ControladorBlackboard se encargará de esto
         return new String("MOVIMIENTO_RECIBIDO_OK");
     }
 }

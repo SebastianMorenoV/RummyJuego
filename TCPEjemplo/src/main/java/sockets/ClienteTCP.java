@@ -41,7 +41,8 @@ public class ClienteTCP implements iDespachador {
         System.out.println("[Despachador] Conectando a " + host + ":" + puerto + "...");
 
         // Usa los parámetros 'host' y 'puerto', no las variables de la clase.
-        try (Socket socket = new Socket(host, puerto); DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
+        try (Socket socket = new Socket(host, puerto); DataOutputStream out
+                = new DataOutputStream(socket.getOutputStream())) {
 
             out.writeUTF(mensaje);
             System.out.println("[Despachador] Enviado -> " + mensaje);

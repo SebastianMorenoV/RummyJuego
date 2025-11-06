@@ -52,7 +52,7 @@ public class Mano {
         return this.fichasEnMano.isEmpty();
     }
 
-    // --- Getters y Setters ---
+    // Getters y Setters
     public List<Ficha> getFichasEnMano() {
         return fichasEnMano;
     }

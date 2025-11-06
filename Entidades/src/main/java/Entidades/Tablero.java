@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 /**
  * Esta clase representa el tablero de el juego Rummy. Se compone de un arreglo
- * de grupos , que representan los grupos puestos en el tablero
- * Un mazo de fichas , para ser utilizadas por los jugadores.
+ * de grupos , que representan los grupos puestos en el tablero Un mazo de
+ * fichas , para ser utilizadas por los jugadores.
  *
  * @author Sebastian Moreno
  */
@@ -89,9 +89,9 @@ public class Tablero {
                 if (grupo.getFichas().isEmpty()) {
                     grupoIterator.remove();
                 }
-                
+
                 return fichaRemovida; // Devolvemos la ficha y terminamos la búsqueda
-                
+
             }
         }
         return null;

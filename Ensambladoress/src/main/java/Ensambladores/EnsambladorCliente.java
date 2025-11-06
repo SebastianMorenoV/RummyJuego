@@ -15,9 +15,8 @@ import java.beans.PropertyChangeListener;
  * @author benja
  */
 public final class EnsambladorCliente implements iEnsambladorCliente {
-
     public EnsambladorCliente() {
-    
+
     }
 
     /**

@@ -98,7 +98,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         DatosJugador datos = new DatosJugador(id, payloadMano);
         estadoJugadores.put(id, datos);
         ordenDeTurnos.add(id);
-        System.out.println("[Pizarra] Jugador '" + id + "' registrado en la partida. Total: " + ordenDeTurnos.size());
+        System.out.println("[Pizarra] Jugador '" + id
+                + "' registrado en la partida. Total: " + ordenDeTurnos.size());
 
         notificarObservadores("REGISTRAR");
 
@@ -122,21 +123,26 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public synchronized void avanzarTurno() {
         if (indiceTurnoActual != -1) {
             indiceTurnoActual = (indiceTurnoActual + 1) % ordenDeTurnos.size();
+
             String idSiguiente = ordenDeTurnos.get(indiceTurnoActual);
+
             System.out.println("[Pizarra] Turno de: " + idSiguiente);
 
-            // ¡Notifica al Controlador!
+            // Notifica al Controlador
             notificarObservadores("AVANZAR_TURNO");
         }
     }
 
     @Override
     public synchronized boolean iniciarPartidaSiCorresponde() {
+
         // Solo inicia si el juego no ha iniciado Y ya tenemos los jugadores necesarios
         if (indiceTurnoActual == -1 && ordenDeTurnos.size() == JUGADORES_PARA_INICIAR) {
             indiceTurnoActual = 0; // Inicia el turno del primer jugador
+
             String idPrimerJugador = ordenDeTurnos.get(0);
-            System.out.println("[Pizarra] ¡Partida iniciada! Hay " + JUGADORES_PARA_INICIAR + " jugadores.");
+            System.out.println("[Pizarra] ¡Partida iniciada! Hay "
+                    + JUGADORES_PARA_INICIAR + " jugadores.");
             System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
             return true;
         }
@@ -152,18 +158,18 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * (NUEVO) Método para que el Controlador obtenga el último tablero válido
+     * Método para que el Controlador obtenga el último tablero válido
      */
     public String getUltimoTableroSerializado() {
         return this.ultimoTableroSerializado;
     }
-    
+
     public String getUltimoJugadorQueMovio() {
         return this.ultimoJugadorQueMovio;
     }
 
     /**
-     * REFACTORIZADO: Ahora maneja los nuevos comandos.
+     * Ahora maneja los nuevos comandos.
      */
     @Override
     public boolean procesarComando(String idCliente, String comando, String payload) {
@@ -174,6 +180,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                 return true;
 
             case "MOVER":
+                
                 // Solo guarda el payload del movimiento, no hace nada más.
                 // El Controlador lo usará para el broadcast.
                 this.ultimoJugadorQueMovio = idCliente;
@@ -182,19 +189,21 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                 notificarObservadores("MOVIMIENTO"); // Notifica al Controlador
                 return true;
 
-            // --- ¡NUEVOS COMANDOS! ---
             case "FINALIZAR_TURNO":
+                
                 // El cliente validó, así que guardamos este como el último estado bueno
                 this.ultimoTableroSerializado = payload;
                 System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
-                avanzarTurno(); // ¡Avanza el marcador y notifica!
+                
+                avanzarTurno(); // Avanza el marcador y notifica
                 return true;
 
             case "TOMAR_FICHA":
                 System.out.println("[Pizarra] " + idCliente + " tomó ficha y finalizó turno.");
+                
                 // Aquí podrías guardar algo si fuera necesario (ej. "TOMO_FICHA")
                 // Pero por ahora, solo avanzamos el turno.
-                avanzarTurno(); // ¡Avanza el marcador y notifica!
+                avanzarTurno(); // Avanza el marcador y notifica
                 return true;
 
             default:

@@ -19,7 +19,6 @@ import java.util.List;
  */
 public class JuegoRummyFachada implements IJuegoRummy {
 
-    // (El resto de tus atributos...)
     private Tablero tablero;
     private List<Jugador> jugadores;
     private int jugadorActual;
@@ -34,7 +33,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
         this.primerMovimientoRealizado = false;
     }
 
-    // (iniciarPartida, getJugadorActual, jugadorTomaFichaDelMazo, siguienteTurno, colocarFichasEnTablero, validarYFinalizarTurno, revertirCambiosDelTurno ... van aquí sin cambios)
+    
     @Override
     public void iniciarPartida() {
         this.jugadores.add(new Jugador("Jugador 1", "B1", new Mano()));
@@ -70,13 +69,12 @@ public class JuegoRummyFachada implements IJuegoRummy {
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
         this.tablero.setFichasEnTablero(nuevosGrupos);
     }
-    
+
     @Override
     public boolean validarYFinalizarTurno() {
-        // --- LÍNEAS MODIFICADAS ---
+
         Jugador jugador = getJugadorActual();
         boolean esPrimerMovimiento = !jugador.isHaHechoPrimerMovimiento();
-        // --- FIN DE MODIFICACIÓN ---
 
         if (tablero.esJugadaValida(esPrimerMovimiento)) { // Pasa la bandera correcta
             confirmarCambiosTurno();
@@ -92,18 +90,16 @@ public class JuegoRummyFachada implements IJuegoRummy {
         revertirCambiosTurno();
     }
 
-    // --- Métodos Internos ---
+    // Métodos Internos
     private void confirmarCambiosTurno() {
         if (!primerMovimientoRealizado) {
             this.primerMovimientoRealizado = true;
         }
 
-        // --- ¡AÑADIR ESTO! ---
         // Marcar todos los grupos en el tablero como validados y permanentes
         for (Grupo g : this.tablero.getFichasEnTablero()) {
             g.setValidado(); // Esto pone esTemporal = false
         }
-        // --- FIN DE LA MODIFICACIÓN ---
 
         // Orquesta la actualizacion de la mano del jugador
         List<Integer> idsEnTablero = this.tablero.getTodosLosIdsDeFichas();
@@ -135,15 +131,16 @@ public class JuegoRummyFachada implements IJuegoRummy {
      */
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
+        
         // Filtramos para quedarnos solo con los grupos que NO son temporales.
         for (Grupo grupoValidado : this.tablero.getFichasEnTablero().stream().filter(g
-                -> !g.esTemporal()).toList()) { // <-- Esto ahora funciona
+                -> !g.esTemporal()).toList()) {
 
             for (Ficha ficha : grupoValidado.getFichas()) {
                 if (ficha.getId() == idFicha) {
 
                     // Encontrada en un grupo antiguo. No se puede mover.
-                    return false; // <-- Esto ahora se disparará
+                    return false;
                 }
             }
         }
@@ -155,10 +152,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
             return true;
         }
 
-        return false; // FALSE No se encontró la ficha para remover
+        return false; // FALSE = No se encontró la ficha para remover
     }
 
-    // (El resto de tus Getters van aquí...)
     @Override
     public List<Ficha> getManoDeJugador(int indiceJugador) {
         if (indiceJugador >= 0 && indiceJugador < jugadores.size()) {

@@ -3,7 +3,6 @@ package contratos;
 // (Asegúrate de importar las otras interfaces)
 
 /**
- * (REFACTORIZADO)
  * Esta interfaz define un ensamblador que CONECTA la lógica de red
  * a los componentes principales del juego.
  * 

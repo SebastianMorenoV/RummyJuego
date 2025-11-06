@@ -1,4 +1,5 @@
 package Dtos;
+
 import DTO.FichaJuegoDTO;
 import Vista.TipoEvento;
 import java.util.List;
@@ -12,9 +13,9 @@ public class ActualizacionDTO {
 
     private final TipoEvento tipoEvento;
     private final boolean esMiTurno;
-    private final List<FichaJuegoDTO> manoDelJugador; 
+    private final List<FichaJuegoDTO> manoDelJugador;
 
-    public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno, 
+    public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno,
             List<FichaJuegoDTO> manoDelJugador) {
         this.tipoEvento = tipoEvento;
         this.esMiTurno = esMiTurno;
@@ -23,7 +24,8 @@ public class ActualizacionDTO {
 
     /**
      * Metodo que obtiene el tipo de evento que se realizo en el juego.
-     * @return 
+     *
+     * @return
      */
     public TipoEvento getTipoEvento() {
         return tipoEvento;
@@ -31,7 +33,8 @@ public class ActualizacionDTO {
 
     /**
      * Metodo que indica el si es el turno de un jugador.
-     * @return 
+     *
+     * @return
      */
     public boolean esMiTurno() {
         return esMiTurno;
@@ -39,7 +42,8 @@ public class ActualizacionDTO {
 
     /**
      * Metodo que obtiene la mano de un jugador.
-     * @return 
+     *
+     * @return
      */
     public List<FichaJuegoDTO> getManoDelJugador() {
         return manoDelJugador;

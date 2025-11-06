@@ -33,7 +33,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private final IJuegoRummy juego;
     private List<GrupoDTO> gruposDeTurnoDTO;
 
-    // --- ¡NUEVA VARIABLE DE MEMORIA! ---
     // Esta guardará los DTOs CON posiciones al inicio del turno.
     private List<GrupoDTO> gruposDTOAlInicioDelTurno;
 
@@ -46,7 +45,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
         this.juego = new JuegoRummyFachada();
         this.gruposDeTurnoDTO = new ArrayList<>();
 
-        // --- INICIALIZAR LA NUEVA LISTA ---
         this.gruposDTOAlInicioDelTurno = new ArrayList<>();
 
         this.esMiTurno = false;
@@ -58,7 +56,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
     public void iniciarJuego() {
         juego.iniciarPartida(); // Esto llama a guardarEstadoTurno() en la fachada
 
-        // --- ¡AÑADIDO! ---
         // Guardamos el estado DTO inicial (tablero vacío)
         this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
 
@@ -74,6 +71,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String payloadd = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         if (evento.equals("MOVIMIENTO_RECIBIDO")) {
+
             // Esto es SÓLO para movimientos temporales de otros jugadores.
             System.out.println("[Modelo] Evento 'MOVIMIENTO_RECIBIDO' (Temporal) detectado!");
             try {
@@ -82,13 +80,16 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                 if (gruposMovidos != null) {
                     System.out.println("Se intento colocar ficha (remoto-temporal)");
+
                     // Solo actualiza la vista, NO guarda el estado.
                     this.actualizarVistaTemporal(gruposMovidos);
                 } else {
-                    System.err.println("[Modelo] Error: No se pudo deserializar el payload (temporal): " + payload);
+                    System.err.println("[Modelo] Error: No se pudo deserializar el payload (temporal): "
+                            + payload);
                 }
             } catch (Exception e) {
-                System.err.println("[Modelo] Error al procesar evento (temporal): " + e.getMessage());
+                System.err.println("[Modelo] Error al procesar evento (temporal): "
+                        + e.getMessage());
             }
         }
 
@@ -105,14 +106,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     //    Esto también actualiza 'this.gruposDeTurnoDTO'
                     this.actualizarVistaTemporal(gruposMovidos);
 
-                    // 2. ¡GUARDA ESTE ESTADO!
+                    // 2. Guarda el estado.
                     System.out.println("[Modelo] Guardando estado de turno (Final).");
-                    juego.guardarEstadoTurno(); // Guarda la lógica
+                    juego.guardarEstadoTurno();
 
-                    // --- ¡CAMBIO IMPORTANTE! ---
                     // Guarda una copia de los DTOs (con posiciones)
                     this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
-                    // --- FIN DEL CAMBIO ---
 
                     // 3. Notifica a la Vista que guarde este estado visual
                     notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
@@ -135,7 +134,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     private void actualizarVistaTemporal(List<GrupoDTO> gruposPropuestos) {
-        this.gruposDeTurnoDTO = gruposPropuestos; // <-- ¡Esto es importante!
+        this.gruposDeTurnoDTO = gruposPropuestos;
 
         List<Grupo> nuevosGrupos = gruposPropuestos.stream()
                 .map(this::convertirGrupoDtoAEntidad)
@@ -170,7 +169,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
-    // --- ***** MÉTODO MODIFICADO ***** ---
     public void tomarFichaMazo() {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'tomarFichaMazo' ignorada. No es mi turno.");
@@ -204,7 +202,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
             Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    // --- ***** FIN DE LA MODIFICACIÓN ***** ---
 
     public void terminarTurno() {
         if (!this.esMiTurno) {
@@ -217,7 +214,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         if (jugadaFueValida) {
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
             try {
-                // ¡MODIFICADO! Llama al serializador correcto
+                // Llama al serializador correcto
                 String payloadJuego = serializarJuegoFinal();
                 String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego;
                 this.despachador.enviar(mensaje);
@@ -229,7 +226,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
 
             try {
-                // ¡MODIFICADO! Llama al serializador correcto
+                // Llama al serializador correcto
                 String payloadJuegoRevertido = serializarEstadoRevertido();
 
                 String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
@@ -263,12 +260,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * reversiones).
      */
     private String serializarEstadoRevertido() {
-        // --- ¡CAMBIO CLAVE! ---
+
         // Usa la lista de DTOs guardada, que CONTIENE las posiciones.
         List<GrupoDTO> grupos = this.gruposDTOAlInicioDelTurno;
-        // --- FIN DEL CAMBIO ---
 
         StringBuilder payloadBuilder = new StringBuilder();
+        
         for (int i = 0; i < grupos.size(); i++) {
             payloadBuilder.append(grupos.get(i).serializarParaPayload());
             if (i < grupos.size() - 1) {
@@ -336,11 +333,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
         JuegoDTO dto = new JuegoDTO();
         List<Grupo> gruposDelJuego = juego.getGruposEnTablero();
 
-        // --- ¡LÓGICA ACTUALIZADA! ---
         // Sincroniza la lista de DTOs (con posiciones) con la 
         // lista de entidades (con estado lógico 'tipo' y 'esTemporal')
         if (this.gruposDeTurnoDTO != null && this.gruposDeTurnoDTO.size() == gruposDelJuego.size()) {
             for (int i = 0; i < gruposDelJuego.size(); i++) {
+                
                 // Actualiza el 'tipo' en nuestro DTO con el resultado de la validación
                 String tipoValidado = gruposDelJuego.get(i).getTipo();
                 this.gruposDeTurnoDTO.get(i).setTipo(tipoValidado);
@@ -350,6 +347,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
             }
             dto.setGruposEnTablero(this.gruposDeTurnoDTO);
         } else {
+            
             // Si no coinciden, crea DTOs desde la lógica (perderá posiciones,
             // pero esto solo debería pasar en una desincronización)
             List<GrupoDTO> gruposDTO = gruposDelJuego.stream()
@@ -357,14 +355,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     .collect(Collectors.toList());
             dto.setGruposEnTablero(gruposDTO);
         }
-        // --- FIN DE LÓGICA ACTUALIZADA ---
-
+        
         dto.setFichasMazo(juego.getCantidadFichasMazo());
         dto.setJugadorActual(juego.getJugadorActual().getNickname());
         return dto;
     }
 
-    // --- MÉTODOS DE AYUDA (ACTUALIZADOS) ---
+    // Metodos de ayuda
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
         List<Ficha> fichas = dto.getFichasGrupo().stream()
                 .map(fDto -> new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(),
@@ -373,7 +370,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         Grupo grupo = new Grupo(dto.getTipo(), fichas.size(), fichas);
 
-        // ¡Importante! Si el DTO dice que no es temporal, lo marcamos
+        // Si el DTO dice que no es temporal, lo marcamos
         if (!dto.isEsTemporal()) {
             grupo.setValidado();
         }

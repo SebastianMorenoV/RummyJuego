@@ -128,7 +128,6 @@ public class TableroUI extends JPanel {
 
                     if (!grupoActual.isEmpty()) {
 
-                        // --- ¡ESTA ES LA NUEVA LÓGICA! ---
                         // Un grupo es temporal si *alguna* de sus fichas
                         // NO estaba en el tablero validado al inicio del turno.
                         boolean esTemporal = false;
@@ -139,7 +138,6 @@ public class TableroUI extends JPanel {
                                 break;
                             }
                         }
-                        // --- FIN DE LA NUEVA LÓGICA ---
 
                         List<FichaJuegoDTO> fichasDTO = new ArrayList<>();
                         for (FichaUI fichaUI : grupoActual) {
@@ -148,7 +146,6 @@ public class TableroUI extends JPanel {
                                     fichaUI.getColor(), fichaUI.isComodin(), celda.y, celda.x));
                         }
 
-                        // --- ¡ASEGÚRATE DE USAR LA BANDERA 'esTemporal' AQUÍ! ---
                         gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c, esTemporal));
 
                     }
@@ -163,6 +160,7 @@ public class TableroUI extends JPanel {
      * Se debe llamar después de una jugada exitosa.
      */
     public void guardarEstadoVisualValido() {
+        
         // Limpiamos el estado anterior
         fichasEnTableroValidas.clear();
         posicionesValidas.clear();

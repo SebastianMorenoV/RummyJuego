@@ -47,7 +47,7 @@ public class Jugador {
         return this.manoJugador.estaVacia();
     }
 
-    // --- Getters y Setters ---
+    // Getters y Setters
     public Mano getManoJugador() {
         return manoJugador;
     }

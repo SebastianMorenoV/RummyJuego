@@ -25,7 +25,7 @@ public class Main {
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9005;
 
-        // 3. Ensamblaje de Componentes de Red (REFACTORIZADO)
+        // 3. Ensamblaje de Componentes de Red
         System.out.println("[Main] Iniciando ensamblaje de red...");
 
         // Instanciamos el nuevo ensamblador
@@ -46,11 +46,13 @@ public class Main {
         // Usamos la variable 'listener'
         new Thread(() -> {
             try {
-                System.out.println("[Main] Iniciando listener en el puerto " + miPuertoDeEscucha);
-                
+                System.out.println("[Main] Iniciando listener en el puerto "
+                        + miPuertoDeEscucha);
+
                 listener.iniciar(miPuertoDeEscucha); // Variable separada
             } catch (IOException e) {
-                System.err.println("[Main] Error fatal al iniciar el listener: " + e.getMessage());
+                System.err.println("[Main] Error fatal al iniciar el listener: "
+                        + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
@@ -58,15 +60,16 @@ public class Main {
         // 6. Registrarse en el Servidor e Iniciar el Juego
         try {
             String mensajeRegistro = miId + ":REGISTRAR:" + miPuertoDeEscucha;
-            
+
             despachador.enviar(mensajeRegistro); // Variable separada
         } catch (IOException ex) {
-            System.err.println("[Main] No se pudo conectar con el servidor para registrarse: " + ex.getMessage());
+            System.err.println("[Main] No se pudo conectar con el servidor para registrarse: "
+                    + ex.getMessage());
         }
 
         // Se muestra la ventana del juego
         vistaJugador1.setVisible(true);
-        
+
         controlador.iniciarJuego();
     }
 }
