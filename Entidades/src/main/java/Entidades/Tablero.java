@@ -59,6 +59,7 @@ public class Tablero {
      */
     public int calcularPuntosDeLaJugada() {
         return this.fichasEnTablero.stream()
+                .filter(Grupo::esTemporal) // <-- ¡ESTA ES LA LÍNEA CLAVE!
                 .mapToInt(Grupo::calcularPuntos)
                 .sum();
     }

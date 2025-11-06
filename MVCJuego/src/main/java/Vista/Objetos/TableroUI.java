@@ -102,9 +102,6 @@ public class TableroUI extends JPanel {
         }
     }
 
-    /**
-     * Genera los grupos basándose en el estado visual actual del tablero.
-     */
     public List<GrupoDTO> generarGruposDesdeCeldas() {
         FichaUI[][] celdasTemporales = new FichaUI[filas][columnas];
         for (FichaUI ficha : fichasEnTablero.values()) {
@@ -130,13 +127,29 @@ public class TableroUI extends JPanel {
                     }
 
                     if (!grupoActual.isEmpty()) {
+
+                        // --- ¡ESTA ES LA NUEVA LÓGICA! ---
+                        // Un grupo es temporal si *alguna* de sus fichas
+                        // NO estaba en el tablero validado al inicio del turno.
+                        boolean esTemporal = false;
+                        for (FichaUI fichaDelGrupo : grupoActual) {
+                            if (!fichasEnTableroValidas.containsKey(fichaDelGrupo.getIdFicha())) {
+                                // Esta ficha es nueva, por lo tanto, el grupo entero es temporal.
+                                esTemporal = true;
+                                break;
+                            }
+                        }
+                        // --- FIN DE LA NUEVA LÓGICA ---
+
                         List<FichaJuegoDTO> fichasDTO = new ArrayList<>();
                         for (FichaUI fichaUI : grupoActual) {
                             Point celda = calcularCeldaParaPunto(fichaUI.getLocation());
                             fichasDTO.add(new FichaJuegoDTO(fichaUI.getIdFicha(), fichaUI.getNumero(),
                                     fichaUI.getColor(), fichaUI.isComodin(), celda.y, celda.x));
                         }
-                        gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c, true));
+
+                        // --- ¡ASEGÚRATE DE USAR LA BANDERA 'esTemporal' AQUÍ! ---
+                        gruposEncontrados.add(new GrupoDTO("No establecido", fichasDTO.size(), fichasDTO, r, c, esTemporal));
 
                     }
                 }

@@ -9,15 +9,18 @@ public class Jugador {
     String nickname;
     String grupoColor;
     Mano manoJugador;
+    private boolean haHechoPrimerMovimiento; // <-- AÑADIR ESTO
 
     public Jugador() {
         this.manoJugador = new Mano();
+        this.haHechoPrimerMovimiento = false;
     }
 
     public Jugador(String nickname, String grupoColor, Mano manoJugador) {
         this.nickname = nickname;
         this.grupoColor = grupoColor;
         this.manoJugador = manoJugador;
+        this.haHechoPrimerMovimiento = false;
     }
 
     /**
@@ -27,6 +30,14 @@ public class Jugador {
      */
     public void agregarFichaAJugador(Ficha ficha) {
         this.manoJugador.getFichasEnMano().add(ficha);
+    }
+    
+    public boolean isHaHechoPrimerMovimiento() {
+        return haHechoPrimerMovimiento;
+    }
+
+    public void setHaHechoPrimerMovimiento(boolean haHechoPrimerMovimiento) {
+        this.haHechoPrimerMovimiento = haHechoPrimerMovimiento;
     }
 
     /**

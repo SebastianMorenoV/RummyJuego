@@ -170,11 +170,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    // --- ***** MÉTODO MODIFICADO ***** ---
     public void tomarFichaMazo() {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'tomarFichaMazo' ignorada. No es mi turno.");
             return;
         }
+
+        // 1. Revertir la lógica y la UI local PRIMERO
         juego.revertirCambiosDelTurno();
         juego.jugadorTomaFichaDelMazo();
 
@@ -183,14 +186,25 @@ public class Modelo implements IModelo, PropertyChangeListener {
         notificarObservadores(TipoEvento.TOMO_FICHA);
 
         try {
-            // ¡MODIFICADO! Usa el nuevo serializador
+            // 2. Obtener el estado REVERTIDO
             String payloadJuegoRevertido = serializarEstadoRevertido();
-            String mensaje = this.miId + ":TOMAR_FICHA:" + payloadJuegoRevertido;
-            this.despachador.enviar(mensaje);
+
+            // 3. ENVIAR UN :MOVER: con el estado revertido.
+            //    Esto actualiza el 'ultimoTableroSerializado' en el servidor
+            //    y notifica a los otros clientes del estado revertido.
+            String mensajeRevertir = this.miId + ":MOVER:" + payloadJuegoRevertido;
+            this.despachador.enviar(mensajeRevertir);
+
+            // 4. ENVIAR :TOMAR_FICHA: para avanzar el turno.
+            //    El servidor ahora usará el payload que acabamos de enviar.
+            String mensajeTomar = this.miId + ":TOMAR_FICHA:" + payloadJuegoRevertido;
+            this.despachador.enviar(mensajeTomar);
+
         } catch (IOException ex) {
             Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    // --- ***** FIN DE LA MODIFICACIÓN ***** ---
 
     public void terminarTurno() {
         if (!this.esMiTurno) {

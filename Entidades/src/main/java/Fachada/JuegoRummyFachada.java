@@ -70,11 +70,15 @@ public class JuegoRummyFachada implements IJuegoRummy {
         nuevosGrupos.forEach(Grupo::validarYEstablecerTipo);
         this.tablero.setFichasEnTablero(nuevosGrupos);
     }
-
+    
     @Override
     public boolean validarYFinalizarTurno() {
-        boolean esPrimerMovimiento = !this.primerMovimientoRealizado;
-        if (tablero.esJugadaValida(esPrimerMovimiento)) {
+        // --- LÍNEAS MODIFICADAS ---
+        Jugador jugador = getJugadorActual();
+        boolean esPrimerMovimiento = !jugador.isHaHechoPrimerMovimiento();
+        // --- FIN DE MODIFICACIÓN ---
+
+        if (tablero.esJugadaValida(esPrimerMovimiento)) { // Pasa la bandera correcta
             confirmarCambiosTurno();
             return true;
         } else {
