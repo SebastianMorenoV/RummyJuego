@@ -1,27 +1,54 @@
 package directorio;
 
-import contratos.iDespachador; 
 import contratos.iDirectorio;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Implementación del "Libro de Direcciones".
+ * Almacena la información de conexión (IP/Puerto) de cada jugador.
+ * Ya NO se encarga de enviar mensajes.
+ * * @author Sebastian Moreno (Refactorizado)
+ */
 public class Directorio implements iDirectorio {
 
-    // Necesita al despachador para enviar mensajes
-    private final iDespachador despachador;
-
     // Un mapa para guardar la info de conexión por ID de jugador
+    // (idJugador -> ClienteInfo)
     private final Map<String, ClienteInfo> directorioJugadores;
 
-    // ¡Inyéctale el despachador!
-    public Directorio(iDespachador despachador) {
-        this.despachador = despachador;
+    // ¡Ya no necesita al despachador!
+    public Directorio() {
         // Usa un mapa seguro para concurrencia
         this.directorioJugadores = new ConcurrentHashMap<>();
     }
 
-    // Un método para registrar al jugador con toda la info necesaria
+    /**
+     * Clase interna que almacena host/puerto e IMPLEMENTA la interfaz
+     * pública de datos de conexión.
+     */
+    public static class ClienteInfo implements ClienteInfoDatos {
+        public final String host;
+        public final int puerto;
+
+        public ClienteInfo(String host, int puerto) {
+            this.host = host;
+            this.puerto = puerto;
+        }
+
+        @Override
+        public String getHost() {
+            return host;
+        }
+
+        @Override
+        public int getPuerto() {
+            return puerto;
+        }
+    }
+
+    // --- Implementación de iDirectorio ---
+    
+    @Override
     public void addJugador(String idJugador, String ip, int puerto) {
         directorioJugadores.put(idJugador, new ClienteInfo(ip, puerto));
         System.out.println("[Directorio] Jugador " + idJugador + " registrado en " + ip + ":" + puerto);
@@ -32,48 +59,23 @@ public class Directorio implements iDirectorio {
         directorioJugadores.remove(idJugador);
     }
 
+    /**
+     * Devuelve un mapa de solo lectura con la información de todos los jugadores.
+     */
     @Override
-    public void enviarATodos(String mensaje) {
-        for (Map.Entry<String, ClienteInfo> entry : directorioJugadores.entrySet()) {
-            try {
-                ClienteInfo destino = entry.getValue();
-                System.out.println("[Directorio] Enviando a TODOS '" + mensaje + "' a " + destino.host + ":" + destino.puerto);
-                this.despachador.enviar(destino.host, destino.puerto, mensaje);
-            } catch (IOException e) {
-                System.err.println("[Directorio] Error al enviar a " + entry.getKey() + ": " + e.getMessage());
-            }
-        }
+    public Map<String, ClienteInfoDatos> getAllClienteInfo() {
+        // Devuelve una copia para evitar modificación externa y cumplir con la interfaz.
+        return new java.util.HashMap<>(directorioJugadores);
+    }
+
+    /**
+     * Devuelve la información de un jugador específico.
+     */
+    @Override
+    public ClienteInfoDatos getClienteInfo(String idJugador) {
+        return directorioJugadores.get(idJugador);
     }
     
-    @Override
-    public void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje) {
-        for (Map.Entry<String, ClienteInfo> entry : directorioJugadores.entrySet()) {
-
-            // Si el ID del destinatario NO es el que envió el mensaje
-            if (!entry.getKey().equals(jugadorQueEnvio)) {
-                try {
-                    ClienteInfo destino = entry.getValue();
-                    System.out.println("[Directorio] Enviando '" + mensaje + "' a " + destino.host + ":" + destino.puerto);
-
-                    // ¡Aquí ocurre la magia! Usa el despachador.
-                    this.despachador.enviar(destino.host, destino.puerto, mensaje);
-
-                } catch (IOException e) {
-                    System.err.println("[Directorio] Error al enviar a " + entry.getKey() + ": " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    // Clase interna simple para guardar host y puerto
-    private static class ClienteInfo {
-
-        public final String host;
-        public final int puerto;
-
-        public ClienteInfo(String host, int puerto) {
-            this.host = host;
-            this.puerto = puerto;
-        }
-    }
+    // --- MÉTODOS ENVIAR... ELIMINADOS ---
+    // (enviarATodos y enviarATurnosInactivos ya no existen aquí)
 }

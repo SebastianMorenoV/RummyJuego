@@ -2,9 +2,11 @@ package control;
 
 import contratos.iAgenteConocimiento;
 import contratos.iControladorBlackboard;
+import contratos.iDespachador; // ¡NUEVO IMPORT!
 import contratos.iDirectorio;
 import contratos.iObservador;
 import contratos.iPizarraJuego;
+import java.io.IOException; // ¡NUEVO IMPORT!
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,16 +14,20 @@ import pizarra.EstadoJuegoPizarra;
 
 /**
  *
- * @author benja
+ * @author benja (Refactorizado)
  */
 public class ControladorBlackboard implements iControladorBlackboard, iObservador {
 
     private final Map<String, iAgenteConocimiento> agentes;
     private final iDirectorio directorio;
+    private final iDespachador despachador; // ¡NUEVO CAMPO!
 
-    public ControladorBlackboard(List<iAgenteConocimiento> listaDeAgentes, iDirectorio directorio) {
+    public ControladorBlackboard(List<iAgenteConocimiento> listaDeAgentes, 
+                                 iDirectorio directorio, 
+                                 iDespachador despachador) { // ¡RECIBE EL DESPACHADOR!
         this.agentes = new HashMap<>();
-        this.directorio = directorio; // Recibe el directorio
+        this.directorio = directorio; 
+        this.despachador = despachador; // ¡ASIGNA EL DESPACHADOR!
 
         for (iAgenteConocimiento agente : listaDeAgentes) {
             this.agentes.put(agente.getComandoQueManeja(), agente);
@@ -30,13 +36,11 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
     @Override
     public void actualiza(iPizarraJuego pizarra, String evento) {
-        // Hacemos cast una sola vez para acceder a métodos específicos
         EstadoJuegoPizarra pizarraConcreta = (EstadoJuegoPizarra) pizarra;
 
-        // Obtenemos los datos ANTES del switch
         String jugadorQueMovio = pizarraConcreta.getUltimoJugadorQueMovio();
         if (jugadorQueMovio == null) {
-            jugadorQueMovio = "ID_DESCONOCIDO"; // Solo como fallback
+            jugadorQueMovio = "ID_DESCONOCIDO"; 
         }
         String ultimoPayload = pizarraConcreta.getUltimoTableroSerializado();
 
@@ -51,28 +55,19 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 break;
 
             case "MOVIMIENTO":
-                // --- SÍ REENVIAMOS LOS MOVIMIENTOS TEMPORALES ---
-                // Esto es para que los otros jugadores vean el "arrastre"
                 String mensajeMovimiento = "MOVIMIENTO_RECIBIDO:" + ultimoPayload;
                 System.out.println("[Controlador] Reenviando MOVIMIENTO (temporal) a inactivos.");
-                directorio.enviarATurnosInactivos(jugadorQueMovio, mensajeMovimiento);
+                // ¡LÓGICA MOVIDA!
+                enviarATurnosInactivos(jugadorQueMovio, mensajeMovimiento);
                 break;
 
             
             case "AVANZAR_TURNO":
-                // Esto se llama DESPUÉS de FINALIZAR_TURNO o TOMAR_FICHA
-                
-                // --- ¡NUEVA LÓGICA! ---
-                // 1. Transmitir el ESTADO FINAL con un *nuevo comando*.
-                //    (ultimoPayload contiene el estado final de FINALIZAR_TURNO
-                //    o el estado revertido de TOMAR_FICHA).
                 String mensajeMovimientoFinal = "ESTADO_FINAL_TABLERO:" + ultimoPayload;
                 System.out.println("[Controlador] Transmitiendo ESTADO_FINAL_TABLERO a inactivos.");
-                directorio.enviarATurnosInactivos(jugadorQueMovio, mensajeMovimientoFinal);
-                // --- FIN DE NUEVA LÓGICA ---
-
+                // ¡LÓGICA MOVIDA!
+                enviarATurnosInactivos(jugadorQueMovio, mensajeMovimientoFinal);
                 
-                // 2. Notificar a TODOS quién es el NUEVO jugador en turno.
                 notificarCambioDeTurno(pizarra);
                 break;
 
@@ -86,14 +81,54 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
      * de la pizarra y envía el broadcast a todos.
      */
     private void notificarCambioDeTurno(iPizarraJuego pizarra) {
-        String nuevoJugadorEnTurno = pizarra.getJugador(); // Ya es el *nuevo* jugador
+        String nuevoJugadorEnTurno = pizarra.getJugador(); 
 
         if (nuevoJugadorEnTurno != null) {
             System.out.println("[Controlador] Notificando cambio de turno a: " + nuevoJugadorEnTurno);
             String mensajeTurno = "TURNO_CAMBIADO:" + nuevoJugadorEnTurno;
 
-            // Notifica a TODOS (incluido el nuevo) de quién es el turno.
-            directorio.enviarATodos(mensajeTurno);
+            // ¡LÓGICA MOVIDA!
+            enviarATodos(mensajeTurno);
+        }
+    }
+
+    // --- NUEVOS MÉTODOS PRIVADOS PARA ENVÍO ---
+
+    /**
+     * Envía un mensaje a todos los jugadores registrados usando el despachador.
+     */
+    private void enviarATodos(String mensaje) {
+        System.out.println("[Controlador] Preparando envío a TODOS de: " + mensaje);
+        // 1. Obtiene la lista de direcciones del Directorio
+        for (Map.Entry<String, iDirectorio.ClienteInfoDatos> entry : directorio.getAllClienteInfo().entrySet()) {
+            try {
+                iDirectorio.ClienteInfoDatos destino = entry.getValue();
+                // 2. Usa el Despachador para enviar el mensaje
+                this.despachador.enviar(destino.getHost(), destino.getPuerto(), mensaje);
+            } catch (IOException e) {
+                System.err.println("[Controlador->Despachador] Error al enviar a " + entry.getKey() + ": " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Envía un mensaje a todos excepto al jugador que originó la acción.
+     */
+    private void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje) {
+        System.out.println("[Controlador] Preparando envío a INACTIVOS de: " + mensaje);
+        // 1. Obtiene la lista de direcciones del Directorio
+        for (Map.Entry<String, iDirectorio.ClienteInfoDatos> entry : directorio.getAllClienteInfo().entrySet()) {
+
+            // 2. Filtra al jugador que envío
+            if (!entry.getKey().equals(jugadorQueEnvio)) {
+                try {
+                    iDirectorio.ClienteInfoDatos destino = entry.getValue();
+                    // 3. Usa el Despachador para enviar el mensaje
+                    this.despachador.enviar(destino.getHost(), destino.getPuerto(), mensaje);
+                } catch (IOException e) {
+                    System.err.println("[Controlador->Despachador] Error al enviar a (inactivo) " + entry.getKey() + ": " + e.getMessage());
+                }
+            }
         }
     }
 }
