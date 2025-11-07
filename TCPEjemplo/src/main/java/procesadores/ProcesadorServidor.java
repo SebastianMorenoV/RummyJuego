@@ -16,12 +16,10 @@ public class ProcesadorServidor implements iProcesador {
 
     private final iPizarraJuego pizarra;
     private final iDespachador despachador;
-    private final iDirectorio directorio;
 
-    public ProcesadorServidor(iPizarraJuego pizarra, iDespachador despachador, iDirectorio directorio) {
+    public ProcesadorServidor(iPizarraJuego pizarra, iDespachador despachador) {
         this.pizarra = pizarra;
         this.despachador = despachador;
-        this.directorio = directorio;
     }
 
     @Override
@@ -35,21 +33,6 @@ public class ProcesadorServidor implements iProcesador {
         String comando = partes[1];
         String payload = (partes.length > 2) ? partes[2] : "";
         System.out.println("COMANDO DESDE PROCESADOR SERVIDOR: " + comando);
-
-        // Logica de red
-        if (comando.equals("REGISTRAR")) {
-            try {
-                int puertoCliente = Integer.parseInt(payload);
-                this.directorio.addJugador(idCliente, ipCliente, puertoCliente);
-
-                // Llama a la pizarra con un payload vacío para el registro del juego
-                pizarra.procesarComando(idCliente, comando, "");
-
-                return "REGISTRO_OK";
-            } catch (Exception e) {
-                return "ERROR: Puerto inválido";
-            }
-        }
 
         // Procesador "tonto" (dummy)
         // Para CUALQUIER OTRO comando, simplemente pasa el comando y el payload CRUDO

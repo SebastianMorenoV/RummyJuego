@@ -54,8 +54,7 @@ public class BlackBoardServer {
         // solo se encarga de conectar el Procesador al Listener.
         iListener listenerServidor = ensamblador.ensamblarRedServidor(
                 pizarra, 
-                despachador, 
-                directorio
+                despachador
         );
 
         // 3. Iniciar el Servidor

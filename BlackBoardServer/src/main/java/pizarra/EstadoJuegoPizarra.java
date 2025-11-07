@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * El Pizarrón (Blackboard) "tonto".
- * Solo guarda datos (muchos como Strings) y notifica al Controlador.
+ * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
+ * notifica al Controlador.
  */
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
@@ -23,16 +23,19 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private List<GrupoDTO> gruposEnTablero;
     private String ultimoJugadorQueMovio;
     private int indiceTurnoActual;
-    
+    private String[] jugadorARegistrarTemporal;
+
     // Almacén "tonto" para el mazo. Es solo un string largo.
     private String mazoSerializado;
 
     /**
-     * Clase interna para guardar el estado de CADA jugador.
-     * Ya no almacena la mano.
+     * Clase interna para guardar el estado de CADA jugador. Ya no almacena la
+     * mano.
      */
     private static class DatosJugador {
+
         private String id;
+
         public DatosJugador(String id, String manoInicialSerializada) {
             this.id = id;
             // La mano ya no se guarda aquí
@@ -64,6 +67,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public void registrarJugador(String id, String payloadMano) {
         // payloadMano se ignora, la mano se dará al iniciar
+        jugadorARegistrarTemporal = new String[3];
+        String[] partes = payloadMano.split("\\$", 2);
+        jugadorARegistrarTemporal[0] = id;
+        jugadorARegistrarTemporal[1] = partes[0]; // la ip del cliente.
+        jugadorARegistrarTemporal[2] = partes[1]; // puerto de escucha de el cliente.
         DatosJugador datos = new DatosJugador(id, "");
         estadoJugadores.put(id, datos);
         ordenDeTurnos.add(id);
@@ -72,6 +80,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         // Notifica al controlador que el "lobby" ha cambiado
         notificarObservadores("JUGADOR_UNIDO");
+        jugadorARegistrarTemporal = null;
     }
 
     @Override
@@ -105,7 +114,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public synchronized boolean iniciarPartidaSiCorresponde() {
         int numJugadores = ordenDeTurnos.size();
-        
+
         // Solo inicia si el juego NO ha comenzado Y hay entre 2 y 4 jugadores
         if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
             indiceTurnoActual = 0; // Inicia el turno del primer jugador
@@ -114,13 +123,18 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
             return true;
         }
-        
+
         if (indiceTurnoActual != -1) {
             System.err.println("[Pizarra] Intento de iniciar partida, pero ya estaba iniciada.");
         } else {
             System.err.println("[Pizarra] Intento de iniciar partida con " + numJugadores + " jugadores. Se requieren 2-4.");
         }
         return false;
+    }
+
+    @Override
+    public String[] getIpCliente() {
+        return jugadorARegistrarTemporal;
     }
 
     @Override
@@ -143,9 +157,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public boolean procesarComando(String idCliente, String comando, String payload) {
         // Solo permite registrar o iniciar si el juego no ha comenzado
         if (indiceTurnoActual == -1) {
-             switch (comando) {
+            switch (comando) {
                 case "REGISTRAR":
-                    registrarJugador(idCliente, payload); // payload es ""
+                    registrarJugador(idCliente, payload); 
                     return true;
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
@@ -153,7 +167,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
                     }
                     return true;
-             }
+            }
         }
 
         // Si el juego ya inició, solo acepta comandos de juego
@@ -181,20 +195,19 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     return true;
             }
         }
-        
+
         System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
         return false;
     }
-    
+
     // --- Métodos de Ayuda para el Controlador ---
-    
     /**
      * Le da al Controlador la lista de jugadores para que el Agente reparta.
      */
     public List<String> getOrdenDeTurnos() {
         return this.ordenDeTurnos;
     }
-    
+
     /**
      * Almacena el estado "tonto" del mazo.
      */
@@ -202,23 +215,23 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         this.mazoSerializado = mazo;
         System.out.println("[Pizarra] Mazo serializado almacenado.");
     }
-    
+
     /**
-     * Toma una ficha del mazo serializado "tonto".
-     * La pizarra no sabe qué es una ficha, solo sabe separar por "|".
+     * Toma una ficha del mazo serializado "tonto". La pizarra no sabe qué es
+     * una ficha, solo sabe separar por "|".
      */
     public String tomarFichaDelMazoSerializado() {
         if (this.mazoSerializado == null || this.mazoSerializado.isEmpty()) {
             return null;
         }
-        
+
         String[] fichas = this.mazoSerializado.split("\\|", 2);
         String fichaTomada = fichas[0];
         this.mazoSerializado = (fichas.length > 1) ? fichas[1] : "";
-        
+
         return fichaTomada;
     }
-    
+
     /**
      * Devuelve el número de fichas restantes en el string del mazo.
      */

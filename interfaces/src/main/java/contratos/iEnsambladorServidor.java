@@ -19,8 +19,7 @@ public interface iEnsambladorServidor {
     */
    public iListener ensamblarRedServidor(
            iPizarraJuego pizarra, 
-           iDespachador despachador, 
-           iDirectorio directorio
+           iDespachador despachador
    ); 
    
 }

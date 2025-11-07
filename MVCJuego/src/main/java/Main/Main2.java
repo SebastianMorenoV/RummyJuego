@@ -8,6 +8,7 @@ import contratos.iListener;
 import contratos.iEnsambladorCliente;
 import Ensambladores.EnsambladorCliente;
 import java.io.IOException;
+import java.net.InetAddress;
 
 /**
  *
@@ -25,7 +26,7 @@ public class Main2 {
 
         // 2. Configuración de Red
         String miId = "asdasdasdasdadsadsasdasdasdasdasd";
-        String ipServidor = "192.168.100.98";
+        String ipServidor = "192.168.100.3";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9006;
 
@@ -63,7 +64,8 @@ public class Main2 {
 
         // 6. Registrarse en el Servidor e Iniciar el Juego
         try {
-            String mensajeRegistro = miId + ":REGISTRAR:" + miPuertoDeEscucha;
+            String ipCliente = InetAddress.getLocalHost().getHostAddress();
+            String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
 
             despachador.enviar(mensajeRegistro); // Variable separada
         } catch (IOException ex) {

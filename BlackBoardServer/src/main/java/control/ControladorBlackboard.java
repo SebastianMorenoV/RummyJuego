@@ -15,8 +15,8 @@ import pizarra.EstadoJuegoPizarra;
 import FuentesConocimiento.AgenteIniciarPartida;
 
 /**
- * El Controlador. Escucha a la Pizarra "tonta" y reacciona
- * llamando a Agentes "expertos" o despachando mensajes.
+ * El Controlador. Escucha a la Pizarra "tonta" y reacciona llamando a Agentes
+ * "expertos" o despachando mensajes.
  */
 public class ControladorBlackboard implements iControladorBlackboard, iObservador {
 
@@ -45,14 +45,16 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String ultimoPayload = pizarraConcreta.getUltimoTableroSerializado();
 
         switch (evento) {
-            
+
             case "JUGADOR_UNIDO":
+                String[] ipJugador = pizarra.getIpCliente();
+                directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2].toString()));
                 System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO.");
                 // A futuro: enviarATodos("LOBBY_ACTUALIZADO:" + pizarraConcreta.getOrdenDeTurnos());
-                
+
                 int numJugadores = pizarraConcreta.getOrdenDeTurnos().size();
                 // Simulación de Lobby: Si se conecta el 2do jugador, le ordenamos al 1ro (Host) que inicie.
-                if (numJugadores == 3) { 
+                if (numJugadores == 3) {
                     String idHost = pizarraConcreta.getOrdenDeTurnos().get(0);
                     System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
                     enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
@@ -61,13 +63,13 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
             case "EVENTO_PARTIDA_INICIADA":
                 System.out.println("[Controlador] Evento PARTIDA_INICIADA detectado. Creando juego...");
-                
+
                 List<String> jugadoresIds = pizarraConcreta.getOrdenDeTurnos();
                 System.out.println("[Controlador] Repartiendo para " + jugadoresIds.size() + " jugadores.");
 
                 // 1. Llamar al Agente "Experto"
                 AgenteIniciarPartida agentePartida = new AgenteIniciarPartida();
-                
+
                 // 2. El Agente crea manos y mazo
                 Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds);
                 String mazoSerializado = agentePartida.getMazoSerializado();
@@ -97,7 +99,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
             case "AVANZAR_TURNO": // Disparado por FINALIZAR_TURNO o TOMAR_FICHA
                 System.out.println("[Controlador] Evento AVANZAR_TURNO detectado.");
-                
+
                 // 1. Enviar el estado final a los inactivos
                 String mensajeMovimientoFinal = "ESTADO_FINAL_TABLERO:" + ultimoPayload;
                 System.out.println("[Controlador] Transmitiendo ESTADO_FINAL_TABLERO a inactivos.");
@@ -106,18 +108,18 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 // 2. Notificar a TODOS del cambio de turno (con el mazo actualizado)
                 notificarCambioDeTurno(pizarra);
                 break;
-                
+
             case "TOMAR_FICHA":
                 System.out.println("[Controlador] " + jugadorQueMovio + " tomó ficha.");
                 String fichaSerializada = pizarraConcreta.tomarFichaDelMazoSerializado();
-                
-                if(fichaSerializada != null) {
+
+                if (fichaSerializada != null) {
                     // 1. Envía la ficha solo al jugador que la pidió
                     enviarMensajeDirecto(jugadorQueMovio, "FICHA_RECIBIDA:" + fichaSerializada);
                 }
-                
+
                 // 2. Avanza el turno (esto disparará el evento AVANZAR_TURNO)
-                pizarra.avanzarTurno(); 
+                pizarra.avanzarTurno();
                 break;
 
             default:
@@ -143,8 +145,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     private void enviarATodos(String mensaje) {
         System.out.println("[Controlador] Preparando envío a TODOS de: " + mensaje);
         // (Usa startsWith para logs más limpios)
-        String logMsg = mensaje.startsWith("MANO_INICIAL") ? "MANO_INICIAL:..." : mensaje; 
-        
+        String logMsg = mensaje.startsWith("MANO_INICIAL") ? "MANO_INICIAL:..." : mensaje;
+
         for (Map.Entry<String, iDirectorio.ClienteInfoDatos> entry : directorio.getAllClienteInfo().entrySet()) {
             try {
                 iDirectorio.ClienteInfoDatos destino = entry.getValue();
@@ -170,7 +172,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             }
         }
     }
-    
+
     private void enviarMensajeDirecto(String idJugador, String mensaje) {
         try {
             iDirectorio.ClienteInfoDatos destino = directorio.getClienteInfo(idJugador);
@@ -178,10 +180,10 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 // Log más limpio para manos grandes
                 String logMsg = mensaje.startsWith("MANO_INICIAL") ? "MANO_INICIAL:..." : mensaje;
                 System.out.println("[Controlador] Enviando a " + idJugador + ": " + logMsg);
-                
+
                 this.despachador.enviar(destino.getHost(), destino.getPuerto(), mensaje);
             } else {
-                 System.err.println("[Controlador] No se encontró destino para: " + idJugador);
+                System.err.println("[Controlador] No se encontró destino para: " + idJugador);
             }
         } catch (IOException e) {
             System.err.println("[Controlador] Error al enviar mensaje directo a " + idJugador + ": " + e.getMessage());
