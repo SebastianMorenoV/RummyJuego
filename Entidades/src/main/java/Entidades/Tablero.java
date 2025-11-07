@@ -24,32 +24,27 @@ public class Tablero {
     }
 
     /**
-     * El método de validación principal. Determina si el estado actual del
-     * tablero es válido para terminar el turno, considerando si es el primer
-     * movimiento.
-     *
-     * @param esPrimerMovimiento Indica si es la primera jugada del jugador
-     * @return true si la jugada es completamente válida, false en caso
-     * contrario.
+     * Verifica que TODOS los grupos en el tablero sean estructuralmente válidos
+     * (ej. "tercia" o "escalera") y no "Invalido" o "Temporal" (incompleto). Un
+     * grupo es "Temporal" si tiene < 3 fichas.
      */
-    public boolean esJugadaValida(boolean esPrimerMovimiento) {
-        // Regla 1: No debe haber grupos temporales o inválidos.
-        boolean estructuraValida = this.fichasEnTablero.stream()
+    public boolean esEstructuraDeGruposValida() {
+        // Esta regla asegura que no haya grupos inválidos o incompletos en el tablero
+        return this.fichasEnTablero.stream()
                 .noneMatch(g -> "Invalido".equals(g.getTipo())
                 || "Temporal".equals(g.getTipo()));
+    }
 
-        if (!estructuraValida) {
-            return false;
-        }
-
-        // Regla 2: Si es el primer movimiento, la suma de puntos debe ser >= 30
-        if (esPrimerMovimiento) {
-            int puntos = this.calcularPuntosDeLaJugada();
-            if (puntos < 30) {
-                return false;
-            }
-        }
-        return true;
+    /**
+     * Devuelve solo los grupos que han sido marcados como temporales (añadidos
+     * o modificados en este turno por la UI).
+     *
+     * @return Una lista de los grupos nuevos.
+     */
+    public List<Grupo> getGruposTemporales() {
+        return this.fichasEnTablero.stream()
+                .filter(Grupo::esTemporal) // Filtra usando el flag que puso la UI
+                .collect(Collectors.toList());
     }
 
     /**

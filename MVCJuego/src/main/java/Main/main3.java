@@ -1,20 +1,27 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
 package Main;
 
 import Controlador.Controlador;
+import Ensambladores.EnsambladorCliente;
 import Modelo.Modelo;
 import Vista.VistaTablero;
 import contratos.iDespachador;
-import contratos.iListener;
 import contratos.iEnsambladorCliente;
-import Ensambladores.EnsambladorCliente;
+import contratos.iListener;
 import java.io.IOException;
 
 /**
  *
- * @author chris
+ * @author benja
  */
-public class Main2 {
+public class main3 {
 
+    /**
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
 
         // 1. Creación de Componentes MVC
@@ -24,10 +31,10 @@ public class Main2 {
         modelo.agregarObservador(vistaJugador1);
 
         // 2. Configuración de Red
-        String miId = "asdasdasdasdadsadsasdasdasdasdasd";
+        String miId = "pepepepepepepepeppepepe";
         String ipServidor = "192.168.100.98";
         int puertoServidor = 5000;
-        int miPuertoDeEscucha = 9006;
+        int miPuertoDeEscucha = 9001;
 
         // 3. Ensamblaje de Componentes de Red
         System.out.println("[Main] Iniciando ensamblaje de red...");
@@ -74,6 +81,6 @@ public class Main2 {
         // Se muestra la ventana del juego.
         vistaJugador1.setVisible(true);
 
-        controlador.iniciarJuego();
-    }
+        controlador.iniciarJuego();    }
+    
 }

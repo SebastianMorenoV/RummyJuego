@@ -2,7 +2,7 @@ package Entidades;
 
 /**
  *
- * @author chris
+ * @author pepe
  */
 public class Jugador {
 

@@ -4,76 +4,51 @@ import DTO.GrupoDTO;
 import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * El Pizarrón (Blackboard) Implementación concreta que almacena el estado de la
- * partida. Es "tonto" y solo guarda datos. No sabe de red.
- *
- * @author benja
+ * El Pizarrón (Blackboard) "tonto".
+ * Solo guarda datos (muchos como Strings) y notifica al Controlador.
  */
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
-    /**
-     * El Estado Interno del Pizarrón Almacena el estado de juego de cada
-     * jugador (ID -> Datos).
-     */
     private final Map<String, DatosJugador> estadoJugadores;
     private final List<iObservador> observadores;
     private String ultimoTableroSerializado = "";
-    /**
-     * Mantiene el orden de los turnos.
-     */
     private final List<String> ordenDeTurnos;
     private String ultimoPayloadMovimiento;
     private List<GrupoDTO> gruposEnTablero;
     private String ultimoJugadorQueMovio;
-
-    /**
-     * Índice del jugador que tiene el turno actual.
-     */
     private int indiceTurnoActual;
-    private final int JUGADORES_PARA_INICIAR = 2; // Jugadores activos por ahora.
+    
+    // Almacén "tonto" para el mazo. Es solo un string largo.
+    private String mazoSerializado;
 
     /**
-     * Clase interna para guardar el estado de CADA jugador. No sabe de IPs ni
-     * puertos, solo del juego.
+     * Clase interna para guardar el estado de CADA jugador.
+     * Ya no almacena la mano.
      */
     private static class DatosJugador {
-
         private String id;
-        private String manoSerializada; // La mano se guarda como un string
-
         public DatosJugador(String id, String manoInicialSerializada) {
             this.id = id;
-            this.manoSerializada = manoInicialSerializada;
-        }
-
-        public String getManoSerializada() {
-            return manoSerializada;
-        }
-
-        public void setManoSerializada(String mano) {
-            this.manoSerializada = mano;
+            // La mano ya no se guarda aquí
         }
     }
 
     public EstadoJuegoPizarra() {
         this.estadoJugadores = new ConcurrentHashMap<>();
-        this.ordenDeTurnos = java.util.Collections.synchronizedList(new ArrayList<>());
-        this.indiceTurnoActual = -1;
+        this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
+        this.indiceTurnoActual = -1; // -1 = El juego no ha comenzado
         this.observadores = new ArrayList<>();
         this.gruposEnTablero = new ArrayList<>();
         this.ultimoPayloadMovimiento = "";
+        this.mazoSerializado = "";
     }
 
-    /**
-     * Añade los métodos del Observable
-     *
-     * @param obs
-     */
     public void addObservador(iObservador obs) {
         if (obs != null && !this.observadores.contains(obs)) {
             this.observadores.add(obs);
@@ -86,35 +61,29 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         }
     }
 
-    /**
-     * Implementación de la Interfaz iPizarraJuego
-     *
-     * @param id
-     * @param payloadMano
-     */
     @Override
     public void registrarJugador(String id, String payloadMano) {
-        // payloadMano es la mano serializada (o "" si es nueva)
-        DatosJugador datos = new DatosJugador(id, payloadMano);
+        // payloadMano se ignora, la mano se dará al iniciar
+        DatosJugador datos = new DatosJugador(id, "");
         estadoJugadores.put(id, datos);
         ordenDeTurnos.add(id);
         System.out.println("[Pizarra] Jugador '" + id
-                + "' registrado en la partida. Total: " + ordenDeTurnos.size());
+                + "' registrado. Total: " + ordenDeTurnos.size());
 
-        notificarObservadores("REGISTRAR");
-
+        // Notifica al controlador que el "lobby" ha cambiado
+        notificarObservadores("JUGADOR_UNIDO");
     }
 
     @Override
     public String getMano(String id) {
-        DatosJugador datos = estadoJugadores.get(id);
-        return (datos != null) ? datos.getManoSerializada() : null;
+        // La pizarra ya no gestiona las manos; el Agente lo hizo.
+        return null;
     }
 
     @Override
     public synchronized boolean esTurnoDe(String id) {
         if (indiceTurnoActual == -1) {
-            return false; // False = El juego no ha comenzado
+            return false; // El juego no ha comenzado
         }
         return ordenDeTurnos.get(indiceTurnoActual).equals(id);
     }
@@ -123,28 +92,33 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public synchronized void avanzarTurno() {
         if (indiceTurnoActual != -1) {
             indiceTurnoActual = (indiceTurnoActual + 1) % ordenDeTurnos.size();
-
             String idSiguiente = ordenDeTurnos.get(indiceTurnoActual);
-
             System.out.println("[Pizarra] Turno de: " + idSiguiente);
-
-            // Notifica al Controlador
+            // Notifica que el turno avanzó. El Controlador se encargará del resto.
             notificarObservadores("AVANZAR_TURNO");
         }
     }
 
+    /**
+     * Valida e inicia la partida. Soporta de 2 a 4 jugadores.
+     */
     @Override
     public synchronized boolean iniciarPartidaSiCorresponde() {
-
-        // Solo inicia si el juego no ha iniciado Y ya tenemos los jugadores necesarios
-        if (indiceTurnoActual == -1 && ordenDeTurnos.size() == JUGADORES_PARA_INICIAR) {
+        int numJugadores = ordenDeTurnos.size();
+        
+        // Solo inicia si el juego NO ha comenzado Y hay entre 2 y 4 jugadores
+        if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
             indiceTurnoActual = 0; // Inicia el turno del primer jugador
-
             String idPrimerJugador = ordenDeTurnos.get(0);
-            System.out.println("[Pizarra] ¡Partida iniciada! Hay "
-                    + JUGADORES_PARA_INICIAR + " jugadores.");
+            System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");
             System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
             return true;
+        }
+        
+        if (indiceTurnoActual != -1) {
+            System.err.println("[Pizarra] Intento de iniciar partida, pero ya estaba iniciada.");
+        } else {
+            System.err.println("[Pizarra] Intento de iniciar partida con " + numJugadores + " jugadores. Se requieren 2-4.");
         }
         return false;
     }
@@ -152,14 +126,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public String getJugador() {
         if (indiceTurnoActual == -1 || ordenDeTurnos.isEmpty()) {
-            return null; // O un ID por defecto
+            return null;
         }
         return ordenDeTurnos.get(indiceTurnoActual);
     }
 
-    /**
-     * Método para que el Controlador obtenga el último tablero válido
-     */
     public String getUltimoTableroSerializado() {
         return this.ultimoTableroSerializado;
     }
@@ -168,48 +139,96 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.ultimoJugadorQueMovio;
     }
 
-    /**
-     * Ahora maneja los nuevos comandos.
-     */
     @Override
     public boolean procesarComando(String idCliente, String comando, String payload) {
-
-        switch (comando) {
-            case "REGISTRAR":
-                registrarJugador(idCliente, payload); // payload es ""
-                return true;
-
-            case "MOVER":
-                
-                // Solo guarda el payload del movimiento, no hace nada más.
-                // El Controlador lo usará para el broadcast.
-                this.ultimoJugadorQueMovio = idCliente;
-                this.ultimoTableroSerializado = payload;
-                System.out.println("[Pizarra] " + idCliente + " movió (temporal).");
-                notificarObservadores("MOVIMIENTO"); // Notifica al Controlador
-                return true;
-
-            case "FINALIZAR_TURNO":
-                
-                // El cliente validó, así que guardamos este como el último estado bueno
-                this.ultimoTableroSerializado = payload;
-                System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
-                
-                avanzarTurno(); // Avanza el marcador y notifica
-                return true;
-
-            case "TOMAR_FICHA":
-                System.out.println("[Pizarra] " + idCliente + " tomó ficha y finalizó turno.");
-                
-                // Aquí podrías guardar algo si fuera necesario (ej. "TOMO_FICHA")
-                // Pero por ahora, solo avanzamos el turno.
-                avanzarTurno(); // Avanza el marcador y notifica
-                return true;
-
-            default:
-                System.err.println("[Pizarra] Comando desconocido: " + comando);
-                return false;
+        // Solo permite registrar o iniciar si el juego no ha comenzado
+        if (indiceTurnoActual == -1) {
+             switch (comando) {
+                case "REGISTRAR":
+                    registrarJugador(idCliente, payload); // payload es ""
+                    return true;
+                case "INICIAR_PARTIDA":
+                    System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
+                    if (iniciarPartidaSiCorresponde()) {
+                        notificarObservadores("EVENTO_PARTIDA_INICIADA");
+                    }
+                    return true;
+             }
         }
+
+        // Si el juego ya inició, solo acepta comandos de juego
+        if (indiceTurnoActual != -1) {
+            switch (comando) {
+                case "MOVER":
+                    this.ultimoJugadorQueMovio = idCliente;
+                    this.ultimoTableroSerializado = payload; // Guarda el estado temporal
+                    System.out.println("[Pizarra] " + idCliente + " movió (temporal).");
+                    notificarObservadores("MOVIMIENTO");
+                    return true;
+
+                case "FINALIZAR_TURNO":
+                    this.ultimoJugadorQueMovio = idCliente;
+                    this.ultimoTableroSerializado = payload; // Guarda el estado final
+                    System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
+                    avanzarTurno(); // Notifica "AVANZAR_TURNO"
+                    return true;
+
+                case "TOMAR_FICHA":
+                    this.ultimoJugadorQueMovio = idCliente;
+                    this.ultimoTableroSerializado = payload; // Guarda el estado REVERTIDO
+                    System.out.println("[Pizarra] " + idCliente + " pidió tomar ficha.");
+                    notificarObservadores("TOMAR_FICHA"); // Notifica al Controlador
+                    return true;
+            }
+        }
+        
+        System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
+        return false;
+    }
+    
+    // --- Métodos de Ayuda para el Controlador ---
+    
+    /**
+     * Le da al Controlador la lista de jugadores para que el Agente reparta.
+     */
+    public List<String> getOrdenDeTurnos() {
+        return this.ordenDeTurnos;
+    }
+    
+    /**
+     * Almacena el estado "tonto" del mazo.
+     */
+    public void setMazoSerializado(String mazo) {
+        this.mazoSerializado = mazo;
+        System.out.println("[Pizarra] Mazo serializado almacenado.");
+    }
+    
+    /**
+     * Toma una ficha del mazo serializado "tonto".
+     * La pizarra no sabe qué es una ficha, solo sabe separar por "|".
+     */
+    public String tomarFichaDelMazoSerializado() {
+        if (this.mazoSerializado == null || this.mazoSerializado.isEmpty()) {
+            return null;
+        }
+        
+        String[] fichas = this.mazoSerializado.split("\\|", 2);
+        String fichaTomada = fichas[0];
+        this.mazoSerializado = (fichas.length > 1) ? fichas[1] : "";
+        
+        return fichaTomada;
+    }
+    
+    /**
+     * Devuelve el número de fichas restantes en el string del mazo.
+     */
+    public int getMazoSerializadoCount() {
+        if (this.mazoSerializado == null || this.mazoSerializado.isEmpty()) {
+            return 0;
+        }
+        // Contar el número de separadores "|" y sumar 1
+        // (Un mazo "1,2|3,4" tiene 2 fichas)
+        return this.mazoSerializado.split("\\|").length;
     }
 
     public String getUltimoPayloadMovimiento() {
