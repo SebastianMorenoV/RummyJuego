@@ -1,10 +1,20 @@
 package contratos;
 
+import java.util.List;
+
 /**
  *
  * @author benja
  */
 public interface iPizarraJuego {
+
+    String tomarFichaDelMazoSerializado();
+
+    List<String> getOrdenDeTurnos();
+
+    String getUltimoTableroSerializado();
+
+    String getUltimoJugadorQueMovio();
 
     void registrarJugador(String id, String payloadMano); // Guardas la mano serializada
 
@@ -13,8 +23,6 @@ public interface iPizarraJuego {
     void avanzarTurno();
 
     boolean iniciarPartidaSiCorresponde();
-
-    String getMano(String id);
 
     String getJugador();
 

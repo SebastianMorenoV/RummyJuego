@@ -5,46 +5,32 @@ import Entidades.Grupo;
 import Entidades.Jugador;
 import Entidades.Mano;
 import Entidades.Tablero;
-import java.util.ArrayList;
-import java.util.HashSet;
-
 import java.util.List;
 
 /**
- * Fachada que encapsula toda la lógica y el estado del juego de Rummy. AHORA:
- * Solo maneja la lógica de UN jugador local.
+ * Fachada que encapsula toda la lógica y el estado del juego de Rummy.
  *
- * @author benja (Refactorizado)
+ * @author benja
  */
 public class JuegoRummyFachada implements IJuegoRummy {
 
     private Tablero tablero;
-    // private List<Jugador> jugadores; // <-- ELIMINADO
-    // private int jugadorActual; // <-- ELIMINADO
-
-    private Jugador jugador; // <-- AÑADIDO: El único jugador que esta fachada maneja
-
+    private Jugador jugador;
     private Tablero tableroAlInicioDelTurno;
     private Mano manoAlInicioDelTurno;
 
     public JuegoRummyFachada() {
         this.tablero = new Tablero();
-        // this.jugadores = new ArrayList<>(); // <-- ELIMINADO
-        // this.jugadorActual = 0; // <-- ELIMINADO
-
-        this.jugador = new Jugador(); // <-- AÑADIDO: Creamos el objeto para el jugador local
+        this.jugador = new Jugador(); 
     }
 
     @Override
     public void iniciarPartida() {
-        // --- LÓGICA DE JUGADORES HARDCODEADA ELIMINADA ---
-        this.tablero.crearMazoCompleto();
         guardarEstadoTurno();
     }
 
     @Override
     public Jugador getJugadorActual() {
-        // Devuelve al único jugador local
         return this.jugador;
     }
 
@@ -54,11 +40,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
         if (fichaTomada != null) {
             getJugadorActual().agregarFichaAJugador(fichaTomada);
         }
-    }
-
-    @Override
-    public void siguienteTurno() {
-        // Este método ya no hace nada. El servidor controla los turnos.
     }
 
     @Override
@@ -113,9 +94,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
             jugador.setHaHechoPrimerMovimiento(true);
 
         } else {
-            // ¡¡¡INICIO DE LA SOLUCIÓN AL PROBLEMA 2!!!
-            // Regla 3: Validar turnos subsecuentes
-
+          
             List<Integer> idsFichasAntiguas = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
             List<Integer> idsFichasNuevas = this.tablero.getTodosLosIdsDeFichas();
 
@@ -128,7 +107,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
                 revertirCambiosTurno();
                 return false;
             }
-            // ¡¡¡FIN DE LA SOLUCIÓN AL PROBLEMA 2!!!
         }
 
         // Si todo es válido, confirmamos los cambios.

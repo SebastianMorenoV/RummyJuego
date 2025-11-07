@@ -24,8 +24,6 @@ public interface IJuegoRummy {
     
     void guardarEstadoTurno();
 
-    void siguienteTurno();
-
     Jugador getJugadorActual();
 
     void revertirCambiosDelTurno();

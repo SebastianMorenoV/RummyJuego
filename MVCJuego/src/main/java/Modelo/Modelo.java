@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * Esta clase representa el modelo en MVC.
  *
- * @author Benja (Refactorizado por IA)
+ * @author Benja
  */
 public class Modelo implements IModelo, PropertyChangeListener {
 
@@ -270,11 +270,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     public void notificarObservadores(TipoEvento tipoEvento) {
         for (Observador observer : this.observadores) {
             
-            // --- INICIO DE CORRECCIÓN ---
-            // Ya no usamos un índice. Obtenemos la mano del jugador local
-            // directamente de la fachada.
             List<Ficha> manoEntidad = juego.getJugadorActual().getManoJugador().getFichasEnMano();
-            // --- FIN DE CORRECCIÓN ---
 
             List<FichaJuegoDTO> manoDTO = manoEntidad.stream()
                     .map(f -> new FichaJuegoDTO(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))

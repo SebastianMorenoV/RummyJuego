@@ -25,22 +25,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private int indiceTurnoActual;
     private String[] jugadorARegistrarTemporal;
 
-    // Almacén "tonto" para el mazo. Es solo un string largo.
     private String mazoSerializado;
-
-    /**
-     * Clase interna para guardar el estado de CADA jugador. Ya no almacena la
-     * mano.
-     */
-    private static class DatosJugador {
-
-        private String id;
-
-        public DatosJugador(String id, String manoInicialSerializada) {
-            this.id = id;
-            // La mano ya no se guarda aquí
-        }
-    }
 
     public EstadoJuegoPizarra() {
         this.estadoJugadores = new ConcurrentHashMap<>();
@@ -66,28 +51,20 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
     @Override
     public void registrarJugador(String id, String payloadMano) {
-        // payloadMano se ignora, la mano se dará al iniciar
         jugadorARegistrarTemporal = new String[3];
         String[] partes = payloadMano.split("\\$", 2);
         jugadorARegistrarTemporal[0] = id;
         jugadorARegistrarTemporal[1] = partes[0]; // la ip del cliente.
         jugadorARegistrarTemporal[2] = partes[1]; // puerto de escucha de el cliente.
-        DatosJugador datos = new DatosJugador(id, "");
+
+        DatosJugador datos = new DatosJugador(id);
         estadoJugadores.put(id, datos);
         ordenDeTurnos.add(id);
-        System.out.println("[Pizarra] Jugador '" + id
-                + "' registrado. Total: " + ordenDeTurnos.size());
 
-        // Notifica al controlador que el "lobby" ha cambiado
         notificarObservadores("JUGADOR_UNIDO");
-        jugadorARegistrarTemporal = null;
+        jugadorARegistrarTemporal = null; // elimina la referencia para no almacenarlo.
     }
 
-    @Override
-    public String getMano(String id) {
-        // La pizarra ya no gestiona las manos; el Agente lo hizo.
-        return null;
-    }
 
     @Override
     public synchronized boolean esTurnoDe(String id) {
@@ -145,10 +122,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return ordenDeTurnos.get(indiceTurnoActual);
     }
 
+    @Override
     public String getUltimoTableroSerializado() {
         return this.ultimoTableroSerializado;
     }
 
+    @Override
     public String getUltimoJugadorQueMovio() {
         return this.ultimoJugadorQueMovio;
     }
@@ -159,7 +138,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         if (indiceTurnoActual == -1) {
             switch (comando) {
                 case "REGISTRAR":
-                    registrarJugador(idCliente, payload); 
+                    registrarJugador(idCliente, payload);
                     return true;
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
@@ -184,14 +163,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload; // Guarda el estado final
                     System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
-                    avanzarTurno(); // Notifica "AVANZAR_TURNO"
+                    avanzarTurno(); 
                     return true;
 
                 case "TOMAR_FICHA":
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload; // Guarda el estado REVERTIDO
                     System.out.println("[Pizarra] " + idCliente + " pidió tomar ficha.");
-                    notificarObservadores("TOMAR_FICHA"); // Notifica al Controlador
+                    notificarObservadores("TOMAR_FICHA"); 
                     return true;
             }
         }
@@ -204,6 +183,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     /**
      * Le da al Controlador la lista de jugadores para que el Agente reparta.
      */
+    @Override
     public List<String> getOrdenDeTurnos() {
         return this.ordenDeTurnos;
     }
@@ -220,6 +200,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * Toma una ficha del mazo serializado "tonto". La pizarra no sabe qué es
      * una ficha, solo sabe separar por "|".
      */
+    @Override
     public String tomarFichaDelMazoSerializado() {
         if (this.mazoSerializado == null || this.mazoSerializado.isEmpty()) {
             return null;
@@ -246,5 +227,18 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
     public String getUltimoPayloadMovimiento() {
         return this.ultimoPayloadMovimiento;
+    }
+
+    /**
+     * Clase interna para guardar el estado de CADA jugador. Ya no almacena la
+     * mano.
+     */
+    private static class DatosJugador {
+
+        private String id;
+
+        public DatosJugador(String id) {
+            this.id = id;
+        }
     }
 }

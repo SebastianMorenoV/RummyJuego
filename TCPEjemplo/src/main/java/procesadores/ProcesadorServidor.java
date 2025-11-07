@@ -1,7 +1,6 @@
 package procesadores;
 
 import contratos.iDespachador;
-import contratos.iDirectorio;
 import contratos.iPizarraJuego;
 import contratos.iProcesador;
 
@@ -15,11 +14,9 @@ import contratos.iProcesador;
 public class ProcesadorServidor implements iProcesador {
 
     private final iPizarraJuego pizarra;
-    private final iDespachador despachador;
 
-    public ProcesadorServidor(iPizarraJuego pizarra, iDespachador despachador) {
+    public ProcesadorServidor(iPizarraJuego pizarra) {
         this.pizarra = pizarra;
-        this.despachador = despachador;
     }
 
     @Override
