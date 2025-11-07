@@ -26,7 +26,7 @@ public class Main2 {
 
         // 2. Configuración de Red
         String miId = "asdasdasdasdadsadsasdasdasdasdasd";
-        String ipServidor = "192.168.100.3";
+        String ipServidor = "192.168.1.70";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9006;
 

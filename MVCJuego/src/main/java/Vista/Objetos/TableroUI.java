@@ -27,7 +27,7 @@ import javax.swing.JPanel;
  */
 public class TableroUI extends JPanel {
 
-    private final int filas = 5;
+    private final int filas = 7;
     private final int columnas = 22;
     private final Map<Integer, FichaUI> fichasEnTablero;
     private final Map<Integer, FichaUI> fichasEnTableroValidas;
@@ -44,8 +44,8 @@ public class TableroUI extends JPanel {
         this.fichasEnTableroValidas = new HashMap<>();
         this.posicionesValidas = new HashMap<>();
 
-        setSize(660, 245);
-        setPreferredSize(new Dimension(660, 245));
+        setSize(660, 343);
+        setPreferredSize(new Dimension(660, 343));
         setLayout(null);
     }
 

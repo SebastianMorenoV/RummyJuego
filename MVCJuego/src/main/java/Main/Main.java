@@ -13,7 +13,6 @@ import java.net.InetAddress;
 public class Main {
 
     public static void main(String[] args) {
-
         // 1. Creación de Componentes MVC
         Modelo modelo = new Modelo();
         Controlador controlador = new Controlador(modelo);
@@ -22,7 +21,7 @@ public class Main {
 
         // 2. Configuración de Red
         String miId = "sandklnaskjdnajdsnkcjajsndck";
-        String ipServidor = "192.168.100.3";
+        String ipServidor = "192.168.1.70";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9005;
 

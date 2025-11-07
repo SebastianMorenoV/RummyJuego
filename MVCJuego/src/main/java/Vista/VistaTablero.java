@@ -9,7 +9,13 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -19,7 +25,11 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
  * Esta clase representa la vistaGeneral de el tablero y todos sus elementos de
@@ -235,23 +245,23 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             byte[] imagenAvatarBytes = Files.readAllBytes(path);
 
             JugadorUI jugador1 = new JugadorUI("Sebastian", 7, imagenAvatarBytes);
-            jugador1.setSize(150, 150);
+            jugador1.setSize(130, 130);
             jugador1.setLocation(-10, -10);
             GUIjuego.add(jugador1);
 
             JugadorUI jugador2 = new JugadorUI("Benjamin", 15, imagenAvatarBytes);
-            jugador2.setSize(150, 150);
-            jugador2.setLocation(-10, 360);
+            jugador2.setSize(130, 130);
+            jugador2.setLocation(-10, 380);
             GUIjuego.add(jugador2);
 
             JugadorUI jugador3 = new JugadorUI("Luciano", 10, imagenAvatarBytes);
-            jugador3.setSize(150, 150);
-            jugador3.setLocation(760, -10);
+            jugador3.setSize(130, 130);
+            jugador3.setLocation(780, -10);
             GUIjuego.add(jugador3);
 
             JugadorUI jugador4 = new JugadorUI("Mr.Fitch", 5, imagenAvatarBytes);
-            jugador4.setSize(150, 150);
-            jugador4.setLocation(760, 360);
+            jugador4.setSize(130, 130);
+            jugador4.setLocation(780, 380);
             GUIjuego.add(jugador4);
 
         } catch (IOException e) {
@@ -286,7 +296,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private void crearTablero(IModelo modelo) {
         if (tableroUI == null) {
             tableroUI = new TableroUI(modelo, control, this);
-            tableroUI.setLocation(130, 130);
+            tableroUI.setLocation(120, 32);
+            tableroUI.setOpaque(false);
 
             GUIjuego.add(tableroUI);
         }
@@ -299,7 +310,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (manoUI == null) {
             manoUI = new ManoUI();
             manoUI.setLocation(160, 380);
-            manoUI.setSize(580, 120);
+            manoUI.setSize(580, 120); // El tamaño de la mano no cambia
 
             JScrollPane scrollPane = new JScrollPane(
                     manoUI,
@@ -307,6 +318,64 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
             );
 
+            
+            scrollPane.setOpaque(false);//Para que tenga un fondo transparente
+            scrollPane.getViewport().setOpaque(false);
+
+            JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
+
+            //Diseño personal del Scroll
+            verticalBar.setUI(new BasicScrollBarUI() {
+
+                @Override
+                protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(Color.WHITE); // Color de la linea
+                    g2.fillRoundRect(
+                            thumbBounds.x + (thumbBounds.width / 8), 
+                            thumbBounds.y,
+                            thumbBounds.width / 2, 
+                            thumbBounds.height,
+                            1, 1 
+                    );
+                    g2.dispose();
+                }
+
+                
+                @Override
+                protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+                    
+                }
+
+                @Override
+                protected JButton createDecreaseButton(int orientation) {
+                    return createZeroButton();
+                }
+
+                @Override
+                protected JButton createIncreaseButton(int orientation) {
+                    return createZeroButton();
+                }
+
+                // Método de ayuda para crear botones invisibles
+                private JButton createZeroButton() {
+                    JButton button = new JButton();
+                    Dimension zeroDim = new Dimension(0, 0);
+                    button.setPreferredSize(zeroDim);
+                    button.setMinimumSize(zeroDim);
+                    button.setMaximumSize(zeroDim);
+                    return button;
+                }
+            });
+
+            // 4. Hacemos la barra en sí transparente (para que se vea el "track" transparente)
+            verticalBar.setOpaque(false);
+
+            // 5. Opcional: puedes definir un ancho fijo para la barra
+            verticalBar.setPreferredSize(new Dimension(10, 0)); // 8 píxeles de ancho
+
+            // --- FIN DEL CÓDIGO NUEVO ---
             scrollPane.setBounds(160, 380, 580, 120);
             scrollPane.setBorder(null);
 
@@ -342,6 +411,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             mazoUI = new MazoUI(String.valueOf(fichasRestantes), control);
             mazoUI.setLocation(807, 140);
             mazoUI.setSize(70, 90);
+            mazoUI.setOpaque(false);
             mazoUI.setCursor(new Cursor(HAND_CURSOR) {
             });
             GUIjuego.add(mazoUI);

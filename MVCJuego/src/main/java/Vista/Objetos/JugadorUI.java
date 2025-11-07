@@ -33,7 +33,7 @@ public class JugadorUI extends JPanel {
             }
         }
 
-        setPreferredSize(new Dimension(200, 200));
+        setPreferredSize(new Dimension(100, 100));
         setOpaque(false);
     }
 
