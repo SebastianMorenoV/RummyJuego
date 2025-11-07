@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * Fachada que encapsula toda la lógica y el estado del juego de Rummy.
- * AHORA: Solo maneja la lógica de UN jugador local.
+ * Fachada que encapsula toda la lógica y el estado del juego de Rummy. AHORA:
+ * Solo maneja la lógica de UN jugador local.
  *
  * @author benja (Refactorizado)
  */
@@ -21,7 +21,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
     private Tablero tablero;
     // private List<Jugador> jugadores; // <-- ELIMINADO
     // private int jugadorActual; // <-- ELIMINADO
-    
+
     private Jugador jugador; // <-- AÑADIDO: El único jugador que esta fachada maneja
 
     private Tablero tableroAlInicioDelTurno;
@@ -31,7 +31,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
         this.tablero = new Tablero();
         // this.jugadores = new ArrayList<>(); // <-- ELIMINADO
         // this.jugadorActual = 0; // <-- ELIMINADO
-        
+
         this.jugador = new Jugador(); // <-- AÑADIDO: Creamos el objeto para el jugador local
     }
 
@@ -70,8 +70,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
     @Override
     public boolean validarYFinalizarTurno() {
 
-        // Ahora 'getJugadorActual()' devuelve al jugador local correcto
-        Jugador jugador = getJugadorActual(); 
+        Jugador jugador = getJugadorActual();
         boolean esPrimerMovimiento = !jugador.isHaHechoPrimerMovimiento();
 
         // Regla 1: Todos los grupos en el tablero DEBEN ser válidos
@@ -83,7 +82,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
         // Regla 2: Lógica específica para el primer movimiento
         if (esPrimerMovimiento) {
 
-            List<Grupo> gruposNuevos = this.tablero.getGruposTemporales(); // Usamos el helper
+            List<Grupo> gruposNuevos = this.tablero.getGruposTemporales();
 
             if (gruposNuevos.isEmpty()) {
                 revertirCambiosTurno();
@@ -95,7 +94,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
             for (Grupo grupoNuevo : gruposNuevos) {
 
-                // RESTRICCIÓN: En el primer turno, los grupos nuevos NO PUEDEN usar fichas viejas.
                 boolean usaFichaAntigua = grupoNuevo.getFichas().stream()
                         .anyMatch(ficha -> idsFichasAntiguas.contains(ficha.getId()));
 
@@ -103,19 +101,34 @@ public class JuegoRummyFachada implements IJuegoRummy {
                     revertirCambiosTurno();
                     return false;
                 }
-                
+
                 puntosNuevos += grupoNuevo.calcularPuntos();
             }
 
-            // RESTRICCIÓN: Debe sumar al menos 30 puntos
             if (puntosNuevos < 30) {
                 revertirCambiosTurno();
                 return false;
             }
 
-            // Marcamos al JUGADOR local
             jugador.setHaHechoPrimerMovimiento(true);
 
+        } else {
+            // ¡¡¡INICIO DE LA SOLUCIÓN AL PROBLEMA 2!!!
+            // Regla 3: Validar turnos subsecuentes
+
+            List<Integer> idsFichasAntiguas = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
+            List<Integer> idsFichasNuevas = this.tablero.getTodosLosIdsDeFichas();
+
+            // El jugador debe haber añadido al menos una ficha nueva al tablero.
+            boolean haJugadoFichaNueva = idsFichasNuevas.stream()
+                    .anyMatch(idNuevo -> !idsFichasAntiguas.contains(idNuevo));
+
+            if (!haJugadoFichaNueva) {
+                // El jugador solo movió fichas, no añadió ninguna.
+                revertirCambiosTurno();
+                return false;
+            }
+            // ¡¡¡FIN DE LA SOLUCIÓN AL PROBLEMA 2!!!
         }
 
         // Si todo es válido, confirmamos los cambios.
@@ -140,8 +153,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     private void revertirCambiosTurno() {
-        this.tablero = this.tableroAlInicioDelTurno;
-        this.getJugadorActual().setManoJugador(this.manoAlInicioDelTurno);
+        this.tablero = this.tableroAlInicioDelTurno.copiaProfunda();
+        this.getJugadorActual().setManoJugador(this.manoAlInicioDelTurno.copiaProfunda());
     }
 
     @Override
@@ -191,7 +204,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public void setManoInicial(List<Ficha> mano) {
         // Asigna la mano al jugador local
         this.getJugadorActual().getManoJugador().setFichasEnMano(mano);
-        guardarEstadoTurno(); 
+        guardarEstadoTurno();
     }
 
     @Override
