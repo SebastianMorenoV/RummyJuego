@@ -10,7 +10,9 @@ import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
 
 /**
- * 
+ * Panel con esquinas redondeadas personalizables para la interfaz. Permite
+ * definir el radio de cada esquina individualmente.
+ *
  * @author Sebastian Moreno
  */
 public class PanelRound extends JPanel {
@@ -60,6 +62,9 @@ public class PanelRound extends JPanel {
         setOpaque(false);
     }
 
+    /**
+     * Dibuja el panel aplicando las esquinas redondeadas configuradas.
+     */
     @Override
     protected void paintComponent(Graphics grphcs) {
         Graphics2D g2 = (Graphics2D) grphcs.create();

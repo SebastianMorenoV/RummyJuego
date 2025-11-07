@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * Despachador asíncrono para envío de mensajes TCP.
  *
  * @author Sebastian Moreno
  */

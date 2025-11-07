@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DTO;
 
 import java.awt.Color;
@@ -102,7 +98,6 @@ public class FichaJuegoDTO {
      */
     public String serializar() {
         // Obtenemos el valor RGB del color como int
-
         // Si el color fuera nulo(null), usamos negro como default
         int rgb = (this.color != null) ? this.color.getRGB() : Color.BLACK.getRGB();
 

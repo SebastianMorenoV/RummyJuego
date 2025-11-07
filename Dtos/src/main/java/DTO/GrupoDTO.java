@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * DTO que representa un grupo de fichas en el tablero.
  *
  * @author chris
  */
@@ -28,7 +29,7 @@ public class GrupoDTO {
         this.columna = columna;
         this.esTemporal = esTemporal;
     }
-    
+
     // Getters y Setters
     public boolean isEsTemporal() {
         return esTemporal;

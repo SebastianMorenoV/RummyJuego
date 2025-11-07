@@ -11,6 +11,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * Servidor TCP basado en cola (productor–consumidor). Evita bloqueos y permite
+ * procesar muchas peticiones concurrentes.
  *
  * @author chris
  */
@@ -104,6 +106,11 @@ public class ServerTCP implements iListener {
         }
     }
 
+    /**
+     * Detiene el servidor cerrando el socket de escucha y finalizando el hilo.
+     *
+     * @throws IOException
+     */
     @Override
     public void detener() throws IOException {
         ejecutando = false;

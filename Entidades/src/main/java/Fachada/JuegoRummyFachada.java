@@ -21,7 +21,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     public JuegoRummyFachada() {
         this.tablero = new Tablero();
-        this.jugador = new Jugador(); 
+        this.jugador = new Jugador();
     }
 
     @Override
@@ -52,7 +52,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public boolean validarYFinalizarTurno() {
 
         Jugador jugador = getJugadorActual();
-        boolean esPrimerMovimiento = !jugador.isHaHechoPrimerMovimiento();
+        boolean esPrimerMovimiento
+                = !jugador.isHaHechoPrimerMovimiento();
 
         // Regla 1: Todos los grupos en el tablero DEBEN ser válidos
         if (!tablero.esEstructuraDeGruposValida()) {
@@ -70,13 +71,15 @@ public class JuegoRummyFachada implements IJuegoRummy {
                 return false;
             }
 
-            List<Integer> idsFichasAntiguas = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
+            List<Integer> idsFichasAntiguas
+                    = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
             int puntosNuevos = 0;
 
             for (Grupo grupoNuevo : gruposNuevos) {
 
                 boolean usaFichaAntigua = grupoNuevo.getFichas().stream()
-                        .anyMatch(ficha -> idsFichasAntiguas.contains(ficha.getId()));
+                        .anyMatch(ficha
+                                -> idsFichasAntiguas.contains(ficha.getId()));
 
                 if (usaFichaAntigua) {
                     revertirCambiosTurno();
@@ -94,9 +97,11 @@ public class JuegoRummyFachada implements IJuegoRummy {
             jugador.setHaHechoPrimerMovimiento(true);
 
         } else {
-          
-            List<Integer> idsFichasAntiguas = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
-            List<Integer> idsFichasNuevas = this.tablero.getTodosLosIdsDeFichas();
+
+            List<Integer> idsFichasAntiguas
+                    = this.tableroAlInicioDelTurno.getTodosLosIdsDeFichas();
+            List<Integer> idsFichasNuevas
+                    = this.tablero.getTodosLosIdsDeFichas();
 
             // El jugador debe haber añadido al menos una ficha nueva al tablero.
             boolean haJugadoFichaNueva = idsFichasNuevas.stream()
@@ -124,7 +129,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
             g.setValidado(); // Pone esTemporal = false
         }
 
-        List<Integer> idsEnTablero = this.tablero.getTodosLosIdsDeFichas();
+        List<Integer> idsEnTablero
+                = this.tablero.getTodosLosIdsDeFichas();
         this.getJugadorActual().getManoJugador().removerFichasJugadas(idsEnTablero);
 
         guardarEstadoTurno();

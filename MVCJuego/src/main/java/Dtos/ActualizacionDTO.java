@@ -5,7 +5,8 @@ import Vista.TipoEvento;
 import java.util.List;
 
 /**
- *
+ * DTO para enviar al cliente la actualización del estado del juego. Incluye el
+ * tipo de evento, si es turno del jugador y su mano actual.
  *
  * @author Sebastian Moreno
  */

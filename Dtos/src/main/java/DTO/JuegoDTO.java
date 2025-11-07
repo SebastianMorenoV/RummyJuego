@@ -3,6 +3,7 @@ package DTO;
 import java.util.List;
 
 /**
+ * DTO que representa el estado completo del juego para la vista.
  *
  * @author benja
  */

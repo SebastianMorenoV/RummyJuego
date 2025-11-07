@@ -24,7 +24,8 @@ public class Mano {
      * @param idsFichasEnTablero
      */
     public void removerFichasJugadas(List<Integer> idsFichasEnTablero) {
-        this.fichasEnMano.removeIf(ficha -> idsFichasEnTablero.contains(ficha.getId()));
+        this.fichasEnMano.removeIf(ficha
+                -> idsFichasEnTablero.contains(ficha.getId()));
     }
 
     /**
@@ -40,13 +41,14 @@ public class Mano {
                 f.getColor(), f.isComodin()))
                 .collect(Collectors.toList());
         copia.setFichasEnMano(fichasCopia);
+
         return copia;
     }
 
     /**
      * Metodo para determinar que la mano esta vacia.
      *
-     * @return true si esta vacia , false si tiene alguna ficha.
+     * @return true si esta vacia , false si contiene alguna ficha.
      */
     public boolean estaVacia() {
         return this.fichasEnMano.isEmpty();

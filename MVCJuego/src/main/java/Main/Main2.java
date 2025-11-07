@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 /**
+ * Punto de entrada alterno para iniciar el cliente del juego. Configura MVC,
+ * ensambla módulos de red y arranca la interfaz.
  *
- * @author chris
+ * @author Sebastian Moreno
  */
 public class Main2 {
 
@@ -65,9 +67,13 @@ public class Main2 {
         // 6. Registrarse en el Servidor e Iniciar el Juego
         try {
             String ipCliente = InetAddress.getLocalHost().getHostAddress();
-            String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
+            String mensajeRegistro = miId
+                    + ":REGISTRAR:"
+                    + ipCliente
+                    + "$"
+                    + miPuertoDeEscucha;
 
-            despachador.enviar(mensajeRegistro); // Variable separada
+            despachador.enviar(mensajeRegistro);
         } catch (IOException ex) {
             System.err.println("[Main] No se pudo conectar con el servidor para registrarse: "
                     + ex.getMessage());

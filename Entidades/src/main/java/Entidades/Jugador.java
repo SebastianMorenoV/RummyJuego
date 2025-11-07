@@ -1,15 +1,19 @@
 package Entidades;
 
 /**
+ * Representa a un jugador dentro del juego, almacenando su información básica
+ * (como nickname y color de grupo), así como su mano de fichas.
  *
- * @author pepe
+ * Entidad principal para gestionar al jugador en la partida.
+ *
+ * @author chris
  */
 public class Jugador {
 
     String nickname;
     String grupoColor;
     Mano manoJugador;
-    private boolean haHechoPrimerMovimiento; // <-- AÑADIR ESTO
+    private boolean haHechoPrimerMovimiento;
 
     public Jugador() {
         this.manoJugador = new Mano();
@@ -31,7 +35,7 @@ public class Jugador {
     public void agregarFichaAJugador(Ficha ficha) {
         this.manoJugador.getFichasEnMano().add(ficha);
     }
-    
+
     public boolean isHaHechoPrimerMovimiento() {
         return haHechoPrimerMovimiento;
     }
@@ -40,9 +44,7 @@ public class Jugador {
         this.haHechoPrimerMovimiento = haHechoPrimerMovimiento;
     }
 
-    /**
-     * Verifica si el jugador ha ganado (no tiene fichas en la mano).
-     */
+    //Verifica si el jugador ha ganado (no tiene fichas en la mano).
     public boolean haGanado() {
         return this.manoJugador.estaVacia();
     }

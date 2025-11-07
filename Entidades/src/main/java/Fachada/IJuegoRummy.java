@@ -37,11 +37,9 @@ public interface IJuegoRummy {
     boolean haGanadoElJugador();
 
     boolean intentarRegresarFichaAMano(int idFicha);
-    
-    // NUEVO MÉTODO
+
     void setManoInicial(List<Ficha> mano);
-    
-    // MÉTODO NUEVO (para serializar el estado revertido)
+
     List<Ficha> getMazo();
 
 }

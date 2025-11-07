@@ -13,8 +13,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
+ * Representa gráficamente el mazo del juego. Muestra cuántas fichas quedan y
+ * permite tomar una ficha al hacer clic.
  *
- * @author Sebastian Moreno
+ * Solo funciona si es turno del jugador (panel habilitado).
+ *
+ * @author Sebastian
  */
 public class MazoUI extends JPanel implements MouseListener {
 
@@ -31,7 +35,7 @@ public class MazoUI extends JPanel implements MouseListener {
     }
 
     public MazoUI() {
-
+        // Constructor vacíO
     }
 
     /**
@@ -77,6 +81,11 @@ public class MazoUI extends JPanel implements MouseListener {
         repaint();
     }
 
+    /**
+     * Dibuja el mazo: fondo y número de fichas restantes
+     *
+     * @param g
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

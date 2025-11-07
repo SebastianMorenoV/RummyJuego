@@ -10,6 +10,12 @@ import Ensambladores.EnsambladorCliente;
 import java.io.IOException;
 import java.net.InetAddress;
 
+/**
+ * Punto de entrada de la aplicación. Configura MVC, conexión en red y arranca
+ * el juego/local listener.
+ *
+ * @author chris
+ */
 public class Main {
 
     public static void main(String[] args) {
@@ -20,21 +26,21 @@ public class Main {
         modelo.agregarObservador(vistaJugador1);
 
         // 2. Configuración de Red
-        String miId = "sandklnaskjdnajdsnkcjajsndck";
+        String miId = "Jugador1";
         String ipServidor = "192.168.1.70";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9005;
 
         iEnsambladorCliente ensamblador = new EnsambladorCliente();
         iDespachador despachador = ensamblador.crearDespachador(ipServidor, puertoServidor);
-        iListener listener = ensamblador.crearListener(miId, modelo); 
-        
+        iListener listener = ensamblador.crearListener(miId, modelo);
+
         modelo.setDespachador(despachador);
         modelo.setMiId(miId);
 
         new Thread(() -> {
             try {
-                listener.iniciar(miPuertoDeEscucha); 
+                listener.iniciar(miPuertoDeEscucha);
             } catch (IOException e) {
                 System.err.println("[Main] Error fatal al iniciar el listener: "
                         + e.getMessage());

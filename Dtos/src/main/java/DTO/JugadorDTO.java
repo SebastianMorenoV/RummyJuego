@@ -1,6 +1,7 @@
 package DTO;
 
 /**
+ * DTO que representa a un jugador en la partida.
  *
  * @author benja
  */

@@ -175,11 +175,11 @@ public class Grupo {
         this.fichas = fichas;
     }
 
-    public boolean esTemporal() {
-        return esTemporal;
-    }
-
     public void setValidado() {
         this.esTemporal = false;
+    }
+
+    public boolean esTemporal() {
+        return esTemporal;
     }
 }

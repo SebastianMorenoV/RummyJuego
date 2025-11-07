@@ -22,8 +22,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 /**
+ * Panel del tablero donde el jugador acomoda fichas. Maneja posiciones,
+ * validaciones visuales y sincronización con el modelo.
  *
- * @author Sebastian Moreno
+ * @author Sebastian
  */
 public class TableroUI extends JPanel {
 
@@ -49,6 +51,11 @@ public class TableroUI extends JPanel {
         setLayout(null);
     }
 
+    /**
+     * Dibuja fondo del tablero y la rejilla
+     *
+     * @param g
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -102,6 +109,11 @@ public class TableroUI extends JPanel {
         }
     }
 
+    /**
+     * Genera grupos según posición de fichas en tablero
+     *
+     * @return
+     */
     public List<GrupoDTO> generarGruposDesdeCeldas() {
         FichaUI[][] celdasTemporales = new FichaUI[filas][columnas];
         for (FichaUI ficha : fichasEnTablero.values()) {
@@ -160,7 +172,7 @@ public class TableroUI extends JPanel {
      * Se debe llamar después de una jugada exitosa.
      */
     public void guardarEstadoVisualValido() {
-        
+
         // Limpiamos el estado anterior
         fichasEnTableroValidas.clear();
         posicionesValidas.clear();

@@ -26,7 +26,7 @@ public class Tablero {
     /**
      * Verifica que TODOS los grupos en el tablero sean estructuralmente válidos
      * (ej. "tercia" o "escalera") y no "Invalido" o "Temporal" (incompleto). Un
-     * grupo es "Temporal" si tiene < 3 fichas.
+     * grupo es "Temporal" si tiene menos de 3 fichas.
      */
     public boolean esEstructuraDeGruposValida() {
         // Esta regla asegura que no haya grupos inválidos o incompletos en el tablero
@@ -70,15 +70,17 @@ public class Tablero {
     public Ficha removerFicha(int idFicha) {
         Ficha fichaRemovida = null;
         // Usamos un iterador para poder remover grupos de forma segura mientras iteramos
-        for (java.util.Iterator<Grupo> grupoIterator = this.fichasEnTablero.iterator(); grupoIterator.hasNext();) {
+        for (java.util.Iterator<Grupo> grupoIterator
+                = this.fichasEnTablero.iterator(); grupoIterator.hasNext();) {
             Grupo grupo = grupoIterator.next();
-            java.util.Optional<Ficha> fichaEncontrada = grupo.getFichas().stream()
-                    .filter(f -> f.getId() == idFicha)
-                    .findFirst();
+            java.util.Optional<Ficha> fichaEncontrada
+                    = grupo.getFichas().stream()
+                            .filter(f -> f.getId() == idFicha)
+                            .findFirst();
 
             if (fichaEncontrada.isPresent()) {
                 fichaRemovida = fichaEncontrada.get();
-                grupo.getFichas().remove(fichaRemovida); // La quitamos del grupo
+                grupo.getFichas().remove(fichaRemovida); // Quitamos la ficha del grupo
 
                 // Si el grupo se quedó sin fichas, lo eliminamos del tablero
                 if (grupo.getFichas().isEmpty()) {
@@ -89,6 +91,7 @@ public class Tablero {
 
             }
         }
+
         return null;
     }
 
@@ -104,6 +107,7 @@ public class Tablero {
         for (int i = 0; i < cantidadFichas && !this.mazo.isEmpty(); i++) {
             mano.add(this.mazo.remove(0));
         }
+
         jugador.getManoJugador().setFichasEnMano(mano);
     }
 
@@ -168,8 +172,10 @@ public class Tablero {
         List<Grupo> gruposCopia = this.fichasEnTablero.stream()
                 .map(g -> {
                     List<Ficha> fichasCopia = g.getFichas().stream()
-                            .map(f -> new Ficha(f.getId(), f.getNumero(), f.getColor(), f.isComodin()))
+                            .map(f -> new Ficha(f.getId(), f.getNumero(),
+                            f.getColor(), f.isComodin()))
                             .collect(Collectors.toList());
+                    
                     return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
                 })
                 .collect(Collectors.toList());

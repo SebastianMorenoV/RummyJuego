@@ -15,6 +15,9 @@ import contratos.iObservador;
 import java.io.IOException;
 
 /**
+ * Arranca el servidor del sistema Blackboard para Rummy. Ensambla módulos:
+ * directorio, pizarra, controlador y comunicación TCP. Gestiona jugadores
+ * conectados, turnos y distribución de eventos en red.
  *
  * @author Sebastian Moreno
  */

@@ -14,6 +14,8 @@ import contratos.iAgentePartida;
 /**
  * El Controlador. Escucha a la Pizarra "tonta" y reacciona llamando a Agentes
  * "expertos" o despachando mensajes.
+ *
+ * @author Sebas
  */
 public class ControladorBlackboard implements iControladorBlackboard, iObservador {
 
@@ -132,6 +134,12 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
+    /**
+     * Envía un mensaje a TODOS los jugadores registrados en el directorio.
+     *
+     * Se usa para eventos globales como: inicio de partida, cambio de turno,
+     * estado del tablero final
+     */
     private void enviarATodos(String mensaje) {
         System.out.println("[Controlador] Preparando envío a TODOS de: " + mensaje);
         String logMsg = mensaje.startsWith("MANO_INICIAL") ? "MANO_INICIAL:..." : mensaje;
@@ -147,6 +155,13 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
+    /**
+     * Envía un mensaje SOLO a los jugadores que NO realizaron la jugada.
+     *
+     * Puede: enviar movidas temporales a observadores, enviar estado final del
+     * tablero a los oponentes
+     *
+     */
     private void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje) {
         System.out.println("[Controlador] Preparando envío a INACTIVOS de: " + mensaje);
         for (Map.Entry<String, iDirectorio.ClienteInfoDatos> entry : directorio.getAllClienteInfo().entrySet()) {
@@ -162,6 +177,12 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
+    /**
+     * Envía un mensaje directo a un jugador específico.
+     *
+     * Se usa para acciones privadas: enviar mano inicial, enviar ficha tomada
+     * del mazo, comandos exclusivos
+     */
     private void enviarMensajeDirecto(String idJugador, String mensaje) {
         try {
             iDirectorio.ClienteInfoDatos destino = directorio.getClienteInfo(idJugador);

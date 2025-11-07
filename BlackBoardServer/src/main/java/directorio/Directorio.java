@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Implementación del "Libro de Direcciones".
- * Almacena la información de conexión (IP/Puerto) de cada jugador.
- * Ya NO se encarga de enviar mensajes.
+ * Implementación del "Libro de Direcciones". Almacena la información de
+ * conexión (IP/Puerto) de cada jugador. Ya NO se encarga de enviar mensajes.
+ *
  * * @author Sebastian Moreno (Refactorizado)
  */
 public class Directorio implements iDirectorio {
@@ -16,17 +16,17 @@ public class Directorio implements iDirectorio {
     // (idJugador -> ClienteInfo)
     private final Map<String, ClienteInfo> directorioJugadores;
 
-    // ¡Ya no necesita al despachador!
     public Directorio() {
-        // Usa un mapa seguro para concurrencia
+        // Mapa seguro para concurrencia
         this.directorioJugadores = new ConcurrentHashMap<>();
     }
 
     /**
-     * Clase interna que almacena host/puerto e IMPLEMENTA la interfaz
-     * pública de datos de conexión.
+     * Clase interna que almacena host/puerto e IMPLEMENTA la interfaz pública
+     * de datos de conexión.
      */
     public static class ClienteInfo implements ClienteInfoDatos {
+
         public final String host;
         public final int puerto;
 
@@ -46,7 +46,7 @@ public class Directorio implements iDirectorio {
         }
     }
 
-    // --- Implementación de iDirectorio ---
+    // Implementación de iDirectorio
     
     @Override
     public void addJugador(String idJugador, String ip, int puerto) {
@@ -60,7 +60,8 @@ public class Directorio implements iDirectorio {
     }
 
     /**
-     * Devuelve un mapa de solo lectura con la información de todos los jugadores.
+     * Devuelve un mapa de solo lectura con la información de todos los
+     * jugadores.
      */
     @Override
     public Map<String, ClienteInfoDatos> getAllClienteInfo() {
@@ -75,7 +76,5 @@ public class Directorio implements iDirectorio {
     public ClienteInfoDatos getClienteInfo(String idJugador) {
         return directorioJugadores.get(idJugador);
     }
-    
-    // --- MÉTODOS ENVIAR... ELIMINADOS ---
-    // (enviarATodos y enviarATurnosInactivos ya no existen aquí)
+
 }

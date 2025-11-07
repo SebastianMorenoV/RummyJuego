@@ -3,6 +3,8 @@ package contratos;
 import java.util.List;
 
 /**
+ * Interfaz de la pizarra del juego (Blackboard). Define las operaciones básicas
+ * para gestionar el estado del juego y notificar acciones
  *
  * @author benja
  */

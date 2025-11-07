@@ -2,10 +2,11 @@ package utils;
 
 /**
  * Esta clase es solo un paquete para guardar el mensaje y su destino juntos.
- * 
+ *
  * @author Sebastian Moreno
  */
 public class MensajeEncolado {
+
     public final String host;
     public final int puerto;
     public final String mensaje;

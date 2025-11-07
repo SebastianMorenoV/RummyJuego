@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
  * notifica al Controlador.
+ *
+ * @author chris
  */
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
@@ -65,7 +67,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal = null; // elimina la referencia para no almacenarlo.
     }
 
-
+    /**
+     * Verifica si actualmente es turno del jugador indicado.
+     *
+     * @param id
+     * @return
+     */
     @Override
     public synchronized boolean esTurnoDe(String id) {
         if (indiceTurnoActual == -1) {
@@ -74,6 +81,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return ordenDeTurnos.get(indiceTurnoActual).equals(id);
     }
 
+    /**
+     * Avanza el turno al siguiente jugador en orden, y notifica al controlador
+     * que el turno avanzó.
+     */
     @Override
     public synchronized void avanzarTurno() {
         if (indiceTurnoActual != -1) {
@@ -87,6 +98,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
     /**
      * Valida e inicia la partida. Soporta de 2 a 4 jugadores.
+     *
+     * @return
      */
     @Override
     public synchronized boolean iniciarPartidaSiCorresponde() {
@@ -132,6 +145,15 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.ultimoJugadorQueMovio;
     }
 
+    /**
+     * Procesa comandos enviados por los clientes, y notifica al controlador
+     * cuando ocurrió un evento relevante.
+     *
+     * @param idCliente
+     * @param comando
+     * @param payload
+     * @return
+     */
     @Override
     public boolean procesarComando(String idCliente, String comando, String payload) {
         // Solo permite registrar o iniciar si el juego no ha comenzado
@@ -163,14 +185,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload; // Guarda el estado final
                     System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
-                    avanzarTurno(); 
+                    avanzarTurno();
                     return true;
 
                 case "TOMAR_FICHA":
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload; // Guarda el estado REVERTIDO
                     System.out.println("[Pizarra] " + idCliente + " pidió tomar ficha.");
-                    notificarObservadores("TOMAR_FICHA"); 
+                    notificarObservadores("TOMAR_FICHA");
                     return true;
             }
         }
@@ -179,7 +201,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return false;
     }
 
-    // --- Métodos de Ayuda para el Controlador ---
     /**
      * Le da al Controlador la lista de jugadores para que el Agente reparta.
      */

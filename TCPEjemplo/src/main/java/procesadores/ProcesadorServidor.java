@@ -37,7 +37,7 @@ public class ProcesadorServidor implements iProcesador {
         boolean resultado = pizarra.procesarComando(idCliente, comando, payload);
 
         if (!resultado) {
-            return new String("NO_TE_JALASTE"); // O JUGADA_INVALIDA
+            return new String("JUGADA_INVALIDA");
         }
 
         return new String("MOVIMIENTO_RECIBIDO_OK");

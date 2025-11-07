@@ -31,6 +31,7 @@ public class ClienteTCP implements iDespachador {
         if (this.hostFijo == null) {
             throw new IllegalStateException("Este despachador no tiene un destino fijo. Use enviar(host, puerto, mensaje).");
         }
+
         // Llama al otro método usando los datos guardados.
         this.enviar(this.hostFijo, this.puertoFijo, mensaje);
     }

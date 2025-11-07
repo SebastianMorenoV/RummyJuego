@@ -2,7 +2,7 @@ package FuentesConocimiento;
 
 import Entidades.Ficha;
 import Entidades.Tablero;
-import DTO.FichaJuegoDTO; // Usamos DTOs para serializar
+import DTO.FichaJuegoDTO;
 import contratos.iAgentePartida;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +14,11 @@ import pizarra.EstadoJuegoPizarra;
 /**
  * Fuente de Conocimiento virtual experta en "Iniciar Partida". Es el ÚNICO
  * componente en el servidor que conoce las Entidades.
+ *
+ * @author benja
  */
-public class AgenteIniciarPartida implements iAgentePartida{
-    
+public class AgenteIniciarPartida implements iAgentePartida {
+
     private Tablero tableroDeJuego;
     EstadoJuegoPizarra pizarra;
 
@@ -39,7 +41,7 @@ public class AgenteIniciarPartida implements iAgentePartida{
     @Override
     public Map<String, String> repartirManos(List<String> jugadorIds) {
         Map<String, String> manosSerializadas = new HashMap<>();
-        
+
         for (String id : jugadorIds) {
             // 1. Usa la lógica de Entidades para repartir 14 fichas
             List<Ficha> mano = new ArrayList<>();
@@ -55,7 +57,7 @@ public class AgenteIniciarPartida implements iAgentePartida{
                     .map(this::convertirFichaADTO) // Convierte Entidad a DTO
                     .map(FichaJuegoDTO::serializar) // Convierte DTO a String
                     .collect(Collectors.joining("|"));
-            
+
             manosSerializadas.put(id, manoPayload);
             System.out.println("[AgenteIniciarPartida] Mano creada para " + id);
         }

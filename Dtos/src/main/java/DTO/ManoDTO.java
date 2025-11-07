@@ -3,6 +3,7 @@ package DTO;
 import java.util.List;
 
 /**
+ * DTO que representa la mano del jugador
  *
  * @author Sebastian Moreno
  */

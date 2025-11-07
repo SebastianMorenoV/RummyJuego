@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package Main;
 
 import Controlador.Controlador;
@@ -15,9 +11,12 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 /**
+ * Punto de entrada para iniciar otro cliente del juego. Configura MVC, red y
+ * lanza la vista del jugador.
  *
  * @author benja
  */
+
 public class main3 {
 
     /**
@@ -32,7 +31,7 @@ public class main3 {
         modelo.agregarObservador(vistaJugador1);
 
         // 2. Configuración de Red
-        String miId = "pepepepepepepepeppepepe";
+        String miId = "Jugador3";
         String ipServidor = "192.168.1.70";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9001;
@@ -60,7 +59,7 @@ public class main3 {
                 System.out.println("[Main] Iniciando listener en el puerto "
                         + miPuertoDeEscucha);
 
-                listener.iniciar(miPuertoDeEscucha); // Variable separada
+                listener.iniciar(miPuertoDeEscucha);
             } catch (IOException e) {
                 System.err.println("[Main] Error fatal al iniciar el listener: "
                         + e.getMessage());
@@ -72,9 +71,13 @@ public class main3 {
         // 6. Registrarse en el Servidor e Iniciar el Juego
         try {
             String ipCliente = InetAddress.getLocalHost().getHostAddress();
-            String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
+            String mensajeRegistro = miId
+                    + ":REGISTRAR:"
+                    + ipCliente
+                    + "$"
+                    + miPuertoDeEscucha;
 
-            despachador.enviar(mensajeRegistro); // Variable separada
+            despachador.enviar(mensajeRegistro);
         } catch (IOException ex) {
             System.err.println("[Main] No se pudo conectar con el servidor para registrarse: "
                     + ex.getMessage());

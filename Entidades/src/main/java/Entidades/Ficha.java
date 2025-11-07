@@ -30,6 +30,14 @@ public class Ficha {
         this.comodin = comodin;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getNumero() {
         return numero;
     }
@@ -42,14 +50,10 @@ public class Ficha {
         return comodin;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
+    /**
+     * 
+     * @return 
+     */
     @Override
     public String toString() {
         return "Ficha{"

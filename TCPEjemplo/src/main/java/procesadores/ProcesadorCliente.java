@@ -32,6 +32,13 @@ public class ProcesadorCliente implements iProcesador {
         support.removePropertyChangeListener(pcl);
     }
 
+    /**
+     * Procesa un mensaje recibido desde el servidor.
+     *
+     * @param ipServidor
+     * @param mensaje
+     * @return
+     */
     @Override
     public String procesar(String ipServidor, String mensaje) {
         String[] partes = mensaje.split(":", 2); // Dividir solo en 2: COMANDO y PAYLOAD

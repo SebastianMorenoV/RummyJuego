@@ -19,6 +19,9 @@ public class EnsambladorServidor implements iEnsambladorServidor {
 
     /**
      * Este método conecta a los componentes La creación se hace en los Main.
+     *
+     * @param pizarra
+     * @return
      */
     @Override
     public iListener ensamblarRedServidor(
@@ -31,10 +34,10 @@ public class EnsambladorServidor implements iEnsambladorServidor {
         iProcesador logicaServidor = new ProcesadorServidor(pizarra);
 
         // 2. Crear el Listener (El que escucha)
-        // inyectando la lógica de red
         iListener listener = new ServerTCP(logicaServidor);
 
         System.out.println("[EnsambladorServidor] Conexión finalizada.");
+
         return listener;
     }
 }

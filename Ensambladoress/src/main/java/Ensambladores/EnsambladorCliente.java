@@ -15,6 +15,7 @@ import java.beans.PropertyChangeListener;
  * @author benja
  */
 public final class EnsambladorCliente implements iEnsambladorCliente {
+
     public EnsambladorCliente() {
 
     }
@@ -51,6 +52,7 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
         iListener listener = new ServerTCP(logicaCliente);
 
         System.out.println("[Ensamblador] Listener ensamblado.");
+
         return listener;
     }
 }

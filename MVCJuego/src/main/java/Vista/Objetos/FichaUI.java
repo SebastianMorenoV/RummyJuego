@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Representa gráficamente una ficha y permite arrastrarla entre mano y tablero.
+ * Maneja drag & drop y notifica al controlador según acciones del jugador.
  *
  * @author chris
  */
@@ -63,6 +65,7 @@ public class FichaUI extends JPanel {
         this.originalLocation = originalLocation;
     }
 
+    // Inicializa funcionalidad de arrastrar y soltar
     private void initDrag() {
         MouseAdapter ma = new MouseAdapter() {
             @Override
@@ -158,10 +161,12 @@ public class FichaUI extends JPanel {
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                         control.colocarFicha(gruposColocados);
                     } else {
+
                         // Si no habia espacio, la devolvemos a su origen (la mano).
                         devolverFichaAlOrigen();
                     }
                 } else if (dentroDeMano) {
+
                     // Solo tiene sentido hacer esto si la ficha venia del tablero
                     if (origen == Origen.TABLERO) {
                         TableroUI tablero = vista.getPanelTablero();
@@ -178,7 +183,7 @@ public class FichaUI extends JPanel {
                     } else {
 
                         // Si su origen no es tablero entonces es mano por lo que se debe quedar donde mismo
-                        devolverFichaAlOrigen();//para que se repinte
+                        devolverFichaAlOrigen();
                     }
 
                 } else {
@@ -210,16 +215,25 @@ public class FichaUI extends JPanel {
         addMouseMotionListener(ma);
     }
 
+    /**
+     * Dibuja la ficha (número o estrella si es comodín)
+     *
+     * @param g
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         g.setColor(color);
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+
         g.setColor(Color.WHITE);
         FontMetrics fm = g.getFontMetrics();
         String texto = comodin ? "★" : String.valueOf(numero);
+
         int x = (getWidth() - fm.stringWidth(texto)) / 2;
         int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+
         g.drawString(texto, x, y);
     }
 
@@ -232,12 +246,12 @@ public class FichaUI extends JPanel {
         this.origen = origen;
     }
 
-    public int getNumero() {
-        return numero;
-    }
-
     public Color getColor() {
         return color;
+    }
+
+    public int getNumero() {
+        return numero;
     }
 
     public boolean isComodin() {

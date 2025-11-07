@@ -99,7 +99,8 @@ public class JugadorUI extends JPanel {
         String chipsText = String.valueOf(fichasRestantes);
         fm = g2d.getFontMetrics();
         int chipsWidth = fm.stringWidth(chipsText);
-        g2d.drawString(chipsText, chipBoxX + (chipBoxWidth - chipsWidth) / 2, chipBoxY + fm.getAscent() + (chipBoxHeight - fm.getHeight()) / 2);
+        g2d.drawString(chipsText, chipBoxX + (chipBoxWidth - chipsWidth)
+                / 2, chipBoxY + fm.getAscent() + (chipBoxHeight - fm.getHeight()) / 2);
     }
 
     private void drawDefaultAvatar(Graphics2D g2d, int avatarX, int avatarY, int avatarSize) {
@@ -108,10 +109,12 @@ public class JugadorUI extends JPanel {
 
         g2d.setColor(Color.WHITE);
         int headSize = (int) (avatarSize * 0.4);
-        g2d.fillOval(avatarX + (avatarSize - headSize) / 2, avatarY + (int) (avatarSize * 0.15), headSize, headSize);
+        g2d.fillOval(avatarX + (avatarSize - headSize) / 2, avatarY
+                + (int) (avatarSize * 0.15), headSize, headSize);
 
         int bodyHeight = (int) (avatarSize * 0.5);
-        g2d.fillArc(avatarX + (int) (avatarSize * 0.1), avatarY + (int) (avatarSize * 0.5), (int) (avatarSize * 0.8), bodyHeight, 0, 180);
+        g2d.fillArc(avatarX + (int) (avatarSize * 0.1), avatarY
+                + (int) (avatarSize * 0.5), (int) (avatarSize * 0.8), bodyHeight, 0, 180);
     }
 
     /**
@@ -152,6 +155,7 @@ public class JugadorUI extends JPanel {
      */
     public void setNombreJugador(String nombreJugador) {
         this.nombreJugador = nombreJugador;
+
         repaint();
     }
 }

@@ -21,9 +21,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Esta clase representa el modelo en MVC.
+ * Envía comando al servidor para iniciar partida.
  *
- * @author Benja
+ * @author benja
  */
 public class Modelo implements IModelo, PropertyChangeListener {
 
@@ -34,30 +34,38 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private boolean esMiTurno;
     private iDespachador despachador;
     private String miId;
-    
+
     private int mazoFichasRestantes = 0;
 
     public Modelo() {
         this.observadores = new ArrayList<>();
-        this.juego = new JuegoRummyFachada(); // <-- Esta fachada ya no tiene la lista
+        this.juego = new JuegoRummyFachada();
         this.gruposDeTurnoDTO = new ArrayList<>();
         this.gruposDTOAlInicioDelTurno = new ArrayList<>();
         this.esMiTurno = false;
     }
 
+    /**
+     * Inicia el juego localmente y notifica a la vista para generar fichas
+     * iniciales.
+     */
     public void iniciarJuego() {
         juego.iniciarPartida();
         this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
 
+    /**
+     * Maneja eventos recibidos desde red (servidor) usando observer pattern.
+     * Actualiza el modelo según el tipo de evento.
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
         String payloadd = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         switch (evento) {
-            
+
             case "COMANDO_INICIAR_PARTIDA":
                 System.out.println("[Modelo] Recibida orden del servidor para iniciar la partida.");
                 enviarComandoIniciarPartida();
@@ -68,7 +76,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 try {
                     String[] payloadPartes = payloadd.split("\\$");
                     String manoPayload = payloadPartes[0];
-                    
+
                     if (payloadPartes.length > 1) {
                         this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]);
                     }
@@ -77,14 +85,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     List<Ficha> manoEntidad = fichasDTO.stream()
                             .map(this::convertirFichaDtoAEntidad)
                             .collect(Collectors.toList());
-                    
+
                     juego.setManoInicial(manoEntidad);
-                    
-                    notificarObservadores(TipoEvento.TOMO_FICHA); 
+
+                    notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
-                } catch (Exception e) { 
+                } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
-                    e.printStackTrace(); 
+                    e.printStackTrace();
                 }
                 break;
 
@@ -95,21 +103,23 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     if (fichaDTO != null) {
                         Ficha fichaEntidad = convertirFichaDtoAEntidad(fichaDTO);
                         juego.getJugadorActual().agregarFichaAJugador(fichaEntidad);
-                        
+
                         this.mazoFichasRestantes--;
-                        
+
                         notificarObservadores(TipoEvento.REPINTAR_MANO);
-                        notificarObservadores(TipoEvento.TOMO_FICHA); 
+                        notificarObservadores(TipoEvento.TOMO_FICHA);
                     }
-                } catch (Exception e) { e.printStackTrace(); }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
-                
+
             case "TURNO_CAMBIADO":
                 System.out.println("[Modelo] Evento 'TURNO_CAMBIADO' detectado! Payload: " + payloadd);
                 String[] partesTurno = payloadd.split(":");
                 String nuevoJugadorId = partesTurno[0];
                 this.esMiTurno = nuevoJugadorId.equals(this.miId);
-                
+
                 if (partesTurno.length > 1) {
                     try {
                         this.mazoFichasRestantes = Integer.parseInt(partesTurno[1]);
@@ -117,9 +127,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
                         System.err.println("[Modelo] Error al parsear conteo del mazo en TURNO_CAMBIADO");
                     }
                 }
-                
+
                 notificarObservadores(TipoEvento.CAMBIO_DE_TURNO);
-                notificarObservadores(TipoEvento.TOMO_FICHA); 
+                notificarObservadores(TipoEvento.TOMO_FICHA);
                 break;
 
             case "MOVIMIENTO_RECIBIDO":
@@ -129,7 +139,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     if (gruposMovidos != null) {
                         this.actualizarVistaTemporal(gruposMovidos);
                     }
-                } catch (Exception e) { e.printStackTrace(); }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
 
             case "ESTADO_FINAL_TABLERO":
@@ -142,15 +154,20 @@ public class Modelo implements IModelo, PropertyChangeListener {
                         this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
                         notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
                     }
-                } catch (Exception e) { e.printStackTrace(); }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
-                
+
             default:
-                 System.out.println("[Modelo] Evento PropertyChange desconocido: " + evento);
-                 break;
+                System.out.println("[Modelo] Evento PropertyChange desconocido: " + evento);
+                break;
         }
     }
-    
+
+    /**
+     * Refresca estado del tablero temporalmente antes de validar jugada.
+     */
     private void actualizarVistaTemporal(List<GrupoDTO> gruposPropuestos) {
         this.gruposDeTurnoDTO = gruposPropuestos;
 
@@ -162,6 +179,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
     }
 
+    /**
+     * Envía movimiento al servidor y actualiza tablero local.
+     */
     public void colocarFicha(List<GrupoDTO> grupos) {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'colocarFicha' ignorada. No es mi turno.");
@@ -186,6 +206,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    /**
+     * Reversa jugada si no fue válida y solicita ficha al servidor.
+     */
     public void tomarFichaMazo() {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'tomarFichaMazo' ignorada. No es mi turno.");
@@ -194,7 +217,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         juego.revertirCambiosDelTurno();
         notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
-        
+
         try {
             String payloadJuegoRevertido = serializarEstadoRevertido();
             String mensajeTomar = this.miId + ":TOMAR_FICHA:" + payloadJuegoRevertido;
@@ -204,7 +227,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
             Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
+    /**
+     * Finaliza turno: valida jugada, envía estado al servidor y notifica a la
+     * vista.
+     */
     public void terminarTurno() {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'terminarTurno' ignorada. No es mi turno.");
@@ -236,6 +263,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         notificarObservadores(TipoEvento.REPINTAR_MANO);
     }
 
+    /**
+     * Serializa el estado final del turno para enviarlo por red.
+     */
     private String serializarJuegoFinal() {
         List<GrupoDTO> grupos = this.gruposDeTurnoDTO;
         StringBuilder payloadBuilder = new StringBuilder();
@@ -248,10 +278,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return payloadBuilder.toString();
     }
 
+    /**
+     * Serializa el estado inicial del turno para revertir jugada.
+     */
     private String serializarEstadoRevertido() {
         List<GrupoDTO> grupos = this.gruposDTOAlInicioDelTurno;
         StringBuilder payloadBuilder = new StringBuilder();
-        
+
         for (int i = 0; i < grupos.size(); i++) {
             payloadBuilder.append(grupos.get(i).serializarParaPayload());
             if (i < grupos.size() - 1) {
@@ -261,15 +294,21 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return payloadBuilder.toString();
     }
 
+    /**
+     * Registra observadores para actualizaciones del modelo (patrón Observer).
+     */
     public void agregarObservador(Observador obs) {
         if (obs != null && !observadores.contains(obs)) {
             observadores.add(obs);
         }
     }
 
+    /**
+     * Notifica cambios a las vistas con un DTO de actualización.
+     */
     public void notificarObservadores(TipoEvento tipoEvento) {
         for (Observador observer : this.observadores) {
-            
+
             List<Ficha> manoEntidad = juego.getJugadorActual().getManoJugador().getFichasEnMano();
 
             List<FichaJuegoDTO> manoDTO = manoEntidad.stream()
@@ -283,6 +322,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    /**
+     * Regresa ficha a la mano (si el movimiento es válido) y actualiza la UI.
+     */
     public void regresarFichaAMano(int idFicha) {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'regresarFichaAMano' ignorada. No es mi turno.");
@@ -298,6 +340,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    /**
+     * Obtiene el estado actual del juego para enviarlo a la vista.
+     */
     @Override
     public JuegoDTO getTablero() {
         JuegoDTO dto = new JuegoDTO();
@@ -316,10 +361,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     .collect(Collectors.toList());
             dto.setGruposEnTablero(gruposDTO);
         }
-        
+
         dto.setFichasMazo(this.mazoFichasRestantes);
-        
-        if(juego.getJugadorActual() != null) {
+
+        if (juego.getJugadorActual() != null) {
             dto.setJugadorActual(juego.getJugadorActual().getNickname());
         } else {
             dto.setJugadorActual("...");
@@ -327,8 +372,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return dto;
     }
 
-    // --- MÉTODOS DE AYUDA PARA CONVERSIÓN ---
-
+    /**
+     * Convierte DTO de grupo a entidad Grupo.
+     */
     private Grupo convertirGrupoDtoAEntidad(GrupoDTO dto) {
         List<Ficha> fichas = dto.getFichasGrupo().stream()
                 .map(this::convertirFichaDtoAEntidad)
@@ -340,6 +386,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return grupo;
     }
 
+    /**
+     * Convierte entidad Grupo a DTO.
+     */
     private GrupoDTO convertirGrupoEntidadADto(Grupo g) {
         List<FichaJuegoDTO> fichasDTO = g.getFichas().stream()
                 .map(f -> new FichaJuegoDTO(f.getId(),
@@ -347,21 +396,29 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 .collect(Collectors.toList());
         return new GrupoDTO(g.getTipo(), fichasDTO.size(), fichasDTO, 0, 0, g.esTemporal());
     }
-    
+
+    /**
+     * Convierte DTO de ficha a entidad Ficha.
+     */
     private Ficha convertirFichaDtoAEntidad(FichaJuegoDTO fDto) {
-        if (fDto == null) return null;
+        if (fDto == null) {
+            return null;
+        }
         return new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(),
-                         fDto.getColor(), fDto.isComodin());
+                fDto.getColor(), fDto.isComodin());
     }
-    
+
+    /**
+     * Convierte payload en una lista de fichas DTO.
+     */
     private List<FichaJuegoDTO> deserializarMano(String payload) {
         List<FichaJuegoDTO> mano = new ArrayList<>();
         if (payload == null || payload.isEmpty()) {
             return mano;
         }
-        
+
         String[] fichasData = payload.split("\\|");
-        
+
         for (String fichaData : fichasData) {
             if (fichaData != null && !fichaData.isEmpty()) {
                 FichaJuegoDTO ficha = FichaJuegoDTO.deserializar(fichaData);
@@ -373,8 +430,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return mano;
     }
 
-    // --- MÉTODOS DE AYUDA PARA RED ---
-
     public void enviarComandoIniciarPartida() {
         try {
             String mensaje = this.miId + ":INICIAR_PARTIDA:";
@@ -385,6 +440,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    /**
+     * Envía comando al servidor para iniciar partida.
+     */
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
     }
