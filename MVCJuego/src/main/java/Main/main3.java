@@ -32,7 +32,7 @@ public class main3 {
 
         // 2. Configuración de Red
         String miId = "Jugador3";
-        String ipServidor = "192.168.1.70";
+        String ipServidor = "192.168.100.98";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9001;
 

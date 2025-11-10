@@ -20,11 +20,6 @@
             <version>RELEASE210</version>
         </dependency>
         <dependency>
-            <groupId>com.mycompany</groupId>
-            <artifactId>TCPEjemplo</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>interfaces</artifactId>
             <version>${project.version}</version>
