@@ -41,7 +41,7 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
                 + "(" + miId + ")...");
 
         // 1. Crear la "Lógica de Cliente"
-        ProcesadorCliente logicaCliente = new ProcesadorCliente(miId);
+        ProcesadorCliente logicaCliente = new ProcesadorCliente();
 
         // 2. Conectar el Modelo (oyente) para que reciba eventos de la red.
         System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()

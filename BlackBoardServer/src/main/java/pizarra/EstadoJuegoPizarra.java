@@ -6,8 +6,6 @@ import contratos.iPizarraJuego;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
@@ -17,12 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
-    private final Map<String, DatosJugador> estadoJugadores;
     private final List<iObservador> observadores;
     private String ultimoTableroSerializado = "";
     private final List<String> ordenDeTurnos;
-    private String ultimoPayloadMovimiento;
-    private List<GrupoDTO> gruposEnTablero;
     private String ultimoJugadorQueMovio;
     private int indiceTurnoActual;
     private String[] jugadorARegistrarTemporal;
@@ -30,12 +25,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String mazoSerializado;
 
     public EstadoJuegoPizarra() {
-        this.estadoJugadores = new ConcurrentHashMap<>();
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1; // -1 = El juego no ha comenzado
         this.observadores = new ArrayList<>();
-        this.gruposEnTablero = new ArrayList<>();
-        this.ultimoPayloadMovimiento = "";
         this.mazoSerializado = "";
     }
 
@@ -59,8 +51,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal[1] = partes[0]; // la ip del cliente.
         jugadorARegistrarTemporal[2] = partes[1]; // puerto de escucha de el cliente.
 
-        DatosJugador datos = new DatosJugador(id);
-        estadoJugadores.put(id, datos);
+
         ordenDeTurnos.add(id);
 
         notificarObservadores("JUGADOR_UNIDO");
@@ -246,20 +237,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.mazoSerializado.split("\\|").length;
     }
 
-    public String getUltimoPayloadMovimiento() {
-        return this.ultimoPayloadMovimiento;
-    }
-
     /**
      * Clase interna para guardar el estado de CADA jugador. Ya no almacena la
      * mano.
      */
-    private static class DatosJugador {
 
-        private String id;
-
-        public DatosJugador(String id) {
-            this.id = id;
-        }
-    }
 }

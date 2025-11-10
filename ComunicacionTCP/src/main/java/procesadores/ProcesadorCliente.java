@@ -13,11 +13,9 @@ import java.beans.PropertyChangeSupport;
  */
 public class ProcesadorCliente implements iProcesador {
 
-    private final String miId;
     private final PropertyChangeSupport support;
 
-    public ProcesadorCliente(String miId) {
-        this.miId = miId;
+    public ProcesadorCliente() {
         this.support = new PropertyChangeSupport(this);
     }
 
