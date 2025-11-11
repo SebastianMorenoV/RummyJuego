@@ -175,9 +175,7 @@ public class FichaUI extends JPanel {
                         if (fichasValidadas.containsValue(FichaUI.this)) {
                             devolverFichaAlOrigen();
                         } else {
-                            control.regresarFichaAMano(FichaUI.this.idFicha);
-                            List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
-                            control.colocarFicha(gruposColocados);
+                              control.regresarFichaAMano(FichaUI.this.idFicha);
                         }
 
                     } else {

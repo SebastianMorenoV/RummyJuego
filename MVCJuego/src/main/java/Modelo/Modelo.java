@@ -15,6 +15,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -330,12 +331,50 @@ public class Modelo implements IModelo, PropertyChangeListener {
             System.out.println("[Modelo] Acción 'regresarFichaAMano' ignorada. No es mi turno.");
             return;
         }
+
+        // 1. Llama a la fachada para actualizar la lógica del juego
         boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
 
         if (fueRegresadaExitosamente) {
+
+            // Actualizamos la lista de DTOs local para mantener la sincronización
+            //y mantener las posciciones.
+            boolean fichaEncontrada = false;
+            for (GrupoDTO grupoDTO : this.gruposDeTurnoDTO) {
+                // Busca en la lista de DTOs la ficha que se regreso
+                Iterator<FichaJuegoDTO> iter = grupoDTO.getFichasGrupo().iterator();
+                while (iter.hasNext()) {
+                    if (iter.next().getIdFicha() == idFicha) {
+                        iter.remove(); // La quita del DTO del grupo
+                        grupoDTO.setCantidad(grupoDTO.getFichasGrupo().size());
+                        fichaEncontrada = true;
+                        break;
+                    }
+                }
+                if (fichaEncontrada) {
+                    break;
+                }
+            }
+
+            // Elimina grupos DTO que hayan quedado vacios (esto esta por si acaso nada mas)
+            this.gruposDeTurnoDTO.removeIf(g -> g.getFichasGrupo().isEmpty());
+
+            // Notifica a la vista para que repinte CON los DTOs actualizados
             notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
             notificarObservadores(TipoEvento.REPINTAR_MANO);
+
+            // Enviamos el nuevo estado al servidor
+            try {
+                // Serializa el estado del tablero SIN la ficha regresada
+                String payloadJuegoActualizado = serializarJuegoFinal();
+                String mensaje = this.miId + ":MOVER:" + payloadJuegoActualizado;
+                this.despachador.enviar(mensaje);
+            } catch (IOException ex) {
+                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         } else {
+            // Si la fachada dijo que no se pudo (ej. ficha validada), revierte la vista.
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         }
     }
