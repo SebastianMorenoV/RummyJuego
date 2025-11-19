@@ -12,7 +12,4 @@ public interface iDespachador {
 
     // Para el Servidor (necesita especificar el destino cada vez)
     void enviar(String host, int puerto, String mensaje) throws IOException;
-
-    // Para el Cliente (usa un destino pre-configurado)
-    void enviar(String mensaje) throws IOException;
 }

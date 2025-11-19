@@ -3,6 +3,7 @@ package Main;
 import Controlador.Controlador;
 import Ensambladores.EnsambladorCliente;
 import Modelo.Modelo;
+import Util.Configuracion;
 import Vista.VistaTablero;
 import contratos.iDespachador;
 import contratos.iEnsambladorCliente;
@@ -16,7 +17,6 @@ import java.net.InetAddress;
  *
  * @author benja
  */
-
 public class main3 {
 
     /**
@@ -77,7 +77,7 @@ public class main3 {
                     + "$"
                     + miPuertoDeEscucha;
 
-            despachador.enviar(mensajeRegistro);
+            despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeRegistro);
         } catch (IOException ex) {
             System.err.println("[Main] No se pudo conectar con el servidor para registrarse: "
                     + ex.getMessage());

@@ -7,6 +7,7 @@ import contratos.iDespachador;
 import contratos.iListener;
 import contratos.iEnsambladorCliente;
 import Ensambladores.EnsambladorCliente;
+import Util.Configuracion;
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -27,7 +28,7 @@ public class Main {
 
         // 2. Configuración de Red
         String miId = "Jugador1";
-        String ipServidor = "192.168.100.98";
+        String ipServidor = "192.168.100.3";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9005;
 
@@ -54,7 +55,7 @@ public class Main {
             String ipCliente = InetAddress.getLocalHost().getHostAddress();
             String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
 
-            despachador.enviar(mensajeRegistro);
+            despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeRegistro);
         } catch (IOException ex) {
             System.err.println("[Main] No se pudo conectar con el servidor para registrarse: "
                     + ex.getMessage());

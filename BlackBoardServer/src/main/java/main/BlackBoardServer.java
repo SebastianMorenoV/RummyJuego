@@ -3,7 +3,7 @@ package main;
 import control.ControladorBlackboard;
 import directorio.Directorio;
 import pizarra.EstadoJuegoPizarra;
-import com.mycompany.tcpejemplo.DespachadorAsincrono;
+import sockets.DespachadorAsincrono;
 import Ensambladores.EnsambladorServidor;
 import FuentesConocimiento.AgenteIniciarPartida;
 import contratos.iEnsambladorServidor;

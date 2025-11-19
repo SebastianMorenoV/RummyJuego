@@ -1,10 +1,11 @@
-package com.mycompany.tcpejemplo;
+package sockets;
 
 import utils.MensajeEncolado;
-import sockets.ClienteTCP;
 import contratos.iDespachador;
+import java.io.DataOutputStream;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -16,12 +17,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class DespachadorAsincrono implements iDespachador, Runnable {
 
     private final BlockingQueue<MensajeEncolado> colaDeSalida;
-    private final iDespachador transportista; // El ClienteTCP real
     private volatile boolean ejecutando = true;
 
     public DespachadorAsincrono() {
         this.colaDeSalida = new LinkedBlockingQueue<>();
-        this.transportista = new ClienteTCP(); // El "obrero" que sabe cómo enviar de verdad
 
         // Inicia el hilo "obrero" que vigila la cola
         new Thread(this).start();
@@ -41,15 +40,6 @@ public class DespachadorAsincrono implements iDespachador, Runnable {
     }
 
     /**
-     * Este método es para el cliente, no se usa en el servidor. Lo
-     * implementamos por la interfaz, pero lanzamos una excepción.
-     */
-    @Override
-    public void enviar(String mensaje) throws IOException {
-        throw new UnsupportedOperationException("Este despachador es para el servidor y requiere un destino.");
-    }
-
-    /**
      * Este es el trabajo del hilo "obrero". Se queda esperando a que lleguen
      * mensajes a la cola y los envía.
      */
@@ -61,8 +51,8 @@ public class DespachadorAsincrono implements iDespachador, Runnable {
                 // El hilo se bloquea aquí hasta que haya un mensaje en la cola.
                 MensajeEncolado msg = colaDeSalida.take();
 
-                // Cuando hay un mensaje, usa el transportista real para enviarlo.
-                transportista.enviar(msg.host, msg.puerto, msg.mensaje);
+                // Cuando hay un mensaje, utiliza el socket para enviarlo.
+                enviarDestinatario(msg.host, msg.puerto, msg.mensaje);
 
             } catch (InterruptedException e) {
                 ejecutando = false;
@@ -70,6 +60,18 @@ public class DespachadorAsincrono implements iDespachador, Runnable {
             } catch (IOException e) {
                 System.err.println("[Despachador Asíncrono] Error al enviar mensaje: " + e.getMessage());
             }
+        }
+    }
+
+    private void enviarDestinatario(String host, int puerto, String mensaje) throws IOException {
+        System.out.println("[Despachador] Conectando a " + host + ":" + puerto + "...");
+
+        // Usa los parámetros 'host' y 'puerto', no las variables de la clase.
+        try (Socket socket = new Socket(host, puerto); DataOutputStream out
+                = new DataOutputStream(socket.getOutputStream())) {
+
+            out.writeUTF(mensaje);
+            System.out.println("[Despachador] Enviado -> " + mensaje);
         }
     }
 

@@ -50,7 +50,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 int numJugadores = pizarra.getOrdenDeTurnos().size();
                 //Si se conecta el 2do jugador, le ordenamos al 1ro (Host) que inicie.
-                if (numJugadores == 3) {
+                if (numJugadores == 2) {
                     String idHost = pizarra.getOrdenDeTurnos().get(0);
                     System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
                     enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");

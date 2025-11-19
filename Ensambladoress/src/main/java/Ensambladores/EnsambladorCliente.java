@@ -1,7 +1,7 @@
 package Ensambladores;
 
+import sockets.DespachadorAsincrono;
 import procesadores.ProcesadorCliente;
-import sockets.ClienteTCP;
 import sockets.ServerTCP;
 import contratos.iDespachador;
 import contratos.iEnsambladorCliente; // Interfaz
@@ -27,7 +27,7 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
     public iDespachador crearDespachador(String ipServidor, int puertoServidor) {
         System.out.println("[Ensamblador] Creando Despachador -> (Servidor en "
                 + ipServidor + ":" + puertoServidor + ")...");
-        iDespachador despachador = new ClienteTCP(ipServidor, puertoServidor);
+        iDespachador despachador = new DespachadorAsincrono();
         System.out.println("[Ensamblador] Despachador creado.");
         return despachador;
     }
