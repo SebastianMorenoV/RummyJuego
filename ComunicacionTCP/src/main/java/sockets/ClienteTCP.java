@@ -14,12 +14,12 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @author Sebastian Moreno
  */
-public class DespachadorAsincrono implements iDespachador, Runnable {
+public class ClienteTCP implements iDespachador, Runnable {
 
     private final BlockingQueue<MensajeEncolado> colaDeSalida;
     private volatile boolean ejecutando = true;
 
-    public DespachadorAsincrono() {
+    public ClienteTCP() {
         this.colaDeSalida = new LinkedBlockingQueue<>();
 
         // Inicia el hilo "obrero" que vigila la cola

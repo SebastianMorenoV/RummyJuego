@@ -3,7 +3,7 @@ package main;
 import control.ControladorBlackboard;
 import directorio.Directorio;
 import pizarra.EstadoJuegoPizarra;
-import sockets.DespachadorAsincrono;
+import sockets.ClienteTCP;
 import Ensambladores.EnsambladorServidor;
 import FuentesConocimiento.AgenteIniciarPartida;
 import contratos.iEnsambladorServidor;
@@ -29,7 +29,7 @@ public class BlackBoardServer {
 
         // 1. CREACIÓN DE COMPONENTES
         // 1.A. Crear Despachador (El que envía)
-        iDespachador despachador = new DespachadorAsincrono();
+        iDespachador despachador = new ClienteTCP();
 
         // 1.B. Crear Directorio (El que sabe "dónde viven")
         iDirectorio directorio = new Directorio();
