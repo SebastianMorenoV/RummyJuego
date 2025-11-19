@@ -1,6 +1,6 @@
 package Ensambladores;
 
-import procesadores.ProcesadorServidor;
+import procesadores.Procesador;
 import sockets.ServerTCP;
 import contratos.iDespachador;
 import contratos.iListener;
@@ -31,7 +31,7 @@ public class EnsambladorServidor implements iEnsambladorServidor {
 
         // 1. Crear el Procesador (Lógica de Red)
         // con las piezas que nos dio el Main
-        iProcesador logicaServidor = new ProcesadorServidor(pizarra);
+        iProcesador logicaServidor = new Procesador(pizarra);
 
         // 2. Crear el Listener (El que escucha)
         iListener listener = new ServerTCP(logicaServidor);

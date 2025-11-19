@@ -1,12 +1,12 @@
 package Ensambladores;
 
 import sockets.ClienteTCP;
-import procesadores.ProcesadorCliente;
 import sockets.ServerTCP;
 import contratos.iDespachador;
 import contratos.iEnsambladorCliente; // Interfaz
 import contratos.iListener;
 import java.beans.PropertyChangeListener;
+import procesadores.Procesador;
 
 /**
  * Clase de utilidad tipo "Fábrica" que construye y conecta los componentes de
@@ -41,7 +41,7 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
                 + "(" + miId + ")...");
 
         // 1. Crear la "Lógica de Cliente"
-        ProcesadorCliente logicaCliente = new ProcesadorCliente();
+        Procesador logicaCliente = new Procesador();
 
         // 2. Conectar el Modelo (oyente) para que reciba eventos de la red.
         System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()
