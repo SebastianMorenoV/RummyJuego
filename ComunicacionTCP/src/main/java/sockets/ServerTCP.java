@@ -74,7 +74,7 @@ public class ServerTCP implements iListener {
             try {
 
                 peticion = colaDeEntrada.take();
-                System.out.println("[Cocinero] Procesando <- " + peticion.mensajeRecibido + " de **" + peticion.ipCliente + "**");
+                System.out.println("[ServidorTCP] Procesando <- " + peticion.mensajeRecibido + " de **" + peticion.ipCliente + "**");
 
                 this.procesador.procesar(peticion.ipCliente, peticion.mensajeRecibido);
 
@@ -82,7 +82,7 @@ public class ServerTCP implements iListener {
                 ejecutando = false;
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                System.err.println("[Cocinero] Error al procesar petición: " + e.getMessage());
+                System.err.println("[ServidorTCP] Error al procesar petición: " + e.getMessage());
             } finally {
                 if (peticion != null && peticion.socketCliente != null) {
                     try {

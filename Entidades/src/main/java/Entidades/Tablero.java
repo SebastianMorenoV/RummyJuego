@@ -25,11 +25,10 @@ public class Tablero {
 
     /**
      * Verifica que TODOS los grupos en el tablero sean estructuralmente válidos
-     * (ej. "tercia" o "escalera") y no "Invalido" o "Temporal" (incompleto). Un
+     *  y no "Invalido" o "Temporal" (incompleto). Un
      * grupo es "Temporal" si tiene menos de 3 fichas.
      */
     public boolean esEstructuraDeGruposValida() {
-        // Esta regla asegura que no haya grupos inválidos o incompletos en el tablero
         return this.fichasEnTablero.stream()
                 .noneMatch(g -> "Invalido".equals(g.getTipo())
                 || "Temporal".equals(g.getTipo()));
@@ -43,7 +42,7 @@ public class Tablero {
      */
     public List<Grupo> getGruposTemporales() {
         return this.fichasEnTablero.stream()
-                .filter(Grupo::esTemporal) // Filtra usando el flag que puso la UI
+                .filter(Grupo::esTemporal) 
                 .collect(Collectors.toList());
     }
 
@@ -54,7 +53,7 @@ public class Tablero {
      */
     public int calcularPuntosDeLaJugada() {
         return this.fichasEnTablero.stream()
-                .filter(Grupo::esTemporal) // <-- ¡ESTA ES LA LÍNEA CLAVE!
+                .filter(Grupo::esTemporal) 
                 .mapToInt(Grupo::calcularPuntos)
                 .sum();
     }
@@ -69,7 +68,6 @@ public class Tablero {
      */
     public Ficha removerFicha(int idFicha) {
         Ficha fichaRemovida = null;
-        // Usamos un iterador para poder remover grupos de forma segura mientras iteramos
         for (java.util.Iterator<Grupo> grupoIterator
                 = this.fichasEnTablero.iterator(); grupoIterator.hasNext();) {
             Grupo grupo = grupoIterator.next();
@@ -80,14 +78,13 @@ public class Tablero {
 
             if (fichaEncontrada.isPresent()) {
                 fichaRemovida = fichaEncontrada.get();
-                grupo.getFichas().remove(fichaRemovida); // Quitamos la ficha del grupo
+                grupo.getFichas().remove(fichaRemovida);
 
-                // Si el grupo se quedó sin fichas, lo eliminamos del tablero
                 if (grupo.getFichas().isEmpty()) {
                     grupoIterator.remove();
                 }
 
-                return fichaRemovida; // Devolvemos la ficha y terminamos la búsqueda
+                return fichaRemovida; 
 
             }
         }
@@ -184,7 +181,6 @@ public class Tablero {
         return copia;
     }
 
-    // Getter y Setters
     public List<Grupo> getFichasEnTablero() {
         return fichasEnTablero;
     }

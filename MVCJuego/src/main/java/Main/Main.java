@@ -20,13 +20,11 @@ import java.net.InetAddress;
 public class Main {
 
     public static void main(String[] args) {
-        // 1. Creación de Componentes MVC
         Modelo modelo = new Modelo();
         Controlador controlador = new Controlador(modelo);
         VistaTablero vistaJugador1 = new VistaTablero(controlador);
         modelo.agregarObservador(vistaJugador1);
 
-        // 2. Configuración de Red
         String miId = "Jugador1";
         String ipServidor = "192.168.100.98";
         int puertoServidor = 5000;
@@ -49,7 +47,6 @@ public class Main {
             }
         }).start();
 
-        //Registrarse en el Servidor e Iniciar el Juego
         try {
 
             String ipCliente = InetAddress.getLocalHost().getHostAddress();

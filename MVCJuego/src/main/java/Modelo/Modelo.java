@@ -204,8 +204,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String mensaje = this.miId + ":MOVER:" + payloadCompleto;
 
         try {
-            //Configuracion
-
             this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
         } catch (IOException ex) {
             Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
@@ -349,20 +347,16 @@ public class Modelo implements IModelo, PropertyChangeListener {
             return;
         }
 
-        // 1. Llama a la fachada para actualizar la lógica del juego
         boolean fueRegresadaExitosamente = juego.intentarRegresarFichaAMano(idFicha);
 
         if (fueRegresadaExitosamente) {
 
-            // Actualizamos la lista de DTOs local para mantener la sincronización
-            //y mantener las posciciones.
             boolean fichaEncontrada = false;
             for (GrupoDTO grupoDTO : this.gruposDeTurnoDTO) {
-                // Busca en la lista de DTOs la ficha que se regreso
                 Iterator<FichaJuegoDTO> iter = grupoDTO.getFichasGrupo().iterator();
                 while (iter.hasNext()) {
                     if (iter.next().getIdFicha() == idFicha) {
-                        iter.remove(); // La quita del DTO del grupo
+                        iter.remove(); 
                         grupoDTO.setCantidad(grupoDTO.getFichasGrupo().size());
                         fichaEncontrada = true;
                         break;
@@ -373,16 +367,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 }
             }
 
-            // Elimina grupos DTO que hayan quedado vacios (esto esta por si acaso nada mas)
             this.gruposDeTurnoDTO.removeIf(g -> g.getFichasGrupo().isEmpty());
 
-            // Notifica a la vista para que repinte CON los DTOs actualizados
             notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
             notificarObservadores(TipoEvento.REPINTAR_MANO);
 
-            // Enviamos el nuevo estado al servidor
             try {
-                // Serializa el estado del tablero SIN la ficha regresada
                 String payloadJuegoActualizado = serializarJuegoFinal();
                 String mensaje = this.miId + ":MOVER:" + payloadJuegoActualizado;
                 this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
@@ -391,7 +381,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
             }
 
         } else {
-            // Si la fachada dijo que no se pudo (ej. ficha validada), revierte la vista.
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         }
     }

@@ -16,7 +16,7 @@ import javax.swing.JPanel;
  */
 public class ManoUI extends JPanel {
 
-    private List<FichaUI> fichas; // Lista de fichas dentro de la mano
+    private List<FichaUI> fichas; 
 
     private static final int MARGEN_IZQUIERDO = 20;
     private static final int FICHAS_POR_FILA = 14;
@@ -84,10 +84,7 @@ public class ManoUI extends JPanel {
             return new Dimension(580, 120);
         }
 
-        // El ancho siempre es el mismo, basado en 14 fichas por fila
         int panelWidth = MARGEN_IZQUIERDO + (FICHAS_POR_FILA * SEPARACION_HORIZONTAL);
-
-        // El alto se calcula basado en cuantas filas se necesitan
         int numFilas = (int) Math.ceil((double) numComponentes / FICHAS_POR_FILA);
         int panelHeight = (numFilas * ALTURA_FILA) + (2 * MARGEN_VERTICAL);
 

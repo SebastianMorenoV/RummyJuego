@@ -65,7 +65,6 @@ public class FichaUI extends JPanel {
         this.originalLocation = originalLocation;
     }
 
-    // Inicializa funcionalidad de arrastrar y soltar
     private void initDrag() {
         MouseAdapter ma = new MouseAdapter() {
             @Override
@@ -152,7 +151,6 @@ public class FichaUI extends JPanel {
 
                     }
 
-                    // Intentamos colocar la ficha en una nueva celda.
                     boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, dropPoint);
 
                     if (colocada) {
@@ -161,13 +159,10 @@ public class FichaUI extends JPanel {
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
                         control.colocarFicha(gruposColocados);
                     } else {
-
-                        // Si no habia espacio, la devolvemos a su origen (la mano).
                         devolverFichaAlOrigen();
                     }
                 } else if (dentroDeMano) {
 
-                    // Solo tiene sentido hacer esto si la ficha venia del tablero
                     if (origen == Origen.TABLERO) {
                         TableroUI tablero = vista.getPanelTablero();
                         Map<Integer, FichaUI> fichasValidadas = tablero.getFichasEnTableroValidas();
@@ -180,13 +175,11 @@ public class FichaUI extends JPanel {
 
                     } else {
 
-                        // Si su origen no es tablero entonces es mano por lo que se debe quedar donde mismo
                         devolverFichaAlOrigen();
                     }
 
                 } else {
 
-                    // Se solto en cualquier otro lado, por lo que la devolvemos a su panel y posicion originales.
                     devolverFichaAlOrigen();
                 }
 
@@ -235,7 +228,6 @@ public class FichaUI extends JPanel {
         g.drawString(texto, x, y);
     }
 
-    // Getters y Setters
     public int getIdFicha() {
         return idFicha;
     }

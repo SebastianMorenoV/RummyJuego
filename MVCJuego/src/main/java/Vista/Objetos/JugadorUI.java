@@ -67,7 +67,6 @@ public class JugadorUI extends JPanel {
         int avatarX = cardX + (cardWidth - avatarSize) / 2;
         int avatarY = cardY + (int) (cardHeight * 0.08);
 
-        // Si el objeto ya esta decodificado, solo lo dibujamos
         if (avatarImage != null) {
             g2d.setClip(new Ellipse2D.Double(avatarX, avatarY, avatarSize, avatarSize));
             g2d.drawImage(avatarImage, avatarX, avatarY, avatarSize, avatarSize, this);
@@ -135,7 +134,6 @@ public class JugadorUI extends JPanel {
      */
     public void setImagenAvatar(byte[] imagenAvatarBytes) {
 
-        // Vuelve a decodificar la imagen si se actualiza
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
             try {
                 this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));

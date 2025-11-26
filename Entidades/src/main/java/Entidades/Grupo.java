@@ -57,7 +57,7 @@ public class Grupo {
         List<Ficha> fichasReales = this.fichas.stream().filter(f
                 -> !f.isComodin()).collect(Collectors.toList());
         if (fichasReales.isEmpty()) {
-            return true; // Puros comodines es válido
+            return true; 
         }
 
         int numeroBase = fichasReales.get(0).getNumero();
@@ -70,7 +70,7 @@ public class Grupo {
 
         long coloresUnicos = fichasReales.stream().map(Ficha::getColor).distinct().count();
 
-        return coloresUnicos == fichasReales.size(); // No debe haber colores repetidos
+        return coloresUnicos == fichasReales.size(); 
     }
 
     /**
@@ -98,12 +98,12 @@ public class Grupo {
         }
 
         if (colorDelGrupo == null) {
-            return true; // Puros comodines es válido
+            return true;
         }
         for (int i = 0; i < this.fichas.size(); i++) {
             int numeroEsperado = numeroAncla + (i - indiceAncla);
             if (numeroEsperado > 13 || numeroEsperado < 1) {
-                return false; // Fuera de rango
+                return false;
             }
             Ficha fichaActual = this.fichas.get(i);
             if (!fichaActual.isComodin()) {
@@ -139,7 +139,7 @@ public class Grupo {
                     .filter(f -> !f.isComodin())
                     .mapToInt(Ficha::getNumero)
                     .findFirst()
-                    .orElse(13); // Valor para grupo de puros comodines
+                    .orElse(13);
             puntosGrupo = numBase * fichas.size();
         } else if ("escalera".equals(tipo)) {
             Integer numeroAncla = null;
@@ -155,7 +155,7 @@ public class Grupo {
                 for (int i = 0; i < fichas.size(); i++) {
                     puntosGrupo += numeroAncla + (i - indiceAncla);
                 }
-            } else { // Escalera de puros comodines
+            } else {
                 puntosGrupo = 13 * fichas.size();
             }
         }

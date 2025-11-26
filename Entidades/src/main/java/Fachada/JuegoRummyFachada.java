@@ -55,13 +55,11 @@ public class JuegoRummyFachada implements IJuegoRummy {
         boolean esPrimerMovimiento
                 = !jugador.isHaHechoPrimerMovimiento();
 
-        // Regla 1: Todos los grupos en el tablero DEBEN ser válidos
         if (!tablero.esEstructuraDeGruposValida()) {
             revertirCambiosTurno();
             return false;
         }
 
-        // Regla 2: Lógica específica para el primer movimiento
         if (esPrimerMovimiento) {
 
             List<Grupo> gruposNuevos = this.tablero.getGruposTemporales();
@@ -103,18 +101,15 @@ public class JuegoRummyFachada implements IJuegoRummy {
             List<Integer> idsFichasNuevas
                     = this.tablero.getTodosLosIdsDeFichas();
 
-            // El jugador debe haber añadido al menos una ficha nueva al tablero.
             boolean haJugadoFichaNueva = idsFichasNuevas.stream()
                     .anyMatch(idNuevo -> !idsFichasAntiguas.contains(idNuevo));
 
             if (!haJugadoFichaNueva) {
-                // El jugador solo movió fichas, no añadió ninguna.
                 revertirCambiosTurno();
                 return false;
             }
         }
 
-        // Si todo es válido, confirmamos los cambios.
         confirmarCambiosTurno();
         return true;
     }
@@ -126,7 +121,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     private void confirmarCambiosTurno() {
         for (Grupo g : this.tablero.getFichasEnTablero()) {
-            g.setValidado(); // Pone esTemporal = false
+            g.setValidado(); 
         }
 
         List<Integer> idsEnTablero
@@ -170,7 +165,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     @Override
     public List<Ficha> getManoDeJugador(int indiceJugador) {
-        // Devuelve la mano del jugador local, ignorando el índice.
         return this.jugador.getManoJugador().getFichasEnMano();
     }
 
@@ -186,7 +180,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     @Override
     public void setManoInicial(List<Ficha> mano) {
-        // Asigna la mano al jugador local
         this.getJugadorActual().getManoJugador().setFichasEnMano(mano);
         guardarEstadoTurno();
     }

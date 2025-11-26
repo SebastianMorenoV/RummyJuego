@@ -330,7 +330,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (manoUI == null) {
             manoUI = new ManoUI();
             manoUI.setLocation(160, 380);
-            manoUI.setSize(580, 120); // El tamaño de la mano no cambia
+            manoUI.setSize(580, 120); 
 
             JScrollPane scrollPane = new JScrollPane(
                     manoUI,
@@ -338,19 +338,18 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
             );
 
-            scrollPane.setOpaque(false);//Para que tenga un fondo transparente
+            scrollPane.setOpaque(false);
             scrollPane.getViewport().setOpaque(false);
 
             JScrollBar verticalBar = scrollPane.getVerticalScrollBar();
 
-            //Diseño personal del Scroll
             verticalBar.setUI(new BasicScrollBarUI() {
 
                 @Override
                 protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setColor(Color.WHITE); // Color de la linea
+                    g2.setColor(Color.WHITE); 
                     g2.fillRoundRect(
                             thumbBounds.x + (thumbBounds.width / 8),
                             thumbBounds.y,
@@ -376,7 +375,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     return createZeroButton();
                 }
 
-                // Método de ayuda para crear botones invisibles
                 private JButton createZeroButton() {
                     JButton button = new JButton();
                     Dimension zeroDim = new Dimension(0, 0);
@@ -387,13 +385,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 }
             });
 
-            // 4. Hacemos la barra en sí transparente (para que se vea el "track" transparente)
             verticalBar.setOpaque(false);
 
-            // 5. Opcional: puedes definir un ancho fijo para la barra
-            verticalBar.setPreferredSize(new Dimension(10, 0)); // 8 píxeles de ancho
+            verticalBar.setPreferredSize(new Dimension(10, 0)); 
 
-            // --- FIN DEL CÓDIGO NUEVO ---
             scrollPane.setBounds(160, 380, 580, 120);
             scrollPane.setBorder(null);
 

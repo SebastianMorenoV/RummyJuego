@@ -10,6 +10,5 @@ import java.io.IOException;
  */
 public interface iDespachador {
 
-    // Para el Servidor (necesita especificar el destino cada vez)
     void enviar(String host, int puerto, String mensaje) throws IOException;
 }

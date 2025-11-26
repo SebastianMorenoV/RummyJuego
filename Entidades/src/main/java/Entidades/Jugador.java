@@ -44,12 +44,10 @@ public class Jugador {
         this.haHechoPrimerMovimiento = haHechoPrimerMovimiento;
     }
 
-    //Verifica si el jugador ha ganado (no tiene fichas en la mano).
     public boolean haGanado() {
         return this.manoJugador.estaVacia();
     }
 
-    // Getters y Setters
     public Mano getManoJugador() {
         return manoJugador;
     }

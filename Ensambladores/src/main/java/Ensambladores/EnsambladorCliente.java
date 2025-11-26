@@ -40,15 +40,12 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
         System.out.println("[Ensamblador] Ensamblando Listener para CLIENTE "
                 + "(" + miId + ")...");
 
-        // 1. Crear la "Lógica de Cliente"
         Procesador logicaCliente = new Procesador();
 
-        // 2. Conectar el Modelo (oyente) para que reciba eventos de la red.
         System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()
                 + ") -> ProcesadorCliente");
         logicaCliente.addPropertyChangeListener(oyente);
 
-        // 3. Crear el "Mesero" (Listener) e inyectarle la lógica ya conectada.
         iListener listener = new ServerTCP(logicaCliente);
 
         System.out.println("[Ensamblador] Listener ensamblado.");

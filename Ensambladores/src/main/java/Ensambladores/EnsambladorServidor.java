@@ -29,11 +29,8 @@ public class EnsambladorServidor implements iEnsambladorServidor {
     ) {
         System.out.println("[EnsambladorServidor] Conectando componentes de red...");
 
-        // 1. Crear el Procesador (Lógica de Red)
-        // con las piezas que nos dio el Main
         iProcesador logicaServidor = new Procesador(pizarra);
 
-        // 2. Crear el Listener (El que escucha)
         iListener listener = new ServerTCP(logicaServidor);
 
         System.out.println("[EnsambladorServidor] Conexión finalizada.");

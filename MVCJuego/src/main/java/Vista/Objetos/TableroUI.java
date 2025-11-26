@@ -80,11 +80,10 @@ public class TableroUI extends JPanel {
     public boolean colocarFichaEnCelda(FichaUI ficha, Point punto) {
         Point celda = calcularCeldaParaPunto(punto);
 
-        // Verificamos si la celda esta ocupada
         for (FichaUI fichaExistente : fichasEnTablero.values()) {
             Point celdaExistente = calcularCeldaParaPunto(fichaExistente.getLocation());
             if (celdaExistente.equals(celda)) {
-                return false; // Celda ocupada
+                return false; 
             }
         }
 
@@ -140,12 +139,9 @@ public class TableroUI extends JPanel {
 
                     if (!grupoActual.isEmpty()) {
 
-                        // Un grupo es temporal si *alguna* de sus fichas
-                        // NO estaba en el tablero validado al inicio del turno.
                         boolean esTemporal = false;
                         for (FichaUI fichaDelGrupo : grupoActual) {
                             if (!fichasEnTableroValidas.containsKey(fichaDelGrupo.getIdFicha())) {
-                                // Esta ficha es nueva, por lo tanto, el grupo entero es temporal.
                                 esTemporal = true;
                                 break;
                             }
@@ -172,12 +168,8 @@ public class TableroUI extends JPanel {
      * Se debe llamar después de una jugada exitosa.
      */
     public void guardarEstadoVisualValido() {
-
-        // Limpiamos el estado anterior
         fichasEnTableroValidas.clear();
         posicionesValidas.clear();
-
-        // Clonamos el estado actual
         for (Map.Entry<Integer, FichaUI> entry : fichasEnTablero.entrySet()) {
             fichasEnTableroValidas.put(entry.getKey(), entry.getValue());
             posicionesValidas.put(entry.getKey(), (Point) entry.getValue().getLocation().clone());
@@ -275,7 +267,6 @@ public class TableroUI extends JPanel {
 
                 Point celdaAncla = new Point(grupoDTO.getColumna(), grupoDTO.getFila());
 
-                // Reposicionar las fichas
                 for (int i = 0; i < grupoDTO.getFichasGrupo().size(); i++) {
                     FichaJuegoDTO fichaDTO = grupoDTO.getFichasGrupo().get(i);
                     FichaUI fichaActualUI = fichasEnTablero.get(fichaDTO.getIdFicha());
@@ -346,7 +337,7 @@ public class TableroUI extends JPanel {
         feedbackPanel.setBorder(BorderFactory.createLineBorder(borderColor, 2));
 
         this.add(feedbackPanel);
-        this.setComponentZOrder(feedbackPanel, getComponentCount() - 1); // Ponerlo al fondo
+        this.setComponentZOrder(feedbackPanel, getComponentCount() - 1); 
     }
 
     /**
