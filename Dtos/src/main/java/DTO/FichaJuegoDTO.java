@@ -41,7 +41,6 @@ public class FichaJuegoDTO {
 
     }
 
-    // Getters and setters
     public int getNumeroFicha() {
         return numeroFicha;
     }
@@ -97,8 +96,6 @@ public class FichaJuegoDTO {
      * Formato: idFicha,numeroFicha,rgbColor,comodin,fila,columna
      */
     public String serializar() {
-        // Obtenemos el valor RGB del color como int
-        // Si el color fuera nulo(null), usamos negro como default
         int rgb = (this.color != null) ? this.color.getRGB() : Color.BLACK.getRGB();
 
         return this.idFicha + ","
@@ -127,7 +124,6 @@ public class FichaJuegoDTO {
             int f = Integer.parseInt(parts[4]);
             int c = Integer.parseInt(parts[5]);
 
-            // Creamos el color de vuelta a partir del entero RGB
             Color color = new Color(rgb);
 
             return new FichaJuegoDTO(id, num, color, com, f, c);
@@ -135,7 +131,7 @@ public class FichaJuegoDTO {
         } catch (Exception e) {
             System.err.println("ERROR al deserializar FichaJuegoDTO: " + data);
             e.printStackTrace();
-            return null; // Devuelve null si el formato es incorrecto
+            return null; 
         }
     }
 

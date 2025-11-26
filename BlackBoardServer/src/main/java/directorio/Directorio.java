@@ -12,12 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Directorio implements iDirectorio {
 
-    // Un mapa para guardar la info de conexión por ID de jugador
-    // (idJugador -> ClienteInfo)
     private final Map<String, ClienteInfo> directorioJugadores;
 
     public Directorio() {
-        // Mapa seguro para concurrencia
         this.directorioJugadores = new ConcurrentHashMap<>();
     }
 
@@ -46,7 +43,6 @@ public class Directorio implements iDirectorio {
         }
     }
 
-    // Implementación de iDirectorio
     
     @Override
     public void addJugador(String idJugador, String ip, int puerto) {
@@ -65,7 +61,6 @@ public class Directorio implements iDirectorio {
      */
     @Override
     public Map<String, ClienteInfoDatos> getAllClienteInfo() {
-        // Devuelve una copia para evitar modificación externa y cumplir con la interfaz.
         return new java.util.HashMap<>(directorioJugadores);
     }
 

@@ -12,8 +12,7 @@ import java.util.stream.Collectors;
 import pizarra.EstadoJuegoPizarra;
 
 /**
- * Fuente de Conocimiento virtual experta en "Iniciar Partida". Es el ÚNICO
- * componente en el servidor que conoce las Entidades.
+ * Fuente de Conocimiento virtual experta en "Iniciar Partida". 
  *
  * @author benja
  */
@@ -43,19 +42,17 @@ public class AgenteIniciarPartida implements iAgentePartida {
         Map<String, String> manosSerializadas = new HashMap<>();
 
         for (String id : jugadorIds) {
-            // 1. Usa la lógica de Entidades para repartir 14 fichas
             List<Ficha> mano = new ArrayList<>();
             for (int i = 0; i < 14; i++) {
-                Ficha ficha = this.tableroDeJuego.tomarFichaMazo(); //
+                Ficha ficha = this.tableroDeJuego.tomarFichaMazo(); 
                 if (ficha != null) {
                     mano.add(ficha);
                 }
             }
 
-            // 2. Serializa la mano a un String (Fichas separadas por "|")
             String manoPayload = mano.stream()
-                    .map(this::convertirFichaADTO) // Convierte Entidad a DTO
-                    .map(FichaJuegoDTO::serializar) // Convierte DTO a String
+                    .map(this::convertirFichaADTO) 
+                    .map(FichaJuegoDTO::serializar) 
                     .collect(Collectors.joining("|"));
 
             manosSerializadas.put(id, manoPayload);
@@ -87,7 +84,6 @@ public class AgenteIniciarPartida implements iAgentePartida {
      * es una "Ficha", pero el cliente sí sabe qué es una "FichaJuegoDTO".
      */
     private FichaJuegoDTO convertirFichaADTO(Ficha ficha) {
-        // Asigna 0,0 a fila/columna, ya que no están en el tablero
         return new FichaJuegoDTO(
                 ficha.getId(),
                 ficha.getNumero(),

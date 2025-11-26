@@ -18,7 +18,7 @@ public class GrupoDTO {
     private boolean esTemporal;
 
     public GrupoDTO() {
-        this.esTemporal = true; // Por defecto es temporal
+        this.esTemporal = true; 
     }
 
     public GrupoDTO(String tipo, int cantidad, List<FichaJuegoDTO> fichasGrupo, int fila, int columna, boolean esTemporal) {
@@ -30,7 +30,6 @@ public class GrupoDTO {
         this.esTemporal = esTemporal;
     }
 
-    // Getters y Setters
     public boolean isEsTemporal() {
         return esTemporal;
     }
@@ -93,10 +92,10 @@ public class GrupoDTO {
         sb.append(this.cantidad).append(";");
         sb.append(this.fila).append(";");
         sb.append(this.columna).append(";");
-        sb.append(this.esTemporal); // --- ¡NUEVO CAMPO SERIALIZADO! ---
+        sb.append(this.esTemporal); 
 
         if (this.fichasGrupo != null && !this.fichasGrupo.isEmpty()) {
-            sb.append(";"); // Separador antes de la lista
+            sb.append(";"); 
 
             for (int i = 0; i < this.fichasGrupo.size(); i++) {
                 FichaJuegoDTO ficha = this.fichasGrupo.get(i);
@@ -113,14 +112,12 @@ public class GrupoDTO {
      * Método estático (factory) para crear un GrupoDTO completo desde el
      * payload recibido por el servidor.
      *
-     * @param payload El string de payload (ej:
-     * "TERCIA;3;4;7;false;ficha1|ficha2")
+     * @param payload El string de payload 
      * @return una nueva instancia de GrupoDTO
      */
     public static GrupoDTO deserializar(String payload) {
         try {
 
-            // Dividimos en 6 partes como MÁXIMO. La 6ta parte es "todo lo demás" (las fichas)
             String[] partesGrupo = payload.split(";", 6);
 
             String tipo = partesGrupo[0];
@@ -131,7 +128,6 @@ public class GrupoDTO {
 
             List<FichaJuegoDTO> fichas = new ArrayList<>();
 
-            // Revisar si la 6ta parte (índice 5) existe y no está vacía
             if (partesGrupo.length == 6 && !partesGrupo[5].isEmpty()) {
                 String[] dataFichas = partesGrupo[5].split("\\|");
 
@@ -148,7 +144,7 @@ public class GrupoDTO {
         } catch (Exception e) {
             System.err.println("ERROR al deserializar GrupoDTO: " + payload);
             e.printStackTrace();
-            return null; // Devuelve null si el formato es incorrecto
+            return null; 
         }
     }
 
@@ -163,8 +159,6 @@ public class GrupoDTO {
     public static List<GrupoDTO> deserializarLista(String payloadLote) {
         List<GrupoDTO> listaGrupos = new ArrayList<>();
 
-        // Si el payload es nulo O ESTÁ VACÍO, no hay nada que
-        // procesar. Devuelve la lista vacía inmediatamente.
         if (payloadLote == null || payloadLote.isEmpty()) {
             return listaGrupos;
         }

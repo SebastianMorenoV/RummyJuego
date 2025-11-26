@@ -12,8 +12,7 @@ import pizarra.EstadoJuegoPizarra;
 import contratos.iAgentePartida;
 
 /**
- * El Controlador. Escucha a la Pizarra "tonta" y reacciona llamando a Agentes
- * "expertos" o despachando mensajes.
+ * 
  *
  * @author Sebas
  */
@@ -37,7 +36,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     @Override
     public void actualiza(iPizarraJuego pizarra, String evento) {
 
-        // Estos se leen de la pizarra DESPUÉS de que el comando los haya escrito
         String jugadorQueMovio = pizarra.getUltimoJugadorQueMovio();
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
 
@@ -49,7 +47,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO.");
 
                 int numJugadores = pizarra.getOrdenDeTurnos().size();
-                //Si se conecta el 2do jugador, le ordenamos al 1ro (Host) que inicie.
                 if (numJugadores == 2) {
                     String idHost = pizarra.getOrdenDeTurnos().get(0);
                     System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
@@ -63,15 +60,12 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
                 System.out.println("[Controlador] Repartiendo para " + jugadoresIds.size() + " jugadores.");
 
-                // El Agente crea manos y mazo
                 Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds);
                 String mazoSerializado = agentePartida.getMazoSerializado();
-                int mazoCount = mazoSerializado.split("\\|").length; // Contamos fichas
+                int mazoCount = mazoSerializado.split("\\|").length;
 
-                // Guardar el mazo "tonto" en la Pizarra
                 agentePartida.setMazoSerializado(mazoSerializado);
 
-                // Enviar a CADA jugador su mano inicial + el contador del mazo | Formato: MANO_INICIAL:[payload_mano]$[conteo_mazo]
                 for (Map.Entry<String, String> entry : manosSerializadas.entrySet()) {
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
@@ -89,15 +83,13 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 enviarATurnosInactivos(jugadorQueMovio, mensajeMovimiento);
                 break;
 
-            case "AVANZAR_TURNO": // Disparado por FINALIZAR_TURNO o TOMAR_FICHA
+            case "AVANZAR_TURNO": 
                 System.out.println("[Controlador] Evento AVANZAR_TURNO detectado.");
 
-                // 1. Enviar el estado final a los inactivos
                 String mensajeMovimientoFinal = "ESTADO_FINAL_TABLERO:" + ultimoPayload;
                 System.out.println("[Controlador] Transmitiendo ESTADO_FINAL_TABLERO a inactivos.");
                 enviarATurnosInactivos(jugadorQueMovio, mensajeMovimientoFinal);
 
-                // 2. Notificar a TODOS del cambio de turno (con el mazo actualizado)
                 notificarCambioDeTurno(pizarra);
                 break;
 
@@ -106,11 +98,9 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 String fichaSerializada = pizarra.tomarFichaDelMazoSerializado();
 
                 if (fichaSerializada != null) {
-                    // 1. Envía la ficha solo al jugador que la pidió
                     enviarMensajeDirecto(jugadorQueMovio, "FICHA_RECIBIDA:" + fichaSerializada);
                 }
 
-                // 2. Avanza el turno (esto disparará el evento AVANZAR_TURNO)
                 pizarra.avanzarTurno();
                 break;
 
@@ -122,13 +112,14 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     /**
      * Lee el jugador actual Y el conteo del mazo y notifica a todos.
      */
-    private void notificarCambioDeTurno(iPizarraJuego pizarra) {
+    
+    @Override
+    public void notificarCambioDeTurno(iPizarraJuego pizarra) {
         String nuevoJugadorEnTurno = pizarra.getJugador();
         int mazoCount = ((EstadoJuegoPizarra) pizarra).getMazoSerializadoCount();
 
         if (nuevoJugadorEnTurno != null) {
             System.out.println("[Controlador] Notificando cambio de turno a: " + nuevoJugadorEnTurno);
-            // Formato: TURNO_CAMBIADO:[ID_JUGADOR]:[CONTEO_MAZO]
             String mensajeTurno = "TURNO_CAMBIADO:" + nuevoJugadorEnTurno + ":" + mazoCount;
             enviarATodos(mensajeTurno);
         }
@@ -140,7 +131,9 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
      * Se usa para eventos globales como: inicio de partida, cambio de turno,
      * estado del tablero final
      */
-    private void enviarATodos(String mensaje) {
+    
+    @Override
+    public void enviarATodos(String mensaje) {
         System.out.println("[Controlador] Preparando envío a TODOS de: " + mensaje);
         String logMsg = mensaje.startsWith("MANO_INICIAL") ? "MANO_INICIAL:..." : mensaje;
 
@@ -162,7 +155,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
      * tablero a los oponentes
      *
      */
-    private void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje) {
+    @Override
+    public void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje) {
         System.out.println("[Controlador] Preparando envío a INACTIVOS de: " + mensaje);
         for (Map.Entry<String, iDirectorio.ClienteInfoDatos> entry : directorio.getAllClienteInfo().entrySet()) {
             if (jugadorQueEnvio != null && !entry.getKey().equals(jugadorQueEnvio)) {
@@ -183,7 +177,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
      * Se usa para acciones privadas: enviar mano inicial, enviar ficha tomada
      * del mazo, comandos exclusivos
      */
-    private void enviarMensajeDirecto(String idJugador, String mensaje) {
+    @Override
+    public void enviarMensajeDirecto(String idJugador, String mensaje) {
         try {
             iDirectorio.ClienteInfoDatos destino = directorio.getClienteInfo(idJugador);
             if (destino != null) {

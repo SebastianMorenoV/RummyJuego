@@ -9,11 +9,11 @@ package contratos;
  */
 public interface iControladorBlackboard {
     
-    /**
-     * Procesa un comando genérico.
-     * Recibe los datos "crudos" y devuelve un resultado "genérico".
-     * @return un iResultadoComando con las instrucciones para la red.
-     * 
-     * Es probable que tenga a futuro un metodo para hablarle a los agentes (MVCs)
-     */
+   void notificarCambioDeTurno(iPizarraJuego pizarra);
+   
+   void enviarATodos(String mensaje);
+   
+   void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje);
+   
+   void enviarMensajeDirecto(String idJugador, String mensaje);
 }

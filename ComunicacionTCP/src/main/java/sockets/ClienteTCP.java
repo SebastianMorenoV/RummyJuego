@@ -22,7 +22,6 @@ public class ClienteTCP implements iDespachador, Runnable {
     public ClienteTCP() {
         this.colaDeSalida = new LinkedBlockingQueue<>();
 
-        // Inicia el hilo "obrero" que vigila la cola
         new Thread(this).start();
     }
 
@@ -48,10 +47,8 @@ public class ClienteTCP implements iDespachador, Runnable {
         System.out.println("[Despachador Asíncrono] Hilo de envío iniciado.");
         while (ejecutando) {
             try {
-                // El hilo se bloquea aquí hasta que haya un mensaje en la cola.
                 MensajeEncolado msg = colaDeSalida.take();
 
-                // Cuando hay un mensaje, utiliza el socket para enviarlo.
                 enviarDestinatario(msg.host, msg.puerto, msg.mensaje);
 
             } catch (InterruptedException e) {
@@ -66,7 +63,6 @@ public class ClienteTCP implements iDespachador, Runnable {
     private void enviarDestinatario(String host, int puerto, String mensaje) throws IOException {
         System.out.println("[Despachador] Conectando a " + host + ":" + puerto + "...");
 
-        // Usa los parámetros 'host' y 'puerto', no las variables de la clase.
         try (Socket socket = new Socket(host, puerto); DataOutputStream out
                 = new DataOutputStream(socket.getOutputStream())) {
 

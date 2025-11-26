@@ -30,7 +30,6 @@ public class ServerTCP implements iListener {
         this.procesador = procesador;
         this.colaDeEntrada = new LinkedBlockingQueue<>();
 
-        // Inicia el hilo "cocinero" que procesará la cola
         new Thread(this::procesarCola).start();
     }
 
@@ -46,14 +45,11 @@ public class ServerTCP implements iListener {
         while (ejecutando) {
             try {
 
-                // 1. Acepta la conexión del cliente
                 Socket socketCliente = serverSocket.accept();
 
-                // 2. Lee el mensaje (la orden)
                 DataInputStream in = new DataInputStream(socketCliente.getInputStream());
                 String msgRecibido = in.readUTF();
 
-                // 3. Pone la orden en la cola para que el "cocinero" la tome
                 colaDeEntrada.put(new PeticionCliente(socketCliente, msgRecibido));
 
             } catch (IOException e) {
@@ -77,20 +73,10 @@ public class ServerTCP implements iListener {
             PeticionCliente peticion = null;
             try {
 
-                // 1. Espera a que haya una orden en la cola.
                 peticion = colaDeEntrada.take();
                 System.out.println("[Cocinero] Procesando <- " + peticion.mensajeRecibido + " de **" + peticion.ipCliente + "**");
 
-                // 2. Procesa la orden.
-                // CAMBIO IMPORTANTE: Como procesar() es void, solo lo ejecutamos.
-                // No capturamos ninguna respuesta String.
                 this.procesador.procesar(peticion.ipCliente, peticion.mensajeRecibido);
-
-                // 3. NO enviamos writeUTF ni write. 
-                // Tu ClienteTCP.java (línea 68) envía y cierra inmediatamente, no espera lectura.
-                // Si escribes aquí, el mensaje se perderá o dará error porque el cliente ya cerró.
-                
-                // La verdadera respuesta le llegará al cliente a través del ControladorBlackboard -> Despachador.
 
             } catch (InterruptedException e) {
                 ejecutando = false;
@@ -98,7 +84,6 @@ public class ServerTCP implements iListener {
             } catch (Exception e) {
                 System.err.println("[Cocinero] Error al procesar petición: " + e.getMessage());
             } finally {
-                // 4. Cierra la conexión con el cliente. Es muy importante.
                 if (peticion != null && peticion.socketCliente != null) {
                     try {
                         peticion.socketCliente.close();

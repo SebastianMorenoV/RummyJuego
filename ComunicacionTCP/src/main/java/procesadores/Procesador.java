@@ -14,10 +14,8 @@ import java.beans.PropertyChangeSupport;
  */
 public class Procesador implements iProcesador {
 
-    // Referencia exclusiva del Servidor (puede ser null en el cliente)
     private final iPizarraJuego pizarra;
     
-    // Referencia exclusiva del Cliente (para notificar al Modelo)
     private final PropertyChangeSupport support;
 
     private final boolean esModoServidor;
