@@ -222,7 +222,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
 
         juego.revertirCambiosDelTurno();
-        notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+        notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR_TOMO_FICHA);
 
         try {
             String payloadJuegoRevertido = serializarEstadoRevertido();
@@ -241,12 +241,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
     public void terminarTurno() {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'terminarTurno' ignorada. No es mi turno.");
+            notificarObservadores(TipoEvento.NO_ES_MI_TURNO);
             return;
         }
 
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
         if (jugadaFueValida) {
+            
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
             try {
                 String payloadJuego = serializarJuegoFinal();
@@ -257,14 +259,24 @@ public class Modelo implements IModelo, PropertyChangeListener {
             }
 
         } else {
-            notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
-            try {
-                String payloadJuegoRevertido = serializarEstadoRevertido();
-                String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
-                this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
-            } catch (IOException ex) {
-                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            if (!gruposDTOAlInicioDelTurno.equals(gruposDeTurnoDTO)) {
+
+                System.out.println("Jugada invalida");
+                System.out.println(gruposDTOAlInicioDelTurno.toString());
+                System.out.println(gruposDeTurnoDTO.toString());
+
+                notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+                try {
+                    String payloadJuegoRevertido = serializarEstadoRevertido();
+                    String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
+                    this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+                } catch (IOException ex) {
+                    Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                notificarObservadores(TipoEvento.TOMAR_FICHA_POR_FINALIZARTURNO);
             }
+
         }
         notificarObservadores(TipoEvento.REPINTAR_MANO);
     }

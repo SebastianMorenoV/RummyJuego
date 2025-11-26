@@ -49,10 +49,11 @@ public class MazoUI extends JPanel implements MouseListener {
             return;
         }
         control.pasarTurno();
-        JOptionPane.showMessageDialog(null,
+        java.awt.Window ventanaPadre = javax.swing.SwingUtilities.getWindowAncestor(this);
+        JOptionPane.showMessageDialog(ventanaPadre,
                 "Ficha agarrada, Turno terminado",
                 "VISTA",
-                JOptionPane.WARNING_MESSAGE);
+                JOptionPane.WARNING_MESSAGE);   
     }
 
     @Override

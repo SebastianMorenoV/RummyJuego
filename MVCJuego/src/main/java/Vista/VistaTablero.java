@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -138,7 +139,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
         control.terminarTurno();
-
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
@@ -181,8 +181,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case CAMBIO_DE_TURNO:
                 if (dto.esMiTurno()) {
                     setTitle("Rummy - ¡Es tu turno!");
+                    JOptionPane.showMessageDialog(this, "¡Ahora es tu turno! ", "Estas en turno", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     setTitle("Rummy - Esperando al oponente...");
+                    JOptionPane.showMessageDialog(this, "Esperando al oponente.. ", "Esperando..", JOptionPane.INFORMATION_MESSAGE);
                 }
                 break;
 
@@ -205,11 +207,29 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case JUGADA_INVALIDA_REVERTIR:
                 if (tableroUI != null) {
                     tableroUI.revertirCambiosVisuales();
+                    JOptionPane.showMessageDialog(this,
+                            "Movimiento inválido: El tablero no cumple las reglas.\nSe ha revertido la jugada.",
+                            "Jugada Inválida",
+                            JOptionPane.WARNING_MESSAGE);
                 }
                 break;
 
+            case JUGADA_INVALIDA_REVERTIR_TOMO_FICHA:
+                if (tableroUI != null) {
+                    tableroUI.revertirCambiosVisuales();
+                }
+                break;
+                
             case TOMO_FICHA:
                 repintarMazo(modelo);
+                break;
+
+            case NO_ES_MI_TURNO:
+                JOptionPane.showMessageDialog(this, "No es tu turno.", "Error", JOptionPane.ERROR_MESSAGE);
+                break;
+            case TOMAR_FICHA_POR_FINALIZARTURNO:
+                JOptionPane.showMessageDialog(this, "Turno finalizado, tomando ficha... ", "Turno finalizado", JOptionPane.INFORMATION_MESSAGE);
+                control.pasarTurno();
                 break;
         }
 
@@ -318,7 +338,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
             );
 
-            
             scrollPane.setOpaque(false);//Para que tenga un fondo transparente
             scrollPane.getViewport().setOpaque(false);
 
@@ -333,19 +352,18 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     g2.setColor(Color.WHITE); // Color de la linea
                     g2.fillRoundRect(
-                            thumbBounds.x + (thumbBounds.width / 8), 
+                            thumbBounds.x + (thumbBounds.width / 8),
                             thumbBounds.y,
-                            thumbBounds.width / 2, 
+                            thumbBounds.width / 2,
                             thumbBounds.height,
-                            1, 1 
+                            1, 1
                     );
                     g2.dispose();
                 }
 
-                
                 @Override
                 protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-                    
+
                 }
 
                 @Override
