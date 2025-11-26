@@ -71,7 +71,7 @@ public class ServerTCP implements iListener {
      * El hilo del "Cocinero". Trabaja en segundo plano. Toma peticiones de la
      * cola, las procesa y envía la respuesta.
      */
-    private void procesarCola() {
+   private void procesarCola() {
         System.out.println("[Procesador de Cola] Hilo de procesamiento (cocinero) iniciado.");
         while (ejecutando) {
             PeticionCliente peticion = null;
@@ -81,18 +81,21 @@ public class ServerTCP implements iListener {
                 peticion = colaDeEntrada.take();
                 System.out.println("[Cocinero] Procesando <- " + peticion.mensajeRecibido + " de **" + peticion.ipCliente + "**");
 
-                // 2. Procesa la orden usando la lógica del servidor. Esta es la parte "lenta".
-                String respuesta = this.procesador.procesar(peticion.ipCliente, peticion.mensajeRecibido);
+                // 2. Procesa la orden.
+                // CAMBIO IMPORTANTE: Como procesar() es void, solo lo ejecutamos.
+                // No capturamos ninguna respuesta String.
+                this.procesador.procesar(peticion.ipCliente, peticion.mensajeRecibido);
 
-                // 3. Envía la respuesta al cliente.
-                DataOutputStream out = new DataOutputStream(peticion.socketCliente.getOutputStream());
-                out.writeUTF(respuesta);
-                System.out.println("[Cocinero] Enviado a **" + peticion.ipCliente + "** -> " + respuesta);
+                // 3. NO enviamos writeUTF ni write. 
+                // Tu ClienteTCP.java (línea 68) envía y cierra inmediatamente, no espera lectura.
+                // Si escribes aquí, el mensaje se perderá o dará error porque el cliente ya cerró.
+                
+                // La verdadera respuesta le llegará al cliente a través del ControladorBlackboard -> Despachador.
 
             } catch (InterruptedException e) {
                 ejecutando = false;
                 Thread.currentThread().interrupt();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.err.println("[Cocinero] Error al procesar petición: " + e.getMessage());
             } finally {
                 // 4. Cierra la conexión con el cliente. Es muy importante.

@@ -28,7 +28,7 @@ public interface iPizarraJuego {
 
     String getJugador();
 
-    boolean procesarComando(String idCliente, String comando, String payload);
+    void procesarComando(String idCliente, String comando, String payload);
 
     String[] getIpCliente();
 }

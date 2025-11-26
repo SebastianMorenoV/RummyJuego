@@ -55,13 +55,13 @@ public class Procesador implements iProcesador {
     }
 
     @Override
-    public String procesar(String ipRemitente, String mensaje) {
+    public void procesar(String ipRemitente, String mensaje) {
         
         if (esModoServidor) {    
             String[] partes = mensaje.split(":", 3); 
             
             if (partes.length < 2) {
-                return "ERROR: Formato de mensaje servidor inválido.";
+                System.out.println("ERROR: Formato de mensaje servidor inválido.");
             }
 
             String idCliente = partes[0];
@@ -70,9 +70,9 @@ public class Procesador implements iProcesador {
 
             System.out.println("[Procesador Server] Comando recibido: " + comando);
 
-            boolean resultado = pizarra.procesarComando(idCliente, comando, payload);
+           pizarra.procesarComando(idCliente, comando, payload);
 
-            return resultado ? "OK_SERVIDOR" : "ERROR_LOGICA_SERVIDOR";
+            
 
         } else {
             String[] partes = mensaje.split(":", 2);
@@ -82,7 +82,6 @@ public class Procesador implements iProcesador {
 
             support.firePropertyChange(evento, null, payload);
 
-            return "OK_CLIENTE_RECIBIDO";
         }
     }
 }

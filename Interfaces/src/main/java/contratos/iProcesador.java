@@ -14,6 +14,6 @@ public interface iProcesador {
      * @param mensaje El contenido del mensaje.
      * @return Una respuesta para enviar de vuelta al remitente original.
      */
-    String procesar(String ipCliente, String mensaje);
+    void procesar(String ipCliente, String mensaje);
     
 }

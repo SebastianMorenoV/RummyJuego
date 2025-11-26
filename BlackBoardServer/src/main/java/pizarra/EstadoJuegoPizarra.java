@@ -146,19 +146,19 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * @return
      */
     @Override
-    public boolean procesarComando(String idCliente, String comando, String payload) {
+    public void procesarComando(String idCliente, String comando, String payload) {
         // Solo permite registrar o iniciar si el juego no ha comenzado
         if (indiceTurnoActual == -1) {
             switch (comando) {
                 case "REGISTRAR":
                     registrarJugador(idCliente, payload);
-                    return true;
+                    break; // Importante: break para no saltar al siguiente caso
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
                     if (iniciarPartidaSiCorresponde()) {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
                     }
-                    return true;
+                    break;
             }
         }
 
@@ -170,26 +170,31 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     this.ultimoTableroSerializado = payload; // Guarda el estado temporal
                     System.out.println("[Pizarra] " + idCliente + " movió (temporal).");
                     notificarObservadores("MOVIMIENTO");
-                    return true;
+                    break; // <--- ESTE BREAK ES EL QUE FALTABA Y CAUSABA EL ERROR
 
                 case "FINALIZAR_TURNO":
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload; // Guarda el estado final
                     System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
                     avanzarTurno();
-                    return true;
+                    break; // <--- ESTE TAMBIÉN ES CRÍTICO
 
                 case "TOMAR_FICHA":
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload; // Guarda el estado REVERTIDO
                     System.out.println("[Pizarra] " + idCliente + " pidió tomar ficha.");
                     notificarObservadores("TOMAR_FICHA");
-                    return true;
+                    break;
+                    
+                default:
+                    // Solo imprimimos error si llega un comando desconocido en tiempo de juego
+                    // Ojo: REGISTRAR e INICIAR_PARTIDA caerán aquí si se envían durante el juego, lo cual es correcto ignorar.
+                    if (!comando.equals("REGISTRAR") && !comando.equals("INICIAR_PARTIDA")) {
+                         System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
+                    }
+                    break;
             }
         }
-
-        System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
-        return false;
     }
 
     /**

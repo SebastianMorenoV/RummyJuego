@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>Ensambladoress</artifactId>
+            <artifactId>Ensambladores</artifactId>   
             <version>${project.version}</version>
         </dependency>
         <dependency>
