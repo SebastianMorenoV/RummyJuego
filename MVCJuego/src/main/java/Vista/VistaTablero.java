@@ -557,10 +557,20 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
     }
 
+    /**
+     * Obtiene el panel de interfaz de usuario (UI) que representa visualmente el tablero de juego.
+     * Este panel contiene los grupos de fichas colocados por los jugadores.
+     * * @return El objeto TableroUI que es el componente visual del tablero.
+     */
     public TableroUI getPanelTablero() {
         return tableroUI;
     }
 
+    /**
+     * Obtiene el panel de interfaz de usuario (UI) que representa visualmente la mano
+     * o área de fichas del jugador actual.
+     * * @return El objeto ManoUI que es el componente visual de la mano del jugador.
+     */
     public ManoUI getPanelMano() {
         return this.manoUI;
     }

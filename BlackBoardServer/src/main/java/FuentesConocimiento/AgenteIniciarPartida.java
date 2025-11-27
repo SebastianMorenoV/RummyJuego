@@ -12,7 +12,9 @@ import java.util.stream.Collectors;
 import pizarra.EstadoJuegoPizarra;
 
 /**
- * Fuente de Conocimiento virtual experta en "Iniciar Partida". 
+ * Fuente de Conocimiento virtual experta en "Iniciar Partida".
+ * Este agente es responsable de inicializar el estado del juego (crear mazo, repartir
+ * fichas) cuando se recibe el comando de inicio de partida.
  *
  * @author benja
  */
@@ -61,6 +63,12 @@ public class AgenteIniciarPartida implements iAgentePartida {
         return manosSerializadas;
     }
 
+    /**
+     * Establece la representación serializada del mazo en la Pizarra (Blackboard), 
+     * permitiendo que otros agentes y procesos accedan al estado del mazo restante.
+     *
+     * @param mazoSerializado Una cadena que representa el mazo restante (Fichas separadas por "|").
+     */
     @Override
     public void setMazoSerializado(String mazoSerializado) {
         this.pizarra.setMazoSerializado(mazoSerializado);

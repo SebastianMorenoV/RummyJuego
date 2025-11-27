@@ -121,6 +121,10 @@ public class ManoUI extends JPanel {
         this.fichas.clear();
     }
 
+    /**
+     * Metodo para contar la cantidad de fichas dentro de la mano del jugador
+     * @return cantidad de fichas en la mano
+     */
     public int getCantidadFichas() {
         return fichas.size();
     }

@@ -6,11 +6,12 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 /**
- * Procesador Unificado.
- * Funciona tanto para el Cliente (MVC) como para el Servidor (Blackboard).
- * - Modo Servidor: Se activa si se construye con una iPizarraJuego.
- * - Modo Cliente: Se activa si se construye sin pizarra (constructor vacío).
- * @author benjamin y SEBAS A LAS 5:20 AM 19/11/2025 LOL
+ * Componente unificado para el procesamiento de mensajes de red.
+ * Opera en dos modos, determinado por su construcción:
+ * - Modo Servidor: Dirige comandos de clientes a la Pizarra de Juego (Blackboard).
+ * - Modo Cliente: Transforma eventos de red del servidor en eventos locales (PropertyChange) 
+ * para que el Modelo los consuma.
+ * * @author benjamin y sebastian
  */
 public class Procesador implements iProcesador {
 
@@ -42,16 +43,30 @@ public class Procesador implements iProcesador {
     }
 
     /**
-     * Permite agregar oyentes (El Modelo usa esto en el lado del Cliente).
+     * Agrega un PropertyChangeListener (oyente) al procesador.
+     * En el Modo Cliente, esta función es utilizada por el Modelo para registrarse 
+     * y escuchar los eventos de la red.
+     * * @param pcl El oyente de cambio de propiedad a registrar.
      */
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
         this.support.addPropertyChangeListener(pcl);
     }
 
+    /**
+     * Elimina un oyente de cambio de propiedad previamente registrado.
+     * * @param pcl El oyente de cambio de propiedad a eliminar.
+     */
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         this.support.removePropertyChangeListener(pcl);
     }
 
+    /**
+     * Implementación del método central de la interfaz iProcesador.
+     * Desacopla el mensaje de red entrante y lo dirige a la lógica apropiada 
+     * según el modo de operación del procesador.
+     * * @param ipRemitente La dirección IP del remitente del mensaje.
+     * @param mensaje El contenido serializado del mensaje recibido a través de la red.
+     */
     @Override
     public void procesar(String ipRemitente, String mensaje) {
         

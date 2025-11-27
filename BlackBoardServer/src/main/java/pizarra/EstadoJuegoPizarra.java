@@ -9,7 +9,8 @@ import java.util.List;
 
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
- * notifica al Controlador.
+ * notifica al Controlador cuando hay un cambio de estado relevante.
+ * Es el centro de datos y coordinación de eventos del lado del servidor.
  *
  * @author chris
  */
@@ -31,18 +32,38 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         this.mazoSerializado = "";
     }
 
+    /**
+     * Agrega un nuevo observador (normalmente el ControladorBlackboard) para 
+     * recibir notificaciones de eventos de la Pizarra.
+     *
+     * @param obs El observador a registrar.
+     */
     public void addObservador(iObservador obs) {
         if (obs != null && !this.observadores.contains(obs)) {
             this.observadores.add(obs);
         }
     }
 
+    /**
+     * Notifica a todos los observadores registrados sobre un evento que ha ocurrido 
+     * en la Pizarra.
+     *
+     * @param evento El nombre del evento ocurrido (p.ej., "JUGADOR_UNIDO").
+     */
     private void notificarObservadores(String evento) {
         for (iObservador obs : this.observadores) {
             obs.actualiza(this, evento);
         }
     }
 
+    /**
+     * Registra temporalmente la información de conexión de un nuevo jugador 
+     * (ID, IP y Puerto) para que el Controlador/Directorio la procese.
+     * El ID del jugador también se añade a la orden de turnos.
+     *
+     * @param id El ID del jugador a registrar.
+     * @param payloadMano El payload que contiene la IP y el Puerto del cliente.
+     */
     @Override
     public void registrarJugador(String id, String payloadMano) {
         jugadorARegistrarTemporal = new String[3];
@@ -59,10 +80,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Verifica si actualmente es turno del jugador indicado.
+     * Verifica si actualmente es el turno del jugador indicado.
      *
-     * @param id
-     * @return
+     * @param id El ID del jugador a verificar.
+     * @return true si el ID coincide con el jugador en el turno actual, false en caso contrario.
      */
     @Override
     public synchronized boolean esTurnoDe(String id) {
@@ -73,8 +94,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Avanza el turno al siguiente jugador en orden, y notifica al controlador
-     * que el turno avanzó.
+     * Avanza el índice de turno al siguiente jugador en el orden preestablecido 
+     * y notifica a los observadores que el turno avanzó.
+     * Si no hay partida iniciada, no hace nada.
      */
     @Override
     public synchronized void avanzarTurno() {
@@ -87,9 +109,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Valida e inicia la partida. Soporta de 2 a 4 jugadores.
+     * Valida las condiciones (2 a 4 jugadores) e inicia la partida, estableciendo 
+     * el índice de turno a cero.
      *
-     * @return
+     * @return true si la partida se inicia correctamente, false si ya estaba iniciada 
+     * o no cumple con el número de jugadores.
      */
     @Override
     public synchronized boolean iniciarPartidaSiCorresponde() {
@@ -111,11 +135,22 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return false;
     }
 
+    /**
+     * Obtiene la información temporal (ID, IP y Puerto) del último cliente 
+     * que se intentó registrar.
+     *
+     * @return Un array de String con la información del cliente.
+     */
     @Override
     public String[] getIpCliente() {
         return jugadorARegistrarTemporal;
     }
 
+    /**
+     * Obtiene el ID del jugador que tiene el turno actual.
+     *
+     * @return El ID del jugador, o null si la partida no ha iniciado.
+     */
     @Override
     public String getJugador() {
         if (indiceTurnoActual == -1 || ordenDeTurnos.isEmpty()) {
@@ -124,11 +159,22 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return ordenDeTurnos.get(indiceTurnoActual);
     }
 
+    /**
+     * Obtiene la última cadena serializada del tablero que fue enviada por un cliente.
+     * Se usa para comunicar movimientos (temporales o finales) a otros jugadores.
+     *
+     * @return La cadena serializada del tablero.
+     */
     @Override
     public String getUltimoTableroSerializado() {
         return this.ultimoTableroSerializado;
     }
 
+    /**
+     * Obtiene el ID del último jugador que ejecutó un comando de movimiento.
+     *
+     * @return El ID del jugador.
+     */
     @Override
     public String getUltimoJugadorQueMovio() {
         return this.ultimoJugadorQueMovio;
@@ -192,7 +238,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Le da al Controlador la lista de jugadores para que el Agente reparta.
+     * Devuelve la lista de IDs de los jugadores en el orden en que se repartirán 
+     * los turnos.
+     *
+     * @return La lista de {@code String} con los IDs de los jugadores.
      */
     @Override
     public List<String> getOrdenDeTurnos() {
@@ -200,7 +249,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Almacena el estado "tonto" del mazo.
+     * Almacena el estado "tonto" del mazo, serializado como una larga cadena de texto.
+     *
+     * @param mazo La cadena serializada del mazo (fichas separadas por "|").
      */
     public void setMazoSerializado(String mazo) {
         this.mazoSerializado = mazo;
@@ -208,8 +259,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Toma una ficha del mazo serializado "tonto". La pizarra no sabe qué es
-     * una ficha, solo sabe separar por "|".
+     * Toma una ficha del mazo serializado "tonto" (extrae el primer elemento 
+     * separado por "|") y actualiza la cadena de mazo restante.
+     *
+     * @return La cadena serializada de la ficha tomada, o null si el mazo está vacío.
      */
     @Override
     public String tomarFichaDelMazoSerializado() {
@@ -225,7 +278,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Devuelve el número de fichas restantes en el string del mazo.
+     * Devuelve el número de fichas restantes en la cadena serializada del mazo.
+     *
+     * @return El conteo de fichas restantes.
      */
     public int getMazoSerializadoCount() {
         if (this.mazoSerializado == null || this.mazoSerializado.isEmpty()) {

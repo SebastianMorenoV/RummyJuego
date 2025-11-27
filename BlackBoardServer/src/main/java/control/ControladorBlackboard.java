@@ -12,7 +12,10 @@ import pizarra.EstadoJuegoPizarra;
 import contratos.iAgentePartida;
 
 /**
- * 
+ * Controlador principal para la arquitectura Blackboard en el servidor.
+ * Escucha los cambios notificados por la Pizarra de Juego  y
+ * reacciona a estos eventos orquestando acciones entre el Directorio,
+ * el Agente de Partida y el Despachador de red.
  *
  * @author Sebas
  */
@@ -33,6 +36,14 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
     }
 
+    /**
+     * Método invocado por la Pizarra (Blackboard) cuando ocurre un cambio de estado 
+     * significativo que requiere una respuesta del servidor.
+     * Implementa el patrón Observer.
+     *
+     * @param pizarra La Pizarra de Juego que notifica el cambio.
+     * @param evento El tipo de evento ocurrido. 
+     */
     @Override
     public void actualiza(iPizarraJuego pizarra, String evento) {
 
@@ -110,9 +121,11 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * Lee el jugador actual Y el conteo del mazo y notifica a todos.
+     * Lee el jugador que tiene el turno actual y el conteo de fichas restantes 
+     * en el mazo, y notifica esta información a todos los clientes.
+     *
+     * @param pizarra La Pizarra de Juego para obtener el estado actual.
      */
-    
     @Override
     public void notificarCambioDeTurno(iPizarraJuego pizarra) {
         String nuevoJugadorEnTurno = pizarra.getJugador();
@@ -126,12 +139,13 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * Envía un mensaje a TODOS los jugadores registrados en el directorio.
+     * Envía un mensaje a todos los jugadores registrados en el directorio.
      *
      * Se usa para eventos globales como: inicio de partida, cambio de turno,
-     * estado del tablero final
+     * y el estado final del tablero.
+     *
+     * @param mensaje El contenido serializado del mensaje a enviar.
      */
-    
     @Override
     public void enviarATodos(String mensaje) {
         System.out.println("[Controlador] Preparando envío a TODOS de: " + mensaje);
@@ -149,11 +163,13 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * Envía un mensaje SOLO a los jugadores que NO realizaron la jugada.
+     * Envía un mensaje solo a los jugadores que no realizaron la jugada.
      *
-     * Puede: enviar movidas temporales a observadores, enviar estado final del
-     * tablero a los oponentes
+     * Se utiliza para enviar movidas temporales a los observadores,
+     * o enviar el estado final del tablero a los oponentes.
      *
+     * @param jugadorQueEnvio El ID del jugador que inició la acción.
+     * @param mensaje El contenido serializado del mensaje a enviar.
      */
     @Override
     public void enviarATurnosInactivos(String jugadorQueEnvio, String mensaje) {
@@ -172,10 +188,13 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * Envía un mensaje directo a un jugador específico.
+     * Envía un mensaje directo a un jugador específico utilizando su ID.
      *
      * Se usa para acciones privadas: enviar mano inicial, enviar ficha tomada
-     * del mazo, comandos exclusivos
+     * del mazo, o comandos exclusivos (como la orden de INICIAR_PARTIDA al host).
+     *
+     * @param idJugador El ID del jugador al que se enviará el mensaje.
+     * @param mensaje El contenido serializado del mensaje a enviar.
      */
     @Override
     public void enviarMensajeDirecto(String idJugador, String mensaje) {

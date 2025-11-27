@@ -26,7 +26,7 @@ public class ActualizacionDTO {
     /**
      * Metodo que obtiene el tipo de evento que se realizo en el juego.
      *
-     * @return
+     * @return TipoEvento
      */
     public TipoEvento getTipoEvento() {
         return tipoEvento;
@@ -35,7 +35,7 @@ public class ActualizacionDTO {
     /**
      * Metodo que indica el si es el turno de un jugador.
      *
-     * @return
+     * @return boolean
      */
     public boolean esMiTurno() {
         return esMiTurno;
@@ -44,7 +44,7 @@ public class ActualizacionDTO {
     /**
      * Metodo que obtiene la mano de un jugador.
      *
-     * @return
+     * @return Lista de fichasJuegoDTO
      */
     public List<FichaJuegoDTO> getManoDelJugador() {
         return manoDelJugador;

@@ -1,7 +1,10 @@
 package utils;
 
 /**
- * Esta clase es solo un paquete para guardar el mensaje y su destino juntos.
+ * Clase de utilidad  utilizada para encapsular y transportar 
+ * un mensaje junto con su destino de red (`host` y `puerto`). 
+ * Se utiliza principalmente en el ClienteTCP (Despachador) para 
+ * almacenar mensajes en la cola de salida antes de su envío asíncrono.
  *
  * @author Sebastian Moreno
  */

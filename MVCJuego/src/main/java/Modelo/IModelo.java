@@ -7,6 +7,7 @@ package Modelo;
 import DTO.JuegoDTO;
 
 /**
+ * Contrato para el Modelo dentro del patrón de diseño MVC,
  *
  * @author moren
  */

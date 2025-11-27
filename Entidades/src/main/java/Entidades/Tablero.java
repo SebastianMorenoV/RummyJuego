@@ -181,6 +181,7 @@ public class Tablero {
         return copia;
     }
 
+    // Getters y Setters
     public List<Grupo> getFichasEnTablero() {
         return fichasEnTablero;
     }

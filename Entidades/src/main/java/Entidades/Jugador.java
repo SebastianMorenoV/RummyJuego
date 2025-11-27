@@ -36,18 +36,36 @@ public class Jugador {
         this.manoJugador.getFichasEnMano().add(ficha);
     }
 
+    /**
+     * Obtiene el estado de si el jugador ha realizado su movimiento inicial
+     * de 30 o más puntos.
+     *
+     * @return true si el jugador ya ha hecho su primer movimiento, false en caso contrario.
+     */
     public boolean isHaHechoPrimerMovimiento() {
         return haHechoPrimerMovimiento;
     }
 
+    /**
+     * Establece si el jugador ha realizado su primer movimiento de 30 o más puntos.
+     *
+     * @param haHechoPrimerMovimiento El nuevo estado del primer movimiento.
+     */
     public void setHaHechoPrimerMovimiento(boolean haHechoPrimerMovimiento) {
         this.haHechoPrimerMovimiento = haHechoPrimerMovimiento;
     }
 
+    /**
+     * Verifica si el jugador ha ganado la partida.
+     * Un jugador gana si se ha quedado sin fichas en su mano.
+     *
+     * @return true si la mano del jugador está vacía (ha ganado), false en caso contrario.
+     */
     public boolean haGanado() {
         return this.manoJugador.estaVacia();
     }
 
+    // Getters y Setters
     public Mano getManoJugador() {
         return manoJugador;
     }

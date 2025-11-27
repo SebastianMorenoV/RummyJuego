@@ -23,7 +23,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Envía comando al servidor para iniciar partida.
+ * Clase Modelo en el patrón MVC. Gestiona el estado local del juego, interactúa 
+ * con la Fachada de lógica de juego (juego) y maneja la comunicación de red 
+ * mediante el despachador.
  *
  * @author benja
  */
@@ -492,6 +494,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
         this.despachador = despachador;
     }
 
+    /**
+     * Establece la identificación única (ID) del cliente/jugador actual, 
+     * usada para construir los mensajes enviados al servidor.
+     */
     public void setMiId(String miId) {
         this.miId = miId;
     }

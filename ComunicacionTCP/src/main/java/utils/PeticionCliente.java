@@ -3,7 +3,11 @@ package utils;
 import java.net.Socket;
 
 /**
- * Contenedor para pasar la petición del "mesero" al "cocinero".
+ * Contenedor de datos utilizado para encapsular una petición 
+ * de red recibida por el servidor. 
+ * Se emplea para transferir los datos de la conexión desde el hilo de escucha 
+ * (`ServerTCP.iniciar`) al hilo de procesamiento de la cola, manteniendo 
+ * la referencia al socket para su posterior cierre.
  *
  * @author Sebastian Moreno
  */

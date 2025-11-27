@@ -1,4 +1,3 @@
-// Archivo: ServerTCP.java (Reemplaza completamente el anterior)
 package sockets;
 
 import utils.PeticionCliente;
@@ -11,8 +10,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Servidor TCP basado en cola (productor–consumidor). Evita bloqueos y permite
- * procesar muchas peticiones concurrentes.
+ * Servidor TCP basado en cola (patrón Productor–Consumidor). 
+ * Este diseño evita bloqueos en la recepción de conexiones y permite procesar 
+ * las peticiones de los clientes de forma asíncrona y concurrente.
  *
  * @author chris
  */
@@ -23,6 +23,13 @@ public class ServerTCP implements iListener {
     private volatile boolean ejecutando = true;
     private ServerSocket serverSocket;
 
+    /**
+     * Constructor. Inicializa el servidor y comienza el hilo dedicado al 
+     * procesamiento de la cola de mensajes.
+     *
+     * @param procesador La instancia de la lógica de procesamiento (Servidor o Cliente) 
+     * a la que se delegarán los mensajes recibidos.
+     */
     public ServerTCP(iProcesador procesador) {
         if (procesador == null) {
             throw new IllegalArgumentException("El procesador no puede ser nulo");
@@ -34,8 +41,13 @@ public class ServerTCP implements iListener {
     }
 
     /**
-     * El hilo del "Mesero". Su único trabajo es aceptar conexiones, leer el
-     * mensaje y ponerlo en la cola. Es súper rápido.
+     * Inicia la operación de escucha del servidor en el puerto especificado.
+     * Este método se ejecuta en el hilo productor (el hilo principal de escucha).
+     * Su función es aceptar conexiones entrantes, leer el mensaje y encolarlo 
+     * para su procesamiento.
+     *
+     * @param puerto El puerto de red en el que el servidor escuchará las conexiones entrantes.
+     * @throws IOException Si ocurre un error al abrir el ServerSocket o aceptar conexiones.
      */
     @Override
     public void iniciar(int puerto) throws IOException {
@@ -64,8 +76,9 @@ public class ServerTCP implements iListener {
     }
 
     /**
-     * El hilo del "Cocinero". Trabaja en segundo plano. Toma peticiones de la
-     * cola, las procesa y envía la respuesta.
+     * Ejecuta la lógica del hilo consumidor. 
+     * Este hilo se mantiene bloqueado (`take()`) esperando peticiones en la cola. 
+     * Una vez disponible, extrae el mensaje y llama al procesador de lógica delegado.
      */
    private void procesarCola() {
         System.out.println("[Procesador de Cola] Hilo de procesamiento (cocinero) iniciado.");

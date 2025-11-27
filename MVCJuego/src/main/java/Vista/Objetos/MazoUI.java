@@ -35,7 +35,6 @@ public class MazoUI extends JPanel implements MouseListener {
     }
 
     public MazoUI() {
-        // Constructor vacíO
     }
 
     /**

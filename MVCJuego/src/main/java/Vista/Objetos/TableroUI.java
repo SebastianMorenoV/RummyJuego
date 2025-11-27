@@ -371,10 +371,22 @@ public class TableroUI extends JPanel {
         ficha.setLocation(x, y);
     }
 
+    /**
+     * Metodo que regresa las fichas en el tablero que sean validas.
+     * (que forman parte 
+     * de grupos que ya han sido confirmados en turnos anteriores)
+     * @return 
+     */
     public Map<Integer, FichaUI> getFichasEnTableroValidas() {
         return fichasEnTableroValidas;
     }
 
+    /**Metodo que regresa todas las fichas que están actualmente colocadas 
+     * en el tablero, incluyendo tanto las fichas validadas como 
+     * las temporales del turno actual.
+     * 
+     * @return 
+     */
     public Map<Integer, FichaUI> getFichasEnTablero() {
         return fichasEnTablero;
     }

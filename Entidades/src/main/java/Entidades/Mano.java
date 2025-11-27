@@ -32,7 +32,7 @@ public class Mano {
      * Crea una copia profunda de la mano. Creando un nuevo arreglo filtrado por
      * un stream.
      *
-     * @return
+     * @return copia
      */
     public Mano copiaProfunda() {
         Mano copia = new Mano();

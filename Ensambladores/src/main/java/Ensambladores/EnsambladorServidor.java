@@ -9,19 +9,20 @@ import contratos.iProcesador;
 import contratos.iEnsambladorServidor;
 
 /**
- *
- * El "Jefe de Obra" de la red. Recibe los componentes del Servidor y les
- * conecta la red.
+ * Clase de utilidad (Factory) responsable de ensamblar la lógica del servidor
+ * con los componentes de la capa de comunicación (Red).
  *
  * @author chris
  */
 public class EnsambladorServidor implements iEnsambladorServidor {
 
     /**
-     * Este método conecta a los componentes La creación se hace en los Main.
+     * Este método conecta la lógica central del servidor mediante Procesador 
+     * configurado con la iPizarraJuego con el componente de escucha de red (ServerTCP).
      *
-     * @param pizarra
-     * @return
+     * @param pizarra La Pizarra de Juego que contiene el estado compartido y la lógica a procesar.
+     * @return Una instancia de {@link iListener} (ServerTCP) que gestionará la recepción 
+     * de comandos de los clientes.
      */
     @Override
     public iListener ensamblarRedServidor(
