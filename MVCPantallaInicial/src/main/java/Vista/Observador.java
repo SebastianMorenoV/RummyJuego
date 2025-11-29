@@ -1,6 +1,6 @@
 package Vista;
 
-import Eventos.Evento;
+import eventos.Evento;
 import Modelo.IModelo;
 
 /**

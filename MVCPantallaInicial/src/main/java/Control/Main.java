@@ -6,9 +6,14 @@ package Control;
 
 import Modelo.Modelo;
 import Vista.VistaLobby;
+import contratos.iNavegacion;
+import controlador.Controlador;
 import java.io.IOException;
 import java.net.Socket;
 import main.BlackBoardServer;
+import modelo.ModeloConfig;
+import modelo.iModeloConfig;
+import vista.ConfigurarPartida;
 
 /**
  *
@@ -23,11 +28,39 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Modelo modelo = new Modelo();
-        Control control = new Control(modelo);
-        VistaLobby vista = new VistaLobby(control);
-        
-        modelo.añadirObservador(vista);
+        // 1. Instanciamos el Modelo del primer MVC
+        Modelo modeloInicial = new Modelo();
+
+        // 2. Definimos qué pasa al navegar (Clase anónima o Lambda)
+        iNavegacion logicaNavegacion = new iNavegacion() {
+            @Override
+            public void iniciarConfiguracionPartida() {
+                // AQUI se crea y arranca el SEGUNDO MVC
+                System.out.println("Orquestador: Arrancando módulo Configurar Partida...");
+
+                // 1. Instancia (usando a interface)
+                iModeloConfig modeloConfig = new ModeloConfig();
+
+// 2. Controlador
+                Controlador controladorConfig = new Controlador(modeloConfig);
+
+// 3. Vista (A vista implementa Observador)
+                ConfigurarPartida vistaConfig = new ConfigurarPartida(controladorConfig);
+
+// 4. Ligar Observador (Agora funciona direto!)
+                modeloConfig.añadirObservador(vistaConfig);
+
+// 5. Iniciar
+                controladorConfig.iniciarCU();
+            }
+        };
+
+        // 3. Instanciamos el Control INYECTANDO la navegación
+        Control controlInicial = new Control(modeloInicial, logicaNavegacion);
+
+        // 4. Instanciamos la Vista y la ligamos (Control no sabe de Vista)
+        VistaLobby vistaLobby = new VistaLobby(controlInicial);
+        modeloInicial.añadirObservador(vistaLobby);
 
         iniciarServidorSiNoExiste();
 

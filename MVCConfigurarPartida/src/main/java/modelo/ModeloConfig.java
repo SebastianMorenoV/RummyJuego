@@ -4,20 +4,20 @@
  */
 package modelo;
 
-import eventos.Evento;
+import TipoEventos.EventoConfig;
 import java.util.ArrayList;
 import java.util.List;
-import vista.Observador;
+import vista.ObservadorConfig;
 
 /**
  *
  * @author benja
  */
-public class Modelo implements IModelo {
+public class ModeloConfig implements iModeloConfig {
 
-    List<Observador> observadores;
+    List<ObservadorConfig> observadores;
 
-    public Modelo() {
+    public ModeloConfig() {
         observadores = new ArrayList<>();
 
     }
@@ -27,16 +27,18 @@ public class Modelo implements IModelo {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    @Override
     public void iniciarCU(){
-        notificarObservadores(Evento.CREAR_PARTIDA);
+        notificarObservadores(EventoConfig.CREAR_PARTIDA);
     }
 
-    public void añadirObservador(Observador obs) {
+    @Override
+    public void añadirObservador(ObservadorConfig obs) {
         observadores.add(obs);
     }
 
-    public void notificarObservadores(Evento evento) {
-        for (Observador observador : observadores) {
+    public void notificarObservadores(EventoConfig evento) {
+        for (ObservadorConfig observador : observadores) {
             observador.actualiza(this, evento);
         }
     }

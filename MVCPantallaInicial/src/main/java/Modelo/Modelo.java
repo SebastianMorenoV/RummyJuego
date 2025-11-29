@@ -4,7 +4,7 @@
  */
 package Modelo;
 
-import Eventos.Evento;
+import eventos.Evento;
 import Vista.Observador;
 import java.util.ArrayList;
 import java.util.List;

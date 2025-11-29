@@ -5,7 +5,7 @@
 package Vista;
 
 import Control.Control;
-import Eventos.Evento;
+import eventos.Evento;
 import Modelo.IModelo;
 
 /**

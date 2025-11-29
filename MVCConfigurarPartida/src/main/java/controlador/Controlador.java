@@ -4,7 +4,8 @@
  */
 package controlador;
 
-import modelo.Modelo;
+import modelo.ModeloConfig;
+import modelo.iModeloConfig;
 
 /**
  *
@@ -12,13 +13,18 @@ import modelo.Modelo;
  */
 public class Controlador {
 
-    Modelo modelo;
-    public Controlador(Modelo modelo) {
-        this.modelo = new Modelo();
+    iModeloConfig modelo;
+
+    public Controlador(iModeloConfig modelo) {
+        this.modelo = modelo;
+    }
+
+    public void iniciarCU() {
+
     }
     
-   public void iniciarCU(){
-       modelo.iniciarCU();
-   } 
-   
+    public void configurarPartida(int comodines,int fichas){
+        System.out.println("Aqui le hablaremos al modelo y despues al blackboard.");
+    }
+
 }

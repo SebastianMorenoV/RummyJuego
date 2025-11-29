@@ -5,7 +5,8 @@
 package Control;
 
 import Modelo.Modelo;
-//import controlador.Controlador;
+import contratos.iNavegacion;
+import controlador.Controlador;
 
 /**
  *
@@ -14,20 +15,22 @@ import Modelo.Modelo;
 public class Control {
 
     Modelo modelo;
-    //Controlador control;
+    iNavegacion navegacion;
 
-    public Control(Modelo modelo) {
+    public Control(Modelo modelo, iNavegacion navegacion) {
+        this.navegacion = navegacion;
         this.modelo = modelo;
     }
-    
-    public void iniciarCreacionPartida(){
+
+    public void iniciarCreacionPartida() {
         modelo.iniciarCreacionPartida();
     }
 
-    public void casoUsoConfigurarPartida(){
+    public void casoUsoConfigurarPartida() {
         //control CU
-       //control.iniciarCU();
-        
+        if (this.navegacion != null) {
+            this.navegacion.iniciarConfiguracionPartida();
+        }
     }
-    
+
 }
