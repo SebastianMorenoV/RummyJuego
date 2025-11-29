@@ -9,5 +9,5 @@ package Modelo;
  * @author benja
  */
 public interface IModelo {
-    
+    public void getPartida();
 }

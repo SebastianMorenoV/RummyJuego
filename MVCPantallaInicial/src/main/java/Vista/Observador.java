@@ -1,13 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
 package Vista;
 
+import Eventos.Evento;
+import Modelo.IModelo;
+
 /**
+ * Clase que implementa la vista para obtener datos.
  *
  * @author benja
  */
 public interface Observador {
-    
+
+    void actualiza(IModelo modelo, Evento evento);
 }

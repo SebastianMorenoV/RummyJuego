@@ -14,9 +14,19 @@
             <artifactId>AbsoluteLayout</artifactId>
             <version>RELEASE260</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>BlackBoardServer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>MVCConfigurarPartida</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <properties>
-        <maven.compiler.release>24</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <exec.mainClass>com.itson.mvcsolicitarunirseapartida.MVCSolicitarUnirseAPartida</exec.mainClass>
     </properties>
     <name>MVCPantallaInicial</name>

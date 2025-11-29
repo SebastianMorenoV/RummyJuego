@@ -14,6 +14,7 @@
         <module>Ensambladores</module>
         <module>Interfaces</module>
         <module>MVCPantallaInicial</module>
+        <module>MVCConfigurarPartida</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

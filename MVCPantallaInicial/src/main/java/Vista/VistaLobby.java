@@ -4,16 +4,28 @@
  */
 package Vista;
 
+import Control.Control;
+import Eventos.Evento;
+import Modelo.IModelo;
+
 /**
  *
  * @author benja
  */
-public class VistaLobby extends javax.swing.JPanel implements Observador{
+public class VistaLobby extends javax.swing.JFrame implements Observador {
 
     /**
      * Creates new form VistaLobby
      */
-    public VistaLobby() {
+    Control control;
+
+    public VistaLobby(Control control) {
+        this.control = control;
+        this.setTitle("RummyKub | Vive la experiencia!");
+        this.setSize(920, 550);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
         initComponents();
     }
 
@@ -44,11 +56,15 @@ public class VistaLobby extends javax.swing.JPanel implements Observador{
 
         jButton1.setBackground(new java.awt.Color(255, 235, 126));
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(0, 0, 0));
         jButton1.setText("Crear partida");
         jButton1.setMaximumSize(new java.awt.Dimension(100, 30));
         jButton1.setMinimumSize(new java.awt.Dimension(100, 30));
         jButton1.setPreferredSize(new java.awt.Dimension(100, 30));
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton1MouseClicked(evt);
+            }
+        });
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -59,7 +75,6 @@ public class VistaLobby extends javax.swing.JPanel implements Observador{
 
         jButton2.setBackground(new java.awt.Color(255, 235, 126));
         jButton2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(0, 0, 0));
         jButton2.setText("Unirse a partida");
         jButton2.setMaximumSize(new java.awt.Dimension(100, 30));
         jButton2.setMinimumSize(new java.awt.Dimension(100, 30));
@@ -90,6 +105,10 @@ public class VistaLobby extends javax.swing.JPanel implements Observador{
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+        control.iniciarCreacionPartida();
+    }//GEN-LAST:event_jButton1MouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -97,4 +116,22 @@ public class VistaLobby extends javax.swing.JPanel implements Observador{
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void actualiza(IModelo modelo, Evento evento) {
+        switch (evento) {
+            case CREAR_PARTIDA:
+                
+                System.out.println("Viajando MVC CrearPartida");
+                this.setVisible(false);
+                control.casoUsoConfigurarPartida();
+                break;
+
+            case SOLICITAR_INICIO:
+
+                break;
+            default:
+                throw new AssertionError();
+        }
+    }
 }
