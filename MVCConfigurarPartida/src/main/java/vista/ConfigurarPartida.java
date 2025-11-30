@@ -183,7 +183,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         fondoRummy.setName(""); // NOI18N
         fondoRummy.setPreferredSize(new java.awt.Dimension(900, 500));
         getContentPane().add(fondoRummy);
-        fondoRummy.setBounds(-4, -4, 910, 510);
+        fondoRummy.setBounds(-4, -4, 910, 520);
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtCrearPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtCrearPartidaMouseClicked

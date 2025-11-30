@@ -6,6 +6,7 @@ package Control;
 
 import Modelo.Modelo;
 import Vista.VistaLobby;
+import contratos.iDespachador;
 import contratos.iNavegacion;
 import controlador.Controlador;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.net.Socket;
 import main.BlackBoardServer;
 import modelo.ModeloConfig;
 import modelo.iModeloConfig;
+import sockets.ClienteTCP;
 import vista.ConfigurarPartida;
 
 /**
@@ -40,17 +42,18 @@ public class Main {
 
                 // 1. Instancia (usando a interface)
                 iModeloConfig modeloConfig = new ModeloConfig();
-
-// 2. Controlador
+                iDespachador despachador = new ClienteTCP();
+                modeloConfig.setDespachador(despachador);
+                // 2. Controlador
                 Controlador controladorConfig = new Controlador(modeloConfig);
 
-// 3. Vista (A vista implementa Observador)
+                // 3. Vista (A vista implementa Observador)
                 ConfigurarPartida vistaConfig = new ConfigurarPartida(controladorConfig);
 
-// 4. Ligar Observador (Agora funciona direto!)
+                // 4. Ligar Observador (Agora funciona direto!)
                 modeloConfig.añadirObservador(vistaConfig);
 
-// 5. Iniciar
+                // 5. Iniciar
                 controladorConfig.iniciarCU();
             }
         };

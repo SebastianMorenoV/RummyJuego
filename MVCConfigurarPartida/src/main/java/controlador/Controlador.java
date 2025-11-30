@@ -24,7 +24,7 @@ public class Controlador {
     }
     
     public void configurarPartida(int comodines,int fichas){
-        System.out.println("Aqui le hablaremos al modelo y despues al blackboard.");
+        modelo.configurarPartida(comodines, fichas);
     }
 
 }

@@ -51,6 +51,11 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
 
         switch (evento) {
+            
+            case "CONFIGURAR_PARTIDA":
+                System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
+                //que deberia hacer aqui si todavia nadie se une?
+                break;
 
             case "JUGADOR_UNIDO":
                 String[] ipJugador = pizarra.getIpCliente();

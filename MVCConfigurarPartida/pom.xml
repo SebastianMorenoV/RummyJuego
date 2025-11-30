@@ -14,6 +14,11 @@
             <artifactId>AbsoluteLayout</artifactId>
             <version>RELEASE240</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Interfaces</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <properties>
         <maven.compiler.release>21</maven.compiler.release>

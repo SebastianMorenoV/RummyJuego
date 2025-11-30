@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
- * notifica al Controlador cuando hay un cambio de estado relevante.
- * Es el centro de datos y coordinación de eventos del lado del servidor.
+ * notifica al Controlador cuando hay un cambio de estado relevante. Es el
+ * centro de datos y coordinación de eventos del lado del servidor.
  *
  * @author chris
  */
@@ -22,18 +22,18 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String ultimoJugadorQueMovio;
     private int indiceTurnoActual;
     private String[] jugadorARegistrarTemporal;
-
+    private String[] configuracionPartida;
     private String mazoSerializado;
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
-        this.indiceTurnoActual = -1; 
+        this.indiceTurnoActual = -1;
         this.observadores = new ArrayList<>();
         this.mazoSerializado = "";
     }
 
     /**
-     * Agrega un nuevo observador (normalmente el ControladorBlackboard) para 
+     * Agrega un nuevo observador (normalmente el ControladorBlackboard) para
      * recibir notificaciones de eventos de la Pizarra.
      *
      * @param obs El observador a registrar.
@@ -45,8 +45,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Notifica a todos los observadores registrados sobre un evento que ha ocurrido 
-     * en la Pizarra.
+     * Notifica a todos los observadores registrados sobre un evento que ha
+     * ocurrido en la Pizarra.
      *
      * @param evento El nombre del evento ocurrido (p.ej., "JUGADOR_UNIDO").
      */
@@ -57,9 +57,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Registra temporalmente la información de conexión de un nuevo jugador 
-     * (ID, IP y Puerto) para que el Controlador/Directorio la procese.
-     * El ID del jugador también se añade a la orden de turnos.
+     * Registra temporalmente la información de conexión de un nuevo jugador
+     * (ID, IP y Puerto) para que el Controlador/Directorio la procese. El ID
+     * del jugador también se añade a la orden de turnos.
      *
      * @param id El ID del jugador a registrar.
      * @param payloadMano El payload que contiene la IP y el Puerto del cliente.
@@ -69,34 +69,58 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal = new String[3];
         String[] partes = payloadMano.split("\\$", 2);
         jugadorARegistrarTemporal[0] = id;
-        jugadorARegistrarTemporal[1] = partes[0]; 
+        jugadorARegistrarTemporal[1] = partes[0];
         jugadorARegistrarTemporal[2] = partes[1];
-
 
         ordenDeTurnos.add(id);
 
         notificarObservadores("JUGADOR_UNIDO");
-        jugadorARegistrarTemporal = null; 
+        jugadorARegistrarTemporal = null;
     }
 
     /**
      * Verifica si actualmente es el turno del jugador indicado.
      *
      * @param id El ID del jugador a verificar.
-     * @return true si el ID coincide con el jugador en el turno actual, false en caso contrario.
+     * @return true si el ID coincide con el jugador en el turno actual, false
+     * en caso contrario.
      */
     @Override
     public synchronized boolean esTurnoDe(String id) {
         if (indiceTurnoActual == -1) {
-            return false; 
+            return false;
         }
         return ordenDeTurnos.get(indiceTurnoActual).equals(id);
     }
 
     /**
-     * Avanza el índice de turno al siguiente jugador en el orden preestablecido 
-     * y notifica a los observadores que el turno avanzó.
-     * Si no hay partida iniciada, no hace nada.
+     * Metodo para configurar la partida, guarda los comodines y numero de
+     * fichas para que el Agente pueda usarlos.
+     *
+     * @param idCliente
+     * @param payload
+     */
+    public void configurarPartida(String idCliente, String payload) {
+        configuracionPartida = new String[2];
+
+        // CORRECCIÓN: Quita el ', 1' o cámbialo por ', 2'
+        String[] partes = payload.split("\\$");
+
+        // Validación extra de seguridad (opcional pero recomendada)
+        if (partes.length >= 2) {
+            configuracionPartida[0] = partes[0];
+            configuracionPartida[1] = partes[1];
+            System.out.println("[Pizarra] Configuración guardada: " + partes[0] + " comodines, " + partes[1] + " fichas.");
+            notificarObservadores("CONFIGURAR_PARTIDA");
+        } else {
+            System.err.println("[Pizarra] Error: Payload de configuración incompleto: " + payload);
+        }
+    }
+
+    /**
+     * Avanza el índice de turno al siguiente jugador en el orden preestablecido
+     * y notifica a los observadores que el turno avanzó. Si no hay partida
+     * iniciada, no hace nada.
      */
     @Override
     public synchronized void avanzarTurno() {
@@ -109,11 +133,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Valida las condiciones (2 a 4 jugadores) e inicia la partida, estableciendo 
-     * el índice de turno a cero.
+     * Valida las condiciones (2 a 4 jugadores) e inicia la partida,
+     * estableciendo el índice de turno a cero.
      *
-     * @return true si la partida se inicia correctamente, false si ya estaba iniciada 
-     * o no cumple con el número de jugadores.
+     * @return true si la partida se inicia correctamente, false si ya estaba
+     * iniciada o no cumple con el número de jugadores.
      */
     @Override
     public synchronized boolean iniciarPartidaSiCorresponde() {
@@ -136,8 +160,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Obtiene la información temporal (ID, IP y Puerto) del último cliente 
-     * que se intentó registrar.
+     * Obtiene la información temporal (ID, IP y Puerto) del último cliente que
+     * se intentó registrar.
      *
      * @return Un array de String con la información del cliente.
      */
@@ -160,8 +184,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Obtiene la última cadena serializada del tablero que fue enviada por un cliente.
-     * Se usa para comunicar movimientos (temporales o finales) a otros jugadores.
+     * Obtiene la última cadena serializada del tablero que fue enviada por un
+     * cliente. Se usa para comunicar movimientos (temporales o finales) a otros
+     * jugadores.
      *
      * @return La cadena serializada del tablero.
      */
@@ -202,6 +227,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
                     }
                     break;
+                case "CONFIGURAR_PARTIDA":
+                    System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");
+                    configurarPartida(idCliente, payload);
+                    break;
             }
         }
 
@@ -209,14 +238,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             switch (comando) {
                 case "MOVER":
                     this.ultimoJugadorQueMovio = idCliente;
-                    this.ultimoTableroSerializado = payload; 
+                    this.ultimoTableroSerializado = payload;
                     System.out.println("[Pizarra] " + idCliente + " movió (temporal).");
                     notificarObservadores("MOVIMIENTO");
-                    break; 
+                    break;
 
                 case "FINALIZAR_TURNO":
                     this.ultimoJugadorQueMovio = idCliente;
-                    this.ultimoTableroSerializado = payload; 
+                    this.ultimoTableroSerializado = payload;
                     System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
                     avanzarTurno();
                     break;
@@ -227,10 +256,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     System.out.println("[Pizarra] " + idCliente + " pidió tomar ficha.");
                     notificarObservadores("TOMAR_FICHA");
                     break;
-                    
+
                 default:
                     if (!comando.equals("REGISTRAR") && !comando.equals("INICIAR_PARTIDA")) {
-                         System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
+                        System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
                     }
                     break;
             }
@@ -238,8 +267,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Devuelve la lista de IDs de los jugadores en el orden en que se repartirán 
-     * los turnos.
+     * Devuelve la lista de IDs de los jugadores en el orden en que se
+     * repartirán los turnos.
      *
      * @return La lista de {@code String} con los IDs de los jugadores.
      */
@@ -249,7 +278,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Almacena el estado "tonto" del mazo, serializado como una larga cadena de texto.
+     * Almacena el estado "tonto" del mazo, serializado como una larga cadena de
+     * texto.
      *
      * @param mazo La cadena serializada del mazo (fichas separadas por "|").
      */
@@ -259,10 +289,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     /**
-     * Toma una ficha del mazo serializado "tonto" (extrae el primer elemento 
+     * Toma una ficha del mazo serializado "tonto" (extrae el primer elemento
      * separado por "|") y actualiza la cadena de mazo restante.
      *
-     * @return La cadena serializada de la ficha tomada, o null si el mazo está vacío.
+     * @return La cadena serializada de la ficha tomada, o null si el mazo está
+     * vacío.
      */
     @Override
     public String tomarFichaDelMazoSerializado() {
@@ -289,5 +320,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.mazoSerializado.split("\\|").length;
     }
 
-
+    public String[] getConfiguracionPartida() {
+        return configuracionPartida;
+    }
 }
