@@ -6,7 +6,8 @@ package Vista;
 
 import Control.Control;
 import eventos.Evento;
-import Modelo.IModelo;
+import javax.swing.JOptionPane;
+import Modelo.iModelo;
 
 /**
  *
@@ -39,8 +40,8 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
     private void initComponents() {
 
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnCrearPartida = new javax.swing.JButton();
+        btnUnirseAPartida = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
 
         setMaximumSize(new java.awt.Dimension(900, 500));
@@ -52,40 +53,40 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         jLabel2.setForeground(new java.awt.Color(246, 220, 105));
         jLabel2.setText("Rummy");
         getContentPane().add(jLabel2);
-        jLabel2.setBounds(340, 30, 220, 60);
+        jLabel2.setBounds(350, 30, 220, 60);
 
-        jButton1.setBackground(new java.awt.Color(255, 235, 126));
-        jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton1.setText("Crear partida");
-        jButton1.setMaximumSize(new java.awt.Dimension(100, 30));
-        jButton1.setMinimumSize(new java.awt.Dimension(100, 30));
-        jButton1.setPreferredSize(new java.awt.Dimension(100, 30));
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+        btnCrearPartida.setBackground(new java.awt.Color(255, 235, 126));
+        btnCrearPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnCrearPartida.setText("Crear partida");
+        btnCrearPartida.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnCrearPartida.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnCrearPartida.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnCrearPartida.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
+                btnCrearPartidaMouseClicked(evt);
             }
         });
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnCrearPartida.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnCrearPartidaActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton1);
-        jButton1.setBounds(320, 130, 280, 120);
+        getContentPane().add(btnCrearPartida);
+        btnCrearPartida.setBounds(320, 130, 280, 120);
 
-        jButton2.setBackground(new java.awt.Color(255, 235, 126));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton2.setText("Unirse a partida");
-        jButton2.setMaximumSize(new java.awt.Dimension(100, 30));
-        jButton2.setMinimumSize(new java.awt.Dimension(100, 30));
-        jButton2.setPreferredSize(new java.awt.Dimension(100, 30));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnUnirseAPartida.setBackground(new java.awt.Color(255, 235, 126));
+        btnUnirseAPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnUnirseAPartida.setText("Unirse a partida");
+        btnUnirseAPartida.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnUnirseAPartida.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnUnirseAPartida.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnUnirseAPartida.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnUnirseAPartidaActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton2);
-        jButton2.setBounds(320, 280, 280, 120);
+        getContentPane().add(btnUnirseAPartida);
+        btnUnirseAPartida.setBounds(320, 280, 280, 120);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/fondoRummy.jpg"))); // NOI18N
         jLabel1.setText("jLabel1");
@@ -97,47 +98,56 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         jLabel1.setBounds(6, 6, 900, 500);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnCrearPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearPartidaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnCrearPartidaActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void btnUnirseAPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnirseAPartidaActionPerformed
+        control.SolicitarUnirseAPartida();
+    }//GEN-LAST:event_btnUnirseAPartidaActionPerformed
 
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+    private void btnCrearPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCrearPartidaMouseClicked
         control.iniciarCreacionPartida();
-    }//GEN-LAST:event_jButton1MouseClicked
+    }//GEN-LAST:event_btnCrearPartidaMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnCrearPartida;
+    private javax.swing.JButton btnUnirseAPartida;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void actualiza(IModelo modelo, Evento evento) {
+    public void actualiza(iModelo modelo, Evento evento) {
         switch (evento) {
             case CREAR_PARTIDA:
-                
-                System.out.println("Viajando MVC CrearPartida");
                 this.setVisible(false);
                 control.casoUsoConfigurarPartida();
                 break;
 
-            case SOLICITAR_INICIO:
+            case ERROR_NO_HAY_PARTIDA:
+                JOptionPane.showMessageDialog(this,
+                        "No hay ninguna partida a la que unirse, puedes configurar y crear una si asi lo deseas.",
+                        "Información", JOptionPane.INFORMATION_MESSAGE);
                 break;
-            case SOLICITAR_UNIRSE_A_PARTIDA:
-                if(modelo.getPartida()==null){
-                    System.out.println("No hay partida a la que unirse");
-                }else{
-                System.out.println("Se solicito unirse a partida");
-                }
+
+            case ERROR_PARTIDA_INICIADA:
+                JOptionPane.showMessageDialog(this,
+                        "La partida ya está iniciada. No puedes unirte.",
+                        "Error", JOptionPane.WARNING_MESSAGE);
                 break;
-            default:
-                throw new AssertionError();
+
+            case UNION_RECHAZADA:
+                JOptionPane.showMessageDialog(this,
+                        "Tu solicitud de unirse a partida fue rechazada.",
+                        "Acceso Denegado", JOptionPane.ERROR_MESSAGE);
+                break;
+
+            case UNION_ACEPTADA:
+                JOptionPane.showMessageDialog(this, "¡Solicitud aceptada! Entrando a sala de espera...", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                this.setVisible(false);
+                break;
         }
     }
 }

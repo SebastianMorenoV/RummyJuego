@@ -27,6 +27,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] configuracionPartida;
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
+    private String candidatoIP;
+    private String candidatoPuerto;
+    private String candidatoID;
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
@@ -219,6 +222,27 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
+
+        if (comando.equals("SOLICITAR_UNION")) {
+            String[] datos = payload.split("\\$");
+            this.candidatoIP = datos[0];
+            this.candidatoPuerto = datos[1];
+            this.candidatoID = idCliente;
+
+            if (ordenDeTurnos.isEmpty()) {
+                System.out.println("[Pizarra] Rechazando solicitud: No hay partida creada.");
+                notificarObservadores("ERROR_NO_EXISTE_PARTIDA");
+
+            } else if (indiceTurnoActual != -1) {
+                System.out.println("[Pizarra] Rechazando solicitud: Partida ya iniciada.");
+                notificarObservadores("ERROR_PARTIDA_YA_INICIADA");
+
+            } else {
+                System.out.println("[Pizarra] Iniciando votación para aceptar a: " + idCliente);
+                notificarObservadores("SOLICITUD_VOTO_NUEVO_JUGADOR");
+            }
+            return;
+        }
         if (indiceTurnoActual == -1) {
             switch (comando) {
                 case "REGISTRAR":
@@ -234,6 +258,17 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");
                     configurarPartida(idCliente, payload);
                     break;
+                case "RESPUESTA_VOTO":
+                    boolean aceptado = Boolean.parseBoolean(payload);
+                    if (aceptado) {
+                        System.out.println("[Pizarra] Voto POSITIVO. Registrando a " + candidatoID);
+                        registrarJugador(candidatoID, candidatoIP + "$" + candidatoPuerto);
+                        notificarObservadores("UNION_EXITOSA");
+                    } else {
+                        System.out.println("[Pizarra] Voto NEGATIVO. Rechazando a " + candidatoID);
+                        notificarObservadores("UNION_RECHAZADA");
+                    }
+                    break;
             }
         }
 
@@ -248,21 +283,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
                 case "FINALIZAR_TURNO":
                     this.ultimoJugadorQueMovio = idCliente;
-                    // [NUEVA LÓGICA] Separar el tablero del contador de fichas usando "#"
-                    // El payload viene como: "GRUPO1;...$GRUPO2...#5"
                     String[] partesFinalizar = payload.split("#");
-
-                    // La parte 0 es el tablero serializado (lo de siempre)
                     this.ultimoTableroSerializado = partesFinalizar[0];
-
-                    // La parte 1 (si existe) es el número de fichas que le quedaron al jugador
                     if (partesFinalizar.length > 1) {
                         try {
                             int fichasRestantes = Integer.parseInt(partesFinalizar[1]);
-
-                            // Guardamos este dato en la Pizarra
                             setFichasJugador(idCliente, fichasRestantes);
-
                             System.out.println("[Pizarra] " + idCliente + " finalizó con " + fichasRestantes + " fichas.");
                         } catch (NumberFormatException e) {
                             System.err.println("[Pizarra] Error al leer número de fichas: " + e.getMessage());
@@ -342,7 +368,23 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         }
         return this.mazoSerializado.split("\\|").length;
     }
+    
+    @Override
+    public String getCandidatoIP() {
+        return candidatoIP;
+    }
 
+    @Override
+    public String getCandidatoPuerto() {
+        return candidatoPuerto;
+    }
+
+    @Override
+    public String getCandidatoID() {
+        return candidatoID;
+    }
+
+    @Override
     public String[] getConfiguracionPartida() {
         return configuracionPartida;
     }

@@ -51,6 +51,53 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
 
         switch (evento) {
+            case "ERROR_NO_EXISTE_PARTIDA":
+            {
+                try {
+                    despachador.enviar(pizarra.getCandidatoIP(), Integer.parseInt(pizarra.getCandidatoPuerto()),
+                            "RESPUESTA_UNION:NO_EXISTE");
+                } catch (IOException ex) {
+                    System.getLogger(ControladorBlackboard.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            }
+                break;
+
+
+            case "ERROR_PARTIDA_YA_INICIADA":
+            {
+                try {
+                    despachador.enviar(pizarra.getCandidatoIP(), Integer.parseInt(pizarra.getCandidatoPuerto()),
+                            "RESPUESTA_UNION:YA_INICIADA");
+                } catch (IOException ex) {
+                    System.getLogger(ControladorBlackboard.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            }
+                break;
+
+
+            case "SOLICITUD_VOTO_NUEVO_JUGADOR":
+                enviarATodos("PETICION_VOTO:" + pizarra.getCandidatoID());
+                break;
+
+            case "UNION_EXITOSA": {
+                try {
+                    despachador.enviar(pizarra.getCandidatoIP(), Integer.parseInt(pizarra.getCandidatoPuerto()),
+                            "RESPUESTA_UNION:ACEPTADO");
+                } catch (IOException ex) {
+                    System.getLogger(ControladorBlackboard.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            }
+            break;
+
+            case "UNION_RECHAZADA": {
+                try {
+                    despachador.enviar(pizarra.getCandidatoIP(), Integer.parseInt(pizarra.getCandidatoPuerto()),
+                            "RESPUESTA_UNION:RECHAZADO");
+                } catch (IOException ex) {
+                    System.getLogger(ControladorBlackboard.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            }
+            break;
 
             case "CONFIGURAR_PARTIDA":
                 System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");

@@ -7,7 +7,7 @@ import contratos.iDespachador;
 import contratos.iListener;
 import contratos.iEnsambladorCliente;
 import Ensambladores.EnsambladorCliente;
-import Util.Configuracion;
+import contratos.Configuracion;
 import java.io.IOException;
 import java.net.InetAddress;
 

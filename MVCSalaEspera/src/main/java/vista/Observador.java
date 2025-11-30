@@ -9,5 +9,6 @@ package vista;
  * @author benja
  */
 public interface Observador {
-    
+
+    void actualiza(String evento, Object datos);
 }

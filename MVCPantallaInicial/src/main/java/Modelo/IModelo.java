@@ -8,6 +8,6 @@ package Modelo;
  *
  * @author benja
  */
-public interface IModelo {
+public interface iModelo {
     public String getPartida();
 }

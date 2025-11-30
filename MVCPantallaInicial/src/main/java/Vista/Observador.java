@@ -1,7 +1,7 @@
 package Vista;
 
 import eventos.Evento;
-import Modelo.IModelo;
+import Modelo.iModelo;
 
 /**
  * Clase que implementa la vista para obtener datos.
@@ -10,5 +10,5 @@ import Modelo.IModelo;
  */
 public interface Observador {
 
-    void actualiza(IModelo modelo, Evento evento);
+    void actualiza(iModelo modelo, Evento evento);
 }

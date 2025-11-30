@@ -1,4 +1,4 @@
-package Util;
+package contratos;
 
 /**
  * Clase de soporte que almacena la configuración de conexión 

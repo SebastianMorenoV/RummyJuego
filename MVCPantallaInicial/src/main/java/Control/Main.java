@@ -4,9 +4,13 @@
  */
 package Control;
 
+import Ensambladores.EnsambladorCliente;
 import Modelo.Modelo;
 import Vista.VistaLobby;
+import contratos.Configuracion;
 import contratos.iDespachador;
+import contratos.iEnsambladorCliente;
+import contratos.iListener;
 import contratos.iNavegacion;
 import controlador.Controlador;
 import java.io.IOException;
@@ -16,6 +20,7 @@ import modelo.ModeloConfig;
 import modelo.iModeloConfig;
 import sockets.ClienteTCP;
 import vista.ConfigurarPartida;
+import Modelo.iModelo;
 
 /**
  *
@@ -27,17 +32,30 @@ public class Main {
      * @param args the command line arguments
      */
     private static final int PUERTO_SERVER = 5000;
+    private static final int PUERTO_CLIENTE_INICIAL = 9002;
 
     public static void main(String[] args) {
 
         // 1. Instanciamos el Modelo del primer MVC
         Modelo modeloInicial = new Modelo();
+        iEnsambladorCliente ensamblador = new EnsambladorCliente();
 
-        // 2. Definimos qué pasa al navegar (Clase anónima o Lambda)
+        iDespachador despachador = ensamblador.crearDespachador(Configuracion.getIpServidor(), Configuracion.getPuerto());
+
+        modeloInicial.setDespachador(despachador);
+        iListener listener = ensamblador.crearListener("ClienteInicial", modeloInicial);
+
+        new Thread(() -> {
+            try {
+                listener.iniciar(PUERTO_CLIENTE_INICIAL);
+            } catch (IOException e) {
+                System.err.println("Error al iniciar listener: " + e.getMessage());
+            }
+        }).start();
+
         iNavegacion logicaNavegacion = new iNavegacion() {
             @Override
             public void iniciarConfiguracionPartida() {
-                // AQUI se crea y arranca el SEGUNDO MVC
                 System.out.println("Orquestador: Arrancando módulo Configurar Partida...");
 
                 // 1. Instancia (usando a interface)
@@ -56,6 +74,8 @@ public class Main {
                 // 5. Iniciar
                 controladorConfig.iniciarCU();
             }
+
+           
         };
 
         // 3. Instanciamos el Control INYECTANDO la navegación

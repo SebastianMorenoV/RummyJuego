@@ -4,18 +4,20 @@
  */
 package vista;
 
+import control.ControlSalaEspera;
+import javax.swing.JOptionPane;
 /**
  *
  * @author benja
  */
 public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VistaSalaEspera.class.getName());
-
+    private ControlSalaEspera control;
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera() {
+    public VistaSalaEspera(ControlSalaEspera control) {
+        this.control=control;
         initComponents();
     }
 
@@ -59,31 +61,24 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+@Override
+    public void actualiza(String evento, Object datos) {
+        
+        if (evento.equals("MOSTRAR_VOTACION")) {
+            String nombreCandidato = (String) datos;
+            
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                    "El jugador " + nombreCandidato + " desea unirse a la partida.\n¿Lo permites?",
+                    "Solicitud de Unión",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+            boolean aceptado = (respuesta == JOptionPane.YES_OPTION);
+            
+            control.enviarVoto(aceptado);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VistaSalaEspera().setVisible(true));
     }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
