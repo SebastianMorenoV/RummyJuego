@@ -31,7 +31,7 @@ public class main3 {
 
         String miId = "Jugador3";
         int puertoServidor = 5000;
-        int miPuertoDeEscucha = 9001;
+        int miPuertoDeEscucha = 900;
 
         System.out.println("[Main] Iniciando ensamblaje de red...");
 

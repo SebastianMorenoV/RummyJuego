@@ -12,10 +12,10 @@ import pizarra.EstadoJuegoPizarra;
 import contratos.iAgentePartida;
 
 /**
- * Controlador principal para la arquitectura Blackboard en el servidor.
- * Escucha los cambios notificados por la Pizarra de Juego  y
- * reacciona a estos eventos orquestando acciones entre el Directorio,
- * el Agente de Partida y el Despachador de red.
+ * Controlador principal para la arquitectura Blackboard en el servidor. Escucha
+ * los cambios notificados por la Pizarra de Juego y reacciona a estos eventos
+ * orquestando acciones entre el Directorio, el Agente de Partida y el
+ * Despachador de red.
  *
  * @author Sebas
  */
@@ -37,12 +37,12 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * Método invocado por la Pizarra (Blackboard) cuando ocurre un cambio de estado 
-     * significativo que requiere una respuesta del servidor.
-     * Implementa el patrón Observer.
+     * Método invocado por la Pizarra (Blackboard) cuando ocurre un cambio de
+     * estado significativo que requiere una respuesta del servidor. Implementa
+     * el patrón Observer.
      *
      * @param pizarra La Pizarra de Juego que notifica el cambio.
-     * @param evento El tipo de evento ocurrido. 
+     * @param evento El tipo de evento ocurrido.
      */
     @Override
     public void actualiza(iPizarraJuego pizarra, String evento) {
@@ -51,7 +51,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
 
         switch (evento) {
-            
+
             case "CONFIGURAR_PARTIDA":
                 System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
                 //que deberia hacer aqui si todavia nadie se une?
@@ -99,7 +99,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 enviarATurnosInactivos(jugadorQueMovio, mensajeMovimiento);
                 break;
 
-            case "AVANZAR_TURNO": 
+            case "AVANZAR_TURNO":
                 System.out.println("[Controlador] Evento AVANZAR_TURNO detectado.");
 
                 String mensajeMovimientoFinal = "ESTADO_FINAL_TABLERO:" + ultimoPayload;
@@ -115,6 +115,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 if (fichaSerializada != null) {
                     enviarMensajeDirecto(jugadorQueMovio, "FICHA_RECIBIDA:" + fichaSerializada);
+                    // 2. NUEVO: Actualizar contador en pizarra (+1 ficha)
+                    ((EstadoJuegoPizarra) pizarra).incrementarFichasJugador(jugadorQueMovio);
                 }
 
                 pizarra.avanzarTurno();
@@ -126,7 +128,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     }
 
     /**
-     * Lee el jugador que tiene el turno actual y el conteo de fichas restantes 
+     * Lee el jugador que tiene el turno actual y el conteo de fichas restantes
      * en el mazo, y notifica esta información a todos los clientes.
      *
      * @param pizarra La Pizarra de Juego para obtener el estado actual.
@@ -136,9 +138,10 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String nuevoJugadorEnTurno = pizarra.getJugador();
         int mazoCount = ((EstadoJuegoPizarra) pizarra).getMazoSerializadoCount();
 
+        String contadores = ((EstadoJuegoPizarra) pizarra).getFichasJugadoresSerializado();
         if (nuevoJugadorEnTurno != null) {
             System.out.println("[Controlador] Notificando cambio de turno a: " + nuevoJugadorEnTurno);
-            String mensajeTurno = "TURNO_CAMBIADO:" + nuevoJugadorEnTurno + ":" + mazoCount;
+            String mensajeTurno = "TURNO_CAMBIADO:" + nuevoJugadorEnTurno + ":" + mazoCount + ":" + contadores;
             enviarATodos(mensajeTurno);
         }
     }
@@ -146,8 +149,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     /**
      * Envía un mensaje a todos los jugadores registrados en el directorio.
      *
-     * Se usa para eventos globales como: inicio de partida, cambio de turno,
-     * y el estado final del tablero.
+     * Se usa para eventos globales como: inicio de partida, cambio de turno, y
+     * el estado final del tablero.
      *
      * @param mensaje El contenido serializado del mensaje a enviar.
      */
@@ -170,8 +173,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     /**
      * Envía un mensaje solo a los jugadores que no realizaron la jugada.
      *
-     * Se utiliza para enviar movidas temporales a los observadores,
-     * o enviar el estado final del tablero a los oponentes.
+     * Se utiliza para enviar movidas temporales a los observadores, o enviar el
+     * estado final del tablero a los oponentes.
      *
      * @param jugadorQueEnvio El ID del jugador que inició la acción.
      * @param mensaje El contenido serializado del mensaje a enviar.
@@ -196,7 +199,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
      * Envía un mensaje directo a un jugador específico utilizando su ID.
      *
      * Se usa para acciones privadas: enviar mano inicial, enviar ficha tomada
-     * del mazo, o comandos exclusivos (como la orden de INICIAR_PARTIDA al host).
+     * del mazo, o comandos exclusivos (como la orden de INICIAR_PARTIDA al
+     * host).
      *
      * @param idJugador El ID del jugador al que se enviará el mensaje.
      * @param mensaje El contenido serializado del mensaje a enviar.

@@ -16,15 +16,17 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Clase Modelo en el patrón MVC. Gestiona el estado local del juego, interactúa 
- * con la Fachada de lógica de juego (juego) y maneja la comunicación de red 
+ * Clase Modelo en el patrón MVC. Gestiona el estado local del juego, interactúa
+ * con la Fachada de lógica de juego (juego) y maneja la comunicación de red
  * mediante el despachador.
  *
  * @author benja
@@ -35,6 +37,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private final IJuegoRummy juego;
     private List<GrupoDTO> gruposDeTurnoDTO;
     private List<GrupoDTO> gruposDTOAlInicioDelTurno;
+    private Map<String, Integer> conteoFichasRivales = new HashMap<>();
+    private String idJugadorEnTurnoGlobal = "";
     private boolean esMiTurno;
     private iDespachador despachador;
     private String miId;
@@ -123,6 +127,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
             case "TURNO_CAMBIADO":
                 System.out.println("[Modelo] Evento 'TURNO_CAMBIADO' detectado! Payload: " + payloadd);
                 String[] partesTurno = payloadd.split(":");
+                this.idJugadorEnTurnoGlobal = partesTurno[0];
                 String nuevoJugadorId = partesTurno[0];
                 this.esMiTurno = nuevoJugadorId.equals(this.miId);
 
@@ -131,6 +136,17 @@ public class Modelo implements IModelo, PropertyChangeListener {
                         this.mazoFichasRestantes = Integer.parseInt(partesTurno[1]);
                     } catch (NumberFormatException e) {
                         System.err.println("[Modelo] Error al parsear conteo del mazo en TURNO_CAMBIADO");
+                    }
+                }
+
+                if (partesTurno.length > 2) {
+                    String dataContadores = partesTurno[2]; // "J1=14;J2=13;"
+                    String[] pares = dataContadores.split(";");
+                    for (String par : pares) {
+                        String[] kv = par.split("=");
+                        if (kv.length == 2) {
+                            conteoFichasRivales.put(kv[0], Integer.parseInt(kv[1]));
+                        }
                     }
                 }
 
@@ -248,11 +264,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
         if (jugadaFueValida) {
-            
+
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
             try {
                 String payloadJuego = serializarJuegoFinal();
-                String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego;
+                int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
+                String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
                 this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
             } catch (IOException ex) {
                 Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
@@ -358,7 +375,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 Iterator<FichaJuegoDTO> iter = grupoDTO.getFichasGrupo().iterator();
                 while (iter.hasNext()) {
                     if (iter.next().getIdFicha() == idFicha) {
-                        iter.remove(); 
+                        iter.remove();
                         grupoDTO.setCantidad(grupoDTO.getFichasGrupo().size());
                         fichaEncontrada = true;
                         break;
@@ -411,11 +428,46 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         dto.setFichasMazo(this.mazoFichasRestantes);
 
-        if (juego.getJugadorActual() != null) {
-            dto.setJugadorActual(juego.getJugadorActual().getNickname());
-        } else {
-            dto.setJugadorActual("...");
+        // Obtener nombre del jugador actual (quien tiene el turno)
+        String nombreJugadorActual = (juego.getJugadorActual() != null)
+                ? juego.getJugadorActual().getNickname()
+                : "...";
+       dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
+
+        // --- CORRECCIÓN PRINCIPAL: Llenar la lista de jugadores ---
+        List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
+
+        // Lista de IDs que existen en tu juego (Debería venir del servidor, 
+        // pero para que funcione visualmente ahora, usaremos los fijos).
+        String[] idsTodosLosJugadores = {"Jugador1", "Jugador2", "Jugador3", "Jugador4"};
+
+        for (String id : idsTodosLosJugadores) {
+            DTO.JugadorDTO jugadorDto = new DTO.JugadorDTO();
+            jugadorDto.setNombre(id);
+
+            // Determinar si es turno de este ID
+            boolean esSuTurno = id.equals(nombreJugadorActual);
+            jugadorDto.setEsTurno(esSuTurno);
+
+            // Actualizar fichas:
+            // Si soy YO (miId), obtengo el dato real de mi mano.
+            if (id.equals(this.miId)) {
+                // Lógica existente para MI mano
+                int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
+                jugadorDto.setFichasRestantes(cantidad);
+            } else {
+                // Lógica NUEVA para rivales
+                // Si el mapa tiene el dato, lo usa. Si no, pone 14 por defecto.
+                int cantidadRival = conteoFichasRivales.getOrDefault(id, 14);
+                jugadorDto.setFichasRestantes(cantidadRival);
+            }
+
+            listaJugadoresDTO.add(jugadorDto);
         }
+
+        // ¡IMPORTANTE! Asignar la lista al DTO
+        dto.setJugadores(listaJugadoresDTO);
+
         return dto;
     }
 
@@ -495,8 +547,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Establece la identificación única (ID) del cliente/jugador actual, 
-     * usada para construir los mensajes enviados al servidor.
+     * Establece la identificación única (ID) del cliente/jugador actual, usada
+     * para construir los mensajes enviados al servidor.
      */
     public void setMiId(String miId) {
         this.miId = miId;

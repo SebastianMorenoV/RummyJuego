@@ -5,7 +5,9 @@ import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
@@ -24,6 +26,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] jugadorARegistrarTemporal;
     private String[] configuracionPartida;
     private String mazoSerializado;
+    private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
@@ -245,7 +248,27 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
                 case "FINALIZAR_TURNO":
                     this.ultimoJugadorQueMovio = idCliente;
-                    this.ultimoTableroSerializado = payload;
+                    // [NUEVA LÓGICA] Separar el tablero del contador de fichas usando "#"
+                    // El payload viene como: "GRUPO1;...$GRUPO2...#5"
+                    String[] partesFinalizar = payload.split("#");
+
+                    // La parte 0 es el tablero serializado (lo de siempre)
+                    this.ultimoTableroSerializado = partesFinalizar[0];
+
+                    // La parte 1 (si existe) es el número de fichas que le quedaron al jugador
+                    if (partesFinalizar.length > 1) {
+                        try {
+                            int fichasRestantes = Integer.parseInt(partesFinalizar[1]);
+
+                            // Guardamos este dato en la Pizarra
+                            setFichasJugador(idCliente, fichasRestantes);
+
+                            System.out.println("[Pizarra] " + idCliente + " finalizó con " + fichasRestantes + " fichas.");
+                        } catch (NumberFormatException e) {
+                            System.err.println("[Pizarra] Error al leer número de fichas: " + e.getMessage());
+                        }
+                    }
+
                     System.out.println("[Pizarra] " + idCliente + " finalizó turno.");
                     avanzarTurno();
                     break;
@@ -322,5 +345,26 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
     public String[] getConfiguracionPartida() {
         return configuracionPartida;
+    }
+
+    // NUEVO: Método para inicializar o actualizar fichas
+    public void setFichasJugador(String id, int cantidad) {
+        fichasPorJugador.put(id, cantidad);
+    }
+
+    // NUEVO: Método para sumar 1 ficha (cuando alguien come)
+    public void incrementarFichasJugador(String id) {
+        if (fichasPorJugador.containsKey(id)) {
+            fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
+        }
+    }
+
+    // NUEVO: Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
+    public String getFichasJugadoresSerializado() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Integer> entry : fichasPorJugador.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+        }
+        return sb.toString();
     }
 }

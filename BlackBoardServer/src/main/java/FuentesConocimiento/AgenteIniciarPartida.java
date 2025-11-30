@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 import pizarra.EstadoJuegoPizarra;
 
 /**
- * Fuente de Conocimiento virtual experta en "Iniciar Partida".
- * Este agente es responsable de inicializar el estado del juego (crear mazo, repartir
- * fichas) cuando se recibe el comando de inicio de partida.
+ * Fuente de Conocimiento virtual experta en "Iniciar Partida". Este agente es
+ * responsable de inicializar el estado del juego (crear mazo, repartir fichas)
+ * cuando se recibe el comando de inicio de partida.
  *
  * @author benja
  */
@@ -46,15 +46,16 @@ public class AgenteIniciarPartida implements iAgentePartida {
         for (String id : jugadorIds) {
             List<Ficha> mano = new ArrayList<>();
             for (int i = 0; i < 14; i++) {
-                Ficha ficha = this.tableroDeJuego.tomarFichaMazo(); 
+                Ficha ficha = this.tableroDeJuego.tomarFichaMazo();
                 if (ficha != null) {
                     mano.add(ficha);
                 }
+                pizarra.setFichasJugador(id, 14); //MODIFICAR AQUI DEPENDIENDO DE LO QUE YA HAY EN BLACKBOARD
             }
 
             String manoPayload = mano.stream()
-                    .map(this::convertirFichaADTO) 
-                    .map(FichaJuegoDTO::serializar) 
+                    .map(this::convertirFichaADTO)
+                    .map(FichaJuegoDTO::serializar)
                     .collect(Collectors.joining("|"));
 
             manosSerializadas.put(id, manoPayload);
@@ -64,10 +65,12 @@ public class AgenteIniciarPartida implements iAgentePartida {
     }
 
     /**
-     * Establece la representación serializada del mazo en la Pizarra (Blackboard), 
-     * permitiendo que otros agentes y procesos accedan al estado del mazo restante.
+     * Establece la representación serializada del mazo en la Pizarra
+     * (Blackboard), permitiendo que otros agentes y procesos accedan al estado
+     * del mazo restante.
      *
-     * @param mazoSerializado Una cadena que representa el mazo restante (Fichas separadas por "|").
+     * @param mazoSerializado Una cadena que representa el mazo restante (Fichas
+     * separadas por "|").
      */
     @Override
     public void setMazoSerializado(String mazoSerializado) {

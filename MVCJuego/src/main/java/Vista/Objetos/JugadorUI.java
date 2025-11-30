@@ -19,6 +19,7 @@ public class JugadorUI extends JPanel {
     private BufferedImage avatarImage;
     private int fichasRestantes;
     private String nombreJugador;
+    private boolean esTuTurno = false;
 
     public JugadorUI(String nombreJugador, int fichasRestantes, byte[] imagenAvatarBytes) {
         this.nombreJugador = nombreJugador;
@@ -59,8 +60,13 @@ public class JugadorUI extends JPanel {
 
         g2d.setColor(new Color(210, 180, 140));
         g2d.fillRoundRect(cardX, cardY, cardWidth, cardHeight, cornerRadius, cornerRadius);
-        g2d.setColor(new Color(150, 120, 90));
-        g2d.setStroke(new BasicStroke(3));
+        if (this.esTuTurno) {
+            g2d.setColor(Color.GREEN); // Color verde para el turno activo
+            g2d.setStroke(new BasicStroke(5)); // Borde más grueso para resaltar
+        } else {
+            g2d.setColor(new Color(150, 120, 90)); // Color original (café)
+            g2d.setStroke(new BasicStroke(3)); // Grosor original
+        }
         g2d.drawRoundRect(cardX, cardY, cardWidth, cardHeight, cornerRadius, cornerRadius);
 
         int avatarSize = (int) (cardWidth * 0.5);
@@ -156,4 +162,10 @@ public class JugadorUI extends JPanel {
 
         repaint();
     }
+
+    public void setEsTuTurno(boolean esTuTurno) {
+        this.esTuTurno = esTuTurno;
+        repaint();
+    }
 }
+    

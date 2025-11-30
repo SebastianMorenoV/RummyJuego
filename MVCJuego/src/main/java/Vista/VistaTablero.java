@@ -44,6 +44,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
+    private java.util.Map<String, JugadorUI> mapaJugadoresUI = new java.util.HashMap<>();
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -177,6 +178,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         habilitarControles(dto.esMiTurno());
 
+        DTO.JuegoDTO estadoJuego = modelo.getTablero();
+
+        if (estadoJuego != null) {
+            actualizarEstadoJugadores(estadoJuego);
+        }
         switch (dto.getTipoEvento()) {
             case CAMBIO_DE_TURNO:
                 if (dto.esMiTurno()) {
@@ -219,9 +225,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     tableroUI.revertirCambiosVisuales();
                 }
                 break;
-                
+
             case TOMO_FICHA:
                 repintarMazo(modelo);
+                if (estadoJuego != null) {
+                    actualizarEstadoJugadores(estadoJuego);
+                }
                 break;
 
             case NO_ES_MI_TURNO:
@@ -264,25 +273,29 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             Path path = new File(rutaImagen).toPath();
             byte[] imagenAvatarBytes = Files.readAllBytes(path);
 
-            JugadorUI jugador1 = new JugadorUI("Sebastian", 7, imagenAvatarBytes);
+            JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
             jugador1.setSize(130, 130);
             jugador1.setLocation(-10, -10);
             GUIjuego.add(jugador1);
+            mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
 
-            JugadorUI jugador2 = new JugadorUI("Benjamin", 15, imagenAvatarBytes);
+            JugadorUI jugador2 = new JugadorUI("Jugador2", 14, imagenAvatarBytes);
             jugador2.setSize(130, 130);
             jugador2.setLocation(-10, 380);
             GUIjuego.add(jugador2);
+            mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
 
-            JugadorUI jugador3 = new JugadorUI("Luciano", 10, imagenAvatarBytes);
+            JugadorUI jugador3 = new JugadorUI("Jugador3", 14, imagenAvatarBytes);
             jugador3.setSize(130, 130);
             jugador3.setLocation(780, -10);
             GUIjuego.add(jugador3);
+            mapaJugadoresUI.put("Jugador3", jugador3);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
 
-            JugadorUI jugador4 = new JugadorUI("Mr.Fitch", 5, imagenAvatarBytes);
+            JugadorUI jugador4 = new JugadorUI("Jugador4", 14, imagenAvatarBytes);
             jugador4.setSize(130, 130);
             jugador4.setLocation(780, 380);
             GUIjuego.add(jugador4);
+            mapaJugadoresUI.put("Jugador4", jugador4);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
 
         } catch (IOException e) {
             System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
@@ -330,7 +343,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (manoUI == null) {
             manoUI = new ManoUI();
             manoUI.setLocation(160, 380);
-            manoUI.setSize(580, 120); 
+            manoUI.setSize(580, 120);
 
             JScrollPane scrollPane = new JScrollPane(
                     manoUI,
@@ -349,7 +362,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setColor(Color.WHITE); 
+                    g2.setColor(Color.WHITE);
                     g2.fillRoundRect(
                             thumbBounds.x + (thumbBounds.width / 8),
                             thumbBounds.y,
@@ -387,7 +400,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
             verticalBar.setOpaque(false);
 
-            verticalBar.setPreferredSize(new Dimension(10, 0)); 
+            verticalBar.setPreferredSize(new Dimension(10, 0));
 
             scrollPane.setBounds(160, 380, 580, 120);
             scrollPane.setBorder(null);
@@ -558,8 +571,35 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
 
     /**
-     * Obtiene el panel de interfaz de usuario (UI) que representa visualmente el tablero de juego.
-     * Este panel contiene los grupos de fichas colocados por los jugadores.
+     * Método auxiliar para actualizar bordes y contadores de TODOS los
+     * jugadores
+     */
+    private void actualizarEstadoJugadores(DTO.JuegoDTO estadoJuego) {
+        String nombreJugadorEnTurno = estadoJuego.getJugadorActual();
+        List<DTO.JugadorDTO> listaJugadores = estadoJuego.getJugadores();
+
+        if (listaJugadores == null) {
+            return; // Ahora esto no será null
+        }
+        for (DTO.JugadorDTO jDto : listaJugadores) {
+            // Ahora buscará "Jugador1" en el mapa y SI lo encontrará
+            JugadorUI ui = mapaJugadoresUI.get(jDto.getNombre());
+
+            if (ui != null) {
+                ui.setFichasRestantes(jDto.getFichasRestantes());
+
+                // Esto activará el borde verde
+                boolean esSuTurno = jDto.getNombre().equals(nombreJugadorEnTurno);
+                ui.setEsTuTurno(esSuTurno);
+            }
+        }
+    }
+
+    /**
+     * Obtiene el panel de interfaz de usuario (UI) que representa visualmente
+     * el tablero de juego. Este panel contiene los grupos de fichas colocados
+     * por los jugadores.
+     *
      * * @return El objeto TableroUI que es el componente visual del tablero.
      */
     public TableroUI getPanelTablero() {
@@ -567,9 +607,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }
 
     /**
-     * Obtiene el panel de interfaz de usuario (UI) que representa visualmente la mano
-     * o área de fichas del jugador actual.
-     * * @return El objeto ManoUI que es el componente visual de la mano del jugador.
+     * Obtiene el panel de interfaz de usuario (UI) que representa visualmente
+     * la mano o área de fichas del jugador actual.
+     *
+     * * @return El objeto ManoUI que es el componente visual de la mano del
+     * jugador.
      */
     public ManoUI getPanelMano() {
         return this.manoUI;
