@@ -23,14 +23,15 @@ public class Modelo implements IModelo {
     }
     
     @Override
-    public void getPartida() {
+    public String getPartida() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
+    public void SolicitarUnirseApartida(){
+        notificarObservadores(Evento.SOLICITAR_UNIRSE_A_PARTIDA);
+    }
+    
     public void iniciarCreacionPartida() {
-        // VERIFICACIONES NECESARIAS.
-
-        //
         notificarObservadores(Evento.CREAR_PARTIDA);
         
     }

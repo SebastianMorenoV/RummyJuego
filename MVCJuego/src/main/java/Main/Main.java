@@ -26,12 +26,11 @@ public class Main {
         modelo.agregarObservador(vistaJugador1);
 
         String miId = "Jugador1";
-        String ipServidor = "192.168.100.98";
         int puertoServidor = 5000;
         int miPuertoDeEscucha = 9005;
 
         iEnsambladorCliente ensamblador = new EnsambladorCliente();
-        iDespachador despachador = ensamblador.crearDespachador(ipServidor, puertoServidor);
+        iDespachador despachador = ensamblador.crearDespachador(Configuracion.getIpServidor(), puertoServidor);
         iListener listener = ensamblador.crearListener(miId, modelo);
 
         modelo.setDespachador(despachador);

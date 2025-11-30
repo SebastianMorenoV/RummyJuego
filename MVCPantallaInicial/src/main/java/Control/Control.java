@@ -6,7 +6,6 @@ package Control;
 
 import Modelo.Modelo;
 import contratos.iNavegacion;
-import controlador.Controlador;
 
 /**
  *
@@ -25,9 +24,10 @@ public class Control {
     public void iniciarCreacionPartida() {
         modelo.iniciarCreacionPartida();
     }
-
+    public void SolicitarUnirseAPartida(){
+        modelo.SolicitarUnirseApartida();
+    }
     public void casoUsoConfigurarPartida() {
-        //control CU
         if (this.navegacion != null) {
             this.navegacion.iniciarConfiguracionPartida();
         }

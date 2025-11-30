@@ -11,5 +11,6 @@ package eventos;
 public enum Evento {
     CREAR_PARTIDA,
     SOLICITAR_INICIO,
+    SOLICITAR_UNIRSE_A_PARTIDA,
     ALGO_DIFERENTES
 }

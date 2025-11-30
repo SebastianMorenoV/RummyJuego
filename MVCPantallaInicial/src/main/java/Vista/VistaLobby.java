@@ -46,12 +46,12 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         setMaximumSize(new java.awt.Dimension(900, 500));
         setMinimumSize(new java.awt.Dimension(900, 500));
         setPreferredSize(new java.awt.Dimension(900, 500));
-        setLayout(null);
+        getContentPane().setLayout(null);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 60)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(246, 220, 105));
         jLabel2.setText("Rummy");
-        add(jLabel2);
+        getContentPane().add(jLabel2);
         jLabel2.setBounds(340, 30, 220, 60);
 
         jButton1.setBackground(new java.awt.Color(255, 235, 126));
@@ -70,7 +70,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
                 jButton1ActionPerformed(evt);
             }
         });
-        add(jButton1);
+        getContentPane().add(jButton1);
         jButton1.setBounds(320, 130, 280, 120);
 
         jButton2.setBackground(new java.awt.Color(255, 235, 126));
@@ -84,7 +84,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
                 jButton2ActionPerformed(evt);
             }
         });
-        add(jButton2);
+        getContentPane().add(jButton2);
         jButton2.setBounds(320, 280, 280, 120);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/fondoRummy.jpg"))); // NOI18N
@@ -93,7 +93,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         jLabel1.setMinimumSize(new java.awt.Dimension(900, 500));
         jLabel1.setName(""); // NOI18N
         jLabel1.setPreferredSize(new java.awt.Dimension(900, 500));
-        add(jLabel1);
+        getContentPane().add(jLabel1);
         jLabel1.setBounds(6, 6, 900, 500);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -128,7 +128,13 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
                 break;
 
             case SOLICITAR_INICIO:
-
+                break;
+            case SOLICITAR_UNIRSE_A_PARTIDA:
+                if(modelo.getPartida()==null){
+                    System.out.println("No hay partida a la que unirse");
+                }else{
+                System.out.println("Se solicito unirse a partida");
+                }
                 break;
             default:
                 throw new AssertionError();
