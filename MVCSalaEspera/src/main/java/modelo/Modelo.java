@@ -7,6 +7,8 @@ package modelo;
 import Dtos.ActualizacionDTO;
 import Util.Configuracion;
 import contratos.iDespachador;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ import vista.TipoEvento;
  *
  * @author benja
  */
-public class Modelo implements IModelo{
+public class Modelo implements IModelo, PropertyChangeListener{
     private List<Observador> observadores;
     private iDespachador despachador;
     private String miId; // Necesitas saber quién eres
@@ -66,6 +68,18 @@ public class Modelo implements IModelo{
         for (Observador observador : observadores) {
             ActualizacionDTO dto = new ActualizacionDTO(evento);
             observador.actualiza(this, dto);
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String evento = evt.getPropertyName();
+        
+        if (evento.equals("MANO_INICIAL")) {
+            System.out.println("[Modelo SalaEspera] ¡Juego iniciado por el servidor!");
+            
+            //posiblemente cambiar dependiendo de lo que siga
+            notificarObservadores(TipoEvento.COMENZAR_JUEGO);
         }
     }
 }
