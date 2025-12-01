@@ -45,7 +45,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
      * @param evento El tipo de evento ocurrido.
      */
     @Override
-    public void actualiza(iPizarraJuego pizarra, String evento) {
+    public void actualiza(iPizarraJuego pizarra, String evento) { //cu gal
 
         String jugadorQueMovio = pizarra.getUltimoJugadorQueMovio();
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
@@ -60,14 +60,15 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             case "JUGADOR_UNIDO":
                 String[] ipJugador = pizarra.getIpCliente();
                 directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2].toString()));
-                System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO.");
-
-                int numJugadores = pizarra.getOrdenDeTurnos().size();
-                if (numJugadores == 2) {
-                    String idHost = pizarra.getOrdenDeTurnos().get(0);
-                    System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
-                    enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
-                }
+                System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO:" + ipJugador[0]);
+                
+                //old shi
+//                int numJugadores = pizarra.getOrdenDeTurnos().size();
+//                if (numJugadores == 2) {
+//                    String idHost = pizarra.getOrdenDeTurnos().get(0);
+//                    System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
+//                    enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
+//                }
                 break;
 
             case "EVENTO_PARTIDA_INICIADA":

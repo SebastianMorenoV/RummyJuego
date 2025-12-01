@@ -4,10 +4,68 @@
  */
 package modelo;
 
+import Dtos.ActualizacionDTO;
+import Util.Configuracion;
+import contratos.iDespachador;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import vista.Observador;
+import vista.TipoEvento;
+
 /**
  *
  * @author benja
  */
 public class Modelo implements IModelo{
+    private List<Observador> observadores;
+    private iDespachador despachador;
+    private String miId; // Necesitas saber quién eres
+
+    public Modelo() {
+        observadores = new ArrayList<>();
+    }
     
+    public void setDespachador(iDespachador despachador) {
+        this.despachador = despachador;
+    }
+
+    public void setMiId(String miId) {
+        this.miId = miId;
+    }
+    
+    public void enviarSolicitudInicio() {
+        if (despachador == null || miId == null) {
+            System.err.println("[SalaEspera] Error: Despachador o ID no configurados.");
+            return;
+        }
+
+        try {
+            // PROTOCOLO: ID:COMANDO:PAYLOAD
+            String mensaje = this.miId + ":ESTOY_LISTO:";
+            System.out.println("[SalaEspera] Enviando solicitud de inicio: " + mensaje);
+            
+            // Usamos la configuración global para saber a dónde enviar
+            this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+            
+            // Opcional: Notificar a la vista que ya se envió (para deshabilitar el botón)
+            notificarObservadores(TipoEvento.SOLICITAR_INICIO); 
+            
+        } catch (IOException ex) {
+            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void añadirObservador(Observador obs) {
+        observadores.add(obs);
+    }
+    
+    public void notificarObservadores(TipoEvento evento) {
+        for (Observador observador : observadores) {
+            ActualizacionDTO dto = new ActualizacionDTO(evento);
+            observador.actualiza(this, dto);
+        }
+    }
 }

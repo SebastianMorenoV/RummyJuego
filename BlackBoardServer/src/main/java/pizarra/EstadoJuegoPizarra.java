@@ -6,8 +6,10 @@ import contratos.iPizarraJuego;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
@@ -27,12 +29,15 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] configuracionPartida;
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
+    
+    private Set<String> jugadoresListos; //cu gal
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
         this.observadores = new ArrayList<>();
         this.mazoSerializado = "";
+        this.jugadoresListos = Collections.synchronizedSet(new HashSet<>()); //cu gal
     }
 
     /**
@@ -143,23 +148,54 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * iniciada o no cumple con el número de jugadores.
      */
     @Override
-    public synchronized boolean iniciarPartidaSiCorresponde() {
+    public synchronized boolean iniciarPartidaSiCorresponde() { //cu gal
         int numJugadores = ordenDeTurnos.size();
-
-        if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
-            indiceTurnoActual = 0; // Inicia el turno del primer jugador
+        int numListos = jugadoresListos.size();
+        
+        boolean salaLlena = (numJugadores == 4);
+        boolean consensoTotal = (numJugadores >= 2 && numListos == numJugadores);
+        
+        if (indiceTurnoActual == -1 && (salaLlena || consensoTotal)) {
+            indiceTurnoActual = 0; 
             String idPrimerJugador = ordenDeTurnos.get(0);
-            System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");
+            System.out.println("[Pizarra] ¡CONDICIONES CUMPLIDAS! Iniciando partida con " + numJugadores + " jugadores.");
             System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
             return true;
         }
-
-        if (indiceTurnoActual != -1) {
-            System.err.println("[Pizarra] Intento de iniciar partida, pero ya estaba iniciada.");
-        } else {
-            System.err.println("[Pizarra] Intento de iniciar partida con " + numJugadores + " jugadores. Se requieren 2-4.");
-        }
+        
+        System.out.println("[Pizarra] Esperando... Conectados: " + numJugadores + " | Listos: " + numListos);
         return false;
+
+//        if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
+//            indiceTurnoActual = 0; // Inicia el turno del primer jugador
+//            String idPrimerJugador = ordenDeTurnos.get(0);
+//            System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");
+//            System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
+//            return true;
+//        }
+//
+//        if (indiceTurnoActual != -1) {
+//            System.err.println("[Pizarra] Intento de iniciar partida, pero ya estaba iniciada.");
+//        } else {
+//            System.err.println("[Pizarra] Intento de iniciar partida con " + numJugadores + " jugadores. Se requieren 2-4.");
+//        }
+//        return false;
+    }
+    
+    //cu gal
+    public void registrarJugadorListo(String idJugador) {
+        if (!ordenDeTurnos.contains(idJugador)) {
+            System.err.println("[Pizarra] Jugador " + idJugador + " intentó estar listo pero no está registrado.");
+            return;
+        }
+        
+        jugadoresListos.add(idJugador);
+        System.out.println("[Pizarra] El jugador " + idJugador + " está LISTO.");
+        
+        // Verificamos inmediatamente si ya podemos iniciar
+        if (iniciarPartidaSiCorresponde()) {
+            notificarObservadores("EVENTO_PARTIDA_INICIADA");
+        }
     }
 
     /**
@@ -218,17 +254,27 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * @return
      */
     @Override
-    public void procesarComando(String idCliente, String comando, String payload) {
+    public void procesarComando(String idCliente, String comando, String payload) { //cu gal
         if (indiceTurnoActual == -1) {
             switch (comando) {
                 case "REGISTRAR":
                     registrarJugador(idCliente, payload);
-                    break; // Importante: break para no saltar al siguiente caso
-                case "INICIAR_PARTIDA":
-                    System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
                     if (iniciarPartidaSiCorresponde()) {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
-                    }
+                    } 
+                    //si entra el 4 jugador la partida inicia envergiza
+                    break; // Importante: break para no saltar al siguiente caso
+                    
+                   //old ass  
+//                case "INICIAR_PARTIDA":
+//                    System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
+//                    if (iniciarPartidaSiCorresponde()) {
+//                        notificarObservadores("EVENTO_PARTIDA_INICIADA");
+//                    }
+//                    break;
+                case "ESTOY_LISTO":
+                    System.out.println("[Pizarra] Recibido ESTOY_LISTO de " + idCliente);
+                    registrarJugadorListo(idCliente);
                     break;
                 case "CONFIGURAR_PARTIDA":
                     System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");

@@ -4,10 +4,13 @@
  */
 package vista;
 
+import Dtos.ActualizacionDTO;
+import modelo.IModelo;
+
 /**
  *
  * @author benja
  */
 public interface Observador {
-    
+    public void actualiza(IModelo modelo, ActualizacionDTO dto);
 }

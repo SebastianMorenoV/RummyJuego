@@ -4,18 +4,28 @@
  */
 package vista;
 
+import Dtos.ActualizacionDTO;
+import control.Control;
+import modelo.IModelo;
+
 /**
  *
  * @author benja
  */
 public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VistaSalaEspera.class.getName());
+    Control control;
 
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera() {
+    public VistaSalaEspera(Control control) {
+        this.control = control;
+        this.setSize(920, 550);
+        this.setTitle("Rummy Sala de Espera");
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
         initComponents();
     }
 
@@ -43,6 +53,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
         jButton1.setBackground(new java.awt.Color(80, 118, 78));
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jButton1.setText("Iniciar Partida");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
         getContentPane().add(jButton1);
         jButton1.setBounds(350, 340, 220, 70);
 
@@ -60,34 +75,27 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        control.notificarEstoyListo();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VistaSalaEspera().setVisible(true));
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void actualiza(IModelo modelo, ActualizacionDTO dto) {
+        switch (dto.getTipoEvento()) {
+        case SOLICITAR_INICIO:
+            // ... lógica ...
+            break;
+        case COMENZAR_JUEGO:
+            this.dispose();
+            //logica...
+            break;
+    }
+    }
 }

@@ -4,10 +4,20 @@
  */
 package control;
 
+import modelo.Modelo;
+
 /**
  *
  * @author benja
  */
 public class Control {
+    private Modelo modelo;
+
+    public Control(Modelo modelo) {
+        this.modelo = modelo;
+    }
     
+    public void notificarEstoyListo() {
+        modelo.enviarSolicitudInicio();
+    }
 }
