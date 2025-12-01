@@ -183,6 +183,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
     
     //cu gal
+    @Override
     public void registrarJugadorListo(String idJugador) {
         if (!ordenDeTurnos.contains(idJugador)) {
             System.err.println("[Pizarra] Jugador " + idJugador + " intentó estar listo pero no está registrado.");

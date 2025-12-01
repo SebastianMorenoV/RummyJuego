@@ -108,4 +108,6 @@ public interface iPizarraJuego {
      * @return arreglo con String [comodines,fichas de cada mano.]
      */
     String[] getConfiguracionPartida();
+    
+    void registrarJugadorListo(String idJugador);
 }

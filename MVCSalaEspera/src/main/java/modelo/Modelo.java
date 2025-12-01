@@ -38,6 +38,7 @@ public class Modelo implements IModelo, PropertyChangeListener{
         this.miId = miId;
     }
     
+    @Override
     public void enviarSolicitudInicio() {
         if (despachador == null || miId == null) {
             System.err.println("[SalaEspera] Error: Despachador o ID no configurados.");
@@ -75,6 +76,7 @@ public class Modelo implements IModelo, PropertyChangeListener{
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
         
+        //o cualquier cosa que señale el comienzo de la partida.
         if (evento.equals("MANO_INICIAL")) {
             System.out.println("[Modelo SalaEspera] ¡Juego iniciado por el servidor!");
             
