@@ -12,7 +12,6 @@ import vista.ObservadorConfig;
  * @author benja
  */
 public interface iModeloConfig {
-    public void getPartida();
     public void setDespachador(iDespachador despachador);
     public void iniciarCU();
     public void añadirObservador(ObservadorConfig obs);

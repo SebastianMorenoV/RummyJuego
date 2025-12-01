@@ -10,7 +10,8 @@ import java.util.logging.Logger;
 import vista.ObservadorConfig;
 
 /**
- *
+ * Esta clase representa los datos de todo el mundo MVC "Configurar Partida"
+ * Contiene metodos para mandar fuera al Blackboard con la configuracion dada.
  * @author benja
  */
 public class ModeloConfig implements iModeloConfig {
@@ -20,12 +21,6 @@ public class ModeloConfig implements iModeloConfig {
 
     public ModeloConfig() {
         observadores = new ArrayList<>();
-
-    }
-
-    @Override
-    public void getPartida() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
@@ -36,19 +31,14 @@ public class ModeloConfig implements iModeloConfig {
     @Override
     public void configurarPartida(int comodines, int fichas) {
         try {
-            // 1. Obtener el payload actual ("2$10")
             String payload = serializarConfiguracion(comodines, fichas);
-
-            // 2. Definir el ID (puede ser "Host" o pasarse como variable) y el Comando
             String idCliente = "REMPLAZAR_ESTE_NOMBRE_AL_REGISTRAR_@CHRIS";
             String comando = "CONFIGURAR_PARTIDA";
             String puerto = "9001";
             String ipClienteMock = "192.168.100.3";
 
-            // 3. Construir el mensaje con el formato correcto: ID:COMANDO:PAYLOAD
             String mensajeProtocolo = idCliente + ":" + comando + ":" + payload;
 
-            // 4. Enviar
             despachador.enviar("192.168.100.3", 5000, mensajeProtocolo);
 
             String mensajeRegistro = idCliente + ":REGISTRAR:" + ipClienteMock + "$" + puerto;
@@ -59,6 +49,12 @@ public class ModeloConfig implements iModeloConfig {
         }
     }
 
+    public void notificarObservadores(EventoConfig evento) {
+        for (ObservadorConfig observador : observadores) {
+            observador.actualiza(this, evento);
+        }
+    }
+
     private String serializarConfiguracion(int comodines, int fichas) {
         return String.valueOf(comodines) + "$" + String.valueOf(fichas);
     }
@@ -66,12 +62,6 @@ public class ModeloConfig implements iModeloConfig {
     @Override
     public void añadirObservador(ObservadorConfig obs) {
         observadores.add(obs);
-    }
-
-    public void notificarObservadores(EventoConfig evento) {
-        for (ObservadorConfig observador : observadores) {
-            observador.actualiza(this, evento);
-        }
     }
 
     @Override

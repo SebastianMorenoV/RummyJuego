@@ -4,7 +4,6 @@
  */
 package controlador;
 
-import modelo.ModeloConfig;
 import modelo.iModeloConfig;
 
 /**
@@ -17,10 +16,6 @@ public class Controlador {
 
     public Controlador(iModeloConfig modelo) {
         this.modelo = modelo;
-    }
-
-    public void iniciarCU() {
-
     }
     
     public void configurarPartida(int comodines,int fichas){
