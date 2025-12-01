@@ -9,5 +9,5 @@ package modelo;
  * @author benja
  */
 public interface IModelo {
-    void enviarSolicitudInicio();
+
 }

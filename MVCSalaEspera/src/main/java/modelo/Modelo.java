@@ -37,8 +37,7 @@ public class Modelo implements IModelo, PropertyChangeListener{
     public void setMiId(String miId) {
         this.miId = miId;
     }
-    
-    @Override
+
     public void enviarSolicitudInicio() {
         if (despachador == null || miId == null) {
             System.err.println("[SalaEspera] Error: Despachador o ID no configurados.");
