@@ -8,7 +8,7 @@ package vista;
  *
  * @author gael_
  */
-public enum TipoEvento {
+public enum TipoEventoSala {
     SOLICITAR_INICIO,
     COMENZAR_JUEGO
 }

@@ -4,10 +4,13 @@
  */
 package modelo;
 
+import contratos.iDespachador;
+
 /**
  *
  * @author benja
  */
-public interface IModelo {
-
+public interface IModeloSala {
+    public void setDespachador(iDespachador despachador);
+    void enviarSolicitudInicio();
 }

@@ -4,9 +4,9 @@
  */
 package vista;
 
-import Dtos.ActualizacionDTO;
+import Dtos.ActualizacionSalaDTO;
 import control.Control;
-import modelo.IModelo;
+import modelo.IModeloSala;
 
 /**
  *
@@ -52,14 +52,14 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
 
         jButton1.setBackground(new java.awt.Color(80, 118, 78));
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton1.setText("Iniciar Partida");
+        jButton1.setText("Iniciar Partida 1 / 4");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
             }
         });
         getContentPane().add(jButton1);
-        jButton1.setBounds(350, 340, 220, 70);
+        jButton1.setBounds(320, 340, 250, 70);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 235, 126));
@@ -87,7 +87,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void actualiza(IModelo modelo, ActualizacionDTO dto) {
+    public void actualiza(IModeloSala modelo, ActualizacionSalaDTO dto) {
         switch (dto.getTipoEvento()) {
         case SOLICITAR_INICIO:
             // ... lógica ...

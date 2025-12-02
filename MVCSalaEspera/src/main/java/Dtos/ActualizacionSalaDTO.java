@@ -4,20 +4,20 @@
  */
 package Dtos;
 
-import vista.TipoEvento;
+import vista.TipoEventoSala;
 
 /**
  *
  * @author gael_
  */
-public class ActualizacionDTO {
-    private final TipoEvento tipoEvento;
+public class ActualizacionSalaDTO {
+    private final TipoEventoSala tipoEvento;
 
-    public ActualizacionDTO(TipoEvento tipoEvento) {
+    public ActualizacionSalaDTO(TipoEventoSala tipoEvento) {
         this.tipoEvento = tipoEvento;
     }
 
-    public TipoEvento getTipoEvento() {
+    public TipoEventoSala getTipoEvento() {
         return tipoEvento;
     }
 }

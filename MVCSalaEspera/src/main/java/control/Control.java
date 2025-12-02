@@ -4,16 +4,16 @@
  */
 package control;
 
-import modelo.Modelo;
+import modelo.ModeloSala;
 
 /**
  *
  * @author benja
  */
 public class Control {
-    private Modelo modelo;
+    private ModeloSala modelo;
 
-    public Control(Modelo modelo) {
+    public Control(ModeloSala modelo) {
         this.modelo = modelo;
     }
     

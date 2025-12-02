@@ -4,7 +4,7 @@
  */
 package modelo;
 
-import Dtos.ActualizacionDTO;
+import Dtos.ActualizacionSalaDTO;
 import Util.Configuracion;
 import contratos.iDespachador;
 import java.beans.PropertyChangeEvent;
@@ -15,18 +15,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vista.Observador;
-import vista.TipoEvento;
+import vista.TipoEventoSala;
 
 /**
  *
  * @author benja
  */
-public class Modelo implements IModelo, PropertyChangeListener{
+public class ModeloSala implements IModeloSala, PropertyChangeListener{
     private List<Observador> observadores;
     private iDespachador despachador;
     private String miId; // Necesitas saber quién eres
 
-    public Modelo() {
+    public ModeloSala() {
         observadores = new ArrayList<>();
     }
     
@@ -53,10 +53,10 @@ public class Modelo implements IModelo, PropertyChangeListener{
             this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
             
             // Opcional: Notificar a la vista que ya se envió (para deshabilitar el botón)
-            notificarObservadores(TipoEvento.SOLICITAR_INICIO); 
+            notificarObservadores(TipoEventoSala.SOLICITAR_INICIO); 
             
         } catch (IOException ex) {
-            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ModeloSala.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -64,9 +64,9 @@ public class Modelo implements IModelo, PropertyChangeListener{
         observadores.add(obs);
     }
     
-    public void notificarObservadores(TipoEvento evento) {
+    public void notificarObservadores(TipoEventoSala evento) {
         for (Observador observador : observadores) {
-            ActualizacionDTO dto = new ActualizacionDTO(evento);
+            ActualizacionSalaDTO dto = new ActualizacionSalaDTO(evento);
             observador.actualiza(this, dto);
         }
     }
@@ -80,7 +80,7 @@ public class Modelo implements IModelo, PropertyChangeListener{
             System.out.println("[Modelo SalaEspera] ¡Juego iniciado por el servidor!");
             
             //posiblemente cambiar dependiendo de lo que siga
-            notificarObservadores(TipoEvento.COMENZAR_JUEGO);
+            notificarObservadores(TipoEventoSala.COMENZAR_JUEGO);
         }
     }
 }
