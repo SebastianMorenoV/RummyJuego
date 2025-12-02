@@ -9,6 +9,7 @@ package eventos;
  * @author moren
  */
 public enum Evento {
+    INICIO,
     CREAR_PARTIDA,
     SOLICITAR_INICIO,
     SOLICITAR_UNIRSE_A_PARTIDA,

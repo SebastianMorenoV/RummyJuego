@@ -4,16 +4,10 @@
  */
 package modelo;
 
-import contratos.iDespachador;
-import vista.ObservadorConfig;
-
 /**
  *
  * @author benja
  */
 public interface iModeloConfig {
-    public void setDespachador(iDespachador despachador);
-    public void iniciarCU();
-    public void añadirObservador(ObservadorConfig obs);
-    public void configurarPartida(int comodines, int fichas);
+
 }

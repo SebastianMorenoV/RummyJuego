@@ -4,9 +4,10 @@
  */
 package Vista;
 
-import Control.Control;
+import Control.ControlCUPrincipal;
 import eventos.Evento;
 import Modelo.IModelo;
+import contratos.controladoresMVC.iControlCUPrincipal;
 
 /**
  *
@@ -17,15 +18,14 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
     /**
      * Creates new form VistaLobby
      */
-    Control control;
+    iControlCUPrincipal control;
 
-    public VistaLobby(Control control) {
+    public VistaLobby(iControlCUPrincipal control) {
         this.control = control;
         this.setTitle("RummyKub | Vive la experiencia!");
         this.setSize(920, 550);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);
         initComponents();
     }
 
@@ -43,9 +43,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         jButton2 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
 
-        setMaximumSize(new java.awt.Dimension(900, 500));
         setMinimumSize(new java.awt.Dimension(900, 500));
-        setPreferredSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 60)); // NOI18N
@@ -94,7 +92,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         jLabel1.setName(""); // NOI18N
         jLabel1.setPreferredSize(new java.awt.Dimension(900, 500));
         getContentPane().add(jLabel1);
-        jLabel1.setBounds(6, 6, 900, 500);
+        jLabel1.setBounds(-4, -4, 910, 530);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -120,8 +118,10 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
     @Override
     public void actualiza(IModelo modelo, Evento evento) {
         switch (evento) {
+            case INICIO:
+                this.setVisible(true);
+                break;
             case CREAR_PARTIDA:
-                
                 System.out.println("Viajando MVC CrearPartida");
                 this.setVisible(false);
                 control.casoUsoConfigurarPartida();

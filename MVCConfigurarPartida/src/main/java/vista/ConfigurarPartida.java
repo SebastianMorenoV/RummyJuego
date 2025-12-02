@@ -4,7 +4,7 @@
  */
 package vista;
 
-import controlador.Controlador;
+import controlador.ControladorConfig;
 import TipoEventos.EventoConfig;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
@@ -17,19 +17,18 @@ import modelo.iModeloConfig;
  */
 public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorConfig {
 
-    Controlador control;
+    ControladorConfig control;
 
     /*Atributos privados temporales*/
     int numComodines;
     int numFichas;
 
-    public ConfigurarPartida(Controlador control) {
+    public ConfigurarPartida(ControladorConfig control) {
         this.control = control;
         this.setTitle("RummyKub | Vive la experiencia!");
         this.setSize(920, 550);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);
         initComponents();
         listenerSpinner();
     }
@@ -152,6 +151,14 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         txtNumComodines1.setForeground(new java.awt.Color(255, 255, 255));
         txtNumComodines1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtNumComodines1.setText("Regresar");
+        txtNumComodines1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtNumComodines1MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                txtNumComodines1MouseEntered(evt);
+            }
+        });
         btnRegresar.add(txtNumComodines1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-2, -3, 170, 40));
 
         getContentPane().add(btnRegresar);
@@ -215,6 +222,15 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     private void spinnerComidinesPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_spinnerComidinesPropertyChange
 
     }//GEN-LAST:event_spinnerComidinesPropertyChange
+
+    private void txtNumComodines1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtNumComodines1MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNumComodines1MouseEntered
+
+    private void txtNumComodines1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtNumComodines1MouseClicked
+        this.setVisible(false);
+        control.regresarPantallaPrincipal();
+    }//GEN-LAST:event_txtNumComodines1MouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
