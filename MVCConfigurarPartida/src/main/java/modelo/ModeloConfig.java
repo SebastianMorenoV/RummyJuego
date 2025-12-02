@@ -42,11 +42,11 @@ public class ModeloConfig implements iModeloConfig {
 
             String mensajeProtocolo = idCliente + ":" + comando + ":" + payload;
 
-            despachador.enviar("192.168.100.3", 5000, mensajeProtocolo);
+            despachador.enviar(ipServidor, puertoServidor, mensajeProtocolo);
 
             /*El cliente que cree la partida necesita registrarse en el blackboard tambien.*/
             String mensajeRegistro = idCliente + ":REGISTRAR:" + ipCliente + "$" + puertoCliente;
-            despachador.enviar("192.168.100.3", 5000, mensajeRegistro);
+            despachador.enviar(ipServidor, puertoServidor, mensajeRegistro);
 
         } catch (IOException ex) {
             Logger.getLogger(ModeloConfig.class.getName()).log(Level.SEVERE, null, ex);
