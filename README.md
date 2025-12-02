@@ -64,5 +64,5 @@ El proyecto sigue un diseño modular para separar la lógica de negocio de la in
 - Sebastian Moreno 00000252840
 - Benjamin Soto 00000253183
 - Luciano Barcelo 00000252086
-- Chris Fitch ID
+- Chris Fitch 00000252379
 - Gael Guerra

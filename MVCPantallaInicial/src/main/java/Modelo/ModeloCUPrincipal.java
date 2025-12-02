@@ -13,11 +13,11 @@ import java.util.List;
  *
  * @author benja
  */
-public class Modelo implements IModelo {
+public class ModeloCUPrincipal implements IModelo {
     
     List<Observador> observadores;
     
-    public Modelo() {
+    public ModeloCUPrincipal() {
         observadores = new ArrayList<>();
         
     }
@@ -34,6 +34,9 @@ public class Modelo implements IModelo {
     public void iniciarCreacionPartida() {
         notificarObservadores(Evento.CREAR_PARTIDA);
         
+    }
+    public void iniciarLobby(){
+        notificarObservadores(Evento.INICIO);
     }
     
     public void añadirObservador(Observador obs) {
