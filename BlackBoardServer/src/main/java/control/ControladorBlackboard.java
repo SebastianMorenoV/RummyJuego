@@ -70,6 +70,14 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 //                    enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
 //                }
                 break;
+            case "ESTADO_SALA_MODIFICADO":
+                // Obtenemos el string "Listos$Total" de la pizarra
+                // Nota: Necesitas castear a la clase concreta o agregar el método a la interfaz iPizarraJuego
+                String estadoSala = ((EstadoJuegoPizarra) pizarra).obtenerEstadoSala();
+
+                // Enviamos mensaje a todos: "ACTUALIZAR_SALA:2$4"
+                enviarATodos("ACTUALIZAR_SALA:" + estadoSala);
+            break;    
 
             case "EVENTO_PARTIDA_INICIADA":
                 System.out.println("[Controlador] Evento PARTIDA_INICIADA detectado. Creando juego...");

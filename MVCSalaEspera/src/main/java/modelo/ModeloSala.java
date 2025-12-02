@@ -30,6 +30,7 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
         observadores = new ArrayList<>();
     }
     
+    @Override
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
     }
@@ -38,6 +39,7 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
         this.miId = miId;
     }
 
+    @Override
     public void enviarSolicitudInicio() {
         if (despachador == null || miId == null) {
             System.err.println("[SalaEspera] Error: Despachador o ID no configurados.");
@@ -70,17 +72,36 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
             observador.actualiza(this, dto);
         }
     }
+    
+    public void notificarObservadores2(ActualizacionSalaDTO dto) {
+    for (Observador observador : observadores) {
+        observador.actualiza(this, dto);
+    }
+    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
+        String payload = (String) evt.getNewValue();
         
-        //o cualquier cosa que señale el comienzo de la partida.
-        if (evento.equals("MANO_INICIAL")) {
-            System.out.println("[Modelo SalaEspera] ¡Juego iniciado por el servidor!");
-            
-            //posiblemente cambiar dependiendo de lo que siga
-            notificarObservadores(TipoEventoSala.COMENZAR_JUEGO);
+        if (evento.equals("ACTUALIZAR_SALA")) {
+            // Payload viene como "Listos$Total", ejemplo: "2$4"
+            String[] partes = payload.split("\\$");
+            int listos = Integer.parseInt(partes[0]);
+            int totales = Integer.parseInt(partes[1]);
+
+            ActualizacionSalaDTO dto = new ActualizacionSalaDTO(
+                TipoEventoSala.ACTUALIZAR_CONTADORES, listos, totales
+            );
+            notificarObservadores2(dto);
+        }
+        else if (evento.equals("MANO_INICIAL")) {
+            System.out.println("[Modelo SalaEspera] ¡Juego iniciado! Cerrando sala...");
+
+            // Avisar a la vista para que se cierre y arranque el juego
+            ActualizacionSalaDTO dto = new ActualizacionSalaDTO(TipoEventoSala.COMENZAR_JUEGO);
+            notificarObservadores2(dto);
         }
     }
+    
 }

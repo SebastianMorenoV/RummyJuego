@@ -10,5 +10,6 @@ package vista;
  */
 public enum TipoEventoSala {
     SOLICITAR_INICIO,
+    ACTUALIZAR_CONTADORES,
     COMENZAR_JUEGO
 }

@@ -90,8 +90,20 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     public void actualiza(IModeloSala modelo, ActualizacionSalaDTO dto) {
         switch (dto.getTipoEvento()) {
         case SOLICITAR_INICIO:
-            // ... lógica ...
+            // Deshabilitar botón para que no spamee
+            jButton1.setEnabled(false);
+            jButton1.setText("Esperando...");
             break;
+        case ACTUALIZAR_CONTADORES:
+            int listos = dto.getJugadoresListos();
+            int totales = dto.getJugadoresTotales();
+
+            if(jButton1.isEnabled()){
+                 jButton1.setText("Iniciar Partida " + listos + " / " + totales);
+            } else {
+                 jButton1.setText("Esperando (" + listos + "/" + totales + ")");
+            }
+            break;    
         case COMENZAR_JUEGO:
             this.dispose();
             //logica...

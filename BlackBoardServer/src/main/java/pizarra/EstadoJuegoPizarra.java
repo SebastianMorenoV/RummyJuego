@@ -81,8 +81,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal[2] = partes[1];
 
         ordenDeTurnos.add(id);
-
+        
         notificarObservadores("JUGADOR_UNIDO");
+        notificarObservadores("ESTADO_SALA_MODIFICADO");
         jugadorARegistrarTemporal = null;
     }
 
@@ -192,11 +193,18 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         
         jugadoresListos.add(idJugador);
         System.out.println("[Pizarra] El jugador " + idJugador + " está LISTO.");
+        notificarObservadores("ESTADO_SALA_MODIFICADO");
         
         // Verificamos inmediatamente si ya podemos iniciar
         if (iniciarPartidaSiCorresponde()) {
             notificarObservadores("EVENTO_PARTIDA_INICIADA");
         }
+    }
+    
+    public String obtenerEstadoSala() {
+        int total = ordenDeTurnos.size();
+        int listos = jugadoresListos.size();
+        return listos + "$" + total; // Formato: "Listos$Total"
     }
 
     /**
