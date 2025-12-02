@@ -14,15 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import vista.Observador;
 import vista.TipoEventoSala;
+import vista.ObservadorSala;
 
 /**
  *
  * @author benja
  */
 public class ModeloSala implements IModeloSala, PropertyChangeListener{
-    private List<Observador> observadores;
+    private List<ObservadorSala> observadores;
     private iDespachador despachador;
     private String miId; // Necesitas saber quién eres
 
@@ -62,19 +62,19 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
         }
     }
 
-    public void añadirObservador(Observador obs) {
+    public void añadirObservador(ObservadorSala obs) {
         observadores.add(obs);
     }
     
     public void notificarObservadores(TipoEventoSala evento) {
-        for (Observador observador : observadores) {
+        for (ObservadorSala observador : observadores) {
             ActualizacionSalaDTO dto = new ActualizacionSalaDTO(evento);
             observador.actualiza(this, dto);
         }
     }
     
     public void notificarObservadores2(ActualizacionSalaDTO dto) {
-    for (Observador observador : observadores) {
+    for (ObservadorSala observador : observadores) {
         observador.actualiza(this, dto);
     }
     }

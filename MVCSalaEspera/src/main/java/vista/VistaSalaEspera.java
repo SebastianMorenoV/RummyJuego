@@ -5,21 +5,23 @@
 package vista;
 
 import Dtos.ActualizacionSalaDTO;
-import control.Control;
+import control.ControlSala;
+import javax.swing.JFrame;
 import modelo.IModeloSala;
 
 /**
  *
  * @author benja
  */
-public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
+public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSala{
     
-    Control control;
+    ControlSala control;
+    JFrame vistaJuego;
 
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera(Control control) {
+    public VistaSalaEspera(ControlSala control) {
         this.control = control;
         this.setSize(920, 550);
         this.setTitle("Rummy Sala de Espera");
@@ -27,6 +29,10 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         initComponents();
+    }
+    
+    public void setVistaJuego(JFrame vistaJuego) {
+        this.vistaJuego = vistaJuego;
     }
 
     /**
@@ -105,9 +111,13 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
             }
             break;    
         case COMENZAR_JUEGO:
-            this.dispose();
-            //logica...
-            break;
+            this.dispose(); // Cierra la sala
+                
+                if (this.vistaJuego != null) {
+                    System.out.println("¡Vámonos al Juego!");
+                    this.vistaJuego.setVisible(true); // Abre el juego
+                }
+                break;
     }
     }
 }

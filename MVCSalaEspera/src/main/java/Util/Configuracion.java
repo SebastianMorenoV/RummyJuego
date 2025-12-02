@@ -9,7 +9,7 @@ package Util;
  * @author gael_
  */
 public class Configuracion {
-    private static final String ipServidor = "192.168.100.3";
+    private static final String ipServidor = "127.0.0.1";
     private static final int puerto = 5000;
 
     public Configuracion() {

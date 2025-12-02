@@ -4,16 +4,20 @@
  */
 package control;
 
+import contratos.controladoresMVC.iControlCUPrincipal;
 import modelo.ModeloSala;
 
 /**
  *
  * @author benja
  */
-public class Control {
+public class ControlSala {
+    
+    //???
+    iControlCUPrincipal controladorCUPrincipal;
     private ModeloSala modelo;
 
-    public Control(ModeloSala modelo) {
+    public ControlSala(ModeloSala modelo) {
         this.modelo = modelo;
     }
     

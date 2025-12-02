@@ -11,6 +11,6 @@ import modelo.IModeloSala;
  *
  * @author benja
  */
-public interface Observador {
+public interface ObservadorSala {
     public void actualiza(IModeloSala modelo, ActualizacionSalaDTO dto);
 }
