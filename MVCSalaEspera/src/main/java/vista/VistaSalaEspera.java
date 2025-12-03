@@ -16,7 +16,6 @@ import modelo.IModeloSala;
 public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSala{
     
     ControlSala control;
-    JFrame vistaJuego;
 
     /**
      * Creates new form VistaSalaEspera
@@ -31,9 +30,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         initComponents();
     }
     
-    public void setVistaJuego(JFrame vistaJuego) {
-        this.vistaJuego = vistaJuego;
-    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -112,12 +108,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             break;    
         case COMENZAR_JUEGO:
             this.dispose(); // Cierra la sala
-                
-                if (this.vistaJuego != null) {
-                    System.out.println("¡Vámonos al Juego!");
-                    this.vistaJuego.setVisible(true); // Abre el juego
-                }
-                break;
+
     }
     }
 }

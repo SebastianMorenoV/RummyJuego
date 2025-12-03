@@ -19,4 +19,6 @@ public interface iControlCUPrincipal {
     public void pantallaInicial();
 
     public void setControladorConfig(iControlConfig controladorConfig);
+    
+    public void setControladorSalaEspera(iControlSolicitarInicio controladorSala);
 }

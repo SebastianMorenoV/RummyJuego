@@ -25,6 +25,10 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
     private List<ObservadorSala> observadores;
     private iDespachador despachador;
     private String miId; // Necesitas saber quién eres
+    
+    String ipServidor;
+    int puertoServidor;
+    String ipCliente;
 
     public ModeloSala() {
         observadores = new ArrayList<>();
@@ -37,6 +41,18 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
 
     public void setMiId(String miId) {
         this.miId = miId;
+    }
+    
+    public void setIpServidor(String ipServidor) {
+        this.ipServidor = ipServidor;
+    }
+
+    public void setPuertoServidor(int puertoServidor) {
+        this.puertoServidor = puertoServidor;
+    }
+
+    public void setIpCliente(String ipCliente) {
+        this.ipCliente = ipCliente;
     }
 
     @Override

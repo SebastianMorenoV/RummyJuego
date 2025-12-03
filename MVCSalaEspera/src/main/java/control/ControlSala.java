@@ -5,23 +5,37 @@
 package control;
 
 import contratos.controladoresMVC.iControlCUPrincipal;
+import contratos.controladoresMVC.iControlSolicitarInicio;
 import modelo.ModeloSala;
 
 /**
  *
  * @author benja
  */
-public class ControlSala {
+public class ControlSala implements iControlSolicitarInicio{
     
     //???
     iControlCUPrincipal controladorCUPrincipal;
-    private ModeloSala modelo;
+    ModeloSala modelo;
 
     public ControlSala(ModeloSala modelo) {
         this.modelo = modelo;
     }
     
+    @Override
     public void notificarEstoyListo() {
         modelo.enviarSolicitudInicio();
+    }
+
+    @Override
+    public void setControladorCUPrincipal(iControlCUPrincipal controladorCUPrincipal) {
+        this.controladorCUPrincipal=controladorCUPrincipal;
+    }
+    
+    @Override
+    public void setConfiguracion(String ipServidor,int puertoServidor, String ipCliente){
+        modelo.setIpServidor(ipServidor);
+        modelo.setPuertoServidor(puertoServidor);
+        modelo.setIpCliente(ipCliente);
     }
 }
