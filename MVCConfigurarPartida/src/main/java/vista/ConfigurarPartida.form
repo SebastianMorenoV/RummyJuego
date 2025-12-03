@@ -58,7 +58,7 @@
         </Constraint>
       </Constraints>
     </Component>
-    <Container class="vista.PanelRound" name="btn13Fichas">
+    <Container class="vista.PanelRound2" name="btn13Fichas">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="69" green="dc" red="f6" type="rgb"/>
@@ -100,7 +100,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="vista.PanelRound" name="btnCrearPartida">
+    <Container class="vista.PanelRound2" name="btnCrearPartida">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="69" green="dc" red="f6" type="rgb"/>
@@ -142,7 +142,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="vista.PanelRound" name="btn10Fichas">
+    <Container class="vista.PanelRound2" name="btn10Fichas">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="69" green="dc" red="f6" type="rgb"/>
@@ -200,7 +200,7 @@
         </Constraint>
       </Constraints>
     </Component>
-    <Container class="vista.PanelRound" name="btnRegresar">
+    <Container class="vista.PanelRound2" name="btnRegresar">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="46" green="46" red="ce" type="rgb"/>

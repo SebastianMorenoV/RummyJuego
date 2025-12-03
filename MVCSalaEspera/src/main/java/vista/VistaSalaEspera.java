@@ -5,6 +5,7 @@
 package vista;
 
 import Dtos.ActualizacionSalaDTO;
+import contratos.controladoresMVC.iLanzadorJuego;
 import control.ControlSala;
 import javax.swing.JFrame;
 import modelo.IModeloSala;
@@ -16,7 +17,13 @@ import modelo.IModeloSala;
 public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSala{
     
     ControlSala control;
+    iLanzadorJuego lanzador;
 
+    public void setLanzador(iLanzadorJuego lanzador) {
+        this.lanzador = lanzador;
+    }
+    
+    
     /**
      * Creates new form VistaSalaEspera
      */
@@ -108,6 +115,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             break;    
         case COMENZAR_JUEGO:
             this.dispose(); // Cierra la sala
+            if (this.lanzador != null) {
+                    System.out.println("[VistaSala] Ejecutando lanzador de juego...");
+                    this.lanzador.lanzarJuego(); 
+                }
+                break;
 
     }
     }

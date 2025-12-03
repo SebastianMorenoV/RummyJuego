@@ -6,16 +6,22 @@ import Modelo.ModeloCUPrincipal;
 import Util.Configuracion;
 import Vista.VistaLobby;
 import contratos.controladoresMVC.iControlCUPrincipal;
+import contratos.controladoresMVC.iLanzadorJuego;
 import contratos.iDespachador;
+import contratos.iListener;
 import control.ControlSala;
 import controlador.ControladorConfig;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import modelo.ModeloConfig;
 import modelo.ModeloSala;
+import procesadores.Procesador;
 import sockets.ClienteTCP;
+import sockets.ServerTCP;
 import vista.ConfigurarPartida;
 import vista.VistaSalaEspera;
 
@@ -29,13 +35,18 @@ public class EnsambladoresMVC {
 
     iDespachador despachador;
 
+//    public EnsambladoresMVC() {
+//        despachador = new ClienteTCP();
+//        try {
+//            ensamblarMVCPrincipal(despachador);
+//        } catch (UnknownHostException ex) {
+//            Logger.getLogger(EnsambladoresMVC.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
+    
+    //Constructor para CU solicitar inicio(no se abre el lobby)
     public EnsambladoresMVC() {
         despachador = new ClienteTCP();
-        try {
-            ensamblarMVCPrincipal(despachador);
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(EnsambladoresMVC.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
 
     
@@ -97,6 +108,52 @@ public class EnsambladoresMVC {
         vistaSala.setVisible(true);
 
 
+    }
+    
+    //ENSAMBLAR EL JUEGO CON LA SALA DE ESPERA
+    //(no se puede depender de MVCJuego por dependencia ciclica)
+    public void ensamblarJuegoCompleto(
+            iDespachador despachador, 
+            PropertyChangeListener modeloJuego, 
+            iLanzadorJuego accionAbrirJuego,
+            String miId,      
+            int puertoLocal   
+    ) throws UnknownHostException {
+
+        String ipCliente = InetAddress.getLocalHost().getHostAddress();
+
+        Procesador procesadorRed = new Procesador(); 
+        procesadorRed.addPropertyChangeListener(modeloJuego);
+
+        iListener listener = new ServerTCP(procesadorRed);
+        new Thread(() -> {
+            try { 
+                System.out.println("[Red] Escuchando en puerto: " + puertoLocal);
+                listener.iniciar(puertoLocal);
+            } 
+            catch (IOException e) { e.printStackTrace(); }
+        }).start();
+
+        ModeloSala modeloSala = new ModeloSala();
+        modeloSala.setDespachador(despachador);
+
+        modeloSala.setMiId(miId); 
+        modeloSala.setIpCliente(ipCliente);
+
+        procesadorRed.addPropertyChangeListener(modeloSala); 
+
+        ControlSala controlSala = new ControlSala(modeloSala);
+        VistaSalaEspera vistaSala = new VistaSalaEspera(controlSala);
+        modeloSala.añadirObservador(vistaSala);
+
+        vistaSala.setLanzador(accionAbrirJuego);
+
+        try {
+             String msg = miId + ":REGISTRAR:" + ipCliente + "$" + puertoLocal;
+             despachador.enviar(Util.Configuracion.getIpServidor(), Util.Configuracion.getPuerto(), msg);
+        } catch (Exception e) { e.printStackTrace(); }
+
+        vistaSala.setVisible(true);
     }
     
 

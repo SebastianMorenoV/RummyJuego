@@ -39,14 +39,14 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
 
         txtTitulo = new javax.swing.JLabel();
         spinnerComidines = new javax.swing.JSpinner();
-        btn13Fichas = new vista.PanelRound();
+        btn13Fichas = new vista.PanelRound2();
         txt13Fichas = new javax.swing.JLabel();
-        btnCrearPartida = new vista.PanelRound();
+        btnCrearPartida = new vista.PanelRound2();
         txtCrearPartida = new javax.swing.JLabel();
-        btn10Fichas = new vista.PanelRound();
+        btn10Fichas = new vista.PanelRound2();
         txt10Fichas = new javax.swing.JLabel();
         txtNumComodines = new javax.swing.JLabel();
-        btnRegresar = new vista.PanelRound();
+        btnRegresar = new vista.PanelRound2();
         txtNumComodines1 = new javax.swing.JLabel();
         txtNumComodines2 = new javax.swing.JLabel();
         txtFichasCont = new javax.swing.JLabel();
@@ -234,10 +234,10 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private vista.PanelRound btn10Fichas;
-    private vista.PanelRound btn13Fichas;
-    private vista.PanelRound btnCrearPartida;
-    private vista.PanelRound btnRegresar;
+    private vista.PanelRound2 btn10Fichas;
+    private vista.PanelRound2 btn13Fichas;
+    private vista.PanelRound2 btnCrearPartida;
+    private vista.PanelRound2 btnRegresar;
     private javax.swing.JLabel fondoRummy;
     private javax.swing.JSpinner spinnerComidines;
     private javax.swing.JLabel txt10Fichas;

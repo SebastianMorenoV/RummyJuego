@@ -15,7 +15,7 @@ import javax.swing.JPanel;
  *
  * @author Sebastian Moreno
  */
-public class PanelRound extends JPanel {
+public class PanelRound2 extends JPanel {
 
     public int getRoundTopLeft() {
         return roundTopLeft;
@@ -58,7 +58,7 @@ public class PanelRound extends JPanel {
     private int roundBottomLeft = 0;
     private int roundBottomRight = 0;
 
-    public PanelRound() {
+    public PanelRound2() {
         setOpaque(false);
     }
 
