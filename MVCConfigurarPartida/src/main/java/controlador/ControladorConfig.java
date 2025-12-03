@@ -24,6 +24,7 @@ public class ControladorConfig implements iControlConfig {
     @Override
     public void configurarPartida(int comodines, int fichas) {
         modelo.configurarPartida(comodines, fichas);
+        controladorCUPrincipal.solicitarRegistro();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package modelo;
 
 import TipoEventos.EventoConfig;
+import Util.SesionUsuario;
 import contratos.iDespachador;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -34,8 +35,9 @@ public class ModeloConfig implements iModeloConfig {
 
     public void configurarPartida(int comodines, int fichas) {
         try {
+            String idCliente = SesionUsuario.getNickname();
+            
             String payload = serializarConfiguracion(comodines, fichas);
-            String idCliente = "REMPLAZAR_ESTE_NOMBRE_AL_REGISTRAR_@CHRIS";
             String comando = "CONFIGURAR_PARTIDA";
 
             String puertoCliente = "9001";
@@ -45,9 +47,10 @@ public class ModeloConfig implements iModeloConfig {
             despachador.enviar(ipServidor, puertoServidor, mensajeProtocolo);
 
             /*El cliente que cree la partida necesita registrarse en el blackboard tambien.*/
-            String mensajeRegistro = idCliente + ":REGISTRAR:" + ipCliente + "$" + puertoCliente;
-            despachador.enviar(ipServidor, puertoServidor, mensajeRegistro);
-
+            /* String idCliente = "REMPLAZAR_ESTE_NOMBRE..."; 
+            String mensajeRegistro = idCliente + ":REGISTRAR: ...";
+            despachador.enviar(ipServidor, puertoServidor, mensajeRegistro); 
+             */
         } catch (IOException ex) {
             Logger.getLogger(ModeloConfig.class.getName()).log(Level.SEVERE, null, ex);
         }

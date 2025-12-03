@@ -53,8 +53,12 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         switch (evento) {
 
             case "CONFIGURAR_PARTIDA":
-                System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
+                //System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
                 //que deberia hacer aqui si todavia nadie se une?
+                //break;
+                
+                System.out.println("Partida configurada por " + jugadorQueMovio);
+                enviarATodos("SERVIDOR:PARTIDA_CONFIGURADA:" + ultimoPayload);
                 break;
 
             case "JUGADOR_UNIDO":

@@ -216,7 +216,6 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
 
         numFichas = 13;
         txtFichasCont.setText("Fichas: 13Fichas");
-
     }//GEN-LAST:event_txt13FichasMouseClicked
 
     private void spinnerComidinesPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_spinnerComidinesPropertyChange

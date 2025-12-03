@@ -13,10 +13,15 @@ public interface iControlCUPrincipal {
     public void iniciarCreacionPartida();
 
     public void SolicitarUnirseAPartida();
+    
+    void solicitarRegistro();
+    
+    void setControladorRegistro(iControlRegistro controlRegistro);
 
     public void casoUsoConfigurarPartida();
 
     public void pantallaInicial();
 
     public void setControladorConfig(iControlConfig controladorConfig);
+    
 }
