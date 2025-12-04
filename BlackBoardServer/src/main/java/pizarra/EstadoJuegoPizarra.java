@@ -69,7 +69,23 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void registrarJugador(String id, String payloadMano) {
+        String[] partes = payloadMano.split("\\$"); 
+        
         jugadorARegistrarTemporal = new String[3];
+        jugadorARegistrarTemporal[0] = id; // ID
+        jugadorARegistrarTemporal[1] = partes[0]; // IP
+        jugadorARegistrarTemporal[2] = partes[1]; // Puerto
+        jugadorARegistrarTemporal[3] = partes[2]; // Avatar
+        jugadorARegistrarTemporal[4] = partes[3]; // Colores (4 sets)
+        jugadorARegistrarTemporal[5] = partes[4];
+        jugadorARegistrarTemporal[6] = partes[5];
+        jugadorARegistrarTemporal[7] = partes[6];
+        
+        ordenDeTurnos.add(id);
+
+        notificarObservadores("JUGADOR_UNIDO");
+        
+        /**jugadorARegistrarTemporal = new String[3];
         String[] partes = payloadMano.split("\\$", 2);
         jugadorARegistrarTemporal[0] = id;
         jugadorARegistrarTemporal[1] = partes[0];
@@ -78,7 +94,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         ordenDeTurnos.add(id);
 
         notificarObservadores("JUGADOR_UNIDO");
-        jugadorARegistrarTemporal = null;
+        jugadorARegistrarTemporal = null;**/
     }
 
     /**

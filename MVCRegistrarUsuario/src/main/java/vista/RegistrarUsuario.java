@@ -31,6 +31,11 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private String avatarSeleccionado = "avatar1";
     private Color colorSeleccionado = Color.WHITE;
     private Border bordeSeleccion = BorderFactory.createLineBorder(Color.RED, 3);
+    // Colores de los 4 sets
+    private Color colorSet1;
+    private Color colorSet2;
+    private Color colorSet3;
+    private Color colorSet4;
 
     /**
      * Creates new form RegistrarUsuario
@@ -51,6 +56,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.setComponentZOrder(avatar1, 0);
         jPanel1.setComponentZOrder(avatar2, 0);
         jPanel1.setComponentZOrder(avatar3, 0);
+        jPanel1.setComponentZOrder(avatar4, 0);
     }
 
     private void initEvents() {
@@ -60,12 +66,28 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             public void mouseClicked(MouseEvent e) {
                 String nombre = txtfldNombre.getText();
                 if (!nombre.trim().isEmpty()) {
-                    control.intentarRegistrar(nombre, avatarSeleccionado, colorSeleccionado);
+
+                    // Si todavía no abrió la ventana de colores, pon defaults
+                    if (colorSet1 == null) {
+                        // Puedes usar los mismos que en EleccionColores si quieres
+                        colorSet1 = Color.RED;
+                        colorSet2 = Color.GREEN;
+                        colorSet3 = Color.YELLOW;
+                        colorSet4 = Color.BLUE;
+                    }
+
+                    control.intentarRegistrar(
+                            nombre,
+                            avatarSeleccionado,
+                            colorSet1, colorSet2, colorSet3, colorSet4
+                    );
+
                 } else {
                     JOptionPane.showMessageDialog(null, "Por favor ingresa un nombre.");
                 }
             }
         });
+
     }
 
     // Lógica para resaltar el avatar seleccionado
@@ -76,6 +98,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 avatar1.setBorder(null);
                 avatar2.setBorder(null);
                 avatar3.setBorder(null);
+                avatar4.setBorder(null);
 
                 //se le asigna un borde al seleccionado y guardamos el nombre
                 JLabel fuente = (JLabel) e.getSource();
@@ -87,6 +110,8 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                     avatarSeleccionado = "avatar2";
                 } else if (fuente == avatar3) {
                     avatarSeleccionado = "avatar3";
+                } else if (fuente == avatar4) {
+                    avatarSeleccionado = "avatar4";
                 }
             }
         };
@@ -94,6 +119,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         avatar1.addMouseListener(selector);
         avatar2.addMouseListener(selector);
         avatar3.addMouseListener(selector);
+        avatar4.addMouseListener(selector);
 
         //el primer icono se escoge por defecto
         avatar1.setBorder(bordeSeleccion);
@@ -102,16 +128,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         btnColor.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Color nuevoColor = JColorChooser.showDialog(null, "Seleccionar color", btnColor.getBackground());
-                if (nuevoColor != null) {
-                    colorSeleccionado = nuevoColor;
-                    btnColor.setBackground(nuevoColor);
-                    btnColor.setOpaque(true); // Asegurar que se vea el color
-
-                    colorEjemplo.setBackground(nuevoColor);
-                    colorEjemplo.setOpaque(true);
-
-                }
+                abrirEleccionColores();
             }
         });
     }
@@ -130,13 +147,14 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         btnRegistrar = new javax.swing.JLabel();
         btnColor = new javax.swing.JLabel();
         txtfldNombre = new javax.swing.JTextField();
-        colorEjemplo = new javax.swing.JPanel();
         txt2 = new javax.swing.JLabel();
         txt1 = new javax.swing.JLabel();
         txtSubtitulo = new javax.swing.JLabel();
+        avatar4 = new javax.swing.JLabel();
         avatar3 = new javax.swing.JLabel();
         avatar2 = new javax.swing.JLabel();
         avatar1 = new javax.swing.JLabel();
+        fondoavatar4 = new javax.swing.JPanel();
         fondoAvatar3 = new javax.swing.JPanel();
         fondoAvatar2 = new javax.swing.JPanel();
         fondoAvatar1 = new javax.swing.JPanel();
@@ -175,21 +193,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         txtfldNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 310, 410, 40));
 
-        colorEjemplo.setBackground(new java.awt.Color(255, 255, 255));
-
-        javax.swing.GroupLayout colorEjemploLayout = new javax.swing.GroupLayout(colorEjemplo);
-        colorEjemplo.setLayout(colorEjemploLayout);
-        colorEjemploLayout.setHorizontalGroup(
-            colorEjemploLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 60, Short.MAX_VALUE)
-        );
-        colorEjemploLayout.setVerticalGroup(
-            colorEjemploLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
-
-        jPanel1.add(colorEjemplo, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 380, 60, 50));
-
         txt2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txt2.setForeground(new java.awt.Color(255, 255, 255));
         txt2.setText("Color de fichas:");
@@ -205,15 +208,33 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         txtSubtitulo.setText("Seleccionar Avatar:");
         jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 140, -1, -1));
 
+        avatar4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar4.png"))); // NOI18N
+        jPanel1.add(avatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 190, 70, 70));
+
         avatar3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar3.png"))); // NOI18N
-        jPanel1.add(avatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 190, 70, 70));
+        jPanel1.add(avatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 190, 70, 70));
 
         avatar2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar2.png"))); // NOI18N
-        jPanel1.add(avatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 190, 70, 70));
+        jPanel1.add(avatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 190, 70, 70));
 
         avatar1.setBackground(new java.awt.Color(255, 255, 255));
         avatar1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar1.png"))); // NOI18N
-        jPanel1.add(avatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 190, -1, -1));
+        jPanel1.add(avatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 190, 70, 70));
+
+        fondoavatar4.setBackground(new java.awt.Color(255, 255, 255));
+
+        javax.swing.GroupLayout fondoavatar4Layout = new javax.swing.GroupLayout(fondoavatar4);
+        fondoavatar4.setLayout(fondoavatar4Layout);
+        fondoavatar4Layout.setHorizontalGroup(
+            fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 70, Short.MAX_VALUE)
+        );
+        fondoavatar4Layout.setVerticalGroup(
+            fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 70, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(fondoavatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 190, 70, 70));
 
         fondoAvatar3.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -228,7 +249,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             .addGap(0, 70, Short.MAX_VALUE)
         );
 
-        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 190, 70, 70));
+        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 190, 70, 70));
 
         fondoAvatar2.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -243,7 +264,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             .addGap(0, 70, Short.MAX_VALUE)
         );
 
-        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 190, 70, 70));
+        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 190, 70, 70));
 
         fondoAvatar1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -258,7 +279,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             .addGap(0, 70, Short.MAX_VALUE)
         );
 
-        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 190, 70, 70));
+        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 190, 70, 70));
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
         txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
@@ -287,18 +308,24 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void abrirEleccionColores() {
+        EleccionColores ventanaColores = new EleccionColores(this);
+        ventanaColores.setVisible(true);
+        // this.setVisible(false);  Opcional para ocultar la ventana mientras se elige
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel avatar1;
     private javax.swing.JLabel avatar2;
     private javax.swing.JLabel avatar3;
+    private javax.swing.JLabel avatar4;
     private javax.swing.JLabel btnColor;
     private javax.swing.JLabel btnRegistrar;
-    private javax.swing.JPanel colorEjemplo;
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel fondoAvatar1;
     private javax.swing.JPanel fondoAvatar2;
     private javax.swing.JPanel fondoAvatar3;
+    private javax.swing.JPanel fondoavatar4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel panel;
     private javax.swing.JLabel txt1;
@@ -317,6 +344,28 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             this.setVisible(true);
             this.toFront();
         }
+    }
+
+    /**
+     * Método público llamado por EleccionColores
+     *
+     * @param c1
+     * @param c2
+     * @param c3
+     * @param c4
+     */
+    public void actualizarColoresUsuario(Color c1, Color c2, Color c3, Color c4) {
+        this.colorSet1 = c1;
+        this.colorSet2 = c2;
+        this.colorSet3 = c3;
+        this.colorSet4 = c4;
+
+        // Opcional: toma el Set 1 como "color principal" para mostrar en el icono
+        this.colorSeleccionado = c1;
+
+        btnColor.setOpaque(true);
+        btnColor.setBackground(c1); // podrías hacer algo más fancy luego
+        btnColor.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
     }
 
 }

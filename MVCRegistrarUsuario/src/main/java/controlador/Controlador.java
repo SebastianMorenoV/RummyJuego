@@ -30,9 +30,15 @@ public class Controlador implements iControlRegistro {
     }
 
     @Override
-    public void intentarRegistrar(String nickname, String avatar, Color color) {
-        int rgb = color.getRGB();
-        modelo.registrarUsuario(nickname, avatar, rgb);
+    public void intentarRegistrar(String nickname, String avatar,
+            Color set1, Color set2, Color set3, Color set4) {
+
+        int rgb1 = set1.getRGB();
+        int rgb2 = set2.getRGB();
+        int rgb3 = set3.getRGB();
+        int rgb4 = set4.getRGB();
+
+        modelo.registrarUsuario(nickname, avatar, rgb1, rgb2, rgb3, rgb4);
     }
 
     @Override

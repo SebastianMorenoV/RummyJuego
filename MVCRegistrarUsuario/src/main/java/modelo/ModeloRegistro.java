@@ -35,21 +35,33 @@ public class ModeloRegistro implements iModeloRegistro {
      * tanto su IP como su puerto de manera local.
      *
      * @param nickname
-     * @param ip
-     * @param puerto
      * @param avatar
-     * @param colorRGB
+     * @param color1
+     * @param color2
+     * @param color3
+     * @param color4
      */
     @Override
-    public void registrarUsuario(String nickname, String avatar, int colorRGB) {
+    public void registrarUsuario(String nickname, String avatar, int color1, int color2, int color3, int color4) {
         try {
             // 1. Guardar sesión localmente
-            Color colorReal = new Color(colorRGB);
-            SesionUsuario.guardarSesion(nickname, avatar, colorReal);
+            Color c1 = new Color(color1);
+            Color c2 = new Color(color2);
+            Color c3 = new Color(color3);
+            Color c4 = new Color(color4);
+
+            SesionUsuario.guardarSesion(nickname, avatar, c1, c2, c3, c4);;
 
             // 2. Construir Payload
             // Protocolo: NICKNAME:REGISTRAR:IP_CLIENTE$PUERTO$AVATAR$COLOR
-            String payload = this.ipCliente + "$" + this.puertoServidor + "$" + avatar + "$" + colorRGB;
+            String payload
+                    = this.ipCliente + "$"
+                    + this.puertoServidor + "$"
+                    + avatar + "$"
+                    + color1 + "$"
+                    + color2 + "$"
+                    + color3 + "$"
+                    + color4;
             String mensaje = nickname + ":REGISTRAR:" + payload;
 
             // 3. Enviar al Servidor

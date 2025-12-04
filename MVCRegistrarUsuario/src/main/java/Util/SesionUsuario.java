@@ -14,18 +14,34 @@ public class SesionUsuario {
 
     private static String nickname;
     private static String avatar;
-    private static Color color;
+
+    // Colores de los 4 sets del usuario
+    private static Color colorSet1;
+    private static Color colorSet2;
+    private static Color colorSet3;
+    private static Color colorSet4;
+
     private static boolean estaRegistrado = false;
 
     private SesionUsuario() {
     }
 
-    public static void guardarSesion(String nick, String imgAvatar, Color colorUsuario) {
+    /**
+     * Guarda la sesión con los 4 colores definidos por el usuario.
+     */
+    public static void guardarSesion(String nick, String imgAvatar,
+            Color c1, Color c2, Color c3, Color c4) {
         nickname = nick;
         avatar = imgAvatar;
-        color = colorUsuario;
+
+        colorSet1 = c1;
+        colorSet2 = c2;
+        colorSet3 = c3;
+        colorSet4 = c4;
+
         estaRegistrado = true;
-        System.out.println("[SesionUsuario] Datos guardados: " + nickname);
+
+        System.out.println("[SesionUsuario] Sesión guardada: " + nickname);
     }
 
     public static String getNickname() {
@@ -36,8 +52,20 @@ public class SesionUsuario {
         return avatar;
     }
 
-    public static Color getColor() {
-        return color;
+    public static Color getColorSet1() {
+        return colorSet1;
+    }
+
+    public static Color getColorSet2() {
+        return colorSet2;
+    }
+
+    public static Color getColorSet3() {
+        return colorSet3;
+    }
+
+    public static Color getColorSet4() {
+        return colorSet4;
     }
 
     public static boolean isEstaRegistrado() {

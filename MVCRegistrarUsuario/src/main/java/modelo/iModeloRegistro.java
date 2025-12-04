@@ -15,7 +15,8 @@ public interface iModeloRegistro {
 
     void setDespachador(iDespachador despachador);
 
-    void registrarUsuario(String nickname, String avatar, int colorRGB);
+    void registrarUsuario(String nickname, String avatar,
+            int color1, int color2, int color3, int color4);
 
     void agregarObservador(ObservadorRegistro obs);
 
