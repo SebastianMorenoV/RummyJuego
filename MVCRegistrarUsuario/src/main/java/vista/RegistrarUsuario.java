@@ -6,6 +6,7 @@ package vista;
 
 import TipoEventos.EventoRegistro;
 import contratos.controladoresMVC.iControlRegistro;
+import contratos.iNavegacion;
 import controlador.Controlador;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -26,6 +27,7 @@ import javax.swing.border.Border;
 public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRegistro {
 
     private iControlRegistro control;
+    private iNavegacion navegacion;
 
     //Valores por defecto del usuario
     private String avatarSeleccionado = "avatar1";
@@ -314,6 +316,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         // this.setVisible(false);  Opcional para ocultar la ventana mientras se elige
     }
 
+    public void setNavegacion(iNavegacion navegacion) {
+        this.navegacion = navegacion;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel avatar1;
     private javax.swing.JLabel avatar2;
@@ -340,6 +346,11 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     public void actualiza(EventoRegistro evento, String mensaje) {
         if (evento == EventoRegistro.REGISTRO_EXITOSO) {
             this.setVisible(false);
+            if (this.navegacion != null) {
+                System.out.println("[VistaRegistro] Navegando a Sala de Espera...");
+                this.navegacion.iniciarSalaEspera();
+            }
+
         } else if (evento == EventoRegistro.ABRIR_VENTANA) {
             this.setVisible(true);
             this.toFront();

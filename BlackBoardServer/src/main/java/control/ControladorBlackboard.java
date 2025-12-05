@@ -56,15 +56,26 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 //System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
                 //que deberia hacer aqui si todavia nadie se une?
                 //break;
-                
+
                 System.out.println("Partida configurada por " + jugadorQueMovio);
                 enviarATodos("SERVIDOR:PARTIDA_CONFIGURADA:" + ultimoPayload);
                 break;
 
             case "JUGADOR_UNIDO":
-                String[] ipJugador = pizarra.getIpCliente();
-                directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2].toString()));
-                System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO.");
+                String[] datosJugador = pizarra.getIpCliente();
+                String id = datosJugador[0];
+                String ip = datosJugador[1];
+                
+                int puerto = Integer.parseInt(datosJugador[2]);
+                String avatar = datosJugador[3];
+                
+                int c1 = Integer.parseInt(datosJugador[4]);
+                int c2 = Integer.parseInt(datosJugador[5]);
+                int c3 = Integer.parseInt(datosJugador[6]);
+                int c4 = Integer.parseInt(datosJugador[7]);
+                
+                directorio.addJugador(id, ip, puerto, avatar, c1, c2, c3, c4);
+                System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO: " + id);
 
                 int numJugadores = pizarra.getOrdenDeTurnos().size();
                 if (numJugadores == 2) {

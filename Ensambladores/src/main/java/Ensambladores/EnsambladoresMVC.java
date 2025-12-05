@@ -7,6 +7,7 @@ import Vista.VistaLobby;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.iDespachador;
+import contratos.iNavegacion;
 import controlador.Controlador;
 import controlador.ControladorConfig;
 import java.net.InetAddress;
@@ -19,6 +20,8 @@ import sockets.ClienteTCP;
 import vista.ConfigurarPartida;
 import vista.ObservadorRegistro;
 import vista.RegistrarUsuario;
+import vista.VistaSalaEspera;
+
 
 /**
  * Esta clase ensambla los mvcs necesarios en el sistema. por ultimo utiliza el
@@ -65,6 +68,33 @@ public class EnsambladoresMVC {
 
         //MVCRegistro registrar usuario
         RegistrarUsuario vistaRegistro = ensamblarMVCRegistro(despachador, ipCliente, controlPrincipal);
+
+        /////////////MOCK DE REGISTRAR USUARIO A SALA DE ESPERA (maso)////////////
+        // Creamos la Sala de Espera (Mock visual, sin controlador complejo por ahora si no lo necesitas)
+        VistaSalaEspera vistaSalaEspera = new VistaSalaEspera();
+
+        // Creamos la implementación de navegación "al vuelo"
+        iNavegacion navegacion = new iNavegacion() {
+            @Override
+            public void iniciarConfiguracionPartida() {
+                // Lógica existente o futura para config
+                vistaLobby.setVisible(false);
+                vistaConfig.setVisible(true);
+            }
+
+            @Override
+            public void iniciarSalaEspera() {
+                System.out.println("[Navegacion] Yendo a Sala de Espera...");
+                // Aquí ocurre el cambio de pantalla
+                vistaRegistro.setVisible(false); // Aseguramos que se cierre registro
+                vistaLobby.setVisible(false);    // Aseguramos que se cierre lobby anterior
+                
+                vistaSalaEspera.setVisible(true);
+            }
+        };
+
+        // Inyectamos la navegación en la vista de registro
+        vistaRegistro.setNavegacion(navegacion);//////////
 
         System.out.println("[Ensamblador] Iniciando aplicación...");
 

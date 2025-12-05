@@ -71,7 +71,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public void registrarJugador(String id, String payloadMano) {
         String[] partes = payloadMano.split("\\$"); 
         
-        jugadorARegistrarTemporal = new String[3];
+        jugadorARegistrarTemporal = new String[8];
         jugadorARegistrarTemporal[0] = id; // ID
         jugadorARegistrarTemporal[1] = partes[0]; // IP
         jugadorARegistrarTemporal[2] = partes[1]; // Puerto

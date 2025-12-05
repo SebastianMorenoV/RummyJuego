@@ -192,6 +192,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
 
         if (fichasSeleccionadas > 0 && comodinesSeleccionados >= 0) {
             control.configurarPartida(comodinesSeleccionados, fichasSeleccionadas);
+            this.setVisible(false); //cerrar vista
         } else {
             JOptionPane.showMessageDialog(this, "Por favor selecciona el modo de juego (10 o 13 fichas).", "Faltan datos", JOptionPane.WARNING_MESSAGE);
         }
