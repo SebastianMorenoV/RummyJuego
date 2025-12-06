@@ -1,6 +1,5 @@
 package Vista;
 
-import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
 import Dtos.ActualizacionDTO;
 import Modelo.IModelo;
@@ -9,6 +8,7 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -40,7 +40,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
  */
 public class VistaTablero extends javax.swing.JFrame implements Observador {
 
-    private Controlador control;
+    private iControlEjercerTurno control;
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
@@ -52,13 +52,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      *
      * @param control el control de el mvc.
      */
-    public VistaTablero(Controlador control) {
+    public VistaTablero(iControlEjercerTurno control) {
         this.control = control;
         this.setSize(920, 550);
         this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);
         initComponents();
     }
 
@@ -184,6 +183,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             actualizarEstadoJugadores(estadoJuego);
         }
         switch (dto.getTipoEvento()) {
+            case MOSTRAR_JUEGO:
+                this.setVisible(true);
+                control.cerrarCUAnteriores();
+                break;
             case CAMBIO_DE_TURNO:
                 if (dto.esMiTurno()) {
                     setTitle("Rummy - ¡Es tu turno!");
@@ -270,8 +273,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private void cargarJugadores() {
         String rutaImagen = "src/main/resources/avatares/avatar.png";
         try {
-            Path path = new File(rutaImagen).toPath();
-            byte[] imagenAvatarBytes = Files.readAllBytes(path);
+            java.io.InputStream is = getClass().getResourceAsStream("/avatares/avatar.png");
+
+            byte[] imagenAvatarBytes = null;
+            if (is != null) {
+                imagenAvatarBytes = is.readAllBytes();
+                is.close();
+            } else {
+                System.out.println("Error: No se encontró la imagen /avatares/avatar.png");
+            }
 
             JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
             jugador1.setSize(130, 130);

@@ -25,6 +25,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private int indiceTurnoActual;
     private String[] jugadorARegistrarTemporal;
     private String[] configuracionPartida;
+    private boolean partidaConfigurada = false;
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
 
@@ -106,13 +107,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public void configurarPartida(String idCliente, String payload) {
         configuracionPartida = new String[2];
 
-        // CORRECCIÓN: Quita el ', 1' o cámbialo por ', 2'
         String[] partes = payload.split("\\$");
 
-        // Validación extra de seguridad (opcional pero recomendada)
         if (partes.length >= 2) {
             configuracionPartida[0] = partes[0];
             configuracionPartida[1] = partes[1];
+            partidaConfigurada = true;
             System.out.println("[Pizarra] Configuración guardada: " + partes[0] + " comodines, " + partes[1] + " fichas.");
             notificarObservadores("CONFIGURAR_PARTIDA");
         } else {
@@ -221,6 +221,33 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public void procesarComando(String idCliente, String comando, String payload) {
         if (indiceTurnoActual == -1) {
             switch (comando) {
+
+                case "SOLICITAR_CREACION":
+                    if (!ordenDeTurnos.contains(idCliente)) {
+                        registrarJugador(idCliente, payload);
+                    }
+                    if (this.partidaConfigurada || this.indiceTurnoActual != -1) {
+                        notificarObservadores("PARTIDA_EXISTENTE:" + idCliente);
+                    } else {
+                        notificarObservadores("PERMISO_CREAR:" + idCliente);
+                    }
+                    break;
+                case "UNIRSE_PARTIDA":
+                    // 1. Registramos al segundo jugador
+                    if (!ordenDeTurnos.contains(idCliente)) {
+                        registrarJugador(idCliente, payload);
+                    }
+
+                    System.out.println("[Pizarra] Jugador unido: " + idCliente);
+                    System.out.println("[Pizarra] Total jugadores: " + ordenDeTurnos.size());
+
+                    // 2. VALIDACIÓN AUTOMÁTICA: Si hay 2 jugadores, iniciamos
+                    if (ordenDeTurnos.size() == 2) {
+                        System.out.println("[Pizarra] Sala llena (2/2). Notificando inicio...");
+                        // Este evento especial le dirá al controlador que reparta las cartas
+                        notificarObservadores("SALA_LLENA");
+                    }
+                    break;
                 case "REGISTRAR":
                     registrarJugador(idCliente, payload);
                     break; // Importante: break para no saltar al siguiente caso

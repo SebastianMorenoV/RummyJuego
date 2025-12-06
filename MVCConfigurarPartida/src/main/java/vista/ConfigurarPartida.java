@@ -13,6 +13,7 @@ import modelo.iModeloConfig;
 
 /**
  * Esta vista representa la pantalla para configurar una partida.
+ *
  * @author Sebastian Moreno
  */
 public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorConfig {
@@ -20,7 +21,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     ControladorConfig control;
 
     /*Atributos privados temporales*/
-    int numComodines;
+    int numComodines = 1;
     int numFichas;
 
     public ConfigurarPartida(ControladorConfig control) {
@@ -151,6 +152,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         txtNumComodines1.setForeground(new java.awt.Color(255, 255, 255));
         txtNumComodines1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtNumComodines1.setText("Regresar");
+        txtNumComodines1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txtNumComodines1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txtNumComodines1MouseClicked(evt);
@@ -251,21 +253,32 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     // End of variables declaration//GEN-END:variables
     /**
      * Metodo para obtener datos o notificaciones del modelo, sin conocerlo.
+     *
      * @param modelo cualquier clase que implemente modelo.
-     * @param evento un tipo de evento en especifico, el cual es la variable a hacer en el switch.
+     * @param evento un tipo de evento en especifico, el cual es la variable a
+     * hacer en el switch.
      */
     @Override
     public void actualiza(iModeloConfig modelo, EventoConfig evento) {
         switch (evento) {
+            case CERRAR_CU:
+                this.setVisible(false);
+                break;
             case CREAR_PARTIDA:
                 this.setVisible(true);
+                break;
+
+            case PARTIDA_CREADA:
+                JOptionPane.showMessageDialog(this, "Partida Configurada y Creada con: " + numComodines + " comodin(es) y " + numFichas + " fichas!, Esperando Jugadores...");
                 break;
             default:
                 throw new AssertionError();
         }
     }
+
     /**
-     * Metodo auxiliar para ponerle un listener al input cuando cambie de estado.
+     * Metodo auxiliar para ponerle un listener al input cuando cambie de
+     * estado.
      */
     public void listenerSpinner() {
         spinnerComidines.addChangeListener(new ChangeListener() {

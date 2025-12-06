@@ -2,6 +2,9 @@ package Controlador;
 
 import DTO.GrupoDTO;
 import Modelo.Modelo;
+import contratos.controladoresMVC.iControlCUPrincipal;
+import contratos.controladoresMVC.iControlConfig;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.util.List;
 
 /**
@@ -11,9 +14,11 @@ import java.util.List;
  *
  * @author moren
  */
-public class Controlador {
+public class Controlador implements iControlEjercerTurno {
 
     Modelo modelo;
+    iControlConfig controlConfiguracion;
+    iControlCUPrincipal controlPantallaPrincipal;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
@@ -22,6 +27,7 @@ public class Controlador {
     /**
      * Metodo que le habla al modelo para iniciar el juego.
      */
+    @Override
     public void iniciarJuego() {
         modelo.iniciarJuego();
     }
@@ -31,6 +37,7 @@ public class Controlador {
      * LISTA ENTERA de DTOs a un solo String. 3 Le dice al Ensamblador que envíe
      * ESE ÚNICO String.
      */
+    @Override
     public void colocarFicha(List<GrupoDTO> grupos) {
         modelo.colocarFicha(grupos);
     }
@@ -41,6 +48,7 @@ public class Controlador {
      *
      * @param idFicha id de la ficha a regresar.
      */
+    @Override
     public void regresarFichaAMano(int idFicha) {
         modelo.regresarFichaAMano(idFicha);
     }
@@ -48,6 +56,7 @@ public class Controlador {
     /**
      * Metodo que le habla al modelo para pasar el Turno.
      */
+    @Override
     public void pasarTurno() {
         modelo.tomarFichaMazo();
     }
@@ -55,8 +64,36 @@ public class Controlador {
     /**
      * Metodo que le habla al modelo para terminar el turno de un jugador.
      */
+    @Override
     public void terminarTurno() {
         modelo.terminarTurno();
+    }
+
+    @Override
+    public void abrirCU() {
+        modelo.abrirCU();
+    }
+
+    @Override
+    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
+        modelo.setIpServidor(ipServidor);
+        modelo.setPuertoServidor(puertoServidor);
+        modelo.setIpCliente(ipCliente);
+        modelo.setPuertoCliente(puertoCliente);
+    }
+
+    @Override
+    public void cerrarCUAnteriores() {
+        controlConfiguracion.cerrarCU();
+        controlPantallaPrincipal.cerrarCU();
+    }
+
+    public void setControlConfiguracion(iControlConfig controlConfiguracion) {
+        this.controlConfiguracion = controlConfiguracion;
+    }
+
+    public void setControlPantallaPrincipal(iControlCUPrincipal controlPantallaPrincipal) {
+        this.controlPantallaPrincipal = controlPantallaPrincipal;
     }
 
 }

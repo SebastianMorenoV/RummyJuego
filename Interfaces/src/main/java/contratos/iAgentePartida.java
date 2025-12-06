@@ -26,7 +26,7 @@ public interface iAgentePartida {
      * @return Un mapa donde la clave es el ID del jugador (String) y el valor 
      * es la mano serializada de fichas (String).
      */
-    public Map<String, String> repartirManos(List<String> jugadorIds);
+    public Map<String, String> repartirManos(List<String> jugadorIds,int numFichas,int numComodines);
 
     /**
      * Almacena o actualiza la cadena serializada que representa el mazo restante 

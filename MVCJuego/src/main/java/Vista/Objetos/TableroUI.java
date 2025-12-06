@@ -6,6 +6,7 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.VistaTablero;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -35,10 +36,10 @@ public class TableroUI extends JPanel {
     private final Map<Integer, FichaUI> fichasEnTableroValidas;
     private final Map<Integer, Point> posicionesValidas;
     private final IModelo modelo;
-    private final Controlador control;
+    private final iControlEjercerTurno control;
     private final VistaTablero vista;
 
-    public TableroUI(IModelo modelo, Controlador control, VistaTablero vista) {
+    public TableroUI(IModelo modelo, iControlEjercerTurno control, VistaTablero vista) {
         this.vista = vista;
         this.modelo = modelo;
         this.control = control;

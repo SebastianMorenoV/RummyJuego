@@ -2,10 +2,13 @@ package modelo;
 
 import TipoEventos.EventoConfig;
 import contratos.iDespachador;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vista.ObservadorConfig;
@@ -16,13 +19,21 @@ import vista.ObservadorConfig;
  *
  * @author benja
  */
-public class ModeloConfig implements iModeloConfig {
+public class ModeloConfig implements iModeloConfig, PropertyChangeListener {
 
     List<ObservadorConfig> observadores;
     iDespachador despachador;
     String ipServidor;
     int puertoServidor;
     String ipCliente;
+    int puertoCliente;
+
+    private String idCliente;
+
+    // NUEVO MÉTODO
+    public void setIdCliente(String id) {
+        this.idCliente = id;
+    }
 
     public ModeloConfig() {
         observadores = new ArrayList<>();
@@ -32,21 +43,24 @@ public class ModeloConfig implements iModeloConfig {
         notificarObservadores(EventoConfig.CREAR_PARTIDA);
     }
 
+    public void cerrarCU(){
+        notificarObservadores(EventoConfig.CERRAR_CU);
+    }
+
     public void configurarPartida(int comodines, int fichas) {
         try {
             String payload = serializarConfiguracion(comodines, fichas);
-            String idCliente = "REMPLAZAR_ESTE_NOMBRE_AL_REGISTRAR_@CHRIS";
+
             String comando = "CONFIGURAR_PARTIDA";
 
-            String puertoCliente = "9001";
+            String puertoCliente = String.valueOf(this.puertoCliente);
 
             String mensajeProtocolo = idCliente + ":" + comando + ":" + payload;
 
-            despachador.enviar(ipServidor, puertoServidor, mensajeProtocolo);
-
             /*El cliente que cree la partida necesita registrarse en el blackboard tambien.*/
-            String mensajeRegistro = idCliente + ":REGISTRAR:" + ipCliente + "$" + puertoCliente;
-            despachador.enviar(ipServidor, puertoServidor, mensajeRegistro);
+//            String mensajeRegistro = idCliente + ":REGISTRAR:" + ipCliente + "$" + puertoCliente;
+//            despachador.enviar(ipServidor, puertoServidor, mensajeRegistro);
+            despachador.enviar(ipServidor, puertoServidor, mensajeProtocolo);
 
         } catch (IOException ex) {
             Logger.getLogger(ModeloConfig.class.getName()).log(Level.SEVERE, null, ex);
@@ -81,6 +95,25 @@ public class ModeloConfig implements iModeloConfig {
 
     public void setIpCliente(String ipCliente) {
         this.ipCliente = ipCliente;
+    }
+
+    public int getPuertoCliente() {
+        return puertoCliente;
+    }
+
+    public void setPuertoCliente(int puertoCliente) {
+        this.puertoCliente = puertoCliente;
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String evento = evt.getPropertyName();
+
+        switch (evento) {
+            case "PARTIDA-CREADA-EXITO":
+                notificarObservadores(EventoConfig.PARTIDA_CREADA); // agregar aqui
+                break;
+        }
     }
 
 }

@@ -16,5 +16,7 @@ public interface iControlConfig {
 
     public void setControladorCUPrincipal(iControlCUPrincipal controladorCUPrincipal);
 
-    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente);
+    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente);
+
+    public void cerrarCU();
 }

@@ -41,10 +41,17 @@ public class ControladorConfig implements iControlConfig {
     }
     
     @Override
-    public void setConfiguracion(String ipServidor,int puertoServidor, String ipCliente){
+    public void setConfiguracion(String ipServidor,int puertoServidor, String ipCliente , int puertoCliente){
         modelo.setIpServidor(ipServidor);
         modelo.setPuertoServidor(puertoServidor);
         modelo.setIpCliente(ipCliente);
+        modelo.setPuertoCliente(puertoCliente);
     }
 
+    @Override
+    public void cerrarCU() {
+        modelo.cerrarCU();
+    }
+
+    
 }

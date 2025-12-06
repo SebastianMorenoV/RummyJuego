@@ -30,7 +30,7 @@ public class AgenteIniciarPartida implements iAgentePartida {
     public AgenteIniciarPartida(EstadoJuegoPizarra pizarra) {
         this.pizarra = pizarra;
         this.tableroDeJuego = new Tablero();
-        this.tableroDeJuego.crearMazoCompleto();
+
     }
 
     /**
@@ -40,17 +40,19 @@ public class AgenteIniciarPartida implements iAgentePartida {
      * @return Un mapa de [ID_Jugador -> ManoSerializada]
      */
     @Override
-    public Map<String, String> repartirManos(List<String> jugadorIds) {
+    public Map<String, String> repartirManos(List<String> jugadorIds, int numFichas,int numComodines) {
+
+        this.tableroDeJuego.crearMazoCompleto(numComodines);
         Map<String, String> manosSerializadas = new HashMap<>();
 
         for (String id : jugadorIds) {
             List<Ficha> mano = new ArrayList<>();
-            for (int i = 0; i < 14; i++) {
+            for (int i = 0; i < numFichas; i++) {
                 Ficha ficha = this.tableroDeJuego.tomarFichaMazo();
                 if (ficha != null) {
                     mano.add(ficha);
                 }
-                pizarra.setFichasJugador(id, 14); //MODIFICAR AQUI DEPENDIENDO DE LO QUE YA HAY EN BLACKBOARD
+                pizarra.setFichasJugador(id, numFichas); //MODIFICAR AQUI DEPENDIENDO DE LO QUE YA HAY EN BLACKBOARD
             }
 
             String manoPayload = mano.stream()

@@ -15,7 +15,6 @@
         <module>Interfaces</module>
         <module>MVCPantallaInicial</module>
         <module>MVCConfigurarPartida</module>
-        <module>MVCSalaEspera</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

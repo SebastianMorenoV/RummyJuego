@@ -13,7 +13,7 @@ import java.beans.PropertyChangeSupport;
  * para que el Modelo los consuma.
  * * @author benjamin y sebastian
  */
-public class Procesador implements iProcesador {
+    public class Procesador implements iProcesador {
 
     private final iPizarraJuego pizarra;
     

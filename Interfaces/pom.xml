@@ -14,4 +14,11 @@
         <exec.mainClass>com.itson.interfaces.Interfaces</exec.mainClass>
     </properties>
     <name>Interfaces</name>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Dtos</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

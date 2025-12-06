@@ -3,6 +3,7 @@ package Vista.Objetos;
 import Controlador.Controlador;
 import DTO.GrupoDTO;
 import Vista.VistaTablero;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
@@ -27,7 +28,7 @@ public class FichaUI extends JPanel {
     private Color color;
     private boolean comodin;
     private VistaTablero vista;
-    private Controlador control;
+    private iControlEjercerTurno control;
     private Point originalLocation;
     private JPanel originalParent;
     private Origen origen;
@@ -40,7 +41,7 @@ public class FichaUI extends JPanel {
     }
 
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
-            Controlador controlador, VistaTablero vista) {
+           iControlEjercerTurno controlador, VistaTablero vista) {
         this.control = controlador;
         this.vista = vista;
         this.idFicha = idFicha;
@@ -55,7 +56,7 @@ public class FichaUI extends JPanel {
     }
 
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
-            Controlador controlador, Point originalLocation, VistaTablero vista) {
+            iControlEjercerTurno controlador, Point originalLocation, VistaTablero vista) {
         this.control = controlador;
         this.vista = vista;
         this.idFicha = idFicha;

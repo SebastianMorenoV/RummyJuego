@@ -8,7 +8,6 @@ import Entidades.Ficha;
 import Entidades.Grupo;
 import Fachada.IJuegoRummy;
 import Fachada.JuegoRummyFachada;
-import Util.Configuracion;
 import Vista.Observador;
 import Vista.TipoEvento;
 import contratos.iDespachador;
@@ -41,13 +40,22 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private String idJugadorEnTurnoGlobal = "";
     private boolean esMiTurno;
     private iDespachador despachador;
-    private String miId;
-    Configuracion config;
+
+    String ipServidor;
+    int puertoServidor;
+    String ipCliente;
+    int puertoCliente;
 
     private int mazoFichasRestantes = 0;
 
+    private String miId;
+
+    // NUEVO MÉTODO
+    public void setIdCliente(String id) {
+        this.miId = id;
+    }
+
     public Modelo() {
-        this.config = new Configuracion();
         this.observadores = new ArrayList<>();
         this.juego = new JuegoRummyFachada();
         this.gruposDeTurnoDTO = new ArrayList<>();
@@ -63,6 +71,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
         juego.iniciarPartida();
         this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
+    }
+
+    public void abrirCU() {
+        iniciarJuego();
+
+        notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
     }
 
     /**
@@ -97,9 +111,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
                             .collect(Collectors.toList());
 
                     juego.setManoInicial(manoEntidad);
-
+                    
+                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
+                    notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
                 } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
                     e.printStackTrace();
@@ -182,7 +198,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 break;
 
             default:
-                System.out.println("[Modelo] Evento PropertyChange desconocido: " + evento);
+                System.out.println("[Modelo MVC] Evento PropertyChange desconocido: " + evento);
                 break;
         }
     }
@@ -222,7 +238,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String mensaje = this.miId + ":MOVER:" + payloadCompleto;
 
         try {
-            this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+            this.despachador.enviar(ipServidor, puertoServidor, mensaje);
         } catch (IOException ex) {
             Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -243,7 +259,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         try {
             String payloadJuegoRevertido = serializarEstadoRevertido();
             String mensajeTomar = this.miId + ":TOMAR_FICHA:" + payloadJuegoRevertido;
-            this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeTomar);
+            this.despachador.enviar(ipServidor, puertoServidor, mensajeTomar);
 
         } catch (IOException ex) {
             Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
@@ -270,7 +286,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 String payloadJuego = serializarJuegoFinal();
                 int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
                 String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
-                this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+                this.despachador.enviar(ipServidor, puertoServidor, mensaje);
             } catch (IOException ex) {
                 Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -286,7 +302,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 try {
                     String payloadJuegoRevertido = serializarEstadoRevertido();
                     String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
-                    this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+                    this.despachador.enviar(ipServidor, puertoServidor, mensaje);
                 } catch (IOException ex) {
                     Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -394,7 +410,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
             try {
                 String payloadJuegoActualizado = serializarJuegoFinal();
                 String mensaje = this.miId + ":MOVER:" + payloadJuegoActualizado;
-                this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+                this.despachador.enviar(ipServidor, puertoServidor, mensaje);
             } catch (IOException ex) {
                 Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -432,7 +448,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String nombreJugadorActual = (juego.getJugadorActual() != null)
                 ? juego.getJugadorActual().getNickname()
                 : "...";
-       dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
+        dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
         // --- CORRECCIÓN PRINCIPAL: Llenar la lista de jugadores ---
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
@@ -533,7 +549,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         try {
             String mensaje = this.miId + ":INICIAR_PARTIDA:";
             System.out.println("[Modelo] Enviando comando INICIAR_PARTIDA al servidor.");
-            this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+            this.despachador.enviar(ipServidor, puertoServidor, mensaje);
         } catch (IOException ex) {
             System.err.println("[Modelo] Error al enviar comando INICIAR_PARTIDA: " + ex.getMessage());
         }
@@ -553,4 +569,37 @@ public class Modelo implements IModelo, PropertyChangeListener {
     public void setMiId(String miId) {
         this.miId = miId;
     }
+
+    public String getIpCliente() {
+        return ipCliente;
+    }
+
+    public void setIpCliente(String ipCliente) {
+        this.ipCliente = ipCliente;
+    }
+
+    public String getIpServidor() {
+        return ipServidor;
+    }
+
+    public void setIpServidor(String ipServidor) {
+        this.ipServidor = ipServidor;
+    }
+
+    public int getPuertoServidor() {
+        return puertoServidor;
+    }
+
+    public void setPuertoServidor(int puertoServidor) {
+        this.puertoServidor = puertoServidor;
+    }
+
+    public int getPuertoCliente() {
+        return puertoCliente;
+    }
+
+    public void setPuertoCliente(int puertoCliente) {
+        this.puertoCliente = puertoCliente;
+    }
+
 }

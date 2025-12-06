@@ -1,14 +1,14 @@
 package Vista;
 
 import eventos.Evento;
-import Modelo.IModelo;
+import Modelo.IModeloLobby;
 
 /**
  * Clase que implementa la vista para obtener datos.
  *
  * @author benja
  */
-public interface Observador {
+public interface ObservadorLobby {
 
-    void actualiza(IModelo modelo, Evento evento);
+    void actualiza(IModeloLobby modelo, Evento evento);
 }

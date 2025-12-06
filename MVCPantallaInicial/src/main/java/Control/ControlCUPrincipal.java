@@ -3,25 +3,26 @@ package Control;
 import Modelo.ModeloCUPrincipal;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlConfig;
-
+import contratos.controladoresMVC.iControlEjercerTurno;
 
 /**
  *
  * @author benja
  */
-public class ControlCUPrincipal implements iControlCUPrincipal{
+public class ControlCUPrincipal implements iControlCUPrincipal {
 
     ModeloCUPrincipal modelo;
     iControlConfig controladorConfig;
+    iControlEjercerTurno controladorEjercerTurno;
 
     public ControlCUPrincipal(ModeloCUPrincipal modelo) {
         this.modelo = modelo;
     }
- 
-    public void pantallaInicial(){
+
+    public void pantallaInicial() {
         modelo.iniciarLobby();
     }
-    
+
     @Override
     public void iniciarCreacionPartida() {
         modelo.iniciarCreacionPartida();
@@ -30,6 +31,11 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
     @Override
     public void SolicitarUnirseAPartida() {
         modelo.SolicitarUnirseApartida();
+    }
+
+    @Override
+    public void ejercerTurno() {
+        controladorEjercerTurno.abrirCU();
     }
 
     @Override
@@ -42,7 +48,26 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
         }
     }
 
+    @Override
+    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
+        modelo.setIpServidor(ipServidor);
+        modelo.setPuertoServidor(puertoServidor);
+        modelo.setMiIp(ipCliente);
+        modelo.setMiPuerto(puertoCliente);
+    }
+
+    @Override
     public void setControladorConfig(iControlConfig controladorConfig) {
         this.controladorConfig = controladorConfig;
+    }
+
+    @Override
+    public void setControladorEjercerTurno(iControlEjercerTurno control) {
+        this.controladorEjercerTurno = control;
+    }
+
+    @Override
+    public void cerrarCU() {
+        modelo.cerrarCU();
     }
 }

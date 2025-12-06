@@ -49,12 +49,43 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
         String jugadorQueMovio = pizarra.getUltimoJugadorQueMovio();
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
+        // 1. Separar evento de posibles argumentos (ID)
+        String eventoPuro = evento;
+        String idAfectado = "";
 
-        switch (evento) {
+        if (evento.contains(":")) {
+            String[] partes = evento.split(":", 2); // Dividir en máximo 2 partes
+            eventoPuro = partes[0];
+            idAfectado = partes[1];
+        }
+        switch (eventoPuro) {
 
+            case "PERMISO_CREAR":
+                enviarMensajeDirecto(idAfectado, "PUEDES_CONFIGURAR");
+                break;
+            case "PARTIDA_EXISTENTE":
+                enviarMensajeDirecto(idAfectado, "PARTIDA-EXISTENTE");
+                break;
             case "CONFIGURAR_PARTIDA":
+                List<String> jugadores = pizarra.getOrdenDeTurnos();
+
+                if (jugadores != null && !jugadores.isEmpty()) {
+                    String idHost = jugadores.get(0);
+
+                    iDirectorio.ClienteInfoDatos datosHost = directorio.getClienteInfo(idHost);
+
+                    if (datosHost != null) {
+                        String ipJugador = datosHost.getHost();
+                        int puertoJugador = datosHost.getPuerto();
+                        System.out.println("[Controlador] IP obtenida del Host (" + idHost + "): " + ipJugador);
+                        enviarMensajeDirecto(idHost, "PARTIDA-CREADA-EXITO");
+
+                    } else {
+                        System.err.println("[Controlador] Error: No se encontró info de red para el jugador " + idHost);
+                    }
+                }
+
                 System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
-                //que deberia hacer aqui si todavia nadie se une?
                 break;
 
             case "JUGADOR_UNIDO":
@@ -76,7 +107,10 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
                 System.out.println("[Controlador] Repartiendo para " + jugadoresIds.size() + " jugadores.");
 
-                Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds);
+                String[] configuracion = pizarra.getConfiguracionPartida();
+                int numFichas = Integer.parseInt(configuracion[1]);
+                int numComodines = Integer.parseInt(configuracion[0]);
+                Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds, numFichas, numComodines);
                 String mazoSerializado = agentePartida.getMazoSerializado();
                 int mazoCount = mazoSerializado.split("\\|").length;
 

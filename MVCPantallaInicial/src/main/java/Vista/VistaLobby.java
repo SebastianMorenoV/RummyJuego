@@ -6,14 +6,15 @@ package Vista;
 
 import Control.ControlCUPrincipal;
 import eventos.Evento;
-import Modelo.IModelo;
 import contratos.controladoresMVC.iControlCUPrincipal;
+import javax.swing.JOptionPane;
+import Modelo.IModeloLobby;
 
 /**
  *
  * @author benja
  */
-public class VistaLobby extends javax.swing.JFrame implements Observador {
+public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
 
     /**
      * Creates new form VistaLobby
@@ -77,6 +78,11 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         jButton2.setMaximumSize(new java.awt.Dimension(100, 30));
         jButton2.setMinimumSize(new java.awt.Dimension(100, 30));
         jButton2.setPreferredSize(new java.awt.Dimension(100, 30));
+        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton2MouseClicked(evt);
+            }
+        });
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -104,8 +110,15 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+
         control.iniciarCreacionPartida();
     }//GEN-LAST:event_jButton1MouseClicked
+
+    private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
+        this.setVisible(false);
+        control.SolicitarUnirseAPartida();
+        control.ejercerTurno();
+    }//GEN-LAST:event_jButton2MouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -116,8 +129,11 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void actualiza(IModelo modelo, Evento evento) {
+    public void actualiza(IModeloLobby modelo, Evento evento) {
         switch (evento) {
+            case CERRAR_CU:
+                this.setVisible(false);
+                break;
             case INICIO:
                 this.setVisible(true);
                 break;
@@ -130,11 +146,14 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
             case SOLICITAR_INICIO:
                 break;
             case SOLICITAR_UNIRSE_A_PARTIDA:
-                if(modelo.getPartida()==null){
+                if (modelo.getPartida() == null) {
                     System.out.println("No hay partida a la que unirse");
-                }else{
-                System.out.println("Se solicito unirse a partida");
+                } else {
+                    System.out.println("Se solicito unirse a partida");
                 }
+                break;
+            case PARTIDA_EXISTENTE:
+                JOptionPane.showMessageDialog(this, "No se puede crear una Nueva Partida, ya existe una corriendo localmente. Uniendose Automaticamente..");
                 break;
             default:
                 throw new AssertionError();

@@ -9,5 +9,7 @@ package TipoEventos;
  * @author moren
  */
 public enum EventoConfig {
-    CREAR_PARTIDA
+    CREAR_PARTIDA,
+    PARTIDA_CREADA,
+    CERRAR_CU
 }
