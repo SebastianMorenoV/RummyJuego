@@ -8,6 +8,13 @@
     </parent>
     <artifactId>MVCSalaEspera</artifactId>
     <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Interfaces</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <exec.mainClass>com.itson.mvcsalaespera.MVCSalaEspera</exec.mainClass>

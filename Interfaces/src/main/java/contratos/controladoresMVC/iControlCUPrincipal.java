@@ -10,13 +10,9 @@ package contratos.controladoresMVC;
  */
 public interface iControlCUPrincipal {
 
-    public void iniciarCreacionPartida();
-
     public void SolicitarUnirseAPartida();
-
-    public void casoUsoConfigurarPartida();
-
-    public void pantallaInicial();
-
-    public void setControladorConfig(iControlConfig controladorConfig);
+    
+    public void setControladorSalaEspera(iControlSalaEspera controlSalaEspera);
+    
+    public void procesarNavegacionSalaEspera();
 }

@@ -13,9 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Directorio implements iDirectorio {
 
     private final Map<String, ClienteInfo> directorioJugadores;
-
+    private final Map<String, ClienteInfo> candidatosPendientes;
     public Directorio() {
         this.directorioJugadores = new ConcurrentHashMap<>();
+        this.candidatosPendientes = new ConcurrentHashMap<>();
     }
 
     /**
@@ -71,7 +72,22 @@ public class Directorio implements iDirectorio {
     public void removeJugador(String idJugador) {
         directorioJugadores.remove(idJugador);
     }
+    @Override
+    public void agregarCandidato(String id, String ip, int puerto) {
+        candidatosPendientes.put(id, new ClienteInfo(ip, puerto));
+        System.out.println("[Directorio] Candidato en espera guardado: " + id);
+    }
 
+    @Override
+    public ClienteInfoDatos getCandidatoInfo(String id) {
+        return candidatosPendientes.get(id);
+    }
+
+    @Override
+    public void removerCandidato(String id) {
+        candidatosPendientes.remove(id);
+        System.out.println("[Directorio] Candidato removido de espera: " + id);
+    }
     /**
      * Devuelve un mapa de solo lectura (una copia) con la información de conexión 
      * de todos los jugadores registrados.

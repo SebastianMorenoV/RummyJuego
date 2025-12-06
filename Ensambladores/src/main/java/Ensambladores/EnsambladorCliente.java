@@ -49,20 +49,22 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
      * @return Una instancia de {@link iListener} (ServerTCP) lista para recibir conexiones.
      */
     @Override
-    public iListener crearListener(String miId, PropertyChangeListener oyente) {
-        System.out.println("[Ensamblador] Ensamblando Listener para CLIENTE "
-                + "(" + miId + ")...");
+    public iListener crearListener(String miId, PropertyChangeListener[] oyentes) {
 
         Procesador logicaCliente = new Procesador();
 
-        System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()
-                + ") -> ProcesadorCliente");
-        logicaCliente.addPropertyChangeListener(oyente);
+        if (oyentes != null) {
+            for (PropertyChangeListener oyente : oyentes) {
+                if (oyente != null) {
+                    System.out.println("[Ensamblador] Conectando Oyente: " + oyente.getClass().getSimpleName());
+                    logicaCliente.addPropertyChangeListener(oyente);
+                }
+            }
+        }
 
         iListener listener = new ServerTCP(logicaCliente);
 
-        System.out.println("[Ensamblador] Listener ensamblado.");
-
+        System.out.println("[Ensamblador] Listener ensamblado correctamente.");
         return listener;
     }
 }

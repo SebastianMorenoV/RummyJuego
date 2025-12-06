@@ -46,5 +46,20 @@ public interface iDirectorio {
      * @return Un Mapa de [idJugador -> InfoDeConexion]
      */
     public Map<String, ClienteInfoDatos> getAllClienteInfo();
+    
+    /**
+     * Registra temporalmente a un jugador que está solicitando entrar.
+     */
+    void agregarCandidato(String idCandidato, String ip, int puerto);
+
+    /**
+     * Obtiene los datos de conexión de un candidato por su ID.
+     */
+    ClienteInfoDatos getCandidatoInfo(String idCandidato);
+
+    /**
+     * Elimina a un candidato de la lista de espera (ya sea porque entró o fue rechazado).
+     */
+    void removerCandidato(String idCandidato);
 
 }

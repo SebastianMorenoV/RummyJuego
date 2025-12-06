@@ -4,16 +4,16 @@
  */
 package Vista;
 
-import Control.ControlCUPrincipal;
 import eventos.Evento;
-import Modelo.IModelo;
+import Modelo.IModeloPantallaInicial;
 import contratos.controladoresMVC.iControlCUPrincipal;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author benja
  */
-public class VistaLobby extends javax.swing.JFrame implements Observador {
+public class VistaLobby extends javax.swing.JFrame implements ObservadorSalaEspera {
 
     /**
      * Creates new form VistaLobby
@@ -40,7 +40,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
 
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnSolicitarUnirseAPartida = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
 
         setMinimumSize(new java.awt.Dimension(900, 500));
@@ -71,19 +71,19 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         getContentPane().add(jButton1);
         jButton1.setBounds(320, 130, 280, 120);
 
-        jButton2.setBackground(new java.awt.Color(255, 235, 126));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton2.setText("Unirse a partida");
-        jButton2.setMaximumSize(new java.awt.Dimension(100, 30));
-        jButton2.setMinimumSize(new java.awt.Dimension(100, 30));
-        jButton2.setPreferredSize(new java.awt.Dimension(100, 30));
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnSolicitarUnirseAPartida.setBackground(new java.awt.Color(255, 235, 126));
+        btnSolicitarUnirseAPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnSolicitarUnirseAPartida.setText("Unirse a partida");
+        btnSolicitarUnirseAPartida.setMaximumSize(new java.awt.Dimension(100, 30));
+        btnSolicitarUnirseAPartida.setMinimumSize(new java.awt.Dimension(100, 30));
+        btnSolicitarUnirseAPartida.setPreferredSize(new java.awt.Dimension(100, 30));
+        btnSolicitarUnirseAPartida.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnSolicitarUnirseAPartidaActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton2);
-        jButton2.setBounds(320, 280, 280, 120);
+        getContentPane().add(btnSolicitarUnirseAPartida);
+        btnSolicitarUnirseAPartida.setBounds(320, 280, 280, 120);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/fondoRummy.jpg"))); // NOI18N
         jLabel1.setText("jLabel1");
@@ -99,42 +99,37 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void btnSolicitarUnirseAPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSolicitarUnirseAPartidaActionPerformed
+        control.SolicitarUnirseAPartida();
+    }//GEN-LAST:event_btnSolicitarUnirseAPartidaActionPerformed
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        control.iniciarCreacionPartida();
     }//GEN-LAST:event_jButton1MouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnSolicitarUnirseAPartida;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void actualiza(IModelo modelo, Evento evento) {
+    public void actualiza(IModeloPantallaInicial modelo, Evento evento) {
         switch (evento) {
             case INICIO:
                 this.setVisible(true);
                 break;
-            case CREAR_PARTIDA:
-                System.out.println("Viajando MVC CrearPartida");
-                this.setVisible(false);
-                control.casoUsoConfigurarPartida();
-                break;
-
             case SOLICITAR_INICIO:
                 break;
             case SOLICITAR_UNIRSE_A_PARTIDA:
-                if(modelo.getPartida()==null){
-                    System.out.println("No hay partida a la que unirse");
-                }else{
-                System.out.println("Se solicito unirse a partida");
-                }
+                System.out.println("[VistaLobby] Éxito. Iniciando navegación a Sala Espera.");
+                this.setVisible(false);
+                control.procesarNavegacionSalaEspera();
+                break;
+
+            case RECHAZADO:
+                JOptionPane.showMessageDialog(this, "No te aceptaron pa :(");                       
                 break;
             default:
                 throw new AssertionError();

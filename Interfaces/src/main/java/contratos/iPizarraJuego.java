@@ -105,7 +105,21 @@ public interface iPizarraJuego {
 
     /**
      * Metodo para obtener la configuracion de la partida.
+     *
      * @return arreglo con String [comodines,fichas de cada mano.]
      */
     String[] getConfiguracionPartida();
+
+    int getNumeroDeJugadoresRegistrados();
+
+    int getIndiceTurnoActual();
+
+    String[] getCandidatoTemporal();
+
+    boolean isVotacionAprobada();
+
+    String[] getCandidatoRechazado();
+    
+    String[] getUltimoResultadoVotacion();
+
 }

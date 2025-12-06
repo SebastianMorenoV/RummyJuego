@@ -1,6 +1,5 @@
 package pizarra;
 
-import DTO.GrupoDTO;
 import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.ArrayList;
@@ -26,13 +25,23 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] jugadorARegistrarTemporal;
     private String[] configuracionPartida;
     private String mazoSerializado;
-    private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
+    private Map<String, Integer> fichasPorJugador = new HashMap<>();
+    private int numeroDeJugadoresRegistrados;
+    private String[] candidatoTemporal;
+    private String[] candidatoRechazado;  
+    private String[] ultimoResultadoVotacion;
+    private boolean votacionEnCurso = false;
+    private int votosAfirmativos = 0;
+    private int votosRecibidos = 0;
+    private int totalVotantesEsperados = 0;
+    private boolean votacionAprobada = false;
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
         this.observadores = new ArrayList<>();
         this.mazoSerializado = "";
+        this.numeroDeJugadoresRegistrados = 0;
     }
 
     /**
@@ -76,8 +85,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal[2] = partes[1];
 
         ordenDeTurnos.add(id);
-
         notificarObservadores("JUGADOR_UNIDO");
+        numeroDeJugadoresRegistrados++;
         jugadorARegistrarTemporal = null;
     }
 
@@ -219,6 +228,27 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
+        switch (comando) {
+
+            case "SOLICITAR_UNIRSE":
+                registrarCandidato(idCliente, payload);
+                break;
+
+            case "RESPUESTA_VOTO":
+                if (!votacionEnCurso) return;
+
+                boolean voto = Boolean.parseBoolean(payload);
+                votosRecibidos++;
+                if (voto) votosAfirmativos++;
+
+                System.out.println("[Pizarra] Voto recibido de " + idCliente + ": " + voto + 
+                                   " (" + votosRecibidos + "/" + totalVotantesEsperados + ")");
+
+                if (votosRecibidos >= totalVotantesEsperados) {
+                    finalizarConteo();
+                }
+                break;
+        }
         if (indiceTurnoActual == -1) {
             switch (comando) {
                 case "REGISTRAR":
@@ -229,10 +259,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     if (iniciarPartidaSiCorresponde()) {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
                     }
-                    break;
-                case "CONFIGURAR_PARTIDA":
-                    System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");
-                    configurarPartida(idCliente, payload);
                     break;
             }
         }
@@ -331,6 +357,68 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return fichaTomada;
     }
 
+   private void registrarCandidato(String id, String payloadRed) {
+        String[] datos = new String[3];
+        String[] partes = payloadRed.split("\\$");
+        datos[0] = id;
+        datos[1] = partes[0];
+        datos[2] = partes[1];
+
+        if (this.votacionEnCurso) {
+            this.candidatoRechazado = datos;
+            System.out.println("[Pizarra] OCUPADO. Rechazando solicitud de: " + id);
+            notificarObservadores("SOLICITUD_RECHAZADA_OCUPADO");
+            return;
+        }
+
+        this.candidatoTemporal = datos;
+
+        if (this.indiceTurnoActual != -1) {
+            System.out.println("[Pizarra] Rechazo automático: Partida iniciada.");
+            notificarObservadores("SOLICITUD_RECHAZADA_INICIADA");
+            this.candidatoTemporal = null;
+            return;
+        }
+
+        if (getNumeroDeJugadoresRegistrados() >= 4) {
+            System.out.println("[Pizarra] Rechazo automático: Sala llena.");
+            notificarObservadores("SOLICITUD_RECHAZADA_LLENA");
+            this.candidatoTemporal = null;
+            return;
+        }
+
+        if (getNumeroDeJugadoresRegistrados() == 0) {
+            System.out.println("[Pizarra] Sala vacía. Aceptando automáticamente al anfitrión: " + id);
+            
+            registrarJugador(id, payloadRed);
+
+            this.candidatoTemporal = datos; 
+            notificarObservadores("CANDIDATO_ACEPTADO_DIRECTAMENTE");
+            
+            this.candidatoTemporal = null;
+            return;
+        }
+
+        System.out.println("[Pizarra] Solicitud válida. Iniciando estado de votación.");
+        this.votacionEnCurso = true;
+        this.votosAfirmativos = 0;
+        this.votosRecibidos = 0;
+        this.totalVotantesEsperados = getNumeroDeJugadoresRegistrados();
+        
+        notificarObservadores("SOLICITUD_ENTRANTE");
+    }
+
+    @Override
+    public String[] getCandidatoRechazado() {
+        return this.candidatoRechazado;
+    }
+
+    public void limpiarCandidatoActual() {
+        this.candidatoTemporal = null;
+        this.votacionEnCurso = false; 
+        System.out.println("[Pizarra] Sala liberada para nuevas solicitudes.");
+    }
+    
     /**
      * Devuelve el número de fichas restantes en la cadena serializada del mazo.
      *
@@ -343,10 +431,49 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.mazoSerializado.split("\\|").length;
     }
 
+    private void finalizarConteo() {
+        this.votacionAprobada = (votosAfirmativos == totalVotantesEsperados);
+        
+        this.ultimoResultadoVotacion = this.candidatoTemporal;
+        
+        this.candidatoTemporal = null;
+        this.votacionEnCurso = false; 
+        this.votosAfirmativos = 0;
+        this.votosRecibidos = 0;
+        
+        System.out.println("[Pizarra] Votación finalizada. Sala liberada automáticamente.");
+        
+        notificarObservadores("VOTACION_FINALIZADA");
+    }
+
+    @Override
     public String[] getConfiguracionPartida() {
         return configuracionPartida;
     }
 
+    @Override
+    public int getNumeroDeJugadoresRegistrados() {
+        return numeroDeJugadoresRegistrados;
+    }
+
+    @Override
+    public int getIndiceTurnoActual() {
+        return indiceTurnoActual;
+    }
+
+    @Override
+    public String[] getCandidatoTemporal() {
+        return this.candidatoTemporal;
+    }
+
+    @Override
+    public boolean isVotacionAprobada() {
+        return this.votacionAprobada;
+    }
+    @Override
+    public String[] getUltimoResultadoVotacion() {
+        return this.ultimoResultadoVotacion;
+    }
     // NUEVO: Método para inicializar o actualizar fichas
     public void setFichasJugador(String id, int cantidad) {
         fichasPorJugador.put(id, cantidad);

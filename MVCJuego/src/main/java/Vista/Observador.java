@@ -12,7 +12,7 @@ import Modelo.IModelo;
  *
  * @author moren
  */
-public interface Observador {
+public interface Observador{
 
     public void actualiza(IModelo modelo, ActualizacionDTO dto);
 }

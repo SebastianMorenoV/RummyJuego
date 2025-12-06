@@ -2,29 +2,30 @@ package Control;
 
 import Modelo.ModeloCUPrincipal;
 import contratos.controladoresMVC.iControlCUPrincipal;
-import contratos.controladoresMVC.iControlConfig;
-
+import contratos.controladoresMVC.iControlSalaEspera;
 
 /**
  *
  * @author benja
  */
-public class ControlCUPrincipal implements iControlCUPrincipal{
+public class ControlCUPrincipal implements iControlCUPrincipal {
 
     ModeloCUPrincipal modelo;
-    iControlConfig controladorConfig;
+    iControlSalaEspera controlSalaEspera;
 
     public ControlCUPrincipal(ModeloCUPrincipal modelo) {
         this.modelo = modelo;
     }
- 
-    public void pantallaInicial(){
-        modelo.iniciarLobby();
-    }
-    
+
+
     @Override
-    public void iniciarCreacionPartida() {
-        modelo.iniciarCreacionPartida();
+    public void procesarNavegacionSalaEspera() {
+        if (controlSalaEspera != null) {
+            System.out.println("[ControlPrincipal] Delegando flujo a ControladorSalaEspera...");
+            controlSalaEspera.iniciarSalaDeEspera();
+        } else {
+            System.err.println("[ControlPrincipal] Error CRÍTICO: Controlador Sala Espera no inyectado.");
+        }
     }
 
     @Override
@@ -33,16 +34,9 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
     }
 
     @Override
-    public void casoUsoConfigurarPartida() {
-        if (this.controladorConfig != null) {
-            System.out.println("[ControlPrincipal] Navegando a Configurar Partida...");
-            this.controladorConfig.iniciarConfiguracion();
-        } else {
-            System.err.println("Error: ControladorConfig no ha sido ensamblado.");
-        }
+    public void setControladorSalaEspera(iControlSalaEspera controlSalaEspera) {
+        this.controlSalaEspera = controlSalaEspera;
+                
     }
 
-    public void setControladorConfig(iControlConfig controladorConfig) {
-        this.controladorConfig = controladorConfig;
-    }
 }

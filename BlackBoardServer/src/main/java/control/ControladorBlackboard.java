@@ -51,23 +51,83 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
 
         switch (evento) {
+            case "CANDIDATO_ACEPTADO_DIRECTAMENTE":
+                String[] datosAceptado = pizarra.getCandidatoTemporal();
+                if (datosAceptado != null) {
+                    String id = datosAceptado[0];
+                    System.out.println("[Controlador] El jugador " + id + " entró directo (Host).");
+                    // Le avisamos al cliente que entre a la sala de espera
+                    enviarMensajeDirecto(id, "UNION_ACEPTADA");
+                }
+                break;
+            case "SOLICITUD_ENTRANTE":
+                String[] datos = pizarra.getCandidatoTemporal();
+                String idCandidato = datos[0];
+                String ip = datos[1];
+                int puerto = Integer.parseInt(datos[2]);
 
-            case "CONFIGURAR_PARTIDA":
-                System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
-                //que deberia hacer aqui si todavia nadie se une?
+                directorio.agregarCandidato(idCandidato, ip, puerto);
+
+                System.out.println("[Controlador] Pizarra aceptó solicitud. Enviando petición de votos.");
+
+                enviarATodos("PETICION_VOTO:" + idCandidato);
                 break;
 
+            case "SOLICITUD_RECHAZADA_INICIADA":
+                manejarRechazoInmediato(pizarra, "ERROR_PARTIDA_INICIADA");
+                break;
+
+            case "SOLICITUD_RECHAZADA_LLENA":
+                manejarRechazoInmediato(pizarra, "UNION_RECHAZADA");
+                break;
+
+            case "SOLICITUD_RECHAZADA_VACIA":
+                manejarRechazoInmediato(pizarra, "UNION_RECHAZADA");
+                break;
+
+            case "SOLICITUD_RECHAZADA_OCUPADO":
+                String[] rechazado = pizarra.getCandidatoRechazado();
+                if (rechazado != null) {
+                    registrarYRechazar(rechazado[0], rechazado[1], Integer.parseInt(rechazado[2]), "ERROR_VOTACION_EN_CURSO");
+                }
+                break;
+
+            case "VOTACION_FINALIZADA":
+                String[] resultado = pizarra.getUltimoResultadoVotacion();
+                if (resultado != null) {
+                    String id = resultado[0];
+                    if (pizarra.isVotacionAprobada()) {
+                        // Recuperar info para registrar
+                        iDirectorio.ClienteInfoDatos info = directorio.getCandidatoInfo(id);
+                        if (info != null) {
+                            // Registrar dispara JUGADOR_UNIDO después
+                            pizarra.registrarJugador(id, info.getHost() + "$" + info.getPuerto());
+                            enviarMensajeCandidato(id, "UNION_ACEPTADA");
+                        }
+                        directorio.removerCandidato(id);
+                    } else {
+                        enviarMensajeCandidato(id, "UNION_RECHAZADA");
+                        directorio.removerCandidato(id);
+                    }
+                }
+                break;
             case "JUGADOR_UNIDO":
                 String[] ipJugador = pizarra.getIpCliente();
-                directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2].toString()));
-                System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO.");
+                // 1. Registrar oficialmente
+                directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2]));
+                System.out.println("[Controlador] Jugador " + ipJugador[0] + " unido.");
 
-                int numJugadores = pizarra.getOrdenDeTurnos().size();
-                if (numJugadores == 2) {
-                    String idHost = pizarra.getOrdenDeTurnos().get(0);
-                    System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
-                    enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
+                // 2. CONSTRUIR LISTA DE JUGADORES
+                StringBuilder listaNombres = new StringBuilder();
+                for (String id : directorio.getAllClienteInfo().keySet()) {
+                    listaNombres.append(id).append(",");
                 }
+                if (listaNombres.length() > 0) {
+                    listaNombres.setLength(listaNombres.length() - 1); // Quitar última coma
+                }
+
+                // 3. ENVIAR A TODOS (Broadcast)
+                enviarATodos("ACTUALIZAR_LISTA:" + listaNombres.toString());
                 break;
 
             case "EVENTO_PARTIDA_INICIADA":
@@ -144,6 +204,37 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             String mensajeTurno = "TURNO_CAMBIADO:" + nuevoJugadorEnTurno + ":" + mazoCount + ":" + contadores;
             enviarATodos(mensajeTurno);
         }
+    }
+
+    private void enviarMensajeCandidato(String idCandidato, String mensaje) {
+        try {
+            iDirectorio.ClienteInfoDatos destino = directorio.getCandidatoInfo(idCandidato);
+            if (destino != null) {
+                System.out.println("[Controlador] Respondiendo a candidato " + idCandidato + ": " + mensaje);
+                this.despachador.enviar(destino.getHost(), destino.getPuerto(), mensaje);
+            } else {
+                System.err.println("[Controlador] No se encontró al candidato " + idCandidato + " en el directorio.");
+            }
+        } catch (IOException e) {
+            System.err.println("[Controlador] Error al enviar a candidato: " + e.getMessage());
+        }
+    }
+
+    private void manejarRechazoInmediato(iPizarraJuego pizarra, String mensajeError) {
+        String[] datos = pizarra.getCandidatoTemporal();
+        if (datos != null) {
+            String id = datos[0];
+            String ip = datos[1];
+            int puerto = Integer.parseInt(datos[2]);
+
+            registrarYRechazar(id, ip, puerto, mensajeError);
+        }
+    }
+
+    private void registrarYRechazar(String id, String ip, int puerto, String msg) {
+        directorio.agregarCandidato(id, ip, puerto);
+        enviarMensajeCandidato(id, msg);
+        directorio.removerCandidato(id);
     }
 
     /**

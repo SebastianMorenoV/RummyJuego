@@ -1,5 +1,7 @@
 package contratos;
 
+import java.beans.PropertyChangeListener;
+
 /**
  * Contrato para la LÓGICA de la aplicación.
  * Define "qué hacer" cuando se recibe un mensaje.
@@ -16,4 +18,16 @@ public interface iProcesador {
      */
     void procesar(String ipCliente, String mensaje);
     
+    /**
+     * Permite registrar observadores (Modelos) que escucharán los eventos de red.
+     * Necesario para el modo Cliente.
+     * @param listener El oyente a agregar.
+     */
+    void addPropertyChangeListener(PropertyChangeListener listener);
+
+    /**
+     * Permite remover observadores.
+     * @param listener El oyente a remover.
+     */
+    void removePropertyChangeListener(PropertyChangeListener listener);
 }

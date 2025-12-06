@@ -4,18 +4,24 @@
  */
 package vista;
 
+import contratos.controladoresMVC.iControlSalaEspera;
+import control.ControlSalaEspera;
+import javax.swing.JOptionPane;
+import modelo.IModeloSalaEspera;
+
 /**
  *
  * @author benja
  */
-public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VistaSalaEspera.class.getName());
+public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaEspera {
+
+    private iControlSalaEspera controlador;
 
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera() {
+    public VistaSalaEspera(iControlSalaEspera control) {
+        this.controlador = control;
         initComponents();
     }
 
@@ -28,7 +34,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
+        btnSolicitarInicioPartida = new javax.swing.JButton();
+        lblJugador1 = new javax.swing.JLabel();
+        lblJugador3 = new javax.swing.JLabel();
+        lblJugador2 = new javax.swing.JLabel();
+        lblJugador4 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
 
@@ -40,11 +50,31 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
         setSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
-        jButton1.setBackground(new java.awt.Color(80, 118, 78));
-        jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton1.setText("Iniciar Partida");
-        getContentPane().add(jButton1);
-        jButton1.setBounds(350, 340, 220, 70);
+        btnSolicitarInicioPartida.setBackground(new java.awt.Color(80, 118, 78));
+        btnSolicitarInicioPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnSolicitarInicioPartida.setText("Iniciar Partida");
+        getContentPane().add(btnSolicitarInicioPartida);
+        btnSolicitarInicioPartida.setBounds(350, 340, 220, 70);
+
+        lblJugador1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        lblJugador1.setText("Esperando jugador...");
+        getContentPane().add(lblJugador1);
+        lblJugador1.setBounds(350, 120, 220, 32);
+
+        lblJugador3.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        lblJugador3.setText("Esperando jugador...");
+        getContentPane().add(lblJugador3);
+        lblJugador3.setBounds(350, 220, 220, 30);
+
+        lblJugador2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        lblJugador2.setText("Esperando jugador...");
+        getContentPane().add(lblJugador2);
+        lblJugador2.setBounds(350, 170, 220, 30);
+
+        lblJugador4.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        lblJugador4.setText("Esperando jugador...");
+        getContentPane().add(lblJugador4);
+        lblJugador4.setBounds(350, 270, 220, 30);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 235, 126));
@@ -60,34 +90,67 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+   @Override
+    public void actualiza(IModeloSalaEspera modelo, String evento, Object datos) {
+        String eventoStr = (String) evento;
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VistaSalaEspera().setVisible(true));
+        switch (eventoStr) {
+            case "MOSTRAR_PANTALLA":
+                this.setVisible(true);
+                break;
+
+            case "PETICION_VOTO":
+                String idCandidato = (String) datos;
+                int respuesta = JOptionPane.showConfirmDialog(
+                        this, 
+                        "El jugador '" + idCandidato + "' solicita unirse.\n¿Permitir acceso?", 
+                        "Votación", 
+                        JOptionPane.YES_NO_OPTION
+                );
+                boolean votoPositivo = (respuesta == JOptionPane.YES_OPTION);
+                controlador.enviarVoto(votoPositivo);
+                break;
+
+            case "ACTUALIZAR_LISTA":
+                if (datos instanceof String[]) {
+                    actualizarLabels((String[]) datos);
+                }
+                break;
+                
+            case "CERRAR_SALA":
+                this.dispose();
+                break;
+        }
     }
 
+    private void actualizarLabels(String[] jugadores) {
+        // 1. Limpiar todos primero
+        lblJugador1.setText("Esperando...");
+        lblJugador2.setText("Esperando...");
+        lblJugador3.setText("Esperando...");
+        lblJugador4.setText("Esperando...");
+        if (jugadores.length > 0) {
+            lblJugador1.setText(jugadores[0]);
+        }
+        if (jugadores.length > 1) {
+            lblJugador2.setText(jugadores[1]);
+        }
+        if (jugadores.length > 2) {
+            lblJugador3.setText(jugadores[2]);
+        }
+        if (jugadores.length > 3) {
+            lblJugador4.setText(jugadores[3]);
+        }
+
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnSolicitarInicioPartida;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel lblJugador1;
+    private javax.swing.JLabel lblJugador2;
+    private javax.swing.JLabel lblJugador3;
+    private javax.swing.JLabel lblJugador4;
     // End of variables declaration//GEN-END:variables
+
 }

@@ -1,20 +1,21 @@
-
 package Ensambladores;
 
 import Control.ControlCUPrincipal;
 import Modelo.ModeloCUPrincipal;
 import Util.Configuracion;
 import Vista.VistaLobby;
-import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.iDespachador;
-import controlador.ControladorConfig;
+import contratos.iEnsambladorCliente;
+import contratos.iListener;
+import control.ControlSalaEspera;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import modelo.ModeloConfig;
-import sockets.ClienteTCP;
-import vista.ConfigurarPartida;
+import modelo.ModeloSalaEspera;
+import vista.VistaSalaEspera;
 
 /**
  * Esta clase ensambla los mvcs necesarios en el sistema. por ultimo utiliza el
@@ -24,51 +25,63 @@ import vista.ConfigurarPartida;
  */
 public class EnsambladoresMVC {
 
-    iDespachador despachador;
-
     public EnsambladoresMVC() {
-        despachador = new ClienteTCP();
+        iEnsambladorCliente ensambladorCliente= new EnsambladorCliente();
+        iDespachador despachador = ensambladorCliente.crearDespachador(Configuracion.getIpServidor(), Configuracion.getPuerto());
         try {
-            ensamblarMVCPrincipal(despachador);
+            ensamblarMVCPrincipal(despachador,ensambladorCliente);
         } catch (UnknownHostException ex) {
             Logger.getLogger(EnsambladoresMVC.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
-
-        //Tomar la ip del cliente ejecutando el MVC.
-        String ipCliente = InetAddress.getLocalHost().toString();
-        System.out.println("ip cliente: " + ipCliente);
-
-        //Instanciar los elementos de el CU de Solicitar unirse a partida.
+  public void ensamblarMVCPrincipal(iDespachador despachador, iEnsambladorCliente ensamblador) throws UnknownHostException {
         
-        ////
-        
-        ModeloConfig modeloConfiguracion = new ModeloConfig();
-        modeloConfiguracion.setDespachador(despachador);
-        ControladorConfig controladorConfiguracion = new ControladorConfig(modeloConfiguracion);
-        ConfigurarPartida vistaConfig = new ConfigurarPartida(controladorConfiguracion);
-        modeloConfiguracion.añadirObservador(vistaConfig);
+        // 1. Identidad
+        String ipCliente = InetAddress.getLocalHost().getHostAddress();
+        String miId = "Jugador_" + System.currentTimeMillis(); 
+        int miPuerto = 9000 + (int)(Math.random() * 1000); 
 
+        System.out.println("=== INICIANDO CLIENTE [" + miId + "] ===");
+
+        // 2. Construcción de MVCs
+        
+        // A) Sala de Espera
+        ModeloSalaEspera modeloSala = new ModeloSalaEspera();
+        modeloSala.setDatosRed(despachador, miId, Configuracion.getIpServidor(), Configuracion.getPuerto());
+        ControlSalaEspera controlSala = new ControlSalaEspera(modeloSala);
+        VistaSalaEspera vistaSala = new VistaSalaEspera(controlSala); 
+        modeloSala.agregarObservador(vistaSala);
+
+        // B) Lobby (Pantalla Inicial)
         ModeloCUPrincipal modeloPrincipal = new ModeloCUPrincipal();
-        iControlCUPrincipal controlPrincipal = new ControlCUPrincipal(modeloPrincipal);
+        modeloPrincipal.setDatosRed(despachador, miId, Configuracion.getIpServidor(), Configuracion.getPuerto(), ipCliente, miPuerto);
+        ControlCUPrincipal controlPrincipal = new ControlCUPrincipal(modeloPrincipal);
         VistaLobby vistaLobby = new VistaLobby(controlPrincipal);
         modeloPrincipal.añadirObservador(vistaLobby);
 
-        controlPrincipal.setControladorConfig(controladorConfiguracion);
-        controladorConfiguracion.setControladorCUPrincipal(controlPrincipal);
-        
-        //Le paso la ip y puerto al control para que se lo pase a modelo
-        controladorConfiguracion.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(),ipCliente);
+       
 
-        System.out.println("[Ensamblador] Iniciando aplicación...");
+        // 3. Inyección de Navegación
+        controlPrincipal.setControladorSalaEspera(controlSala);
+        PropertyChangeListener[] modelos= {modeloSala,modeloPrincipal};
+        iListener listener = ensamblador.crearListener(miId, modelos);
+
+        // 5. Iniciar Listener
+        new Thread(() -> {
+            try {
+                listener.iniciar(miPuerto);
+            } catch (IOException ex) {
+                Logger.getLogger(EnsambladoresMVC.class.getName()).log(Level.SEVERE, "Error red", ex);
+            }
+        }).start();
+
+        // 6. Arrancar UI
         vistaLobby.setVisible(true);
-        vistaConfig.setVisible(false);
-
+        vistaSala.setVisible(false);
     }
 
     public static void main(String[] args) {
-        EnsambladoresMVC e = new EnsambladoresMVC();
+        new EnsambladoresMVC();
     }
 }
