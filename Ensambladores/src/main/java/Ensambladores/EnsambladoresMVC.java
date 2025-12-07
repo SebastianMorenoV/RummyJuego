@@ -1,27 +1,28 @@
-
 package Ensambladores;
 
 import Control.ControlCUPrincipal;
+import Controlador.Controlador;
+import Modelo.Modelo;
 import Modelo.ModeloCUPrincipal;
-import Util.Configuracion;
 import Vista.VistaLobby;
+import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlCUPrincipal;
+import contratos.controladoresMVC.iControlSalaEspera;
 import contratos.iDespachador;
-import controlador.ControladorConfig;
+import contratos.iEnsambladorCliente;
+import control.ControlSalaEspera;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import modelo.ModeloConfig;
 import sockets.ClienteTCP;
-import vista.ConfigurarPartida;
 
-/**
- * Esta clase ensambla los mvcs necesarios en el sistema. por ultimo utiliza el
- * metodo run.
- *
- * @author Sebastian Moreno
- */
+// Importaciones de Interfaces de los módulos inferiores (la clave del desacoplamiento)
+import contratos.modelosMVC.IModeloSalaEspera;
+import contratos.vistasMVC.IVistaJuego;
+import modelo.ModeloSalaEspera;
+import vista.VistaSalaEspera;
+
 public class EnsambladoresMVC {
 
     iDespachador despachador;
@@ -37,35 +38,73 @@ public class EnsambladoresMVC {
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
 
-        //Tomar la ip del cliente ejecutando el MVC.
-        String ipCliente = InetAddress.getLocalHost().toString();
-        System.out.println("ip cliente: " + ipCliente);
+        // 🚨 CRUCIAL: CAMBIAR ESTA LÍNEA MANUALMENTE PARA CADA CLIENTE (Jugador1, Jugador2, etc.)
+        String miId = "Jugador4";
+        int miPuertoDeEscucha = 9008;
 
-        //Instanciar los elementos de el CU de Solicitar unirse a partida.
-        
-        ////
-        
-        ModeloConfig modeloConfiguracion = new ModeloConfig();
-        modeloConfiguracion.setDespachador(despachador);
-        ControladorConfig controladorConfiguracion = new ControladorConfig(modeloConfiguracion);
-        ConfigurarPartida vistaConfig = new ConfigurarPartida(controladorConfiguracion);
-        modeloConfiguracion.añadirObservador(vistaConfig);
+        String ipCliente = InetAddress.getLocalHost().getHostAddress();
 
+        // ** Dependencias Globales **
+        iEnsambladorCliente ensambladorCliente = new EnsambladorCliente();
+
+        // 2. Ensamblar MVC Sala de Espera (Componente a Sincronizar)
+        // Declaramos con la interfaz (IModeloSalaEspera) y la inicializamos con la clase concreta.
+        IModeloSalaEspera modeliSalaEspera = new ModeloSalaEspera();
+
+        // 2.1. INYECCIÓN DE RECURSOS NECESARIOS PARA EL MODELO
+        modeliSalaEspera.setDespachador(despachador);
+        modeliSalaEspera.setMiId(miId);
+        modeliSalaEspera.setEnsambladorCliente(ensambladorCliente);
+        modeliSalaEspera.setMiPuertoDeEscucha(miPuertoDeEscucha);
+
+        // Se usa la interfaz IModeloSalaEspera en el constructor de ControlSalaEspera
+        ControlSalaEspera controlSalaEspera = new ControlSalaEspera(modeliSalaEspera);
+        VistaSalaEspera vistaSalaEspera = new VistaSalaEspera(controlSalaEspera);
+        modeliSalaEspera.agregarObservador(vistaSalaEspera);
+
+        // 3. Ensamblar CU Principal (Lobby)
         ModeloCUPrincipal modeloPrincipal = new ModeloCUPrincipal();
         iControlCUPrincipal controlPrincipal = new ControlCUPrincipal(modeloPrincipal);
         VistaLobby vistaLobby = new VistaLobby(controlPrincipal);
         modeloPrincipal.añadirObservador(vistaLobby);
 
-        controlPrincipal.setControladorConfig(controladorConfiguracion);
-        controladorConfiguracion.setControladorCUPrincipal(controlPrincipal);
+        // 4. Ensamblar CU Ejercer Turno (MVCJuego)
+        Modelo modelo = new Modelo();
+        Controlador controlador = new Controlador(modelo);
         
-        //Le paso la ip y puerto al control para que se lo pase a modelo
-        controladorConfiguracion.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(),ipCliente);
+        modelo.setDespachador(despachador);
+        modelo.setMiId(miId);
 
-        System.out.println("[Ensamblador] Iniciando aplicación...");
+        // CORRECCIÓN CLAVE: Creamos UNA SOLA instancia de VistaTablero
+        VistaTablero vistaTablero = new VistaTablero(controlador);
+
+        // La variable de interfaz apunta a la única instancia creada. 
+        // Esto funciona porque VistaTablero implementa IVistaJuego.
+        IVistaJuego vistaJuego = vistaTablero;
+
+        modelo.agregarObservador(vistaTablero); // La instancia concreta escucha al Modelo
+
+        // 4. Inyectar dependencias de navegación
+        // El orquestador necesita los controladores y la vista de juego
+        ((ControlCUPrincipal) controlPrincipal).setControladorSalaEspera((iControlSalaEspera) controlSalaEspera);
+        ((ControlCUPrincipal) controlPrincipal).setControladorJuego(controlador);
+
+        // Inyectamos la única instancia de la vista de juego (como interfaz)
+        ((ControlCUPrincipal) controlPrincipal).setVistaTableroJuego(vistaJuego);
+
+        // Inyectar el modelo de sala al modelo de juego para delegación de eventos de red
+        modelo.setModeloSalaEspera(modeliSalaEspera);
+
+        // Inyectar el orquestador en el controlador de Sala de Espera para la navegación final
+        controlSalaEspera.setControlCUPrincipal(controlPrincipal);
+
+        // 5. ** ORDENAR AL MODELO QUE INICIE SU RED ** (Dispara la lógica de hilos/sockets dentro del Modelo)
+        modeliSalaEspera.iniciarConexionRed();
+
+        System.out.println("[Ensamblador] Iniciando aplicación para ID: " + miId);
         vistaLobby.setVisible(true);
-        vistaConfig.setVisible(false);
-
+        vistaSalaEspera.setVisible(false);
+        vistaTablero.setVisible(false); // Controlamos la visibilidad de la única instancia
     }
 
     public static void main(String[] args) {

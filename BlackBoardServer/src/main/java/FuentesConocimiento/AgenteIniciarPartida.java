@@ -45,13 +45,17 @@ public class AgenteIniciarPartida implements iAgentePartida {
 
         for (String id : jugadorIds) {
             List<Ficha> mano = new ArrayList<>();
+
             for (int i = 0; i < 14; i++) {
                 Ficha ficha = this.tableroDeJuego.tomarFichaMazo();
                 if (ficha != null) {
                     mano.add(ficha);
                 }
-                pizarra.setFichasJugador(id, 14); //MODIFICAR AQUI DEPENDIENDO DE LO QUE YA HAY EN BLACKBOARD
+                // LÍNEA ELIMINADA: pizarra.setFichasJugador(id, 14); 
             }
+
+            // AÑADIDO: Sincronizar el estado del jugador a la Pizarra (Blackboard)
+            pizarra.setFichasJugador(id, mano.size());
 
             String manoPayload = mano.stream()
                     .map(this::convertirFichaADTO)
@@ -61,6 +65,11 @@ public class AgenteIniciarPartida implements iAgentePartida {
             manosSerializadas.put(id, manoPayload);
             System.out.println("[AgenteIniciarPartida] Mano creada para " + id);
         }
+
+        // Sincronizar el estado final del mazo a la Pizarra (Blackboard)
+        String mazoRestante = getMazoSerializado();
+        pizarra.setMazoSerializado(mazoRestante);
+
         return manosSerializadas;
     }
 

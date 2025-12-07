@@ -63,33 +63,61 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO.");
 
                 int numJugadores = pizarra.getOrdenDeTurnos().size();
+
+                // [Lógica CU: 4 jugadores conectados inician automáticamente (o 2 en el caso mínimo)]
                 if (numJugadores == 2) {
                     String idHost = pizarra.getOrdenDeTurnos().get(0);
-                    System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
+                    // Mantenemos la notificación al Host para que sepa que ya hay mínimo de jugadores
+                    System.out.println("[Controlador] Hay " + numJugadores + " jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego si lo desea.");
                     enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
                 }
                 break;
 
+            case "JUGADOR_LISTO":
+                System.out.println("[Controlador] Pizarra notificó JUGADOR_LISTO. Verificando condición de inicio por aceptación.");
+
+                EstadoJuegoPizarra estadoPizarra = (EstadoJuegoPizarra) pizarra;
+
+                // 1. OBTENER EL ESTADO SERIALIZADO Y ENVIARLO A TODOS (SINCRONIZACIÓN)
+                String estadoListosPayload = estadoPizarra.getJugadoresListosSerializado();
+                enviarATodos("SALA_ACTUALIZADA:" + estadoListosPayload);
+
+                // 2. VERIFICAR CONDICIÓN DE INICIO
+                if (estadoPizarra.cumplenCondicionInicioPorListo()) { // Condición: Todos listos
+                    // ... (lógica existente para iniciar partida) ...
+                    if (pizarra.iniciarPartidaSiCorresponde()) {
+                        estadoPizarra.notificarObservadores("EVENTO_PARTIDA_INICIADA");
+                    } else {
+                        System.err.println("[Controlador] No se pudo iniciar la partida, pero la condición de LISTO se cumplió.");
+                    }
+                }
+                break;
+
             case "EVENTO_PARTIDA_INICIADA":
-                System.out.println("[Controlador] Evento PARTIDA_INICIADA detectado. Creando juego...");
+                System.out.println("[Controlador] EVENTO_PARTIDA_INICIADA: Inicializando reparto y estado.");
 
-                List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
-                System.out.println("[Controlador] Repartiendo para " + jugadoresIds.size() + " jugadores.");
+                EstadoJuegoPizarra estadoPizarra2 = (EstadoJuegoPizarra) pizarra;
 
-                Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds);
-                String mazoSerializado = agentePartida.getMazoSerializado();
-                int mazoCount = mazoSerializado.split("\\|").length;
+                // 2. OBTENER LA LISTA DE JUGADORES REGISTRADOS DESDE LA PIZARRA
+                List<String> idsJugadores = estadoPizarra2.getOrdenDeTurnos();
 
-                agentePartida.setMazoSerializado(mazoSerializado);
+                // 3. REPARTIR FICHAS Y OBTENER MANOS SERIALIZADAS (CORRECCIÓN CRUCIAL)
+                // Se llama con el argumento requerido: List<String>
+                Map<String, String> manosSerializadas = agentePartida.repartirManos(idsJugadores);
 
+                // 4. ENVIAR MANO INICIAL A CADA JUGADOR (Lógica de sincronización)
                 for (Map.Entry<String, String> entry : manosSerializadas.entrySet()) {
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
+                    
+                    int mazoCount = estadoPizarra2.getMazoSerializadoCount();
 
-                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount;
-                    enviarMensajeDirecto(idJugador, mensajeMano);
+                    // El cliente espera: MANO_INICIAL:ManoData$MazoCount
+                    enviarMensajeDirecto(idJugador, "MANO_INICIAL:" + manoPayload + "$" + mazoCount); // CORRECCIÓN
+                    System.out.println("[Controlador] Mano inicial enviada a: " + idJugador);
                 }
 
+                // 5. ENVIAR ESTADO FINAL Y TURNO A TODOS
                 notificarCambioDeTurno(pizarra);
                 break;
 

@@ -9,7 +9,6 @@ import Entidades.Grupo;
 import Fachada.IJuegoRummy;
 import Fachada.JuegoRummyFachada;
 import Util.Configuracion;
-import Vista.Observador;
 import Vista.TipoEvento;
 import contratos.iDespachador;
 import java.beans.PropertyChangeEvent;
@@ -23,6 +22,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import contratos.modelosMVC.IModeloSalaEspera;
+import Vista.ObservadorJuego;
 
 /**
  * Clase Modelo en el patrón MVC. Gestiona el estado local del juego, interactúa
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
  */
 public class Modelo implements IModelo, PropertyChangeListener {
 
-    private List<Observador> observadores;
+    private List<ObservadorJuego> observadores;
     private final IJuegoRummy juego;
     private List<GrupoDTO> gruposDeTurnoDTO;
     private List<GrupoDTO> gruposDTOAlInicioDelTurno;
@@ -43,6 +44,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private iDespachador despachador;
     private String miId;
     Configuracion config;
+
+    private final static Logger logger = Logger.getLogger(Modelo.class.getName());
+    private IModeloSalaEspera modeloSalaEspera; // <--- INYECCIÓN PARA DELEGACIÓN
 
     private int mazoFichasRestantes = 0;
 
@@ -62,7 +66,31 @@ public class Modelo implements IModelo, PropertyChangeListener {
     public void iniciarJuego() {
         juego.iniciarPartida();
         this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
-        notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
+        notificarObservadores(TipoEvento.INCIALIZAR_FICHAS); // <-- Dibuja el UI (incluye llamar a cargarJugadores)
+        enviarComandoIniciarPartida(); // <-- Luego pide la mano real al servidor.
+    }
+
+    /**
+     * ** LÓGICA DE INICIO DE PARTIDA REMOTO (CU INICIAR PARTIDA) ** Envía el
+     * comando al servidor para que inicie el reparto de fichas.
+     */
+    public void iniciarJuegoRemoto() {
+        if (despachador == null) {
+            logger.severe("ERROR: Despachador no inyectado. La partida no puede iniciar.");
+            return;
+        }
+
+        try {
+            // El servidor BlackBoard espera este comando para disparar el reparto de fichas
+            String mensaje = "COMANDO_INICIAR_PARTIDA:";
+
+            // Se asume que el ID del jugador se añade en el despachador o en el controlador (o no es necesario aquí)
+            despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+            logger.info("Enviado comando final de inicio de partida al servidor.");
+
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "ERROR de red al enviar COMANDO_INICIAR_PARTIDA:", e);
+        }
     }
 
     /**
@@ -76,6 +104,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         switch (evento) {
 
+            case "SALA_ACTUALIZADA": // <--- DELEGACIÓN CRUCIAL: Pasar eventos de Sala al Modelo Secundario
+                if (modeloSalaEspera != null) {
+                    modeloSalaEspera.propertyChange(evt);
+                }
+                break;
+
             case "COMANDO_INICIAR_PARTIDA":
                 System.out.println("[Modelo] Recibida orden del servidor para iniciar la partida.");
                 enviarComandoIniciarPartida();
@@ -87,8 +121,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     String[] payloadPartes = payloadd.split("\\$");
                     String manoPayload = payloadPartes[0];
 
+                    // CORRECCIÓN/VERIFICACIÓN: Consumir el conteo de fichas del Mazo desde el payload
                     if (payloadPartes.length > 1) {
-                        this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]);
+                        this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]); // <--- ESTO ES CORRECTO
                     }
 
                     List<FichaJuegoDTO> fichasDTO = deserializarMano(manoPayload);
@@ -98,6 +133,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                     juego.setManoInicial(manoEntidad);
 
+                    // Estos dos notifican a VistaTablero para dibujar la mano y el mazo
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
                 } catch (Exception e) {
@@ -332,7 +368,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     /**
      * Registra observadores para actualizaciones del modelo (patrón Observer).
      */
-    public void agregarObservador(Observador obs) {
+    public void agregarObservador(ObservadorJuego obs) {
         if (obs != null && !observadores.contains(obs)) {
             observadores.add(obs);
         }
@@ -342,7 +378,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * Notifica cambios a las vistas con un DTO de actualización.
      */
     public void notificarObservadores(TipoEvento tipoEvento) {
-        for (Observador observer : this.observadores) {
+        for (ObservadorJuego observer : this.observadores) {
 
             List<Ficha> manoEntidad = juego.getJugadorActual().getManoJugador().getFichasEnMano();
 
@@ -432,7 +468,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String nombreJugadorActual = (juego.getJugadorActual() != null)
                 ? juego.getJugadorActual().getNickname()
                 : "...";
-       dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
+        dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
         // --- CORRECCIÓN PRINCIPAL: Llenar la lista de jugadores ---
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
@@ -540,10 +576,18 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Envía comando al servidor para iniciar partida.
+     * Establece la herramienta de red (Despachador).
      */
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
+    }
+
+    /**
+     * Establece la referencia al Modelo de Sala de Espera (para delegar eventos
+     * de sincronización).
+     */
+    public void setModeloSalaEspera(IModeloSalaEspera modeloSalaEspera) {
+        this.modeloSalaEspera = modeloSalaEspera;
     }
 
     /**

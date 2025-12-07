@@ -8,6 +8,23 @@
     </parent>
     <artifactId>MVCSalaEspera</artifactId>
     <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>org.netbeans.external</groupId>
+            <artifactId>AbsoluteLayout</artifactId>
+            <version>RELEASE210</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Interfaces</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>MVCPantallaInicial</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <exec.mainClass>com.itson.mvcsalaespera.MVCSalaEspera</exec.mainClass>

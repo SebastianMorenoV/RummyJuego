@@ -2,12 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package vista;
+package Vista;
+
+import Dtos.ActualizacionDTO;
+import Modelo.IModelo;
 
 /**
  *
- * @author benja
+ *
+ * @author moren
  */
-public interface Observador {
-    
+public interface ObservadorJuego {
+
+    public void actualiza(IModelo modelo, ActualizacionDTO dto);
 }

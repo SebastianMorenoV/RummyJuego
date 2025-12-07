@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author benja
  */
-public class ModeloCUPrincipal implements IModelo {
+public class ModeloCUPrincipal implements IModeloLobby {
     
     List<Observador> observadores;
     
@@ -24,7 +24,7 @@ public class ModeloCUPrincipal implements IModelo {
     
     @Override
     public String getPartida() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return "Partida_Activa_Mock";
     }
     
     public void SolicitarUnirseApartida(){

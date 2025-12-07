@@ -15,8 +15,11 @@ public interface iControlCUPrincipal {
     public void SolicitarUnirseAPartida();
 
     public void casoUsoConfigurarPartida();
+    
+    public void casoUsoSolicitarUnirseAPartida();
+    
+    public void casoUsoIniciarPartida();
 
     public void pantallaInicial();
 
-    public void setControladorConfig(iControlConfig controladorConfig);
 }

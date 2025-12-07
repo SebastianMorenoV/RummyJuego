@@ -6,8 +6,8 @@ package Vista;
 
 import Control.ControlCUPrincipal;
 import eventos.Evento;
-import Modelo.IModelo;
 import contratos.controladoresMVC.iControlCUPrincipal;
+import Modelo.IModeloLobby;
 
 /**
  *
@@ -101,6 +101,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
+        control.SolicitarUnirseAPartida();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
@@ -116,7 +117,7 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void actualiza(IModelo modelo, Evento evento) {
+    public void actualiza(IModeloLobby modelo, Evento evento) {
         switch (evento) {
             case INICIO:
                 this.setVisible(true);
@@ -130,10 +131,12 @@ public class VistaLobby extends javax.swing.JFrame implements Observador {
             case SOLICITAR_INICIO:
                 break;
             case SOLICITAR_UNIRSE_A_PARTIDA:
-                if(modelo.getPartida()==null){
+                if (modelo.getPartida() == null) {
                     System.out.println("No hay partida a la que unirse");
-                }else{
-                System.out.println("Se solicito unirse a partida");
+                } else {
+                    System.out.println("Se solicito unirse a partida. Ocultando Lobby y navegando a SalaEspera.");
+                    this.setVisible(false); // <--- LÍNEA AÑADIDA/CORREGIDA: OCULTA EL LOBBY
+                    control.casoUsoSolicitarUnirseAPartida(); // Esto llama al controlador que abrirá la nueva vista
                 }
                 break;
             default:

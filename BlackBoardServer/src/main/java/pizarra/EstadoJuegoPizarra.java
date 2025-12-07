@@ -28,6 +28,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
 
+    private Map<String, Boolean> jugadoresListos = new HashMap<>();
+
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
@@ -53,7 +55,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      *
      * @param evento El nombre del evento ocurrido (p.ej., "JUGADOR_UNIDO").
      */
-    private void notificarObservadores(String evento) {
+    public void notificarObservadores(String evento) {
         for (iObservador obs : this.observadores) {
             obs.actualiza(this, evento);
         }
@@ -76,9 +78,36 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal[2] = partes[1];
 
         ordenDeTurnos.add(id);
-
+        jugadoresListos.put(id, false); // <--- Inicializar como NO LISTO
         notificarObservadores("JUGADOR_UNIDO");
-        jugadorARegistrarTemporal = null;
+
+    }
+
+    /**
+     * Marca a un jugador como listo y notifica a los observadores.
+     */
+    public void setJugadorListo(String idJugador) {
+        if (jugadoresListos.containsKey(idJugador) && !jugadoresListos.get(idJugador)) {
+            jugadoresListos.put(idJugador, true);
+            System.out.println("[Pizarra] Jugador " + idJugador + " se declaró LISTO.");
+            notificarObservadores("JUGADOR_LISTO"); // Notifica al ControladorBlackboard para chequear inicio.
+        }
+    }
+
+    /**
+     * Valida la condición del CU: "todos los jugadores aceptaron la solicitud
+     * de inicio".
+     */
+    public boolean cumplenCondicionInicioPorListo() {
+        int numJugadores = ordenDeTurnos.size();
+
+        if (numJugadores < 2) {
+            return false; // Mínimo 2 jugadores
+        }
+        // Verifica que todos los jugadores registrados estén marcados como 'true'.
+        boolean todosListos = jugadoresListos.values().stream().allMatch(listo -> listo);
+
+        return todosListos;
     }
 
     /**
@@ -234,6 +263,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");
                     configurarPartida(idCliente, payload);
                     break;
+                case "LISTO": // <--- NUEVO CASO DE USO
+                    setJugadorListo(idCliente);
+                    break;
             }
         }
 
@@ -363,6 +395,15 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public String getFichasJugadoresSerializado() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> entry : fichasPorJugador.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
+        }
+        return sb.toString();
+    }
+    
+    public String getJugadoresListosSerializado() {
+        StringBuilder sb = new StringBuilder();
+        // Recorrer el mapa para crear la cadena serializada
+        for (Map.Entry<String, Boolean> entry : jugadoresListos.entrySet()) {
             sb.append(entry.getKey()).append("=").append(entry.getValue()).append(";");
         }
         return sb.toString();

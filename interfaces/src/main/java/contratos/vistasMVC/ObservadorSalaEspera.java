@@ -2,12 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package modelo;
+package contratos.vistasMVC;
+
+import contratos.modelosMVC.IModeloSalaEspera;
 
 /**
  *
  * @author benja
  */
-public interface IModelo {
+public interface ObservadorSalaEspera {
+    
+    // Método para que el Modelo notifique a la Vista.
+    void actualiza(IModeloSalaEspera modelo);
     
 }

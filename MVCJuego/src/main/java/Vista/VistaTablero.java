@@ -9,6 +9,7 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import contratos.vistasMVC.IVistaJuego;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -38,7 +39,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
  *
  * @author benja
  */
-public class VistaTablero extends javax.swing.JFrame implements Observador {
+public class VistaTablero extends javax.swing.JFrame implements ObservadorJuego, IVistaJuego {
 
     private Controlador control;
     private TableroUI tableroUI;
@@ -267,39 +268,62 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     /**
      * Metodo para cargar los jugadores aun no terminado (MOCK).
      */
+    // RummyJuego/MVCJuego/src/main/java/Vista/VistaTablero.java (Método cargarJugadores)
     private void cargarJugadores() {
-        String rutaImagen = "src/main/resources/avatares/avatar.png";
-        try {
-            Path path = new File(rutaImagen).toPath();
-            byte[] imagenAvatarBytes = Files.readAllBytes(path);
+        // Usamos la ruta interna del JAR
+        String rutaImagen = "/avatares/avatar.png";
+        byte[] imagenAvatarBytes = null;
 
-            JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
-            jugador1.setSize(130, 130);
-            jugador1.setLocation(-10, -10);
-            GUIjuego.add(jugador1);
-            mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+        try (java.io.InputStream is = getClass().getResourceAsStream(rutaImagen); java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream()) {
 
-            JugadorUI jugador2 = new JugadorUI("Jugador2", 14, imagenAvatarBytes);
-            jugador2.setSize(130, 130);
-            jugador2.setLocation(-10, 380);
-            GUIjuego.add(jugador2);
-            mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+            if (is == null) {
+                System.err.println("ERROR: El recurso de imagen no se encuentra: " + rutaImagen);
+                return;
+            }
 
-            JugadorUI jugador3 = new JugadorUI("Jugador3", 14, imagenAvatarBytes);
-            jugador3.setSize(130, 130);
-            jugador3.setLocation(780, -10);
-            GUIjuego.add(jugador3);
-            mapaJugadoresUI.put("Jugador3", jugador3);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+            // Leer el stream de bytes
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+            imagenAvatarBytes = buffer.toByteArray();
 
-            JugadorUI jugador4 = new JugadorUI("Jugador4", 14, imagenAvatarBytes);
-            jugador4.setSize(130, 130);
-            jugador4.setLocation(780, 380);
-            GUIjuego.add(jugador4);
-            mapaJugadoresUI.put("Jugador4", jugador4);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-        } catch (IOException e) {
-            System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
+        } catch (java.io.IOException e) {
+            System.err.println("Error al leer el recurso de imagen del avatar: " + e.getMessage());
+            e.printStackTrace();
+            return;
         }
+
+        // --- Instanciación de JugadorUI (ya con los bytes cargados) ---
+        // Jugador 1
+        JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
+        jugador1.setSize(130, 130);
+        jugador1.setLocation(-10, -10);
+        GUIjuego.add(jugador1);
+        mapaJugadoresUI.put("Jugador1", jugador1);
+
+        // Jugador 2
+        JugadorUI jugador2 = new JugadorUI("Jugador2", 14, imagenAvatarBytes);
+        jugador2.setSize(130, 130);
+        jugador2.setLocation(-10, 380);
+        GUIjuego.add(jugador2);
+        mapaJugadoresUI.put("Jugador2", jugador2);
+
+        // Jugador 3
+        JugadorUI jugador3 = new JugadorUI("Jugador3", 14, imagenAvatarBytes);
+        jugador3.setSize(130, 130);
+        jugador3.setLocation(780, -10);
+        GUIjuego.add(jugador3);
+        mapaJugadoresUI.put("Jugador3", jugador3);
+
+        // Jugador 4
+        JugadorUI jugador4 = new JugadorUI("Jugador4", 14, imagenAvatarBytes);
+        jugador4.setSize(130, 130);
+        jugador4.setLocation(780, 380);
+        GUIjuego.add(jugador4);
+        mapaJugadoresUI.put("Jugador4", jugador4);
     }
 
     /**

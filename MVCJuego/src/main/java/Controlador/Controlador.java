@@ -2,7 +2,9 @@ package Controlador;
 
 import DTO.GrupoDTO;
 import Modelo.Modelo;
+import Vista.VistaTablero;
 import java.util.List;
+import contratos.controladoresMVC.iControlJuego;
 
 /**
  * Controlador del sistema encargado de gestionar la comunicación entre la
@@ -11,9 +13,10 @@ import java.util.List;
  *
  * @author moren
  */
-public class Controlador {
+public class Controlador implements iControlJuego{
 
     Modelo modelo;
+    private VistaTablero vistaTablero;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
@@ -24,6 +27,9 @@ public class Controlador {
      */
     public void iniciarJuego() {
         modelo.iniciarJuego();
+        
+        // 2. No se instancia ni se llama a setVisible(true) en la Vista.
+        System.out.println("[ControladorJuego] Delegada orden de inicio al Modelo. La Vista será mostrada por el Ensamblador/Orquestador.");
     }
 
     /**
@@ -57,6 +63,14 @@ public class Controlador {
      */
     public void terminarTurno() {
         modelo.terminarTurno();
+    }
+
+    @Override
+    public void iniciarPartida() {
+        modelo.iniciarJuego();
+
+        // 2. No se instancia ni se llama a setVisible(true) en la Vista.
+        System.out.println("[ControladorJuego] Delegada orden de inicio al Modelo. La Vista será mostrada por el Ensamblador/Orquestador.");
     }
 
 }
