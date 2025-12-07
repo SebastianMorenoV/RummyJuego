@@ -78,11 +78,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 break;
 
             case "SOLICITUD_RECHAZADA_LLENA":
-                manejarRechazoInmediato(pizarra, "UNION_RECHAZADA");
-                break;
-
-            case "SOLICITUD_RECHAZADA_VACIA":
-                manejarRechazoInmediato(pizarra, "UNION_RECHAZADA");
+                manejarRechazoInmediato(pizarra, "ERROR_SALA_LLENA");
                 break;
 
             case "SOLICITUD_RECHAZADA_OCUPADO":
@@ -90,6 +86,10 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 if (rechazado != null) {
                     registrarYRechazar(rechazado[0], rechazado[1], Integer.parseInt(rechazado[2]), "ERROR_VOTACION_EN_CURSO");
                 }
+                break;
+            case "EVENTO_PARTIDA_INICIADA":
+                System.out.println("[Controlador] Partida iniciada correctamente. Notificando a todos.");
+                enviarATodos("JUEGO_INICIADO");
                 break;
 
             case "VOTACION_FINALIZADA":

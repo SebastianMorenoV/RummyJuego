@@ -93,6 +93,26 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
                 String[] nombresJugadores = payload.split(",");
                 notificarObservadores("ACTUALIZAR_LISTA", nombresJugadores);
                 break;
+            case "JUEGO_INICIADO":
+                System.out.println("[ModeloSala] ¡Juego Iniciado! Notificando vista.");
+                notificarObservadores("JUEGO_INICIADO", payload);
+                break;
+
+            case "ERROR_PARTIDA_NO_INICIADA":
+                notificarObservadores("ERROR_INICIO", payload);
+                break;
+        }
+    }
+
+    public void solicitarInicioPartida() {
+        try {
+            if (despachador != null) {
+                // Protocolo: ID:INICIAR_PARTIDA:null
+                String mensaje = miId + ":INICIAR_PARTIDA:null";
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 

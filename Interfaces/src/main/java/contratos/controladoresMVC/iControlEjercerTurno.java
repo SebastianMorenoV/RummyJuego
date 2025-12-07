@@ -8,11 +8,7 @@ package contratos.controladoresMVC;
  *
  * @author benja
  */
-public interface iControlSalaEspera {
+public interface iControlEjercerTurno {
+    public void IniciarEjercerTurno();
     
-
-    void iniciarSalaDeEspera();
-    void enviarVoto(boolean aceptado);
-    void setEjercerTurno(iControlEjercerTurno controlEjercerTurno);
-    void navegacionEjercerTurno();
 }

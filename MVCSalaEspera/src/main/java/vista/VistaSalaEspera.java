@@ -4,7 +4,6 @@
  */
 package vista;
 
-import contratos.controladoresMVC.iControlSalaEspera;
 import control.ControlSalaEspera;
 import javax.swing.JOptionPane;
 import modelo.IModeloSalaEspera;
@@ -15,12 +14,12 @@ import modelo.IModeloSalaEspera;
  */
 public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaEspera {
 
-    private iControlSalaEspera controlador;
+    private ControlSalaEspera controlador;
 
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera(iControlSalaEspera control) {
+    public VistaSalaEspera(ControlSalaEspera control) {
         this.controlador = control;
         initComponents();
     }
@@ -53,28 +52,33 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         btnSolicitarInicioPartida.setBackground(new java.awt.Color(80, 118, 78));
         btnSolicitarInicioPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         btnSolicitarInicioPartida.setText("Iniciar Partida");
+        btnSolicitarInicioPartida.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSolicitarInicioPartidaActionPerformed(evt);
+            }
+        });
         getContentPane().add(btnSolicitarInicioPartida);
         btnSolicitarInicioPartida.setBounds(350, 340, 220, 70);
 
         lblJugador1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         lblJugador1.setText("Esperando jugador...");
         getContentPane().add(lblJugador1);
-        lblJugador1.setBounds(350, 120, 220, 32);
+        lblJugador1.setBounds(270, 120, 380, 32);
 
         lblJugador3.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         lblJugador3.setText("Esperando jugador...");
         getContentPane().add(lblJugador3);
-        lblJugador3.setBounds(350, 220, 220, 30);
+        lblJugador3.setBounds(270, 220, 380, 30);
 
         lblJugador2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         lblJugador2.setText("Esperando jugador...");
         getContentPane().add(lblJugador2);
-        lblJugador2.setBounds(350, 170, 220, 30);
+        lblJugador2.setBounds(270, 170, 380, 30);
 
         lblJugador4.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         lblJugador4.setText("Esperando jugador...");
         getContentPane().add(lblJugador4);
-        lblJugador4.setBounds(350, 270, 220, 30);
+        lblJugador4.setBounds(270, 270, 370, 30);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 235, 126));
@@ -90,7 +94,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-   @Override
+    private void btnSolicitarInicioPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSolicitarInicioPartidaActionPerformed
+        controlador.solicitarInicioPartida();
+    }//GEN-LAST:event_btnSolicitarInicioPartidaActionPerformed
+
+    @Override
     public void actualiza(IModeloSalaEspera modelo, String evento, Object datos) {
         String eventoStr = (String) evento;
 
@@ -102,9 +110,9 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             case "PETICION_VOTO":
                 String idCandidato = (String) datos;
                 int respuesta = JOptionPane.showConfirmDialog(
-                        this, 
-                        "El jugador '" + idCandidato + "' solicita unirse.\n¿Permitir acceso?", 
-                        "Votación", 
+                        this,
+                        "El jugador '" + idCandidato + "' solicita unirse.\n¿Permitir acceso?",
+                        "Votación",
                         JOptionPane.YES_NO_OPTION
                 );
                 boolean votoPositivo = (respuesta == JOptionPane.YES_OPTION);
@@ -116,7 +124,18 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                     actualizarLabels((String[]) datos);
                 }
                 break;
-                
+            case "JUEGO_INICIADO":
+                // 1. Ocultar esta pantalla
+                this.setVisible(false);
+                // 2. Navegar a la siguiente
+                controlador.navegacionEjercerTurno();
+                break;
+            case "ERROR_INICIO":
+                JOptionPane.showMessageDialog(this,
+                        "No se pudo iniciar la partida.\n"
+                        + "Verifica que haya al menos 2 jugadores y máximo 4.",
+                        "Error al Iniciar", JOptionPane.WARNING_MESSAGE);
+                break;
             case "CERRAR_SALA":
                 this.dispose();
                 break;

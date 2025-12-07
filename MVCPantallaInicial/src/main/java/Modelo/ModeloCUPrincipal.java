@@ -52,13 +52,33 @@ public class ModeloCUPrincipal implements IModeloPantallaInicial, PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        String evento = evt.getPropertyName();
+        String eventoRed = evt.getPropertyName(); 
         
-        if (evento.equals("UNION_ACEPTADA")) {
-            System.out.println("[ModeloPrincipal] ¡Me aceptaron! Entrando a sala.");
-            notificarObservadores(Evento.SOLICITAR_UNIRSE_A_PARTIDA); 
-        } else if (evento.equals("UNION_RECHAZADA")) {
-            notificarObservadores(Evento.RECHAZADO);
+        System.out.println("[ModeloPrincipal] Recibido del servidor: " + eventoRed);
+
+        switch (eventoRed) {
+            case "UNION_ACEPTADA":
+                notificarObservadores(Evento.SOLICITAR_UNIRSE_A_PARTIDA);
+                break;
+                
+            case "UNION_RECHAZADA":
+                notificarObservadores(Evento.UNION_RECHAZADA);
+                break;
+                
+            case "ERROR_SALA_LLENA":
+                notificarObservadores(Evento.ERROR_SALA_LLENA);
+                break;
+                
+            case "ERROR_VOTACION_EN_CURSO":
+                notificarObservadores(Evento.ERROR_VOTACION_EN_CURSO);
+                break;
+                
+            case "ERROR_PARTIDA_INICIADA":
+                notificarObservadores(Evento.ERROR_PARTIDA_YA_INICIADA);
+                break;
+                
+            default:
+                break;
         }
     }
 

@@ -23,7 +23,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String ultimoJugadorQueMovio;
     private int indiceTurnoActual;
     private String[] jugadorARegistrarTemporal;
-    private String[] configuracionPartida;
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>();
     private int numeroDeJugadoresRegistrados;
@@ -105,29 +104,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return ordenDeTurnos.get(indiceTurnoActual).equals(id);
     }
 
-    /**
-     * Metodo para configurar la partida, guarda los comodines y numero de
-     * fichas para que el Agente pueda usarlos.
-     *
-     * @param idCliente
-     * @param payload
-     */
-    public void configurarPartida(String idCliente, String payload) {
-        configuracionPartida = new String[2];
-
-        // CORRECCIÓN: Quita el ', 1' o cámbialo por ', 2'
-        String[] partes = payload.split("\\$");
-
-        // Validación extra de seguridad (opcional pero recomendada)
-        if (partes.length >= 2) {
-            configuracionPartida[0] = partes[0];
-            configuracionPartida[1] = partes[1];
-            System.out.println("[Pizarra] Configuración guardada: " + partes[0] + " comodines, " + partes[1] + " fichas.");
-            notificarObservadores("CONFIGURAR_PARTIDA");
-        } else {
-            System.err.println("[Pizarra] Error: Payload de configuración incompleto: " + payload);
-        }
-    }
+    
 
     /**
      * Avanza el índice de turno al siguiente jugador en el orden preestablecido
@@ -446,10 +423,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         notificarObservadores("VOTACION_FINALIZADA");
     }
 
-    @Override
-    public String[] getConfiguracionPartida() {
-        return configuracionPartida;
-    }
+
 
     @Override
     public int getNumeroDeJugadoresRegistrados() {

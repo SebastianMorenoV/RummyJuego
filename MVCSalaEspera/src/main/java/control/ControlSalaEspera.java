@@ -4,6 +4,7 @@
  */
 package control;
 
+import contratos.controladoresMVC.iControlEjercerTurno;
 import contratos.controladoresMVC.iControlSalaEspera;
 import modelo.ModeloSalaEspera;
 
@@ -14,7 +15,7 @@ import modelo.ModeloSalaEspera;
 public class ControlSalaEspera implements iControlSalaEspera {
     
     private ModeloSalaEspera modelo;
-    
+    private iControlEjercerTurno controlEjercerTurno;
     public ControlSalaEspera(ModeloSalaEspera modelo) {
         this.modelo = modelo;
     }
@@ -29,6 +30,25 @@ public class ControlSalaEspera implements iControlSalaEspera {
     public void enviarVoto(boolean aceptado) {
         System.out.println("[ControlSalaEspera] Procesando voto: " + aceptado);
         modelo.enviarVoto(aceptado);
+    }
+
+    @Override
+    public void setEjercerTurno(iControlEjercerTurno cet) {
+        this.controlEjercerTurno = cet;
+    }
+    
+    public void solicitarInicioPartida() {
+        System.out.println("[ControlSala] Solicitando inicio de partida al servidor...");
+        modelo.solicitarInicioPartida();
+    }
+    @Override
+    public void navegacionEjercerTurno() {
+        if (controlEjercerTurno != null) {
+            System.out.println("[ControlSala] Navegando hacia MVC Juego...");
+            controlEjercerTurno.IniciarEjercerTurno(); 
+        } else {
+            System.err.println("[ControlSala] ERROR CRÍTICO: Controlador de Juego es NULL.");
+        }
     }
 
     

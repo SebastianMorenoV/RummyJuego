@@ -120,19 +120,43 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorSalaEspe
             case INICIO:
                 this.setVisible(true);
                 break;
-            case SOLICITAR_INICIO:
+
+            case CREAR_PARTIDA:
+                this.setVisible(false);
                 break;
+
             case SOLICITAR_UNIRSE_A_PARTIDA:
-                System.out.println("[VistaLobby] Éxito. Iniciando navegación a Sala Espera.");
+                System.out.println("[VistaLobby] ¡Aceptado! Entrando...");
                 this.setVisible(false);
                 control.procesarNavegacionSalaEspera();
                 break;
 
-            case RECHAZADO:
-                JOptionPane.showMessageDialog(this, "No te aceptaron pa :(");                       
+            case ERROR_SALA_LLENA:
+                JOptionPane.showMessageDialog(this,
+                        "La sala está llena (4/4 jugadores).\nNo se admiten más participantes.",
+                        "Sala Llena", JOptionPane.WARNING_MESSAGE);
                 break;
+
+            case ERROR_VOTACION_EN_CURSO:
+                JOptionPane.showMessageDialog(this,
+                        "Hay una votación de ingreso en curso.\nPor favor, espera unos segundos e intenta de nuevo.",
+                        "Servidor Ocupado", JOptionPane.WARNING_MESSAGE);
+                break;
+
+            case ERROR_PARTIDA_YA_INICIADA:
+                JOptionPane.showMessageDialog(this,
+                        "La partida ya ha comenzado.\nNo puedes unirte en este momento.",
+                        "Juego Iniciado", JOptionPane.ERROR_MESSAGE);
+                break;
+
+            case UNION_RECHAZADA:
+                JOptionPane.showMessageDialog(this,
+                        "Tu solicitud de unión fue rechazada por los jugadores de la sala.",
+                        "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
+                break;
+
             default:
-                throw new AssertionError();
+                break;
         }
     }
 }

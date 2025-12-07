@@ -108,7 +108,6 @@ public interface iPizarraJuego {
      *
      * @return arreglo con String [comodines,fichas de cada mano.]
      */
-    String[] getConfiguracionPartida();
 
     int getNumeroDeJugadoresRegistrados();
 

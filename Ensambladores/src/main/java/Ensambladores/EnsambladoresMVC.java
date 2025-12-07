@@ -1,9 +1,12 @@
 package Ensambladores;
 
 import Control.ControlCUPrincipal;
+import Controlador.Controlador;
+import Modelo.Modelo;
 import Modelo.ModeloCUPrincipal;
 import Util.Configuracion;
 import Vista.VistaLobby;
+import Vista.VistaTablero;
 import contratos.iDespachador;
 import contratos.iEnsambladorCliente;
 import contratos.iListener;
@@ -60,11 +63,16 @@ public class EnsambladoresMVC {
         VistaLobby vistaLobby = new VistaLobby(controlPrincipal);
         modeloPrincipal.añadirObservador(vistaLobby);
 
-       
-
+       //EJERCER TURNO
+        Modelo modeloEjercerTurno= new Modelo();
+        modeloEjercerTurno.setDatosRed(despachador, miId, Configuracion.getIpServidor(), Configuracion.getPuerto());
+        Controlador controlEjercerTurno = new Controlador (modeloEjercerTurno);
+        VistaTablero vistaTablero = new VistaTablero(controlEjercerTurno);
+        modeloEjercerTurno.agregarObservador(vistaTablero);
         // 3. Inyección de Navegación
+        
         controlPrincipal.setControladorSalaEspera(controlSala);
-        PropertyChangeListener[] modelos= {modeloSala,modeloPrincipal};
+        PropertyChangeListener[] modelos= {modeloSala,modeloPrincipal,modeloEjercerTurno};
         iListener listener = ensamblador.crearListener(miId, modelos);
 
         // 5. Iniciar Listener
@@ -79,6 +87,7 @@ public class EnsambladoresMVC {
         // 6. Arrancar UI
         vistaLobby.setVisible(true);
         vistaSala.setVisible(false);
+        vistaTablero.setVisible(false);
     }
 
     public static void main(String[] args) {

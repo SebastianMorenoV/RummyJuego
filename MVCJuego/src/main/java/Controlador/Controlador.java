@@ -2,6 +2,7 @@ package Controlador;
 
 import DTO.GrupoDTO;
 import Modelo.Modelo;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  *
  * @author moren
  */
-public class Controlador {
+public class Controlador implements iControlEjercerTurno{
 
     Modelo modelo;
 
@@ -57,6 +58,11 @@ public class Controlador {
      */
     public void terminarTurno() {
         modelo.terminarTurno();
+    }
+
+    @Override
+    public void IniciarEjercerTurno() {
+        
     }
 
 }
