@@ -6,7 +6,7 @@ package control;
 
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlSalaEspera;
-import contratos.modelosMVC.IModeloSalaEspera;
+import modelo.IModeloSalaEspera;
 
 /**
  *
@@ -21,9 +21,6 @@ public class ControlSalaEspera implements iControlSalaEspera{
         this.modelo = modelo;
     }
     
-    
-
-    // MÉTODO MODIFICADO PARA INICIAR LA SALA DE ESPERA
     @Override
     public void iniciarSalaEspera() {
         System.out.println("[ControlSalaEspera] Simulación de entrada de jugadores e inicio de Sala de Espera.");
@@ -39,7 +36,6 @@ public class ControlSalaEspera implements iControlSalaEspera{
         modelo.jugadorPulsaListo();
     }
     
-    // NUEVO: Método para pasar la ejecución al siguiente Caso de Uso (Juego)
     public void iniciarPartidaFinal() {
         if (controlCUPrincipal != null) {
             // Delega al orquestador (ControlCUPrincipal) la responsabilidad de iniciar
@@ -51,6 +47,11 @@ public class ControlSalaEspera implements iControlSalaEspera{
 
     public void setControlCUPrincipal(iControlCUPrincipal controlCUPrincipal) {
         this.controlCUPrincipal = controlCUPrincipal;
+    }
+
+    @Override
+    public void cerrarCU() {
+        modelo.cerrarCU();
     }
     
     

@@ -11,4 +11,6 @@ package contratos.controladoresMVC;
 public interface iControlSalaEspera {
 
     void iniciarSalaEspera();
+    
+    void cerrarCU();
 }

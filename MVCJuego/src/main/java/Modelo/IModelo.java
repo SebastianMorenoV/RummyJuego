@@ -13,4 +13,6 @@ import DTO.JuegoDTO;
  */
 public interface IModelo {
     public JuegoDTO getTablero();
+    
+    public int getMazoFichasRestantes();
 }

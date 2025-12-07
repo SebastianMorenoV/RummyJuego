@@ -10,6 +10,7 @@ import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlSalaEspera;
 import contratos.iDespachador;
 import contratos.iEnsambladorCliente;
+import contratos.iListener;
 import control.ControlSalaEspera;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -18,9 +19,16 @@ import java.util.logging.Logger;
 import sockets.ClienteTCP;
 
 // Importaciones de Interfaces de los módulos inferiores (la clave del desacoplamiento)
-import contratos.modelosMVC.IModeloSalaEspera;
 import contratos.vistasMVC.IVistaJuego;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
+import modelo.IModeloSalaEspera;
 import modelo.ModeloSalaEspera;
+import procesadores.Procesador;
+import sockets.ServerTCP;
 import vista.VistaSalaEspera;
 
 public class EnsambladoresMVC {
@@ -38,9 +46,8 @@ public class EnsambladoresMVC {
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
 
-        // 🚨 CRUCIAL: CAMBIAR ESTA LÍNEA MANUALMENTE PARA CADA CLIENTE (Jugador1, Jugador2, etc.)
-        String miId = "Jugador4";
-        int miPuertoDeEscucha = 9008;
+        String miId = "Jugador1";
+        int miPuertoDeEscucha = buscarPuertoLibre();
 
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
 
@@ -69,11 +76,29 @@ public class EnsambladoresMVC {
         modeloPrincipal.añadirObservador(vistaLobby);
 
         // 4. Ensamblar CU Ejercer Turno (MVCJuego)
-        Modelo modelo = new Modelo();
-        Controlador controlador = new Controlador(modelo);
+        Modelo modeloEjercerTurno = new Modelo();
+        Controlador controlador = new Controlador(modeloEjercerTurno);
+
+        modeloEjercerTurno.setDespachador(despachador);
+        modeloEjercerTurno.setMiId(miId);
         
-        modelo.setDespachador(despachador);
-        modelo.setMiId(miId);
+        List<PropertyChangeListener> escuchadores = new ArrayList<>();
+//        escuchadores.add(modeloPrincipal);
+        escuchadores.add(modeloEjercerTurno);
+        escuchadores.add(modeliSalaEspera);
+
+        EnsambladorCliente ensambladorRed = new EnsambladorCliente();
+        iListener listener = ensambladorRed.crearListener(ipCliente, escuchadores);
+
+        new Thread(() -> {
+            try {
+                listener.iniciar(miPuertoDeEscucha);
+            } catch (IOException e) {
+                System.err.println("[Main] Error fatal al iniciar el listener: "
+                        + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
 
         // CORRECCIÓN CLAVE: Creamos UNA SOLA instancia de VistaTablero
         VistaTablero vistaTablero = new VistaTablero(controlador);
@@ -82,19 +107,19 @@ public class EnsambladoresMVC {
         // Esto funciona porque VistaTablero implementa IVistaJuego.
         IVistaJuego vistaJuego = vistaTablero;
 
-        modelo.agregarObservador(vistaTablero); // La instancia concreta escucha al Modelo
+        modeloEjercerTurno.agregarObservador(vistaTablero); // La instancia concreta escucha al Modelo
 
         // 4. Inyectar dependencias de navegación
         // El orquestador necesita los controladores y la vista de juego
         ((ControlCUPrincipal) controlPrincipal).setControladorSalaEspera((iControlSalaEspera) controlSalaEspera);
         ((ControlCUPrincipal) controlPrincipal).setControladorJuego(controlador);
+        controlador.setControlSalaEspera(controlSalaEspera);
 
         // Inyectamos la única instancia de la vista de juego (como interfaz)
         ((ControlCUPrincipal) controlPrincipal).setVistaTableroJuego(vistaJuego);
 
         // Inyectar el modelo de sala al modelo de juego para delegación de eventos de red
-        modelo.setModeloSalaEspera(modeliSalaEspera);
-
+//        modelo.setModeloSalaEspera(modeliSalaEspera);
         // Inyectar el orquestador en el controlador de Sala de Espera para la navegación final
         controlSalaEspera.setControlCUPrincipal(controlPrincipal);
 
@@ -106,6 +131,16 @@ public class EnsambladoresMVC {
         vistaSalaEspera.setVisible(false);
         vistaTablero.setVisible(false); // Controlamos la visibilidad de la única instancia
     }
+
+    private int buscarPuertoLibre() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            System.err.println("No se pudo encontrar un puerto libre, usando por defecto 9999");
+            return 9999; // Fallback en caso de error extremo
+        }
+    }
+    
 
     public static void main(String[] args) {
         EnsambladoresMVC e = new EnsambladoresMVC();

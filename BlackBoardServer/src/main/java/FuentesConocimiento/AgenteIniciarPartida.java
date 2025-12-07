@@ -30,7 +30,9 @@ public class AgenteIniciarPartida implements iAgentePartida {
     public AgenteIniciarPartida(EstadoJuegoPizarra pizarra) {
         this.pizarra = pizarra;
         this.tableroDeJuego = new Tablero();
-        this.tableroDeJuego.crearMazoCompleto();
+        
+        this.tableroDeJuego.crearMazoCompleto(); 
+        System.out.println("[Agente] Tablero inicializado y Mazo de 108 fichas creado.");
     }
 
     /**
@@ -41,6 +43,10 @@ public class AgenteIniciarPartida implements iAgentePartida {
      */
     @Override
     public Map<String, String> repartirManos(List<String> jugadorIds) {
+        // LOG: Verificamos el tamaño del mazo antes del reparto
+        System.out.println("----------------------------------------------");
+        System.out.println("[Agente] MAZO INICIAL ANTES DE REPARTO: " + this.tableroDeJuego.getMazo().size() + " fichas.");
+
         Map<String, String> manosSerializadas = new HashMap<>();
 
         for (String id : jugadorIds) {
@@ -51,10 +57,10 @@ public class AgenteIniciarPartida implements iAgentePartida {
                 if (ficha != null) {
                     mano.add(ficha);
                 }
-                // LÍNEA ELIMINADA: pizarra.setFichasJugador(id, 14); 
+                // La línea pizarra.setFichasJugador(id, 14) fue eliminada en el paso anterior (correctamente)
             }
 
-            // AÑADIDO: Sincronizar el estado del jugador a la Pizarra (Blackboard)
+            // Sincronizar el estado del jugador a la Pizarra (Blackboard)
             pizarra.setFichasJugador(id, mano.size());
 
             String manoPayload = mano.stream()
@@ -63,13 +69,17 @@ public class AgenteIniciarPartida implements iAgentePartida {
                     .collect(Collectors.joining("|"));
 
             manosSerializadas.put(id, manoPayload);
-            System.out.println("[AgenteIniciarPartida] Mano creada para " + id);
+            System.out.println("[Agente] Mano creada para " + id + " con " + mano.size() + " fichas.");
         }
+
+        // LOG: Verificamos el tamaño del mazo después del reparto
+        System.out.println("[Agente] MAZO FINAL DESPUÉS DE REPARTO: " + this.tableroDeJuego.getMazo().size() + " fichas.");
 
         // Sincronizar el estado final del mazo a la Pizarra (Blackboard)
         String mazoRestante = getMazoSerializado();
         pizarra.setMazoSerializado(mazoRestante);
 
+        System.out.println("----------------------------------------------");
         return manosSerializadas;
     }
 

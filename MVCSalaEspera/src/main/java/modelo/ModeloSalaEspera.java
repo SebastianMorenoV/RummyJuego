@@ -2,7 +2,6 @@ package modelo;
 
 import contratos.iDespachador;
 import contratos.iEnsambladorCliente;
-import contratos.iListener;
 import Util.Configuracion;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
@@ -14,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import contratos.modelosMVC.IModeloSalaEspera;
-import contratos.vistasMVC.ObservadorSalaEspera;
 
 /**
  * Modelo para la Sala de Espera. Maneja el estado de los jugadores listos y la
@@ -30,8 +27,6 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
     private List<String> idsJugadoresEnSala;
     private iDespachador despachador;
     private String miId;
-
-    // CAMPOS DELEGADOS INYECTADOS POR EL ENSAMBLADOR
     private iEnsambladorCliente ensambladorCliente;
     private int miPuertoDeEscucha;
 
@@ -43,9 +38,6 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
         this.idsJugadoresEnSala = List.of("Jugador1", "Jugador2", "Jugador3", "Jugador4");
     }
 
-    // ************************************************************
-    // ** LÓGICA DE RED Y SINCRONIZACIÓN (PropertyChangeListener) **
-    // ************************************************************
     /**
      * Recibe eventos delegados del Modelo principal (MVCJuego).
      */
@@ -55,10 +47,10 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
         String payload = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         switch (evento) {
-            case "SALA_ACTUALIZADA": // Recibido del servidor
+            case "SALA_ACTUALIZADA":
                 logger.info("Evento SALA_ACTUALIZADA recibido. Payload: " + payload);
                 actualizarEstadoGlobalDeSala(payload);
-                notificarObservadores(); // Notifica a la Vista para que repinte los iconos
+                notificarObservadores(TipoEvento.SALA);//notifica a la vista para que repinte los iconos
                 break;
             default:
                 break;
@@ -94,43 +86,24 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
 
     /**
      * ** MÉTODO DE INICIO DE CONEXIÓN ** Se llama desde EnsambladoresMVC.
-     * Inicia la conexión en un hilo y se registra.
      */
-    public void iniciarConexionRed() {
+    public void iniciarConexionRed() {//esto va pal ensamblador!!!!!!!!!!!!!!!!!
         if (ensambladorCliente == null) {
             logger.severe("ERROR: EnsambladorCliente no inyectado. La red no iniciará.");
             return;
         }
 
+        // 3. Registrar Cliente con el servidor (Este registro se usa para el envío del mensaje SALA_ACTUALIZADA)
         try {
-            iListener listenerSalaEspera = ensambladorCliente.crearListener(
-                    miId,
-                    this
-            );
-
-            new Thread(() -> {
-                try {
-                    logger.info("Listener iniciado en puerto " + miPuertoDeEscucha);
-                    listenerSalaEspera.iniciar(miPuertoDeEscucha);
-                } catch (IOException e) {
-                    logger.log(Level.SEVERE, "ERROR fatal al iniciar Listener (" + miId + "):", e);
-                }
-            }).start();
-
-            // 3. Registrar Cliente con el servidor (Este registro se usa para el envío del mensaje SALA_ACTUALIZADA)
             String ipCliente = InetAddress.getLocalHost().getHostAddress();
             String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
-
             this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeRegistro);
-
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error de red al registrar cliente " + miId + ":", ex);
+            Logger.getLogger(ModeloSalaEspera.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
 
-    // ************************************************************
-    // ** MÉTODOS DE CONTROL Y OBSERVABLE **
-    // ************************************************************
+    }
+    
     /**
      * Lógica CU: El cliente envía el comando LISTO al servidor.
      */
@@ -141,7 +114,7 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
 
             // Actualización LOCAL (Para que la respuesta sea instantánea)
             jugadoresListos.put(miId, true);
-            notificarObservadores();
+            notificarObservadores(TipoEvento.SALA);
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error al enviar comando LISTO:", e);
@@ -161,13 +134,12 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
             this.jugadoresListos.putIfAbsent(id, false);
         }
 
-        notificarObservadores();
+        notificarObservadores(TipoEvento.SALA);
     }
 
-    // MÉTODOS DE OBSERVABLE (Implementan el patrón Observer)
-    public void notificarObservadores() {
+    public void notificarObservadores(TipoEvento evt) {
         for (ObservadorSalaEspera observador : observadores) {
-            observador.actualiza(this);
+            observador.actualiza(this, evt);
         }
     }
 
@@ -183,9 +155,6 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
         return jugadoresEnSala >= 2 && jugadoresListosCount == jugadoresEnSala;
     }
 
-    // ************************************************************
-    // ** GETTERS Y SETTERS **
-    // ************************************************************
     public void setEnsambladorCliente(iEnsambladorCliente ensambladorCliente) {
         this.ensambladorCliente = ensambladorCliente;
     }
@@ -213,4 +182,10 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
     public String getMiId() {
         return miId;
     }
+
+    @Override
+    public void cerrarCU() {
+        notificarObservadores(TipoEvento.CERRAR_CU);
+    }
+
 }

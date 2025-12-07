@@ -6,6 +6,7 @@ import contratos.iDespachador;
 import contratos.iEnsambladorCliente;
 import contratos.iListener;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 import procesadores.Procesador;
 
 /**
@@ -49,20 +50,17 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
      * @return Una instancia de {@link iListener} (ServerTCP) lista para recibir conexiones.
      */
     @Override
-    public iListener crearListener(String miId, PropertyChangeListener oyente) {
-        System.out.println("[Ensamblador] Ensamblando Listener para CLIENTE "
-                + "(" + miId + ")...");
+    public iListener crearListener(String miId, List<PropertyChangeListener> oyentes) {
 
         Procesador logicaCliente = new Procesador();
 
-        System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()
-                + ") -> ProcesadorCliente");
-        logicaCliente.addPropertyChangeListener(oyente);
+        for (PropertyChangeListener oyente : oyentes) {
+            logicaCliente.addPropertyChangeListener(oyente);
+            System.out.println("[Ensamblador] Conectando Oyente (" + oyente.getClass().getSimpleName()
+                    + ") -> ProcesadorCliente");
+        }
 
         iListener listener = new ServerTCP(logicaCliente);
-
-        System.out.println("[Ensamblador] Listener ensamblado.");
-
         return listener;
     }
 }

@@ -6,6 +6,8 @@ package Modelo;
 
 import eventos.Evento;
 import Vista.Observador;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
  *
  * @author benja
  */
-public class ModeloCUPrincipal implements IModeloLobby {
+public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
     
     List<Observador> observadores;
     
@@ -47,5 +49,10 @@ public class ModeloCUPrincipal implements IModeloLobby {
         for (Observador observador : observadores) {
             observador.actualiza(this, evento);
         }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

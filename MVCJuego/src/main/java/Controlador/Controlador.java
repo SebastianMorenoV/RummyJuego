@@ -5,6 +5,7 @@ import Modelo.Modelo;
 import Vista.VistaTablero;
 import java.util.List;
 import contratos.controladoresMVC.iControlJuego;
+import contratos.controladoresMVC.iControlSalaEspera;
 
 /**
  * Controlador del sistema encargado de gestionar la comunicación entre la
@@ -17,9 +18,18 @@ public class Controlador implements iControlJuego{
 
     Modelo modelo;
     private VistaTablero vistaTablero;
+    private iControlSalaEspera controlSalaEspera;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
+    }
+    
+    public void cerrarCU(){
+        controlSalaEspera.cerrarCU();
+    }
+
+    public void setControlSalaEspera(iControlSalaEspera controlSalaEspera) {
+        this.controlSalaEspera = controlSalaEspera;
     }
 
     /**

@@ -41,5 +41,7 @@ public interface IJuegoRummy {
     void setManoInicial(List<Ficha> mano);
 
     List<Ficha> getMazo();
+    
+    public void setJugadorLocalID(String id);
 
 }

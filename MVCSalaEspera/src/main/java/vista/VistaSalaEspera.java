@@ -10,22 +10,23 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import contratos.modelosMVC.IModeloSalaEspera;
-import contratos.vistasMVC.ObservadorSalaEspera;
+import modelo.IModeloSalaEspera;
 import modelo.ModeloSalaEspera;
+import modelo.ObservadorSalaEspera;
+import modelo.TipoEvento;
 
 /**
  *
  * @author benja
  */
-public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaEspera{
-    
+public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaEspera {
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VistaSalaEspera.class.getName());
     private ControlSalaEspera control;
 
     /**
      * Creates new form VistaSalaEspera
+     *
      * @param control
      */
     public VistaSalaEspera(ControlSalaEspera control) {
@@ -43,7 +44,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             }
         });
     }
-    
+
     // ******************************************************
     // Constructor para PRUEBAS LOCALES (main) ***
     // ******************************************************
@@ -55,84 +56,90 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         // Llama a inicializar componentes para que la UI se dibuje
         initComponents();
         this.setLocationRelativeTo(null);
-        // Opcional: deshabilitar el botón de iniciar para evitar NullPointerException en el Main de prueba
         if (btnJugadorListoParaIniciarPartida != null) {
             btnJugadorListoParaIniciarPartida.setEnabled(false);
             btnJugadorListoParaIniciarPartida.setText("MODO PRUEBA");
         }
     }
-    
-    
+
     @Override
-    public void actualiza(IModeloSalaEspera iModelo) {
-        ModeloSalaEspera modelo = (ModeloSalaEspera) iModelo;
-        Map<String, Boolean> jugadoresListos = modelo.getJugadoresListos();
-        String miId = modelo.getMiId(); // ID de la instancia actual (Ej: "Jugador1")
+    public void actualiza(IModeloSalaEspera iModelo, TipoEvento evt) {
+        switch (evt) {
+            case SALA:
+                ModeloSalaEspera modelo = (ModeloSalaEspera) iModelo;
+                Map<String, Boolean> jugadoresListos = modelo.getJugadoresListos();
+                String miId = modelo.getMiId(); // ID de la instancia actual (Ej: "Jugador1")
 
-        // Mapeo de componentes de la UI a los slots fijos de la ventana
-        JLabel[] nombres = {txtNombreJ1, txtNombreJ2, txtNombreJ3, txtNombreJ4};
-        JLabel[] iconosListos = {Jugador1NoListo, Jugador2NoListo, Jugador3NoListo, Jugador4NoListo};
-        String[] idsFijos = {"Jugador1", "Jugador2", "Jugador3", "Jugador4"};
+                // Mapeo de componentes de la UI a los slots fijos de la ventana
+                JLabel[] nombres = {txtNombreJ1, txtNombreJ2, txtNombreJ3, txtNombreJ4};
+                JLabel[] iconosListos = {Jugador1NoListo, Jugador2NoListo, Jugador3NoListo, Jugador4NoListo};
+                String[] idsFijos = {"Jugador1", "Jugador2", "Jugador3", "Jugador4"};
 
-        // Carga de íconos desde resources
-        ImageIcon iconoListo = new ImageIcon(getClass().getResource("/check.png"));
-        ImageIcon iconoNoListo = new ImageIcon(getClass().getResource("/loadingGIF.gif"));
+                // Carga de íconos desde resources
+                ImageIcon iconoListo = new ImageIcon(getClass().getResource("/check.png"));
+                ImageIcon iconoNoListo = new ImageIcon(getClass().getResource("/loadingGIF.gif"));
 
-        // Lógica de Repintado: Cargar nombres, identidad (TÚ) y estados (iconos)
-        for (int i = 0; i < idsFijos.length; i++) {
-            String id = idsFijos[i]; // ID del slot actual (Ej: "Jugador1" en el primer ciclo)
+                // Lógica de Repintado: Cargar nombres, identidad (TÚ) y estados (iconos)
+                for (int i = 0; i < idsFijos.length; i++) {
+                    String id = idsFijos[i]; // ID del slot actual (Ej: "Jugador1" en el primer ciclo)
 
-            // Ya que el modelo mockea J1-J4, esta condición siempre será verdadera
-            if (modelo.getIdsJugadoresEnSala().contains(id)) {
+                    // Ya que el modelo mockea J1-J4, esta condición siempre será verdadera
+                    if (modelo.getIdsJugadoresEnSala().contains(id)) {
 
-                // 1. ASIGNAR NOMBRE E IDENTIDAD (TÚ)
-                // Si el ID del slot coincide con mi ID local, añado (TÚ)
-                String nombreCompleto = id + (id.equals(miId) ? " (TÚ)" : "");
-                nombres[i].setText(nombreCompleto);
+                        // 1. ASIGNAR NOMBRE E IDENTIDAD (TÚ)
+                        // Si el ID del slot coincide con mi ID local, añado (TÚ)
+                        String nombreCompleto = id + (id.equals(miId) ? " (TÚ)" : "");
+                        nombres[i].setText(nombreCompleto);
 
-                // 2. ASIGNAR ICONO LISTO
-                boolean estaListo = jugadoresListos.getOrDefault(id, false);
-                iconosListos[i].setIcon(estaListo ? iconoListo : iconoNoListo);
-            } else {
-                // Estado por defecto si el slot no está ocupado (nunca debería ocurrir con este mock)
-                nombres[i].setText("?????????????????");
-                iconosListos[i].setIcon(null);
-            }
+                        // 2. ASIGNAR ICONO LISTO
+                        boolean estaListo = jugadoresListos.getOrDefault(id, false);
+                        iconosListos[i].setIcon(estaListo ? iconoListo : iconoNoListo);
+                    } else {
+                        // Estado por defecto si el slot no está ocupado (nunca debería ocurrir con este mock)
+                        nombres[i].setText("?????????????????");
+                        iconosListos[i].setIcon(null);
+                    }
+                }
+
+                // Lógica del Botón y Título (CU "Iniciar Partida")
+                boolean miEstado = jugadoresListos.getOrDefault(miId, false);
+
+                if (modelo.isPartidaLista()) {
+                    btnJugadorListoParaIniciarPartida.setText("Partida lista");
+                    btnJugadorListoParaIniciarPartida.setEnabled(false);
+                    this.setVisible(false); // Ocultar la sala de espera
+                    control.iniciarPartidaFinal(); // Llamar al controlador para iniciar el CU de Juego
+                    // FIN DE LA LÓGICA DE TRANSICIÓN
+                } else if (miEstado) {
+                    // El jugador actual está listo, esperando a los demás
+                    this.setTitle("Sala de Espera - " + miId + " (¡LISTO!)");
+                    btnJugadorListoParaIniciarPartida.setText("Esperando a otros...");
+                    btnJugadorListoParaIniciarPartida.setEnabled(false);
+                } else {
+                    // El jugador actual no se ha declarado listo
+                    this.setTitle("Sala de Espera - " + miId);
+                    btnJugadorListoParaIniciarPartida.setText("Estoy Listo");
+                    btnJugadorListoParaIniciarPartida.setEnabled(true);
+                }
+
+                // ----------------------------------------------------
+                // LÍNEAS CRUCIALES: FORZAR REDIBUJADO DE LA INTERFAZ
+                this.revalidate();
+                this.repaint();
+                // ----------------------------------------------------
+
+                // Hace visible la ventana (o la mantiene visible si ya lo estaba)
+                this.setVisible(true);
+
+                break;
+
+            case CERRAR_CU:
+                this.setVisible(false);
+                
+                break;
+        
         }
 
-        // Lógica del Botón y Título (CU "Iniciar Partida")
-        boolean miEstado = jugadoresListos.getOrDefault(miId, false);
-
-        if (modelo.isPartidaLista()) {
-            // CONDICIÓN CUMPLIDA: Partida lista para iniciar
-            btnJugadorListoParaIniciarPartida.setText("Partida lista, INICIANDO...");
-            btnJugadorListoParaIniciarPartida.setEnabled(false);
-
-            // LÓGICA DE TRANSICIÓN AÑADIDA/MODIFICADA:
-            JOptionPane.showMessageDialog(this, "¡La partida va a comenzar!", "INICIANDO PARTIDA", JOptionPane.INFORMATION_MESSAGE);
-            this.setVisible(false); // Ocultar la sala de espera
-            control.iniciarPartidaFinal(); // Llamar al controlador para iniciar el CU de Juego
-            // FIN DE LA LÓGICA DE TRANSICIÓN
-        } else if (miEstado) {
-            // El jugador actual está listo, esperando a los demás
-            this.setTitle("Sala de Espera - " + miId + " (¡LISTO!)");
-            btnJugadorListoParaIniciarPartida.setText("Esperando a otros...");
-            btnJugadorListoParaIniciarPartida.setEnabled(false);
-        } else {
-            // El jugador actual no se ha declarado listo
-            this.setTitle("Sala de Espera - " + miId);
-            btnJugadorListoParaIniciarPartida.setText("Estoy Listo");
-            btnJugadorListoParaIniciarPartida.setEnabled(true);
-        }
-
-        // ----------------------------------------------------
-        // LÍNEAS CRUCIALES: FORZAR REDIBUJADO DE LA INTERFAZ
-        this.revalidate();
-        this.repaint();
-        // ----------------------------------------------------
-
-        // Hace visible la ventana (o la mantiene visible si ya lo estaba)
-        this.setVisible(true);
     }
 
     /**

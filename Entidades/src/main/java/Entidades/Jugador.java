@@ -27,6 +27,14 @@ public class Jugador {
         this.haHechoPrimerMovimiento = false;
     }
 
+    public Jugador(String nickname) {
+        this.nickname = nickname;
+        this.manoJugador = new Mano();
+        this.haHechoPrimerMovimiento = false;
+    }
+    
+    
+
     /**
      * Agrega una ficha a la mano del jugador
      *

@@ -194,11 +194,17 @@ public class VistaTablero extends javax.swing.JFrame implements ObservadorJuego,
                     JOptionPane.showMessageDialog(this, "Esperando al oponente.. ", "Esperando..", JOptionPane.INFORMATION_MESSAGE);
                 }
                 break;
+                
+            case MOSTRAR_JUEGO:
+                this.setVisible(true);
+                control.cerrarCU();
+                break;
 
             case REPINTAR_MANO:
                 repintarMano(modelo, dto);
+                // CORRECCIÓN CLAVE: Asegurar que el mazo se actualice cuando la mano se actualiza
+                repintarMazo(modelo); // <--- LÍNEA AÑADIDA
                 break;
-
             case ACTUALIZAR_TABLERO_TEMPORAL:
                 if (tableroUI != null) {
                     tableroUI.repintarTablero(false);
@@ -335,8 +341,8 @@ public class VistaTablero extends javax.swing.JFrame implements ObservadorJuego,
     private void iniciarComponentesDeJuego(IModelo modelo, ActualizacionDTO dto) {
         crearTablero(modelo);
         crearManoUI();
-        repintarMano(modelo, dto);
-        crearMazo(modelo);
+        // LÍNEA ELIMINADA: repintarMano(modelo, dto); // El DTO aquí está vacío.
+        crearMazo(modelo); // Se crea el componente MazoUI (con 0 fichas).
         cargarJugadores();
         btnFinalizarTurno.setVisible(false);
         GUIjuego.add(fondo);
@@ -457,7 +463,11 @@ public class VistaTablero extends javax.swing.JFrame implements ObservadorJuego,
      */
     private void crearMazo(IModelo modelo) {
         if (mazoUI == null) {
-            int fichasRestantes = modelo.getTablero().getFichasMazo();
+            // CORRECCIÓN: USAR EL GETTER DIRECTO DEL MODELO
+            int fichasRestantes = modelo.getMazoFichasRestantes(); // <--- CAMBIO CLAVE
+            
+            // La línea original era: int fichasRestantes = modelo.getTablero().getFichasMazo();
+            
             mazoUI = new MazoUI(String.valueOf(fichasRestantes), control);
             mazoUI.setLocation(807, 140);
             mazoUI.setSize(70, 90);
@@ -476,7 +486,11 @@ public class VistaTablero extends javax.swing.JFrame implements ObservadorJuego,
      */
     private void repintarMazo(IModelo modelo) {
         if (mazoUI != null) {
-            int fichasRestantes = modelo.getTablero().getFichasMazo();
+            int fichasRestantes = modelo.getMazoFichasRestantes();
+            
+            // LOG DE VALIDACIÓN 2: ¿Qué número se está enviando a MazoUI?
+            System.out.println("[VistaTablero] DEBUG: Actualizando MazoUI con: " + fichasRestantes + " fichas.");
+            
             mazoUI.setNumeroFichasRestantes(String.valueOf(fichasRestantes));
             mazoUI.setCursor(new Cursor(HAND_CURSOR) {
             });

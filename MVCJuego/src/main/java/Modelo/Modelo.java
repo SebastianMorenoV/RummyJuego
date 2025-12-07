@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import contratos.modelosMVC.IModeloSalaEspera;
 import Vista.ObservadorJuego;
 
 /**
@@ -46,7 +45,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
     Configuracion config;
 
     private final static Logger logger = Logger.getLogger(Modelo.class.getName());
-    private IModeloSalaEspera modeloSalaEspera; // <--- INYECCIÓN PARA DELEGACIÓN
 
     private int mazoFichasRestantes = 0;
 
@@ -64,10 +62,18 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * iniciales.
      */
     public void iniciarJuego() {
-        juego.iniciarPartida();
-        this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
-        notificarObservadores(TipoEvento.INCIALIZAR_FICHAS); // <-- Dibuja el UI (incluye llamar a cargarJugadores)
-        enviarComandoIniciarPartida(); // <-- Luego pide la mano real al servidor.
+        try {
+            juego.setJugadorLocalID(this.miId);
+            juego.iniciarPartida();
+            this.gruposDTOAlInicioDelTurno = new ArrayList<>(this.gruposDeTurnoDTO);
+            String mensaje = "COMANDO_INICIAR_PARTIDA:";
+            despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+            logger.info("Enviado comando final de inicio de partida al servidor.");
+            notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
+            enviarComandoIniciarPartida(); // <-- Luego pide la mano real al servidor.
+        } catch (IOException ex) {
+            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -104,11 +110,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         switch (evento) {
 
-            case "SALA_ACTUALIZADA": // <--- DELEGACIÓN CRUCIAL: Pasar eventos de Sala al Modelo Secundario
-                if (modeloSalaEspera != null) {
-                    modeloSalaEspera.propertyChange(evt);
-                }
-                break;
+//            case "SALA_ACTUALIZADA": // <--- DELEGACIÓN CRUCIAL: Pasar eventos de Sala al Modelo Secundario
+//                if (modeloSalaEspera != null) {
+//                    modeloSalaEspera.propertyChange(evt);
+//                }
+//                break;
 
             case "COMANDO_INICIAR_PARTIDA":
                 System.out.println("[Modelo] Recibida orden del servidor para iniciar la partida.");
@@ -117,6 +123,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
             case "MANO_INICIAL":
                 System.out.println("[Modelo] Evento 'MANO_INICIAL' detectado!");
+                
+                if (juego.getJugadorActual() == null) {
+                    System.out.println("[Modelo] CRÍTICO: La fachada no estaba inicializada al recibir la mano. Inicializando ahora...");
+                    juego.setJugadorLocalID(this.miId);
+                    juego.iniciarPartida(); // Esto crea los jugadores y asigna jugadorLocal
+                }
+                
                 try {
                     String[] payloadPartes = payloadd.split("\\$");
                     String manoPayload = payloadPartes[0];
@@ -131,11 +144,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
                             .map(this::convertirFichaDtoAEntidad)
                             .collect(Collectors.toList());
 
+                    System.out.println("[Modelo] VALIDACIÓN: Deserializadas " + manoEntidad.size() + " fichas. Mazo restante: " + this.mazoFichasRestantes);
                     juego.setManoInicial(manoEntidad);
 
                     // Estos dos notifican a VistaTablero para dibujar la mano y el mazo
+                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
+                    notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
                 } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
                     e.printStackTrace();
@@ -583,18 +599,15 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Establece la referencia al Modelo de Sala de Espera (para delegar eventos
-     * de sincronización).
-     */
-    public void setModeloSalaEspera(IModeloSalaEspera modeloSalaEspera) {
-        this.modeloSalaEspera = modeloSalaEspera;
-    }
-
-    /**
      * Establece la identificación única (ID) del cliente/jugador actual, usada
      * para construir los mensajes enviados al servidor.
      */
     public void setMiId(String miId) {
         this.miId = miId;
+    }
+
+    @Override
+    public int getMazoFichasRestantes() {
+        return this.mazoFichasRestantes;
     }
 }

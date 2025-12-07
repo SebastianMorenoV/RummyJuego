@@ -65,7 +65,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 int numJugadores = pizarra.getOrdenDeTurnos().size();
 
                 // [Lógica CU: 4 jugadores conectados inician automáticamente (o 2 en el caso mínimo)]
-                if (numJugadores == 2) {
+                if (numJugadores == 4) {
                     String idHost = pizarra.getOrdenDeTurnos().get(0);
                     // Mantenemos la notificación al Host para que sepa que ya hay mínimo de jugadores
                     System.out.println("[Controlador] Hay " + numJugadores + " jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego si lo desea.");

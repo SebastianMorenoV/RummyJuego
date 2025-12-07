@@ -5,6 +5,7 @@ import Entidades.Grupo;
 import Entidades.Jugador;
 import Entidades.Mano;
 import Entidades.Tablero;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,16 +16,20 @@ import java.util.List;
 public class JuegoRummyFachada implements IJuegoRummy {
 
     private Tablero tablero;
-    private Jugador jugador;
+    private Jugador jugadorActual;
     private Tablero tableroAlInicioDelTurno;
     private Mano manoAlInicioDelTurno;
+    private List<Jugador> jugadores;
+    private Jugador jugadorLocal; // <--- CAMBIO 1: Campo para almacenar el objeto Jugador local
+    private String idJugadorLocal;
 
     /**
      * Constructor por defecto. Inicializa el tablero y el jugador.
      */
     public JuegoRummyFachada() {
         this.tablero = new Tablero();
-        this.jugador = new Jugador();
+        this.jugadorActual = new Jugador();
+        this.jugadores = new ArrayList<>();
     }
 
     /**
@@ -34,17 +39,40 @@ public class JuegoRummyFachada implements IJuegoRummy {
      */
     @Override
     public void iniciarPartida() {
-        guardarEstadoTurno();
+        // Asumiendo que esta lógica crea todos los objetos Jugador.
+        // Si no los crea aquí, ¡debes asegurarte de que lo haga!
+
+        // EJEMPLO DE CÓMO DEBERÍA CREAR LOS JUGADORES (si no existe):
+        // Esto es un ejemplo, asumiendo 4 jugadores fijos:
+        this.jugadores.clear();
+        this.jugadores.add(new Jugador("Jugador1"));
+        this.jugadores.add(new Jugador("Jugador2"));
+        this.jugadores.add(new Jugador("Jugador3"));
+        this.jugadores.add(new Jugador("Jugador4"));
+
+        // Después de crear todos los jugadores, se asigna el jugador local:
+        this.jugadorLocal = this.jugadores.stream()
+                .filter(j -> j.getNickname().equals(this.idJugadorLocal))
+                .findFirst()
+                .orElse(null);
+
+        // Lógica de inicio de turno (por defecto, el primero en la lista)
+        if (!this.jugadores.isEmpty()) {
+            this.jugadorActual = this.jugadores.get(0);
+        }
+
+        // El reparto real de fichas es manejado por el servidor, no por la Fachada local.
+        // La Fachada solo prepara su estado inicial.
     }
 
     /**
      * Obtiene la instancia del Jugador que está participando actualmente.
      * * @return El objeto Jugador actual.
      */
-    @Override
-    public Jugador getJugadorActual() {
-        return this.jugador;
-    }
+//    @Override
+//    public Jugador getJugadorActual() {
+//        return this.jugadorActual;
+//    }
 
     /**
      * Simula la acción del jugador de tomar una ficha del mazo.
@@ -230,7 +258,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
      */
     @Override
     public List<Ficha> getManoDeJugador(int indiceJugador) {
-        return this.jugador.getManoJugador().getFichasEnMano();
+        return this.jugadorActual.getManoJugador().getFichasEnMano();
     }
 
     /**
@@ -271,4 +299,19 @@ public class JuegoRummyFachada implements IJuegoRummy {
     public List<Ficha> getMazo() {
         return this.tablero.getMazo();
     }
+
+    @Override
+    public Jugador getJugadorActual() {
+        // CORRECCIÓN: La lógica de turno debe ser gestionada por el Modelo del MVCJuego 
+        // y su campo 'esMiTurno', no la Fachada, a menos que sea un juego local.
+        // Pero el Modelo necesita MI jugador, así que devolvemos el jugador local.
+        return this.jugadorLocal; // <--- CAMBIO 3: Devolvemos el jugador local
+    }
+
+    @Override
+    public void setJugadorLocalID(String id) {
+        this.idJugadorLocal = id; // <--- CAMBIO 4: Implementación del nuevo setter
+    }
+    
+    
 }
