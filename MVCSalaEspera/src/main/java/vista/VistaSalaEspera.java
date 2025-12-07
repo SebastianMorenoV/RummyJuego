@@ -28,7 +28,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton1 = new javax.swing.JButton();
+        btnIniciar = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
 
@@ -40,11 +40,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
         setSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
-        jButton1.setBackground(new java.awt.Color(80, 118, 78));
-        jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jButton1.setText("Iniciar Partida");
-        getContentPane().add(jButton1);
-        jButton1.setBounds(350, 340, 220, 70);
+        btnIniciar.setBackground(new java.awt.Color(80, 118, 78));
+        btnIniciar.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnIniciar.setText("Iniciar Partida");
+        getContentPane().add(btnIniciar);
+        btnIniciar.setBounds(350, 340, 220, 70);
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 235, 126));
@@ -86,7 +86,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnIniciar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables

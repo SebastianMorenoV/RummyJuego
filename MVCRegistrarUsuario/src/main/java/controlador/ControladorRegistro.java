@@ -12,11 +12,11 @@ import java.awt.Color;
  *
  * @author chris
  */
-public class Controlador implements iControlRegistro {
+public class ControladorRegistro implements iControlRegistro {
 
     private iModeloRegistro modelo;
 
-    public Controlador(iModeloRegistro modelo) {
+    public ControladorRegistro(iModeloRegistro modelo) {
         this.modelo = modelo;
     }
 

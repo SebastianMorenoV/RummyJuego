@@ -19,6 +19,7 @@ import java.util.Map;
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
     private final List<iObservador> observadores;
+    private Map<String, String> datosJugadores = new HashMap<>();
     private String ultimoTableroSerializado = "";
     private final List<String> ordenDeTurnos;
     private String ultimoJugadorQueMovio;
@@ -69,8 +70,9 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void registrarJugador(String id, String payloadMano) {
-        String[] partes = payloadMano.split("\\$"); 
-        
+        this.datosJugadores.put(id, payloadMano);
+        String[] partes = payloadMano.split("\\$");
+
         jugadorARegistrarTemporal = new String[8];
         jugadorARegistrarTemporal[0] = id; // ID
         jugadorARegistrarTemporal[1] = partes[0]; // IP
@@ -80,21 +82,40 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         jugadorARegistrarTemporal[5] = partes[4];
         jugadorARegistrarTemporal[6] = partes[5];
         jugadorARegistrarTemporal[7] = partes[6];
-        
+
+        if (partes.length > 3) {
+            jugadorARegistrarTemporal[4] = partes[3];
+        }
+        if (partes.length > 4) {
+            jugadorARegistrarTemporal[5] = partes[4];
+        }
+        if (partes.length > 5) {
+            jugadorARegistrarTemporal[6] = partes[5];
+        }
+        if (partes.length > 6) {
+            jugadorARegistrarTemporal[7] = partes[6];
+        }
+
         ordenDeTurnos.add(id);
 
         notificarObservadores("JUGADOR_UNIDO");
-        
-        /**jugadorARegistrarTemporal = new String[3];
-        String[] partes = payloadMano.split("\\$", 2);
-        jugadorARegistrarTemporal[0] = id;
-        jugadorARegistrarTemporal[1] = partes[0];
-        jugadorARegistrarTemporal[2] = partes[1];
 
-        ordenDeTurnos.add(id);
+        /**
+         * jugadorARegistrarTemporal = new String[3]; String[] partes =
+         * payloadMano.split("\\$", 2); jugadorARegistrarTemporal[0] = id;
+         * jugadorARegistrarTemporal[1] = partes[0];
+         * jugadorARegistrarTemporal[2] = partes[1];
+         *
+         * ordenDeTurnos.add(id);
+         *
+         * notificarObservadores("JUGADOR_UNIDO"); jugadorARegistrarTemporal =
+         * null;*
+         */
+    }
 
-        notificarObservadores("JUGADOR_UNIDO");
-        jugadorARegistrarTemporal = null;**/
+    // Permite al Controlador obtener el payload completo (Avatar, Colores) de un jugador por su ID
+    public String getDatosJugador(String idJugador) {
+        return this.datosJugadores.get(idJugador);
     }
 
     /**
@@ -122,10 +143,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public void configurarPartida(String idCliente, String payload) {
         configuracionPartida = new String[2];
 
-        // CORRECCIÓN: Quita el ', 1' o cámbialo por ', 2'
         String[] partes = payload.split("\\$");
 
-        // Validación extra de seguridad (opcional pero recomendada)
         if (partes.length >= 2) {
             configuracionPartida[0] = partes[0];
             configuracionPartida[1] = partes[1];
@@ -162,7 +181,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public synchronized boolean iniciarPartidaSiCorresponde() {
         int numJugadores = ordenDeTurnos.size();
 
-        if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
+        // MOCK: Se cambio para permitir iniciar con 1 para pruebas si es necesario, pero la regla es 2-4
+        if (indiceTurnoActual == -1 && numJugadores >= 1 && numJugadores <= 4) {
             indiceTurnoActual = 0; // Inicia el turno del primer jugador
             String idPrimerJugador = ordenDeTurnos.get(0);
             System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");

@@ -1,27 +1,26 @@
 package Ensambladores;
 
-import Control.ControlCUPrincipal;
-import Modelo.ModeloCUPrincipal;
+import Controlador.Controlador;
+import Modelo.Modelo;
+import Vista.VistaTablero;
+import Vista.TipoEvento;
+import Dtos.ActualizacionDTO;
+import Vista.Observador;
+import Modelo.IModelo;
+import modelo.ModeloRegistro;
+import controlador.ControladorRegistro;
+import vista.RegistrarUsuario;
 import Util.Configuracion;
-import Vista.VistaLobby;
+import Vista.Observador;
 import contratos.controladoresMVC.iControlCUPrincipal;
-import contratos.controladoresMVC.iControlRegistro;
 import contratos.iDespachador;
-import contratos.iNavegacion;
-import controlador.Controlador;
-import controlador.ControladorConfig;
+import contratos.iListener;
+import sockets.ClienteTCP;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import modelo.ModeloConfig;
-import modelo.ModeloRegistro;
-import sockets.ClienteTCP;
-import vista.ConfigurarPartida;
-import vista.ObservadorRegistro;
-import vista.RegistrarUsuario;
-import vista.VistaSalaEspera;
-
+import java.io.IOException;
 
 /**
  * Esta clase ensambla los mvcs necesarios en el sistema. por ultimo utiliza el
@@ -43,90 +42,90 @@ public class EnsambladoresMVC {
     }
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
-        // Tomar la ip del cliente
-        String ipCliente = InetAddress.getLocalHost().getHostAddress(); // getHostAddress es mejor que toString
-        System.out.println("ip cliente: " + ipCliente);
+        //Tomar la ip del cliente
+        String ipCliente = InetAddress.getLocalHost().getHostAddress();
+        int puertoCliente = 9090;
+        System.out.println("[Ensamblador] IP Cliente: " + ipCliente);
+        System.out.println("[Ensamblador] Puerto Cliente (Escucha): " + puertoCliente);
 
-        //MVCConfigurarpartida
-        ModeloConfig modeloConfiguracion = new ModeloConfig();
-        modeloConfiguracion.setDespachador(despachador);
+        //Ensamblar MVC JUEGO
+        System.out.println("[Ensamblador] Preparando MVC Juego (Oculto)...");
+        Modelo modeloJuego = new Modelo();
+        modeloJuego.setMiId(ipCliente);
+        modeloJuego.setDespachador(despachador);
 
-        ControladorConfig controladorConfiguracion = new ControladorConfig(modeloConfiguracion);
-        controladorConfiguracion.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(), ipCliente);
+        Controlador controladorJuego = new Controlador(modeloJuego);
+        VistaTablero vistaTablero = new VistaTablero(controladorJuego);
 
-        ConfigurarPartida vistaConfig = new ConfigurarPartida(controladorConfiguracion);
-        modeloConfiguracion.añadirObservador(vistaConfig);
+        vistaTablero.setVisible(false);
 
-        //MVCLobby
-        ModeloCUPrincipal modeloPrincipal = new ModeloCUPrincipal();
-        iControlCUPrincipal controlPrincipal = new ControlCUPrincipal(modeloPrincipal);
-        VistaLobby vistaLobby = new VistaLobby(controlPrincipal);
-        modeloPrincipal.añadirObservador(vistaLobby);
+        // Conectamos el observador natural del juego
+        modeloJuego.agregarObservador(vistaTablero);
 
-        controlPrincipal.setControladorConfig(controladorConfiguracion);
-        controladorConfiguracion.setControladorCUPrincipal(controlPrincipal);
+        // Listener del Client
+        EnsambladorCliente fabricaCliente = new EnsambladorCliente();
+        iListener listener = fabricaCliente.crearListener("ClienteMain", modeloJuego);
 
-        //MVCRegistro registrar usuario
-        RegistrarUsuario vistaRegistro = ensamblarMVCRegistro(despachador, ipCliente, controlPrincipal);
-
-        /////////////MOCK DE REGISTRAR USUARIO A SALA DE ESPERA (maso)////////////
-        // Creamos la Sala de Espera (Mock visual, sin controlador complejo por ahora si no lo necesitas)
-        VistaSalaEspera vistaSalaEspera = new VistaSalaEspera();
-
-        // Creamos la implementación de navegación "al vuelo"
-        iNavegacion navegacion = new iNavegacion() {
-            @Override
-            public void iniciarConfiguracionPartida() {
-                // Lógica existente o futura para config
-                vistaLobby.setVisible(false);
-                vistaConfig.setVisible(true);
+        Thread hiloListener = new Thread(() -> {
+            try {
+                System.out.println("[Ensamblador] Iniciando escucha en puerto " + puertoCliente + "...");
+                listener.iniciar(puertoCliente);
+            } catch (IOException e) {
+                System.err.println("[Ensamblador] Error CRÍTICO en Listener: " + e.getMessage());
             }
+        });
+        hiloListener.start();
 
+        // Ensamblar MVC REGISTRO
+        System.out.println("[Ensamblador] Iniciando MVC Registro...");
+        RegistrarUsuario vistaRegistro = ensamblarMVCRegistro(despachador, ipCliente, null, puertoCliente);
+
+        // Lógica de Navegación MOCK
+        modeloJuego.agregarObservador(new Observador() {
             @Override
-            public void iniciarSalaEspera() {
-                System.out.println("[Navegacion] Yendo a Sala de Espera...");
-                // Aquí ocurre el cambio de pantalla
-                vistaRegistro.setVisible(false); // Aseguramos que se cierre registro
-                vistaLobby.setVisible(false);    // Aseguramos que se cierre lobby anterior
-                
-                vistaSalaEspera.setVisible(true);
+            public void actualiza(IModelo modelo, ActualizacionDTO actualizacion) {
+
+                // Si recibimos fichas (Mano inicial) o el juego arranca...
+                if (actualizacion.getTipoEvento() == TipoEvento.REPINTAR_MANO
+                        || actualizacion.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS
+                        || actualizacion.getTipoEvento() == TipoEvento.TOMO_FICHA) {
+
+                    if (vistaRegistro.isVisible()) {
+                        System.out.println("[Navegacion Mock] ¡Datos recibidos! Cambiando a Tablero.");
+                        vistaRegistro.setVisible(false); // Cierra Registro
+                        vistaTablero.setVisible(true);   // Abre Tablero
+                    }
+                }
             }
-        };
+        });
 
-        // Inyectamos la navegación en la vista de registro
-        vistaRegistro.setNavegacion(navegacion);//////////
+        // Arrancar
+        vistaTablero.setVisible(false);
+        vistaRegistro.setVisible(true);
 
-        System.out.println("[Ensamblador] Iniciando aplicación...");
-
-        vistaLobby.setVisible(true);
-        vistaConfig.setVisible(false);
-        vistaRegistro.setVisible(false);
     }
 
-    public RegistrarUsuario ensamblarMVCRegistro(iDespachador despachador, String ipCliente, iControlCUPrincipal controlPrincipal) {
-
+    public RegistrarUsuario ensamblarMVCRegistro(iDespachador despachador, String ipCliente, iControlCUPrincipal controlPrincipal, int puertoEscuchaCliente) {
         System.out.println("[Ensamblador] Ensamblando MVC Registro...");
 
         ModeloRegistro modeloRegistro = new ModeloRegistro();
         modeloRegistro.setDespachador(despachador);
 
-        Controlador controladorRegistro = new Controlador(modeloRegistro);
+        ControladorRegistro controladorRegistro = new ControladorRegistro(modeloRegistro);
 
         controladorRegistro.setConfiguracion(
-                Configuracion.getIpServidor(),
-                Configuracion.getPuerto(),
-                ipCliente
+                Configuracion.getIpServidor(), // IP Servidor
+                puertoEscuchaCliente, // Puerto Cliente (Payload)
+                ipCliente // IP Cliente
         );
 
         if (controlPrincipal != null) {
             controlPrincipal.setControladorRegistro(controladorRegistro);
         }
 
-        RegistrarUsuario vistaRegistro = new RegistrarUsuario((iControlRegistro) controladorRegistro);
+        RegistrarUsuario vistaRegistro = new RegistrarUsuario(controladorRegistro);
+        modeloRegistro.agregarObservador(vistaRegistro);
 
-        modeloRegistro.agregarObservador((ObservadorRegistro) vistaRegistro);
-
-        //vista creada
         return vistaRegistro;
     }
 

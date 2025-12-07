@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementación del "Libro de Direcciones". Almacena la información de
- * conexión (IP/Puerto) de cada jugador. Ya NO se encarga de enviar mensajes.
+ * conexión (IP/Puerto) de cada jugador. 
  *
  * * @author Sebastian Moreno (Refactorizado)
  */

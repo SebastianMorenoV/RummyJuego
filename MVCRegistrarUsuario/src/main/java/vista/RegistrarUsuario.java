@@ -7,7 +7,7 @@ package vista;
 import TipoEventos.EventoRegistro;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.iNavegacion;
-import controlador.Controlador;
+import controlador.ControladorRegistro;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
@@ -345,11 +345,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     @Override
     public void actualiza(EventoRegistro evento, String mensaje) {
         if (evento == EventoRegistro.REGISTRO_EXITOSO) {
-            this.setVisible(false);
-            if (this.navegacion != null) {
-                System.out.println("[VistaRegistro] Navegando a Sala de Espera...");
-                this.navegacion.iniciarSalaEspera();
-            }
+            System.out.println("[VistaRegistro] Registro enviado correctamente. Esperando respuesta del servidor...");
 
         } else if (evento == EventoRegistro.ABRIR_VENTANA) {
             this.setVisible(true);

@@ -10,6 +10,4 @@ package contratos;
  */
 public interface iNavegacion {
     void iniciarConfiguracionPartida();
-    //MAS METODOS ESCENCIALES
-    void iniciarSalaEspera();
 }

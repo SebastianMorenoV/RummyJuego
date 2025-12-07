@@ -53,7 +53,7 @@ public class ModeloRegistro implements iModeloRegistro {
             SesionUsuario.guardarSesion(nickname, avatar, c1, c2, c3, c4);;
 
             // 2. Construir Payload
-            // Protocolo: NICKNAME:REGISTRAR:IP_CLIENTE$PUERTO$AVATAR$COLOR
+            // Protocolo: NICKNAME:REGISTRAR:IP_CLIENTE$PUERTO$AVATAR$COLORSET1$COLORSET2$COLORSET3$COLORSET4
             String payload
                     = this.ipCliente + "$"
                     + this.puertoServidor + "$"
@@ -66,7 +66,9 @@ public class ModeloRegistro implements iModeloRegistro {
 
             // 3. Enviar al Servidor
             if (despachador != null) {
-                despachador.enviar(this.ipServidor, this.puertoServidor, mensaje);
+                int puertoRealServidor = Util.Configuracion.getPuerto();
+                // MOCK: aquí siempre usamos el puerto fijo del servidor desde Configuracion (puertoRealServidor)
+                despachador.enviar(this.ipServidor, puertoRealServidor, mensaje);
                 notificarObservadores(EventoRegistro.REGISTRO_EXITOSO, "Registro enviado");
             } else {
                 System.out.println("[ModeloRegistro] Modo offline: Despachador es null, pero la sesión se guardó.");

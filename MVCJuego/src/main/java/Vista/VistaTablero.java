@@ -18,10 +18,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -44,8 +40,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
-    private java.util.Map<String, JugadorUI> mapaJugadoresUI = new java.util.HashMap<>();
 
+    //cambio para el MOCK
+    private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
+
+    //private java.util.Map<String, JugadorUI> mapaJugadoresUI = new java.util.HashMap<>();
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
      * siguiente componente de MVC.
@@ -268,38 +267,85 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * Metodo para cargar los jugadores aun no terminado (MOCK).
      */
     private void cargarJugadores() {
-        String rutaImagen = "src/main/resources/avatares/avatar.png";
+        listaJugadoresUI.clear();
+
+        byte[] defaultAvatar = new byte[0];
         try {
-            Path path = new File(rutaImagen).toPath();
-            byte[] imagenAvatarBytes = Files.readAllBytes(path);
-
-            JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
-            jugador1.setSize(130, 130);
-            jugador1.setLocation(-10, -10);
-            GUIjuego.add(jugador1);
-            mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador2 = new JugadorUI("Jugador2", 14, imagenAvatarBytes);
-            jugador2.setSize(130, 130);
-            jugador2.setLocation(-10, 380);
-            GUIjuego.add(jugador2);
-            mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador3 = new JugadorUI("Jugador3", 14, imagenAvatarBytes);
-            jugador3.setSize(130, 130);
-            jugador3.setLocation(780, -10);
-            GUIjuego.add(jugador3);
-            mapaJugadoresUI.put("Jugador3", jugador3);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador4 = new JugadorUI("Jugador4", 14, imagenAvatarBytes);
-            jugador4.setSize(130, 130);
-            jugador4.setLocation(780, 380);
-            GUIjuego.add(jugador4);
-            mapaJugadoresUI.put("Jugador4", jugador4);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-        } catch (IOException e) {
-            System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
+            java.io.InputStream is = getClass().getResourceAsStream("/avatares/avatar.png");
+            if (is != null) {
+                java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[1024];
+                while ((nRead = is.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                }
+                defaultAvatar = buffer.toByteArray();
+            }
+        } catch (Exception e) {
         }
+
+        // Creamos los 4 huecos visuales fijos
+        // YO
+        JugadorUI jugador1 = new JugadorUI("Cargando...", 0, defaultAvatar);
+        jugador1.setSize(130, 130);
+        jugador1.setLocation(-10, 380); // Abajo Izquierda
+        GUIjuego.add(jugador1);
+        listaJugadoresUI.add(jugador1); // ÍNDICE 0
+
+        // RIVAL 1
+        JugadorUI jugador2 = new JugadorUI("Rival 1", 14, defaultAvatar);
+        jugador2.setSize(130, 130);
+        jugador2.setLocation(-10, -10); // Arriba Izquierda
+        GUIjuego.add(jugador2);
+        listaJugadoresUI.add(jugador2);
+
+        // RIVAL 2
+        JugadorUI jugador3 = new JugadorUI("Rival 2", 14, defaultAvatar);
+        jugador3.setSize(130, 130);
+        jugador3.setLocation(780, -10); // Arriba Derecha
+        GUIjuego.add(jugador3);
+        listaJugadoresUI.add(jugador3);
+
+        // RIVAL 3
+        JugadorUI jugador4 = new JugadorUI("Rival 3", 14, defaultAvatar);
+        jugador4.setSize(130, 130);
+        jugador4.setLocation(780, 380); // Abajo Derecha
+        GUIjuego.add(jugador4);
+        listaJugadoresUI.add(jugador4);
+
+        //Codigo anterior 
+        /**
+         * String rutaImagen = "src/main/resources/avatares/avatar.png"; try {
+         * Path path = new File(rutaImagen).toPath(); byte[] imagenAvatarBytes =
+         * Files.readAllBytes(path);
+         *
+         * JugadorUI jugador1 = new JugadorUI("Jugador1", 14,
+         * imagenAvatarBytes); jugador1.setSize(130, 130);
+         * jugador1.setLocation(-10, -10); GUIjuego.add(jugador1);
+         * mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE
+         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+         *
+         * JugadorUI jugador2 = new JugadorUI("Jugador2", 14,
+         * imagenAvatarBytes); jugador2.setSize(130, 130);
+         * jugador2.setLocation(-10, 380); GUIjuego.add(jugador2);
+         * mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE
+         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+         *
+         * JugadorUI jugador3 = new JugadorUI("Jugador3", 14,
+         * imagenAvatarBytes); jugador3.setSize(130, 130);
+         * jugador3.setLocation(780, -10); GUIjuego.add(jugador3);
+         * mapaJugadoresUI.put("Jugador3", jugador3); //JUSTO ESTO TIENE QUE
+         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+         *
+         * JugadorUI jugador4 = new JugadorUI("Jugador4", 14,
+         * imagenAvatarBytes); jugador4.setSize(130, 130);
+         * jugador4.setLocation(780, 380); GUIjuego.add(jugador4);
+         * mapaJugadoresUI.put("Jugador4", jugador4); //JUSTO ESTO TIENE QUE
+         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
+         *
+         * } catch (IOException e) { System.err.println("Error: No se pudo
+         * encontrar o leer el archivo de imagen en la ruta: " + rutaImagen); }
+         */
     }
 
     /**
@@ -314,6 +360,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         repintarMano(modelo, dto);
         crearMazo(modelo);
         cargarJugadores();
+
+        DTO.JuegoDTO estadoJuego = modelo.getTablero();
+        if (estadoJuego != null) {
+            actualizarEstadoJugadores(estadoJuego);
+        }
+
         btnFinalizarTurno.setVisible(false);
         GUIjuego.add(fondo);
 
@@ -576,23 +628,52 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      */
     private void actualizarEstadoJugadores(DTO.JuegoDTO estadoJuego) {
         String nombreJugadorEnTurno = estadoJuego.getJugadorActual();
-        List<DTO.JugadorDTO> listaJugadores = estadoJuego.getJugadores();
+        List<DTO.JugadorDTO> listaDatos = estadoJuego.getJugadores();
 
-        if (listaJugadores == null) {
-            return; // Ahora esto no será null
+        if (listaDatos == null || listaDatos.isEmpty()) {
+            return;
         }
-        for (DTO.JugadorDTO jDto : listaJugadores) {
-            // Ahora buscará "Jugador1" en el mapa y SI lo encontrará
-            JugadorUI ui = mapaJugadoresUI.get(jDto.getNombre());
 
-            if (ui != null) {
-                ui.setFichasRestantes(jDto.getFichasRestantes());
-
-                // Esto activará el borde verde
-                boolean esSuTurno = jDto.getNombre().equals(nombreJugadorEnTurno);
-                ui.setEsTuTurno(esSuTurno);
+        // El Modelo SIEMPRE debe mandar la lista ordenada: [YO, Rival1, Rival2, Rival3]
+        for (int i = 0; i < listaDatos.size(); i++) {
+            if (i >= listaJugadoresUI.size()) {
+                break;
             }
+            DTO.JugadorDTO datosDTO = listaDatos.get(i);
+            JugadorUI uiPanel = listaJugadoresUI.get(i);
+
+            // actualizar nombre
+            uiPanel.setNombreJugador(datosDTO.getNombre());
+
+            // fichas
+            uiPanel.setFichasRestantes(datosDTO.getFichasRestantes());
+
+            // avatar
+            if (datosDTO.getAvatar() != null && datosDTO.getAvatar().length > 0) {
+                uiPanel.setImagenAvatar(datosDTO.getAvatar());
+            }
+
+            boolean esSuTurno = datosDTO.getNombre().equals(nombreJugadorEnTurno);
+            uiPanel.setEsTuTurno(esSuTurno);
         }
+        GUIjuego.repaint();
+
+        //codigo anterior
+        /**
+         * String nombreJugadorEnTurno = estadoJuego.getJugadorActual();
+         * List<DTO.JugadorDTO> listaJugadores = estadoJuego.getJugadores();
+         *
+         * if (listaJugadores == null) { return; // Ahora esto no será null }
+         * for (DTO.JugadorDTO jDto : listaJugadores) { // Ahora buscará
+         * "Jugador1" en el mapa y SI lo encontrará JugadorUI ui =
+         * mapaJugadoresUI.get(jDto.getNombre());
+         *
+         * if (ui != null) { ui.setFichasRestantes(jDto.getFichasRestantes());
+         *
+         * // Esto activará el borde verde boolean esSuTurno =
+         * jDto.getNombre().equals(nombreJugadorEnTurno);
+         * ui.setEsTuTurno(esSuTurno); } }
+         */
     }
 
     /**

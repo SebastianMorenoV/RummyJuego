@@ -65,26 +65,52 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 String[] datosJugador = pizarra.getIpCliente();
                 String id = datosJugador[0];
                 String ip = datosJugador[1];
-                
+
                 int puerto = Integer.parseInt(datosJugador[2]);
                 String avatar = datosJugador[3];
-                
+
                 int c1 = Integer.parseInt(datosJugador[4]);
                 int c2 = Integer.parseInt(datosJugador[5]);
                 int c3 = Integer.parseInt(datosJugador[6]);
                 int c4 = Integer.parseInt(datosJugador[7]);
-                
-                directorio.addJugador(id, ip, puerto, avatar, c1, c2, c3, c4);
-                System.out.println("[Controlador] Pizarra notificó JUGADOR_UNIDO: " + id);
 
+                directorio.addJugador(id, ip, puerto, avatar, c1, c2, c3, c4);
+                System.out.println("[Controlador] Jugador registrado: " + id);
+                
+                //para confirmar los datos
+                String confirmacion = "CONFIRMACION_REGISTRO:" + id + ":" + avatar + ":"
+                        + c1 + ":" + c2 + ":" + c3 + ":" + c4;
+                enviarMensajeDirecto(id, confirmacion);
+
+                //Iniciamos con un jugador solamente para probar el CU
                 int numJugadores = pizarra.getOrdenDeTurnos().size();
-                if (numJugadores == 2) {
-                    String idHost = pizarra.getOrdenDeTurnos().get(0);
-                    System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al Host (" + idHost + ") que inicie el juego.");
-                    enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA");
+                if (pizarra.getOrdenDeTurnos().size() >= 1) {
+                    System.out.println("[Controlador] Iniciando partida automáticamente para entrega individual.");
+
+                    // 1. Repartir manos (Mockeadas en AgentePartida)
+                    List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
+                    Map<String, String> manos = agentePartida.repartirManos(jugadoresIds);
+
+                    // 2. Enviar mano inicial al cliente (Esto carga los datos en EjercerTurno)
+                    for (String pid : manos.keySet()) {
+                        String manoPayload = manos.get(pid);
+                        // Enviamos formato: MANO_INICIAL:fichas$cantMazo
+                        enviarMensajeDirecto(pid, "MANO_INICIAL:" + manoPayload + "$" + 20);
+                    }
+
+                    // 3. Notificar turno
+                    notificarCambioDeTurno(pizarra);
                 }
                 break;
 
+            //Metodo anterior que ocupaba mas de un 1 jugador
+            /**
+             * if (numJugadores == 2) { String idHost =
+             * pizarra.getOrdenDeTurnos().get(0);
+             * System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al
+             * Host (" + idHost + ") que inicie el juego.");
+             * enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA"); } break;
+             */
             case "EVENTO_PARTIDA_INICIADA":
                 System.out.println("[Controlador] Evento PARTIDA_INICIADA detectado. Creando juego...");
 
