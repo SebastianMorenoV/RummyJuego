@@ -87,10 +87,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                     registrarYRechazar(rechazado[0], rechazado[1], Integer.parseInt(rechazado[2]), "ERROR_VOTACION_EN_CURSO");
                 }
                 break;
-            case "EVENTO_PARTIDA_INICIADA":
-                System.out.println("[Controlador] Partida iniciada correctamente. Notificando a todos.");
-                enviarATodos("JUEGO_INICIADO");
-                break;
 
             case "VOTACION_FINALIZADA":
                 String[] resultado = pizarra.getUltimoResultadoVotacion();
@@ -231,7 +227,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
-    private void registrarYRechazar(String id, String ip, int puerto, String msg) {
+        private void registrarYRechazar(String id, String ip, int puerto, String msg) {
         directorio.agregarCandidato(id, ip, puerto);
         enviarMensajeCandidato(id, msg);
         directorio.removerCandidato(id);
