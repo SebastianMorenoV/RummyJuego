@@ -46,7 +46,7 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
     }
 
     public void SolicitarUnirseApartida() {
-        String mensaje = idCliente + ":REGISTRAR:" + miIp + "$" + miPuerto;
+        String mensaje = idCliente + ":SOLICITAR_UNIRSE:" + miIp + "$" + miPuerto;
         if (despachador != null) {
             try {
                 despachador.enviar(ipServidor, puertoServidor, mensaje);
@@ -70,6 +70,20 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
     public void cerrarCU() {
         notificarObservadores(Evento.CERRAR_CU);
+    }
+
+    public void iniciarCU() {
+        try {
+            String mensaje = idCliente + ":REGISTRAR:" + miIp + "$" + miPuerto;
+
+            if (despachador != null) {
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+
+            notificarObservadores(Evento.INICIO);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void iniciarLobby() {
@@ -127,6 +141,9 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
         String evento = evt.getPropertyName();
 
         switch (evento) {
+            case "ACCESO_DENEGADO":
+                notificarObservadores(Evento.ACCESO_DENEGADO);
+                break;
             case "PARTIDA-EXISTENTE":
                 notificarObservadores(Evento.PARTIDA_EXISTENTE); // agregar aqui
                 break;

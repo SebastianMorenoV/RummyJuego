@@ -27,4 +27,6 @@ public interface iControlCUPrincipal {
     public void ejercerTurno();
     
     public void cerrarCU();
+    
+    public void iniciarCU();
 }

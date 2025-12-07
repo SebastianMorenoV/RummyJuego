@@ -28,6 +28,8 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         initComponents();
+        
+        
     }
 
     /**
@@ -115,9 +117,7 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
-        this.setVisible(false);
         control.SolicitarUnirseAPartida();
-        control.ejercerTurno();
     }//GEN-LAST:event_jButton2MouseClicked
 
 
@@ -131,6 +131,9 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
     @Override
     public void actualiza(IModeloLobby modelo, Evento evento) {
         switch (evento) {
+            case ACCESO_DENEGADO:
+                JOptionPane.showMessageDialog(this, "No se pudo unir: La partida esta llena (4 jugadores) o falta partida a la cual unirse","No se pudo unir",JOptionPane.WARNING_MESSAGE);
+                break;  
             case CERRAR_CU:
                 this.setVisible(false);
                 break;

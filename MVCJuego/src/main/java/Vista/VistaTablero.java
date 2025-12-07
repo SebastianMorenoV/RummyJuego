@@ -1,6 +1,7 @@
 package Vista;
 
 import DTO.FichaJuegoDTO;
+import DTO.JugadorDTO;
 import Dtos.ActualizacionDTO;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
@@ -14,6 +15,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
@@ -270,46 +272,62 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     /**
      * Metodo para cargar los jugadores aun no terminado (MOCK).
      */
-    private void cargarJugadores() {
+    private void cargarJugadores(List<JugadorDTO> jugadoresReales) {
+        // 1. Limpiamos por si acaso
+        mapaJugadoresUI.clear();
+
+        // 2. Definimos las 4 posiciones fijas del tablero (Slots)
+        Point[] posiciones = {
+            new Point(-10, -10), // Slot 1: Arriba Izquierda
+            new Point(-10, 380), // Slot 2: Abajo Izquierda
+            new Point(780, -10), // Slot 3: Arriba Derecha
+            new Point(780, 380) // Slot 4: Abajo Derecha
+        };
+
+        // 3. Cargamos la imagen del avatar (una sola vez)
         String rutaImagen = "src/main/resources/avatares/avatar.png";
+        byte[] imagenAvatarBytes = null;
         try {
             java.io.InputStream is = getClass().getResourceAsStream("/avatares/avatar.png");
-
-            byte[] imagenAvatarBytes = null;
             if (is != null) {
                 imagenAvatarBytes = is.readAllBytes();
                 is.close();
             } else {
                 System.out.println("Error: No se encontró la imagen /avatares/avatar.png");
             }
-
-            JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
-            jugador1.setSize(130, 130);
-            jugador1.setLocation(-10, -10);
-            GUIjuego.add(jugador1);
-            mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador2 = new JugadorUI("Jugador2", 14, imagenAvatarBytes);
-            jugador2.setSize(130, 130);
-            jugador2.setLocation(-10, 380);
-            GUIjuego.add(jugador2);
-            mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador3 = new JugadorUI("Jugador3", 14, imagenAvatarBytes);
-            jugador3.setSize(130, 130);
-            jugador3.setLocation(780, -10);
-            GUIjuego.add(jugador3);
-            mapaJugadoresUI.put("Jugador3", jugador3);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador4 = new JugadorUI("Jugador4", 14, imagenAvatarBytes);
-            jugador4.setSize(130, 130);
-            jugador4.setLocation(780, 380);
-            GUIjuego.add(jugador4);
-            mapaJugadoresUI.put("Jugador4", jugador4);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
         } catch (IOException e) {
-            System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
+            System.err.println("Error al cargar imagen: " + e.getMessage());
         }
+
+        // 4. Recorremos la lista REAL de jugadores y los asignamos a los slots
+        int index = 0;
+        if (jugadoresReales != null) {
+            for (JugadorDTO jugadorDto : jugadoresReales) {
+                if (index >= posiciones.length) {
+                    break; // Protección por si hay más de 4
+                }
+                // Usamos el NOMBRE REAL (el ID dinámico) que viene del servidor
+                String idReal = jugadorDto.getNombre();
+                int fichas = jugadorDto.getFichasRestantes();
+
+                JugadorUI jugadorUI = new JugadorUI(idReal, fichas, imagenAvatarBytes);
+                jugadorUI.setSize(130, 130);
+
+                // Asignar posición del slot correspondiente
+                jugadorUI.setLocation(posiciones[index].x, posiciones[index].y);
+
+                // Agregamos al panel y al mapa
+                GUIjuego.add(jugadorUI);
+                mapaJugadoresUI.put(idReal, jugadorUI);
+
+                System.out.println("[Vista] Jugador pintado: " + idReal + " en posición " + index);
+
+                index++;
+            }
+        }
+
+        GUIjuego.revalidate();
+        GUIjuego.repaint();
     }
 
     /**
@@ -323,7 +341,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         crearManoUI();
         repintarMano(modelo, dto);
         crearMazo(modelo);
-        cargarJugadores();
+        List<JugadorDTO> listaJugadores = modelo.getTablero().getJugadores();
+        cargarJugadores(listaJugadores);
         btnFinalizarTurno.setVisible(false);
         GUIjuego.add(fondo);
 

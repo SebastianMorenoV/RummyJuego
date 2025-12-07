@@ -29,6 +29,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
 
+    private Map<String, String> candidatos = new HashMap<>();
+
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
@@ -80,6 +82,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         notificarObservadores("JUGADOR_UNIDO");
         jugadorARegistrarTemporal = null;
+        candidatos.remove(id);
     }
 
     /**
@@ -219,37 +222,44 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
+
         if (indiceTurnoActual == -1) {
             switch (comando) {
 
                 case "SOLICITAR_CREACION":
-                    if (!ordenDeTurnos.contains(idCliente)) {
-                        registrarJugador(idCliente, payload);
-                    }
-                    if (this.partidaConfigurada || this.indiceTurnoActual != -1) {
+                    if (this.partidaConfigurada || !ordenDeTurnos.isEmpty()) {
                         notificarObservadores("PARTIDA_EXISTENTE:" + idCliente);
                     } else {
                         notificarObservadores("PERMISO_CREAR:" + idCliente);
                     }
                     break;
+                case "SOLICITAR_UNIRSE": // Ojo: Asegúrate que tu cliente envíe este comando exacto
                 case "UNIRSE_PARTIDA":
-                    // 1. Registramos al segundo jugador
-                    if (!ordenDeTurnos.contains(idCliente)) {
-                        registrarJugador(idCliente, payload);
-                    }
+                    if (this.partidaConfigurada) {
+                        // Recuperamos sus datos de conexión
+                        String payloadJugador = candidatos.get(idCliente);
+                        // O si el cliente re-envía el payload en este comando, úsalo directo:
+                        if (payload != null && !payload.isEmpty()) {
+                            payloadJugador = payload;
+                        }
 
-                    System.out.println("[Pizarra] Jugador unido: " + idCliente);
-                    System.out.println("[Pizarra] Total jugadores: " + ordenDeTurnos.size());
+                        if (payloadJugador != null) {
+                            registrarJugador(idCliente, payloadJugador);
 
-                    // 2. VALIDACIÓN AUTOMÁTICA: Si hay 2 jugadores, iniciamos
-                    if (ordenDeTurnos.size() == 2) {
-                        System.out.println("[Pizarra] Sala llena (2/2). Notificando inicio...");
-                        // Este evento especial le dirá al controlador que reparta las cartas
-                        notificarObservadores("SALA_LLENA");
+                            // Si con este ya son 2 (o los que definas), notificas
+                            if (ordenDeTurnos.size() == 2) { // O la lógica que tenías
+                                System.out.println("[Pizarra] Sala lista para iniciar.");
+                                // Podrías notificar SALA_LLENA o esperar al comando INICIAR_PARTIDA
+                            }
+                        }
+                    } else {
+                        notificarObservadores("ACCESO_DENEGADO:" + idCliente);
+                        System.out.println("[Pizarra] " + idCliente + " intentó unirse pero no hay partida configurada.");
                     }
                     break;
                 case "REGISTRAR":
-                    registrarJugador(idCliente, payload);
+                    almacenarUsuarioTemporal(idCliente, payload);
+                    //registrarJugador(idCliente, payload);
                     break; // Importante: break para no saltar al siguiente caso
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
@@ -258,14 +268,30 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     }
                     break;
                 case "CONFIGURAR_PARTIDA":
-                    System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");
-                    configurarPartida(idCliente, payload);
+                    System.out.println("Configurando partida... Promoviendo al Host: " + idCliente);
+
+                    // RECUPERAMOS la IP/Puerto que guardamos cuando hizo "REGISTRAR"
+                    String payloadHost = candidatos.get(idCliente);
+
+                    if (payloadHost != null) {
+                        // Lo convertimos en jugador oficial
+                        registrarJugador(idCliente, payloadHost);
+                        // Guardamos la config del juego
+                        configurarPartida(idCliente, payload);
+                    } else {
+                        System.err.println("[Error] El usuario " + idCliente + " no estaba en la lista de candidatos.");
+                    }
                     break;
             }
         }
 
         if (indiceTurnoActual != -1) {
             switch (comando) {
+
+                case "SOLICITAR_UNIRSE":
+                    notificarObservadores("ACCESO_DENEGADO:" + idCliente);
+                    System.out.println("[Pizarra] " + idCliente + " intentó unirse pero no hay partida configurada.");
+                    break;
                 case "MOVER":
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload;
@@ -314,6 +340,25 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     break;
             }
         }
+    }
+
+    public void almacenarUsuarioTemporal(String idCliente, String payload) {
+        // 1. Guardar en el mapa local (para uso interno de la Pizarra)
+        candidatos.put(idCliente, payload);
+
+        // 2. Preparar los datos para que el Controlador los pueda leer
+        // Reutilizamos la variable 'jugadorARegistrarTemporal' que ya tienes definida
+        jugadorARegistrarTemporal = new String[3];
+        String[] partes = payload.split("\\$", 2);
+        jugadorARegistrarTemporal[0] = idCliente;
+        jugadorARegistrarTemporal[1] = partes[0]; // IP
+        jugadorARegistrarTemporal[2] = partes[1]; // Puerto
+
+        System.out.println("[Pizarra] Candidato registrado en sala de espera: " + idCliente);
+
+        // 3. Notificar al Controlador para que lo meta al Directorio
+        // Usaremos un evento nuevo para diferenciarlo de un jugador que ya está jugando
+        notificarObservadores("REGISTRAR_CANDIDATO");
     }
 
     /**

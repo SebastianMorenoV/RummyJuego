@@ -19,6 +19,7 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import modelo.ModeloConfig;
@@ -49,7 +50,8 @@ public class EnsambladoresMVC {
         //Tomar la ip del cliente ejecutando el MVC.
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
         System.out.println("ip cliente: " + ipCliente);
-        String idCliente = "Jugador1";
+        String idAleatorio = UUID.randomUUID().toString().substring(0, 5);
+        String idCliente = "Jugador_" + idAleatorio;
 
         int puertoLocalEscucha = buscarPuertoLibre();
 
@@ -108,6 +110,7 @@ public class EnsambladoresMVC {
         vistaLobby.setVisible(true);
         vistaConfig.setVisible(false);
 
+        controlPrincipal.iniciarCU();
     }
 
     /**

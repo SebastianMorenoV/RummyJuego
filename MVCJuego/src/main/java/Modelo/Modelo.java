@@ -45,7 +45,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     int puertoServidor;
     String ipCliente;
     int puertoCliente;
-
+    private List<String> nombresJugadores = new ArrayList<>();
     private int mazoFichasRestantes = 0;
 
     private String miId;
@@ -104,14 +104,24 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     if (payloadPartes.length > 1) {
                         this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]);
                     }
+                    if (payloadPartes.length > 2) {
+                        String listaJugadoresStr = payloadPartes[2]; // Viene como "Jugador_A,Jugador_B"
+                        String[] arrayNombres = listaJugadoresStr.split(",");
 
+                        this.nombresJugadores.clear();
+                        // Agregamos los nombres a nuestra lista dinámica
+                        for (String nombre : arrayNombres) {
+                            this.nombresJugadores.add(nombre);
+                        }
+                        System.out.println("[Modelo] Jugadores en la partida: " + this.nombresJugadores);
+                    }
                     List<FichaJuegoDTO> fichasDTO = deserializarMano(manoPayload);
                     List<Ficha> manoEntidad = fichasDTO.stream()
                             .map(this::convertirFichaDtoAEntidad)
                             .collect(Collectors.toList());
 
                     juego.setManoInicial(manoEntidad);
-                    
+
                     notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
@@ -455,11 +465,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         // Lista de IDs que existen en tu juego (Debería venir del servidor, 
         // pero para que funcione visualmente ahora, usaremos los fijos).
-        String[] idsTodosLosJugadores = {"Jugador1", "Jugador2", "Jugador3", "Jugador4"};
+        List<String> jugadoresAPintar = this.nombresJugadores.isEmpty() ? new ArrayList<>() : this.nombresJugadores;
 
-        for (String id : idsTodosLosJugadores) {
+        for (String id : jugadoresAPintar) {
             DTO.JugadorDTO jugadorDto = new DTO.JugadorDTO();
-            jugadorDto.setNombre(id);
+            jugadorDto.setNombre(id); // Ahora 'id' es el UUID real (ej: Jugador_a1b2)
 
             // Determinar si es turno de este ID
             boolean esSuTurno = id.equals(nombreJugadorActual);

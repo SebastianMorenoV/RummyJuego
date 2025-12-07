@@ -59,7 +59,9 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             idAfectado = partes[1];
         }
         switch (eventoPuro) {
-
+            case "ACCESO_DENEGADO":
+                enviarMensajeDirecto(idAfectado, "ACCESO_DENEGADO");
+                break;
             case "PERMISO_CREAR":
                 enviarMensajeDirecto(idAfectado, "PUEDES_CONFIGURAR");
                 break;
@@ -87,7 +89,19 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
                 break;
-
+            case "REGISTRAR_CANDIDATO":
+                // 1. Obtener los datos temporales de la pizarra
+                String[] datosCandidato = pizarra.getIpCliente(); // Esto devuelve jugadorARegistrarTemporal
+                if (datosCandidato != null) {
+                    // 2. Agregarlo al Directorio
+                    directorio.addJugador(
+                            datosCandidato[0], // ID
+                            datosCandidato[1], // IP
+                            Integer.parseInt(datosCandidato[2]) // Puerto
+                    );
+                    System.out.println("[Controlador] Candidato añadido al Directorio: " + datosCandidato[0]);
+                }
+                break;
             case "JUGADOR_UNIDO":
                 String[] ipJugador = pizarra.getIpCliente();
                 directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2].toString()));
@@ -107,6 +121,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
                 System.out.println("[Controlador] Repartiendo para " + jugadoresIds.size() + " jugadores.");
 
+                String listaJugadoresString = String.join(",", jugadoresIds);
+
                 String[] configuracion = pizarra.getConfiguracionPartida();
                 int numFichas = Integer.parseInt(configuracion[1]);
                 int numComodines = Integer.parseInt(configuracion[0]);
@@ -120,7 +136,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
 
-                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount;
+                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount + "$" + listaJugadoresString;
                     enviarMensajeDirecto(idJugador, mensajeMano);
                 }
 

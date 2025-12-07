@@ -37,7 +37,11 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     public void ejercerTurno() {
         controladorEjercerTurno.abrirCU();
     }
-
+    
+    @Override
+    public void iniciarCU(){
+        modelo.iniciarCU();
+    }
     @Override
     public void casoUsoConfigurarPartida() {
         if (this.controladorConfig != null) {
