@@ -100,6 +100,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
+                    notificarObservadores(TipoEvento.INICIAR_PANTALLA);
+                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                 } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
                     e.printStackTrace();
@@ -550,7 +552,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
     }
-
+    public void iniciarPantalla(){
+        notificarObservadores(TipoEvento.INICIAR_PANTALLA);
+    }
     /**
      * Establece la identificación única (ID) del cliente/jugador actual, usada
      * para construir los mensajes enviados al servidor.

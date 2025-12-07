@@ -93,9 +93,10 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
                 String[] nombresJugadores = payload.split(",");
                 notificarObservadores("ACTUALIZAR_LISTA", nombresJugadores);
                 break;
-            case "JUEGO_INICIADO":
+            case "MANO_INICIAL":
                 System.out.println("[ModeloSala] ¡Juego Iniciado! Notificando vista.");
                 notificarObservadores("JUEGO_INICIADO", payload);
+                notificarObservadores("CERRAR_SALA", null);
                 break;
 
             case "ERROR_PARTIDA_NO_INICIADA":
@@ -115,5 +116,6 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
             ex.printStackTrace();
         }
     }
+
 
 }

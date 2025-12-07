@@ -58,7 +58,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);
         initComponents();
     }
 
@@ -169,7 +168,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      */
     @Override
     public void actualiza(IModelo modelo, ActualizacionDTO dto) {
-
+        if(dto.getTipoEvento() == TipoEvento.INICIAR_PANTALLA){
+            this.setVisible(true);
+        }
         if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
             iniciarComponentesDeJuego(modelo, dto);
             habilitarControles(dto.esMiTurno());
@@ -261,46 +262,62 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         }
         );
-
+        if(dto.getTipoEvento()== TipoEvento.INICIAR_PANTALLA){
+            this.setVisible(true);
+        }
     }
 
     /**
      * Metodo para cargar los jugadores aun no terminado (MOCK).
      */
-    private void cargarJugadores() {
-        String rutaImagen = "src/main/resources/avatares/avatar.png";
-        try {
-            Path path = new File(rutaImagen).toPath();
-            byte[] imagenAvatarBytes = Files.readAllBytes(path);
+    private void cargarJugadores(IModelo modelo) {
+    // 1. Obtener la lista real de jugadores del Modelo
+    DTO.JuegoDTO estadoJuego = modelo.getTablero();
+    List<DTO.JugadorDTO> jugadoresReales = estadoJuego.getJugadores();
+    
+    // Coordenadas fijas para los 4 slots visuales (según tu diseño actual)
+    int[][] coordenadas = {
+        {-10, -10},   // Posición 0 (Arriba Izq)
+        {-10, 380},   // Posición 1 (Abajo Izq)
+        {780, -10},   // Posición 2 (Arriba Der)
+        {780, 380}    // Posición 3 (Abajo Der)
+    };
 
-            JugadorUI jugador1 = new JugadorUI("Jugador1", 14, imagenAvatarBytes);
-            jugador1.setSize(130, 130);
-            jugador1.setLocation(-10, -10);
-            GUIjuego.add(jugador1);
-            mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador2 = new JugadorUI("Jugador2", 14, imagenAvatarBytes);
-            jugador2.setSize(130, 130);
-            jugador2.setLocation(-10, 380);
-            GUIjuego.add(jugador2);
-            mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador3 = new JugadorUI("Jugador3", 14, imagenAvatarBytes);
-            jugador3.setSize(130, 130);
-            jugador3.setLocation(780, -10);
-            GUIjuego.add(jugador3);
-            mapaJugadoresUI.put("Jugador3", jugador3);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-            JugadorUI jugador4 = new JugadorUI("Jugador4", 14, imagenAvatarBytes);
-            jugador4.setSize(130, 130);
-            jugador4.setLocation(780, 380);
-            GUIjuego.add(jugador4);
-            mapaJugadoresUI.put("Jugador4", jugador4);  //JUSTO ESTO TIENE QUE MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-
-        } catch (IOException e) {
-            System.err.println("Error: No se pudo encontrar o leer el archivo de imagen en la ruta: " + rutaImagen);
+    try {
+        // 2. Cargar la imagen correctamente desde el Classpath (dentro del JAR/Target)
+        java.io.InputStream is = getClass().getResourceAsStream("/avatares/avatar.png");
+        
+        if (is == null) {
+            System.err.println("ERROR: No se encontró la imagen en /avatares/avatar.png");
+            return;
         }
+        
+        byte[] imagenAvatarBytes = is.readAllBytes(); // Leer los bytes del stream
+
+        // 3. Crear los UI dinámicamente según los datos reales
+        for (int i = 0; i < jugadoresReales.size(); i++) {
+            if (i >= 4) break; // Máximo 4 slots
+
+            DTO.JugadorDTO dto = jugadoresReales.get(i);
+            
+            // Crear el UI con el nombre REAL y fichas REALES
+            JugadorUI jugadorUI = new JugadorUI(dto.getNombre(), dto.getFichasRestantes(), imagenAvatarBytes);
+            
+            // Asignar tamaño y posición según el slot
+            jugadorUI.setSize(130, 130);
+            jugadorUI.setLocation(coordenadas[i][0], coordenadas[i][1]);
+            
+            // Agregar al panel y al mapa
+            GUIjuego.add(jugadorUI);
+            mapaJugadoresUI.put(dto.getNombre(), jugadorUI);
+            
+            System.out.println("[VistaTablero] Cargado visualmente: " + dto.getNombre());
+        }
+
+    } catch (IOException e) {
+        System.err.println("Error al cargar la imagen del avatar: " + e.getMessage());
     }
+}
 
     /**
      * Metodo que pinta los componentes necesarios para la vista. Los crea con
@@ -313,7 +330,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         crearManoUI();
         repintarMano(modelo, dto);
         crearMazo(modelo);
-        cargarJugadores();
+        cargarJugadores(modelo);
         btnFinalizarTurno.setVisible(false);
         GUIjuego.add(fondo);
 

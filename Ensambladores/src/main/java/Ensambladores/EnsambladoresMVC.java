@@ -72,6 +72,7 @@ public class EnsambladoresMVC {
         // 3. Inyección de Navegación
         
         controlPrincipal.setControladorSalaEspera(controlSala);
+        controlSala.setEjercerTurno(controlEjercerTurno);
         PropertyChangeListener[] modelos= {modeloSala,modeloPrincipal,modeloEjercerTurno};
         iListener listener = ensamblador.crearListener(miId, modelos);
 
@@ -87,7 +88,6 @@ public class EnsambladoresMVC {
         // 6. Arrancar UI
         vistaLobby.setVisible(true);
         vistaSala.setVisible(false);
-        vistaTablero.setVisible(false);
     }
 
     public static void main(String[] args) {

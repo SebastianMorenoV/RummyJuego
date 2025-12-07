@@ -62,7 +62,7 @@ public class Controlador implements iControlEjercerTurno{
 
     @Override
     public void IniciarEjercerTurno() {
-        
+        modelo.iniciarPantalla();
     }
 
 }

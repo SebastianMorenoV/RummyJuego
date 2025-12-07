@@ -125,9 +125,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 }
                 break;
             case "JUEGO_INICIADO":
-                // 1. Ocultar esta pantalla
-                this.setVisible(false);
-                // 2. Navegar a la siguiente
                 controlador.navegacionEjercerTurno();
                 break;
             case "ERROR_INICIO":
