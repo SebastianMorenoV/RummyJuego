@@ -39,19 +39,17 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
     }
 
     /**
-     * Ensambla el componente de Escucha para el cliente. Configura el
-     * Procesador en modo cliente (sin pizarra) y lo conecta al oyente provisto
+     * Ensambla el componente de Escucha para el cliente.Configura el Procesador
+     * en modo cliente (sin pizarra) y lo conecta al oyente provisto
      * (generalmente el Modelo), creando el componente de red que recibe
      * mensajes entrantes (ServerTCP).
      *
      * @param miId El identificador único del cliente.
-     * @param oyente La clase que implementa {@link PropertyChangeListener} (el
-     * Modelo) que recibirá los eventos procesados.
      * @return Una instancia de {@link iListener} (ServerTCP) lista para recibir
      * conexiones.
      */
     @Override
-    public iListener crearListener(String miId, List<PropertyChangeListener> oyentes) { 
+    public iListener crearListener(String miId, List<PropertyChangeListener> oyentes) {
 
         Procesador logicaCliente = new Procesador();
 

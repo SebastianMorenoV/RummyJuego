@@ -7,6 +7,7 @@ import modelo.iModeloConfig;
 
 /**
  * Clase que implementa la vista para obtener datos.
+ * Si es necesario.
  * @author Sebastian Moreno
  */
 public interface ObservadorConfig {

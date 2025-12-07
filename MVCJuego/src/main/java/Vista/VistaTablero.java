@@ -20,10 +20,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -273,18 +270,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * Metodo para cargar los jugadores aun no terminado (MOCK).
      */
     private void cargarJugadores(List<JugadorDTO> jugadoresReales) {
-        // 1. Limpiamos por si acaso
         mapaJugadoresUI.clear();
 
-        // 2. Definimos las 4 posiciones fijas del tablero (Slots)
         Point[] posiciones = {
-            new Point(-10, -10), // Slot 1: Arriba Izquierda
-            new Point(-10, 380), // Slot 2: Abajo Izquierda
-            new Point(780, -10), // Slot 3: Arriba Derecha
-            new Point(780, 380) // Slot 4: Abajo Derecha
+            new Point(-10, -10), 
+            new Point(-10, 380), 
+            new Point(780, -10),
+            new Point(780, 380) 
         };
 
-        // 3. Cargamos la imagen del avatar (una sola vez)
         String rutaImagen = "src/main/resources/avatares/avatar.png";
         byte[] imagenAvatarBytes = null;
         try {
@@ -299,24 +293,20 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             System.err.println("Error al cargar imagen: " + e.getMessage());
         }
 
-        // 4. Recorremos la lista REAL de jugadores y los asignamos a los slots
         int index = 0;
         if (jugadoresReales != null) {
             for (JugadorDTO jugadorDto : jugadoresReales) {
                 if (index >= posiciones.length) {
-                    break; // Protección por si hay más de 4
+                    break; 
                 }
-                // Usamos el NOMBRE REAL (el ID dinámico) que viene del servidor
                 String idReal = jugadorDto.getNombre();
                 int fichas = jugadorDto.getFichasRestantes();
 
                 JugadorUI jugadorUI = new JugadorUI(idReal, fichas, imagenAvatarBytes);
                 jugadorUI.setSize(130, 130);
 
-                // Asignar posición del slot correspondiente
                 jugadorUI.setLocation(posiciones[index].x, posiciones[index].y);
 
-                // Agregamos al panel y al mapa
                 GUIjuego.add(jugadorUI);
                 mapaJugadoresUI.put(idReal, jugadorUI);
 

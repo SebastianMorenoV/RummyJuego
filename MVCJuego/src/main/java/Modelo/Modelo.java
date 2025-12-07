@@ -50,11 +50,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     private String miId;
 
-    // NUEVO MÉTODO
-    public void setIdCliente(String id) {
-        this.miId = id;
-    }
-
     public Modelo() {
         this.observadores = new ArrayList<>();
         this.juego = new JuegoRummyFachada();
@@ -105,11 +100,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                         this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]);
                     }
                     if (payloadPartes.length > 2) {
-                        String listaJugadoresStr = payloadPartes[2]; // Viene como "Jugador_A,Jugador_B"
+                        String listaJugadoresStr = payloadPartes[2]; 
                         String[] arrayNombres = listaJugadoresStr.split(",");
 
                         this.nombresJugadores.clear();
-                        // Agregamos los nombres a nuestra lista dinámica
                         for (String nombre : arrayNombres) {
                             this.nombresJugadores.add(nombre);
                         }
@@ -610,6 +604,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     public void setPuertoCliente(int puertoCliente) {
         this.puertoCliente = puertoCliente;
+    }
+    
+    public void setIdCliente(String id) {
+        this.miId = id;
     }
 
 }

@@ -1,11 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
 package Modelo;
 
 /**
- *
+ * Contrato que debe seguir la vistaLobby para obtener datos.
  * @author benja
  */
 public interface IModeloLobby {

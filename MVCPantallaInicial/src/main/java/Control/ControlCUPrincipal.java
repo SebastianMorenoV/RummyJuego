@@ -6,6 +6,7 @@ import contratos.controladoresMVC.iControlConfig;
 import contratos.controladoresMVC.iControlEjercerTurno;
 
 /**
+ * Esta clase representa el control del caso de uso Principal.
  *
  * @author benja
  */
@@ -19,6 +20,7 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
         this.modelo = modelo;
     }
 
+    @Override
     public void pantallaInicial() {
         modelo.iniciarLobby();
     }
@@ -37,11 +39,17 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     public void ejercerTurno() {
         controladorEjercerTurno.abrirCU();
     }
-    
+
     @Override
-    public void iniciarCU(){
+    public void iniciarCU() {
         modelo.iniciarCU();
     }
+
+    @Override
+    public void cerrarCU() {
+        modelo.cerrarCU();
+    }
+
     @Override
     public void casoUsoConfigurarPartida() {
         if (this.controladorConfig != null) {
@@ -68,10 +76,5 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     @Override
     public void setControladorEjercerTurno(iControlEjercerTurno control) {
         this.controladorEjercerTurno = control;
-    }
-
-    @Override
-    public void cerrarCU() {
-        modelo.cerrarCU();
     }
 }

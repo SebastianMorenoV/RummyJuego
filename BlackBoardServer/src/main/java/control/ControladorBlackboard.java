@@ -90,10 +90,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
                 break;
             case "REGISTRAR_CANDIDATO":
-                // 1. Obtener los datos temporales de la pizarra
-                String[] datosCandidato = pizarra.getIpCliente(); // Esto devuelve jugadorARegistrarTemporal
+                String[] datosCandidato = pizarra.getIpCliente(); 
                 if (datosCandidato != null) {
-                    // 2. Agregarlo al Directorio
                     directorio.addJugador(
                             datosCandidato[0], // ID
                             datosCandidato[1], // IP
@@ -165,10 +163,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 if (fichaSerializada != null) {
                     enviarMensajeDirecto(jugadorQueMovio, "FICHA_RECIBIDA:" + fichaSerializada);
-                    // 2. NUEVO: Actualizar contador en pizarra (+1 ficha)
                     ((EstadoJuegoPizarra) pizarra).incrementarFichasJugador(jugadorQueMovio);
                 }
-
                 pizarra.avanzarTurno();
                 break;
 

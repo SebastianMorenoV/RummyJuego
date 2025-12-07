@@ -88,10 +88,12 @@ public class Controlador implements iControlEjercerTurno {
         controlPantallaPrincipal.cerrarCU();
     }
 
+    @Override
     public void setControlConfiguracion(iControlConfig controlConfiguracion) {
         this.controlConfiguracion = controlConfiguracion;
     }
 
+    @Override
     public void setControlPantallaPrincipal(iControlCUPrincipal controlPantallaPrincipal) {
         this.controlPantallaPrincipal = controlPantallaPrincipal;
     }

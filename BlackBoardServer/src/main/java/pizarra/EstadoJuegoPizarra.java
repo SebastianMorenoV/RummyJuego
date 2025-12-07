@@ -1,6 +1,5 @@
 package pizarra;
 
-import DTO.GrupoDTO;
 import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.ArrayList;
@@ -27,8 +26,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] configuracionPartida;
     private boolean partidaConfigurada = false;
     private String mazoSerializado;
-    private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
-
+    private Map<String, Integer> fichasPorJugador = new HashMap<>(); 
     private Map<String, String> candidatos = new HashMap<>();
 
     public EstadoJuegoPizarra() {
@@ -225,7 +223,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         if (indiceTurnoActual == -1) {
             switch (comando) {
-
                 case "SOLICITAR_CREACION":
                     if (this.partidaConfigurada || !ordenDeTurnos.isEmpty()) {
                         notificarObservadores("PARTIDA_EXISTENTE:" + idCliente);
@@ -233,12 +230,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         notificarObservadores("PERMISO_CREAR:" + idCliente);
                     }
                     break;
-                case "SOLICITAR_UNIRSE": // Ojo: Asegúrate que tu cliente envíe este comando exacto
+                case "SOLICITAR_UNIRSE": 
                 case "UNIRSE_PARTIDA":
                     if (this.partidaConfigurada) {
-                        // Recuperamos sus datos de conexión
                         String payloadJugador = candidatos.get(idCliente);
-                        // O si el cliente re-envía el payload en este comando, úsalo directo:
                         if (payload != null && !payload.isEmpty()) {
                             payloadJugador = payload;
                         }
@@ -246,10 +241,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         if (payloadJugador != null) {
                             registrarJugador(idCliente, payloadJugador);
 
-                            // Si con este ya son 2 (o los que definas), notificas
-                            if (ordenDeTurnos.size() == 2) { // O la lógica que tenías
+                            if (ordenDeTurnos.size() == 2) { 
                                 System.out.println("[Pizarra] Sala lista para iniciar.");
-                                // Podrías notificar SALA_LLENA o esperar al comando INICIAR_PARTIDA
                             }
                         }
                     } else {
@@ -259,8 +252,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     break;
                 case "REGISTRAR":
                     almacenarUsuarioTemporal(idCliente, payload);
-                    //registrarJugador(idCliente, payload);
-                    break; // Importante: break para no saltar al siguiente caso
+                    break;
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
                     if (iniciarPartidaSiCorresponde()) {
@@ -269,14 +261,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     break;
                 case "CONFIGURAR_PARTIDA":
                     System.out.println("Configurando partida... Promoviendo al Host: " + idCliente);
-
-                    // RECUPERAMOS la IP/Puerto que guardamos cuando hizo "REGISTRAR"
                     String payloadHost = candidatos.get(idCliente);
 
                     if (payloadHost != null) {
-                        // Lo convertimos en jugador oficial
                         registrarJugador(idCliente, payloadHost);
-                        // Guardamos la config del juego
                         configurarPartida(idCliente, payload);
                     } else {
                         System.err.println("[Error] El usuario " + idCliente + " no estaba en la lista de candidatos.");
@@ -301,19 +289,13 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
                 case "FINALIZAR_TURNO":
                     this.ultimoJugadorQueMovio = idCliente;
-                    // [NUEVA LÓGICA] Separar el tablero del contador de fichas usando "#"
-                    // El payload viene como: "GRUPO1;...$GRUPO2...#5"
                     String[] partesFinalizar = payload.split("#");
-
-                    // La parte 0 es el tablero serializado (lo de siempre)
                     this.ultimoTableroSerializado = partesFinalizar[0];
 
                     // La parte 1 (si existe) es el número de fichas que le quedaron al jugador
                     if (partesFinalizar.length > 1) {
                         try {
                             int fichasRestantes = Integer.parseInt(partesFinalizar[1]);
-
-                            // Guardamos este dato en la Pizarra
                             setFichasJugador(idCliente, fichasRestantes);
 
                             System.out.println("[Pizarra] " + idCliente + " finalizó con " + fichasRestantes + " fichas.");
@@ -343,11 +325,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     public void almacenarUsuarioTemporal(String idCliente, String payload) {
-        // 1. Guardar en el mapa local (para uso interno de la Pizarra)
         candidatos.put(idCliente, payload);
 
-        // 2. Preparar los datos para que el Controlador los pueda leer
-        // Reutilizamos la variable 'jugadorARegistrarTemporal' que ya tienes definida
         jugadorARegistrarTemporal = new String[3];
         String[] partes = payload.split("\\$", 2);
         jugadorARegistrarTemporal[0] = idCliente;
@@ -356,8 +335,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         System.out.println("[Pizarra] Candidato registrado en sala de espera: " + idCliente);
 
-        // 3. Notificar al Controlador para que lo meta al Directorio
-        // Usaremos un evento nuevo para diferenciarlo de un jugador que ya está jugando
         notificarObservadores("REGISTRAR_CANDIDATO");
     }
 
@@ -415,16 +392,15 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.mazoSerializado.split("\\|").length;
     }
 
+    @Override
     public String[] getConfiguracionPartida() {
         return configuracionPartida;
     }
 
-    // NUEVO: Método para inicializar o actualizar fichas
     public void setFichasJugador(String id, int cantidad) {
         fichasPorJugador.put(id, cantidad);
     }
 
-    // NUEVO: Método para sumar 1 ficha (cuando alguien come)
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
             fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);

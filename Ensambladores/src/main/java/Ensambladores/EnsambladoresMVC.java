@@ -27,8 +27,8 @@ import sockets.ClienteTCP;
 import vista.ConfigurarPartida;
 
 /**
- * Esta clase ensambla los mvcs necesarios en el sistema. por ultimo utiliza el
- * metodo run.
+ * Esta clase ensambla los mvcs necesarios en el sistema atraves de inyeccion de dependencias.
+ * conociendo a las clases especificas, para evitar referencias circulares entre proyectos.
  *
  * @author Sebastian Moreno
  */
@@ -125,7 +125,7 @@ public class EnsambladoresMVC {
             return socket.getLocalPort();
         } catch (IOException e) {
             System.err.println("No se pudo encontrar un puerto libre, usando por defecto 9999");
-            return 9999; // Fallback en caso de error extremo
+            return 9999;
         }
     }
 

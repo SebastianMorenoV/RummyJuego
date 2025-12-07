@@ -5,10 +5,8 @@ import contratos.iDespachador;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vista.ObservadorConfig;
@@ -27,13 +25,7 @@ public class ModeloConfig implements iModeloConfig, PropertyChangeListener {
     int puertoServidor;
     String ipCliente;
     int puertoCliente;
-
-    private String idCliente;
-
-    // NUEVO MÉTODO
-    public void setIdCliente(String id) {
-        this.idCliente = id;
-    }
+    String idCliente;
 
     public ModeloConfig() {
         observadores = new ArrayList<>();
@@ -43,23 +35,16 @@ public class ModeloConfig implements iModeloConfig, PropertyChangeListener {
         notificarObservadores(EventoConfig.CREAR_PARTIDA);
     }
 
-    public void cerrarCU(){
+    public void cerrarCU() {
         notificarObservadores(EventoConfig.CERRAR_CU);
     }
 
     public void configurarPartida(int comodines, int fichas) {
         try {
             String payload = serializarConfiguracion(comodines, fichas);
-
             String comando = "CONFIGURAR_PARTIDA";
-
-            String puertoCliente = String.valueOf(this.puertoCliente);
-
             String mensajeProtocolo = idCliente + ":" + comando + ":" + payload;
 
-            /*El cliente que cree la partida necesita registrarse en el blackboard tambien.*/
-//            String mensajeRegistro = idCliente + ":REGISTRAR:" + ipCliente + "$" + puertoCliente;
-//            despachador.enviar(ipServidor, puertoServidor, mensajeRegistro);
             despachador.enviar(ipServidor, puertoServidor, mensajeProtocolo);
 
         } catch (IOException ex) {
@@ -97,12 +82,12 @@ public class ModeloConfig implements iModeloConfig, PropertyChangeListener {
         this.ipCliente = ipCliente;
     }
 
-    public int getPuertoCliente() {
-        return puertoCliente;
-    }
-
     public void setPuertoCliente(int puertoCliente) {
         this.puertoCliente = puertoCliente;
+    }
+
+    public void setIdCliente(String id) {
+        this.idCliente = id;
     }
 
     @Override

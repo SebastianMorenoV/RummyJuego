@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Modelo;
 
 import eventos.Evento;
@@ -11,12 +7,12 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import Vista.ObservadorLobby;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Esta clase representa el modelo de datos para CU PantallaPrincipal
  *
  * @author benja
  */
@@ -30,19 +26,27 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
     int puertoServidor;
     private String idCliente;
 
-    // NUEVO MÉTODO
-    public void setIdCliente(String id) {
-        this.idCliente = id;
-    }
-
     public ModeloCUPrincipal() {
         observadores = new ArrayList<>();
 
     }
 
     @Override
-    public String getPartida() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void propertyChange(PropertyChangeEvent evt) {
+        String evento = evt.getPropertyName();
+
+        switch (evento) {
+            case "ACCESO_DENEGADO":
+                notificarObservadores(Evento.ACCESO_DENEGADO);
+                break;
+            case "PARTIDA-EXISTENTE":
+                notificarObservadores(Evento.PARTIDA_EXISTENTE); // agregar aqui
+                break;
+
+            case "PUEDES_CONFIGURAR":
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+        }
     }
 
     public void SolicitarUnirseApartida() {
@@ -88,6 +92,12 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
     public void iniciarLobby() {
         notificarObservadores(Evento.INICIO);
+    }
+
+    @Override
+    public String getPartida() {
+        System.out.println("No utilizado.");
+        return null;
     }
 
     public void añadirObservador(ObservadorLobby obs) {
@@ -136,21 +146,8 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
         this.puertoServidor = puertoServidor;
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        String evento = evt.getPropertyName();
-
-        switch (evento) {
-            case "ACCESO_DENEGADO":
-                notificarObservadores(Evento.ACCESO_DENEGADO);
-                break;
-            case "PARTIDA-EXISTENTE":
-                notificarObservadores(Evento.PARTIDA_EXISTENTE); // agregar aqui
-                break;
-
-            case "PUEDES_CONFIGURAR":
-                notificarObservadores(Evento.CREAR_PARTIDA);
-                break;
-        }
+    public void setIdCliente(String id) {
+        this.idCliente = id;
     }
+
 }
