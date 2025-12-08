@@ -63,6 +63,25 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             obs.actualiza(this, evento);
         }
     }
+    
+    public String obtenerEstadoSala() {
+        StringBuilder sb = new StringBuilder();
+        
+        synchronized(ordenDeTurnos) { // Sincronizar para evitar errores si alguien entra justo ahora
+            for (int i = 0; i < ordenDeTurnos.size(); i++) {
+                String id = ordenDeTurnos.get(i);
+                boolean estaListo = jugadoresListos.contains(id);
+                
+                sb.append(id).append(":").append(estaListo);
+                
+                // Agregamos punto y coma si no es el último
+                if (i < ordenDeTurnos.size() - 1) {
+                    sb.append(";");
+                }
+            }
+        }
+        return sb.toString();
+    }
 
     /**
      * Registra temporalmente la información de conexión de un nuevo jugador
@@ -167,20 +186,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         System.out.println("[Pizarra] Esperando... Conectados: " + numJugadores + " | Listos: " + numListos);
         return false;
 
-//        if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
-//            indiceTurnoActual = 0; // Inicia el turno del primer jugador
-//            String idPrimerJugador = ordenDeTurnos.get(0);
-//            System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");
-//            System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
-//            return true;
-//        }
-//
-//        if (indiceTurnoActual != -1) {
-//            System.err.println("[Pizarra] Intento de iniciar partida, pero ya estaba iniciada.");
-//        } else {
-//            System.err.println("[Pizarra] Intento de iniciar partida con " + numJugadores + " jugadores. Se requieren 2-4.");
-//        }
-//        return false;
+
     }
     
     //cu gal
@@ -201,11 +207,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         }
     }
     
-    public String obtenerEstadoSala() {
-        int total = ordenDeTurnos.size();
-        int listos = jugadoresListos.size();
-        return listos + "$" + total; // Formato: "Listos$Total"
-    }
 
     /**
      * Obtiene la información temporal (ID, IP y Puerto) del último cliente que
@@ -273,14 +274,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     } 
                     //si entra el 4 jugador la partida inicia envergiza
                     break; // Importante: break para no saltar al siguiente caso
-                    
-                   //old ass  
-//                case "INICIAR_PARTIDA":
-//                    System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
-//                    if (iniciarPartidaSiCorresponde()) {
-//                        notificarObservadores("EVENTO_PARTIDA_INICIADA");
-//                    }
-//                    break;
                 case "ESTOY_LISTO":
                     System.out.println("[Pizarra] Recibido ESTOY_LISTO de " + idCliente);
                     registrarJugadorListo(idCliente);

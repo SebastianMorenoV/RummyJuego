@@ -29,12 +29,13 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
      */
     public VistaSalaEspera(ControlSala control) {
         this.control = control;
+        initComponents();
+        getContentPane().setLayout(null);
         this.setSize(920, 550);
         this.setTitle("Rummy Sala de Espera");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
-        initComponents();
     }
     
 
@@ -49,7 +50,17 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
         jButton1 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        panelJugador3 = new javax.swing.JPanel();
+        txtNombreJ3 = new javax.swing.JLabel();
+        panelJugador1 = new javax.swing.JPanel();
+        txtNombreJ1 = new javax.swing.JLabel();
+        panelJugador2 = new javax.swing.JPanel();
+        txtNombreJ2 = new javax.swing.JLabel();
+        panelJugador4 = new javax.swing.JPanel();
+        txtNombreJ4 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(900, 500));
@@ -76,10 +87,44 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         getContentPane().add(jLabel2);
         jLabel2.setBounds(270, 30, 400, 90);
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 204, 51));
+        jLabel4.setText("Esperando Jugadores...");
+        getContentPane().add(jLabel4);
+        jLabel4.setBounds(350, 430, 240, 16);
+
+        txtNombreJ3.setText("Jugador 3");
+        panelJugador3.add(txtNombreJ3);
+
+        getContentPane().add(panelJugador3);
+        panelJugador3.setBounds(310, 240, 280, 30);
+
+        txtNombreJ1.setText("Jugador 1");
+        panelJugador1.add(txtNombreJ1);
+
+        getContentPane().add(panelJugador1);
+        panelJugador1.setBounds(310, 160, 280, 30);
+
+        txtNombreJ2.setText("Jugador 2");
+        panelJugador2.add(txtNombreJ2);
+
+        getContentPane().add(panelJugador2);
+        panelJugador2.setBounds(310, 200, 280, 30);
+
+        txtNombreJ4.setText("Jugador 4");
+        panelJugador4.add(txtNombreJ4);
+
+        getContentPane().add(panelJugador4);
+        panelJugador4.setBounds(310, 280, 280, 30);
+
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
         jLabel1.setText("jLabel1");
         getContentPane().add(jLabel1);
-        jLabel1.setBounds(-10, -10, 920, 520);
+        jLabel1.setBounds(0, 0, 920, 520);
+
+        jLabel5.setText("jLabel5");
+        getContentPane().add(jLabel5);
+        jLabel5.setBounds(600, 80, 37, 16);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -93,6 +138,16 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JPanel panelJugador1;
+    private javax.swing.JPanel panelJugador2;
+    private javax.swing.JPanel panelJugador3;
+    private javax.swing.JPanel panelJugador4;
+    private javax.swing.JLabel txtNombreJ1;
+    private javax.swing.JLabel txtNombreJ2;
+    private javax.swing.JLabel txtNombreJ3;
+    private javax.swing.JLabel txtNombreJ4;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -104,14 +159,51 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             jButton1.setText("Esperando...");
             break;
         case ACTUALIZAR_CONTADORES:
-            int listos = dto.getJugadoresListos();
-            int totales = dto.getJugadoresTotales();
+            java.util.List<ActualizacionSalaDTO.JugadorInfo> jugadores = dto.getJugadores();
+            String miId = modelo.getMiId();
+            
+            // Arrays de componentes visuales
+            javax.swing.JPanel[] paneles = {panelJugador1, panelJugador2, panelJugador3, panelJugador4};
+            javax.swing.JLabel[] etiquetasNombres = {txtNombreJ1, txtNombreJ2, txtNombreJ3, txtNombreJ4};
 
-            if(jButton1.isEnabled()){
-                 jButton1.setText("Iniciar Partida " + listos + " / " + totales);
-            } else {
-                 jButton1.setText("Esperando (" + listos + "/" + totales + ")");
+            int contListos = 0;
+
+            // Recorremos los 4 slots
+            for (int i = 0; i < 4; i++) {
+                if (i < jugadores.size()) {
+                    // --- HAY JUGADOR ---
+                    ActualizacionSalaDTO.JugadorInfo info = jugadores.get(i);
+                    
+                    paneles[i].setVisible(true);
+                    etiquetasNombres[i].setVisible(true);
+                    
+                     // Poner Nombre (y marcar si soy yo)
+                    String textoNombre = info.nombre;
+                    if (info.nombre.equals(miId)) {
+                        textoNombre += " (Tú)";
+                    }
+                    etiquetasNombres[i].setText(textoNombre);
+
+                    // Poner Icono de Estado
+                    if (info.estaListo) {
+                        contListos++;
+                    } else {
+                    }
+
+                } else {
+                    // --- SLOT VACÍO ---
+                    paneles[i].setVisible(false);
+                    etiquetasNombres[i].setVisible(false);
+
+                }
             }
+            // 3. Actualizar Botón
+            if (jButton1.isEnabled()) {
+                jButton1.setText("Iniciar Partida (" + contListos + "/" + jugadores.size() + ")");
+            }
+            
+            this.revalidate();
+            this.repaint();
             break;    
         case COMENZAR_JUEGO:
             this.dispose(); // Cierra la sala
@@ -121,6 +213,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 }
                 break;
 
-    }
+            }
+
     }
 }

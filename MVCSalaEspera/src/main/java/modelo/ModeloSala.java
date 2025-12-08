@@ -149,13 +149,26 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
         String payload = (String) evt.getNewValue();
         
         if (evento.equals("ACTUALIZAR_SALA")) {
-            // Payload viene como "Listos$Total", ejemplo: "2$4"
-            String[] partes = payload.split("\\$");
-            int listos = Integer.parseInt(partes[0]);
-            int totales = Integer.parseInt(partes[1]);
+            // Payload viene como: "Juan:true;Pedro:false;Maria:true"
+            List<ActualizacionSalaDTO.JugadorInfo> listaJugadores = new ArrayList<>();
+            
+            if (payload != null && !payload.isEmpty()) {
+                String[] jugadoresData = payload.split(";");
+                
+                for (String jugadorStr : jugadoresData) {
+                    // Separamos nombre y estado (Juan : true)
+                    String[] datos = jugadorStr.split(":");
+                    if (datos.length == 2) {
+                        String nombre = datos[0];
+                        boolean listo = Boolean.parseBoolean(datos[1]);
+                        listaJugadores.add(new ActualizacionSalaDTO.JugadorInfo(nombre, listo));
+                    }
+                }
+            }
 
+            // Enviamos la lista completa a la vista
             ActualizacionSalaDTO dto = new ActualizacionSalaDTO(
-                TipoEventoSala.ACTUALIZAR_CONTADORES, listos, totales
+                TipoEventoSala.ACTUALIZAR_CONTADORES, listaJugadores
             );
             notificarObservadores2(dto);
         }

@@ -15,7 +15,6 @@ import vista.VistaSalaEspera;
  */
 public class ControlSala implements iControlSolicitarInicio{
     
-    //???
     iControlCUPrincipal controlCUPrincipal;
     ModeloSala modelo;
     private VistaSalaEspera vista;

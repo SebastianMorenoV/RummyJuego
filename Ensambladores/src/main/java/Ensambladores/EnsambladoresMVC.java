@@ -54,41 +54,33 @@ public class EnsambladoresMVC {
         }
     }
     
-    //de luciano
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
 
-        String miId = "Jugador1";
+        String miId = "Ernest0o";
         int miPuertoDeEscucha = buscarPuertoLibre();
 
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
 
-        // ** Dependencias Globales **
         iEnsambladorCliente ensambladorCliente = new EnsambladorCliente();
 
-        // 2. Ensamblar MVC Sala de Espera (Componente a Sincronizar)
-        // Declaramos con la interfaz (IModeloSalaEspera) y la inicializamos con la clase concreta.
         ModeloSala modeliSalaEspera = new ModeloSala();
 
-        // 2.1. INYECCIÓN DE RECURSOS NECESARIOS PARA EL MODELO
         modeliSalaEspera.setDespachador(despachador);
         modeliSalaEspera.setMiId(miId);
         modeliSalaEspera.setEnsambladorCliente(ensambladorCliente);
         modeliSalaEspera.setMiPuertoDeEscucha(miPuertoDeEscucha);
 
-        // Se usa la interfaz IModeloSalaEspera en el constructor de ControlSalaEspera
         ControlSala controlSalaEspera = new ControlSala(modeliSalaEspera);
         VistaSalaEspera vistaSalaEspera = new VistaSalaEspera(controlSalaEspera);
         controlSalaEspera.setVista(vistaSalaEspera);
         
         modeliSalaEspera.añadirObservador(vistaSalaEspera);
 
-        // 3. Ensamblar CU Principal (Lobby)
         ModeloCUPrincipal modeloPrincipal = new ModeloCUPrincipal();
         iControlCUPrincipal controlPrincipal = new ControlCUPrincipal(modeloPrincipal);
         VistaLobby vistaLobby = new VistaLobby(controlPrincipal);
         modeloPrincipal.añadirObservador(vistaLobby);
 
-        // 4. Ensamblar CU Ejercer Turno (MVCJuego)
         Modelo modeloEjercerTurno = new Modelo();
         Controlador controlador = new Controlador(modeloEjercerTurno);
 
@@ -96,7 +88,6 @@ public class EnsambladoresMVC {
         modeloEjercerTurno.setMiId(miId);
         
         List<PropertyChangeListener> escuchadores = new ArrayList<>();
-//        escuchadores.add(modeloPrincipal);
         escuchadores.add(modeloEjercerTurno);
         escuchadores.add(modeliSalaEspera);
 
@@ -113,45 +104,33 @@ public class EnsambladoresMVC {
             }
         }).start();
 
-        // CORRECCIÓN CLAVE: Creamos UNA SOLA instancia de VistaTablero
         VistaTablero vistaTablero = new VistaTablero(controlador);
 
-        // La variable de interfaz apunta a la única instancia creada. 
-        // Esto funciona porque VistaTablero implementa IVistaJuego.
         IVistaJuego vistaJuego = vistaTablero;
 
-        modeloEjercerTurno.agregarObservador(vistaTablero); // La instancia concreta escucha al Modelo
+        modeloEjercerTurno.agregarObservador(vistaTablero); 
         
         vistaSalaEspera.setLanzador(() -> {
         controlPrincipal.casoUsoIniciarPartida();
     });
 
-        // 4. Inyectar dependencias de navegación
-        // El orquestador necesita los controladores y la vista de juego
         ((ControlCUPrincipal) controlPrincipal).setControladorSalaEspera((iControlSolicitarInicio) controlSalaEspera);
         ((ControlCUPrincipal) controlPrincipal).setControladorJuego(controlador);
         controlador.setControlSalaEspera(controlSalaEspera);
 
-        // Inyectamos la única instancia de la vista de juego (como interfaz)
         ((ControlCUPrincipal) controlPrincipal).setVistaTableroJuego(vistaJuego);
 
-        // Inyectar el modelo de sala al modelo de juego para delegación de eventos de red
-//        modelo.setModeloSalaEspera(modeliSalaEspera);
-        // Inyectar el orquestador en el controlador de Sala de Espera para la navegación final
         controlSalaEspera.setControladorCUPrincipal(controlPrincipal);
 
-        // 5. ** ORDENAR AL MODELO QUE INICIE SU RED ** (Dispara la lógica de hilos/sockets dentro del Modelo)
         modeliSalaEspera.iniciarConexionRed();
 
         System.out.println("[Ensamblador] Iniciando aplicación para ID: " + miId);
         vistaLobby.setVisible(true);
         vistaSalaEspera.setVisible(false);
-        vistaTablero.setVisible(false); // Controlamos la visibilidad de la única instancia
+        vistaTablero.setVisible(false); 
         
     }
    
-    // EN Ensambladores/EnsambladoresMVC.java
-
     
     private int buscarPuertoLibre() {
         try (ServerSocket socket = new ServerSocket(0)) {
