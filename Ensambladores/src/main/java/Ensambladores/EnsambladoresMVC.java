@@ -56,7 +56,7 @@ public class EnsambladoresMVC {
     
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
 
-        String miId = "Ernest0o";
+        String miId = "Gael Guerra";
         int miPuertoDeEscucha = buscarPuertoLibre();
 
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
@@ -122,7 +122,7 @@ public class EnsambladoresMVC {
 
         controlSalaEspera.setControladorCUPrincipal(controlPrincipal);
 
-        modeliSalaEspera.iniciarConexionRed();
+        //modeliSalaEspera.iniciarConexionRed();
 
         System.out.println("[Ensamblador] Iniciando aplicación para ID: " + miId);
         vistaLobby.setVisible(true);

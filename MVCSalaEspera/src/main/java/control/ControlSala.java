@@ -46,4 +46,10 @@ public class ControlSala implements iControlSolicitarInicio{
         }
     }
 
+    @Override
+    public void unirseASala() {
+        System.out.println("[ControlSala] Iniciando conexión con el servidor...");
+        modelo.iniciarConexionRed(); 
+    }
+
 }

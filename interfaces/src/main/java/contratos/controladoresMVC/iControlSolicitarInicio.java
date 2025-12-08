@@ -13,5 +13,5 @@ public interface iControlSolicitarInicio {
     public void setControladorCUPrincipal(iControlCUPrincipal controladorCUPrincipal);
     
     public void mostrarVista();
-
+    public void unirseASala();
 }
