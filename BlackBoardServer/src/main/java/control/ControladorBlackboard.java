@@ -202,7 +202,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
-    private void enviarMensajeCandidato(String idCandidato, String mensaje) {
+    @Override
+    public void enviarMensajeCandidato(String idCandidato, String mensaje) {
         try {
             iDirectorio.ClienteInfoDatos destino = directorio.getCandidatoInfo(idCandidato);
             if (destino != null) {
@@ -216,7 +217,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
-    private void manejarRechazoInmediato(iPizarraJuego pizarra, String mensajeError) {
+    @Override
+    public void manejarRechazoInmediato(iPizarraJuego pizarra, String mensajeError) {
         String[] datos = pizarra.getCandidatoTemporal();
         if (datos != null) {
             String id = datos[0];
@@ -227,7 +229,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
-        private void registrarYRechazar(String id, String ip, int puerto, String msg) {
+    @Override
+        public void registrarYRechazar(String id, String ip, int puerto, String msg) {
         directorio.agregarCandidato(id, ip, puerto);
         enviarMensajeCandidato(id, msg);
         directorio.removerCandidato(id);

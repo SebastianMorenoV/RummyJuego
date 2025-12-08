@@ -11,7 +11,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import Vista.ObservadorSalaEspera;
+import Vista.ObservadorPantallaInicial;
 
 /**
  *
@@ -19,7 +19,7 @@ import Vista.ObservadorSalaEspera;
  */
 public class ModeloCUPrincipal implements IModeloPantallaInicial, PropertyChangeListener {
     
-    private List<ObservadorSalaEspera> observadores = new ArrayList<>();
+    private List<ObservadorPantallaInicial> observadores = new ArrayList<>();
     private iDespachador despachador;
     private String miId;
     private String ipServidor;
@@ -82,12 +82,12 @@ public class ModeloCUPrincipal implements IModeloPantallaInicial, PropertyChange
         }
     }
 
-    public void añadirObservador(ObservadorSalaEspera observador) {
+    public void añadirObservador(ObservadorPantallaInicial observador) {
         observadores.add(observador);
     }
 
     private void notificarObservadores(Evento evento) {
-        for (ObservadorSalaEspera obs : observadores) {
+        for (ObservadorPantallaInicial obs : observadores) {
             obs.actualiza(this, evento);
         }
     }

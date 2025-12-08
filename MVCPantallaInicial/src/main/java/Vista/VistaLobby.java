@@ -13,12 +13,12 @@ import javax.swing.JOptionPane;
  *
  * @author benja
  */
-public class VistaLobby extends javax.swing.JFrame implements ObservadorSalaEspera {
+public class VistaLobby extends javax.swing.JFrame implements ObservadorPantallaInicial {
 
     /**
      * Creates new form VistaLobby
      */
-    iControlCUPrincipal control;
+    private iControlCUPrincipal control;
 
     public VistaLobby(iControlCUPrincipal control) {
         this.control = control;

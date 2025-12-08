@@ -8,7 +8,7 @@ import eventos.Evento;
  *
  * @author benja
  */
-public interface ObservadorSalaEspera {
+public interface ObservadorPantallaInicial {
 
     void actualiza(IModeloPantallaInicial modelo, Evento evento);
 }

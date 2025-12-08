@@ -35,4 +35,10 @@ public interface iControladorBlackboard {
      * @param mensaje El contenido serializado del mensaje a transmitir.
      */
     void enviarMensajeDirecto(String idJugador, String mensaje);
+    
+    void enviarMensajeCandidato(String idCandidato, String mensaje);
+    
+    void manejarRechazoInmediato(iPizarraJuego pizarra, String mensajeError);
+    
+    void registrarYRechazar(String id, String ip, int puerto, String msg);
 }

@@ -19,11 +19,10 @@ import vista.ObservadorSalaEspera;
 public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListener {
 
     private List<ObservadorSalaEspera> observadores = new ArrayList<>();
-    iDespachador despachador;
-    String ipServidor;
-    int puertoServidor;
-    String ipCliente;
-    String miId;
+    private iDespachador despachador;
+    private String ipServidor;
+    private int puertoServidor;
+    private String miId;
 
     public ModeloSalaEspera() {
     }
@@ -61,21 +60,6 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
         this.puertoServidor = portServer;
     }
 
-    public void setDespachador(iDespachador despachador) {
-        this.despachador = despachador;
-    }
-
-    public void setIpServidor(String ipServidor) {
-        this.ipServidor = ipServidor;
-    }
-
-    public void setPuertoServidor(int puertoServidor) {
-        this.puertoServidor = puertoServidor;
-    }
-
-    public void setIpCliente(String ipCliente) {
-        this.ipCliente = ipCliente;
-    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -108,7 +92,6 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
     public void solicitarInicioPartida() {
         try {
             if (despachador != null) {
-                // Protocolo: ID:INICIAR_PARTIDA:null
                 String mensaje = miId + ":INICIAR_PARTIDA:null";
                 despachador.enviar(ipServidor, puertoServidor, mensaje);
             }

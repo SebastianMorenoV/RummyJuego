@@ -15,4 +15,5 @@ public interface iControlSalaEspera {
     void enviarVoto(boolean aceptado);
     void setEjercerTurno(iControlEjercerTurno controlEjercerTurno);
     void navegacionEjercerTurno();
+    void solicitarInicioPartida();
 }

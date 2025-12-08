@@ -120,5 +120,17 @@ public interface iPizarraJuego {
     String[] getCandidatoRechazado();
     
     String[] getUltimoResultadoVotacion();
+    
+    void finalizarConteo();
+    
+    int getMazoSerializadoCount();
+    
+    void limpiarCandidatoActual();
+    
+    void registrarCandidato(String id, String payloadRed);
+    
+    void incrementarFichasJugador(String id);
+    
+    String getFichasJugadoresSerializado();
 
 }

@@ -24,6 +24,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private int indiceTurnoActual;
     private String[] jugadorARegistrarTemporal;
     private String mazoSerializado;
+    
+    
     private Map<String, Integer> fichasPorJugador = new HashMap<>();
     private int numeroDeJugadoresRegistrados;
     private String[] candidatoTemporal;
@@ -334,7 +336,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return fichaTomada;
     }
 
-   private void registrarCandidato(String id, String payloadRed) {
+    @Override
+   public void registrarCandidato(String id, String payloadRed) {
         String[] datos = new String[3];
         String[] partes = payloadRed.split("\\$");
         datos[0] = id;
@@ -390,6 +393,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.candidatoRechazado;
     }
 
+    @Override
     public void limpiarCandidatoActual() {
         this.candidatoTemporal = null;
         this.votacionEnCurso = false; 
@@ -401,6 +405,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      *
      * @return El conteo de fichas restantes.
      */
+    @Override
     public int getMazoSerializadoCount() {
         if (this.mazoSerializado == null || this.mazoSerializado.isEmpty()) {
             return 0;
@@ -408,7 +413,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.mazoSerializado.split("\\|").length;
     }
 
-    private void finalizarConteo() {
+    @Override
+    public void finalizarConteo() {
         this.votacionAprobada = (votosAfirmativos == totalVotantesEsperados);
         
         this.ultimoResultadoVotacion = this.candidatoTemporal;
@@ -454,6 +460,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     // NUEVO: Método para sumar 1 ficha (cuando alguien come)
+    @Override
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
             fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
@@ -461,6 +468,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     // NUEVO: Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
+    @Override
     public String getFichasJugadoresSerializado() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> entry : fichasPorJugador.entrySet()) {

@@ -37,6 +37,7 @@ public class ControlSalaEspera implements iControlSalaEspera {
         this.controlEjercerTurno = cet;
     }
     
+    @Override
     public void solicitarInicioPartida() {
         System.out.println("[ControlSala] Solicitando inicio de partida al servidor...");
         modelo.solicitarInicioPartida();

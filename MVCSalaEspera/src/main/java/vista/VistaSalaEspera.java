@@ -4,6 +4,7 @@
  */
 package vista;
 
+import contratos.controladoresMVC.iControlSalaEspera;
 import control.ControlSalaEspera;
 import javax.swing.JOptionPane;
 import modelo.IModeloSalaEspera;
@@ -14,13 +15,16 @@ import modelo.IModeloSalaEspera;
  */
 public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaEspera {
 
-    private ControlSalaEspera controlador;
+    private iControlSalaEspera controlador;
 
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera(ControlSalaEspera control) {
+    public VistaSalaEspera(iControlSalaEspera control) {
         this.controlador = control;
+        this.setSize(920, 550);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
         initComponents();
     }
 
