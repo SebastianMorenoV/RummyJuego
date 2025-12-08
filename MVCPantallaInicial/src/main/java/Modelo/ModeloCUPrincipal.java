@@ -5,47 +5,199 @@
 package Modelo;
 
 import eventos.Evento;
-import Vista.Observador;
+import contratos.iDespachador;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import Vista.ObservadorLobby;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author benja
  */
-public class ModeloCUPrincipal implements IModelo {
-    
-    List<Observador> observadores;
-    
+public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
+
+    List<ObservadorLobby> observadores;
+    iDespachador despachador;
+    private String miIp;
+    private int miPuerto;
+    String ipServidor;
+    int puertoServidor;
+    private String idCliente;
+    private String datosSalaCache;
+
+    public void setIdCliente(String id) {
+        this.idCliente = id;
+    }
+
     public ModeloCUPrincipal() {
         observadores = new ArrayList<>();
-        
+
     }
-    
+
     @Override
     public String getPartida() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    public void SolicitarUnirseApartida(){
-        notificarObservadores(Evento.SOLICITAR_UNIRSE_A_PARTIDA);
+
+    public void SolicitarUnirseApartida() {
+        String mensaje = idCliente + ":SOLICITAR_UNIRSE:" + miIp + "$" + miPuerto;
+        if (despachador != null) {
+            try {
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            } catch (IOException ex) {
+                Logger.getLogger(ModeloCUPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
-    
+
     public void iniciarCreacionPartida() {
-        notificarObservadores(Evento.CREAR_PARTIDA);
-        
+        try {
+
+            String mensaje = idCliente + ":SOLICITAR_CREACION:" + miIp + "$" + miPuerto;
+
+            if (despachador != null) {
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-    public void iniciarLobby(){
+
+    public void cerrarCU() {
+        notificarObservadores(Evento.CERRAR_CU);
+    }
+
+    public void iniciarCU() {
+        try {
+            String mensaje = idCliente + ":REGISTRAR:" + miIp + "$" + miPuerto;
+
+            if (despachador != null) {
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+
+            notificarObservadores(Evento.INICIO);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void iniciarLobby() {
         notificarObservadores(Evento.INICIO);
     }
-    
-    public void añadirObservador(Observador obs) {
+
+    public void añadirObservador(ObservadorLobby obs) {
         observadores.add(obs);
     }
-    
+
     public void notificarObservadores(Evento evento) {
-        for (Observador observador : observadores) {
+        for (ObservadorLobby observador : observadores) {
             observador.actualiza(this, evento);
+        }
+    }
+
+    public void setDespachador(iDespachador despachador) {
+        this.despachador = despachador;
+    }
+
+    public String getMiIp() {
+        return miIp;
+    }
+
+    public void setMiIp(String miIp) {
+        this.miIp = miIp;
+    }
+
+    public int getMiPuerto() {
+        return miPuerto;
+    }
+
+    public void setMiPuerto(int miPuerto) {
+        this.miPuerto = miPuerto;
+    }
+
+    public String getIpServidor() {
+        return ipServidor;
+    }
+
+    public void setIpServidor(String ipServidor) {
+        this.ipServidor = ipServidor;
+    }
+
+    public int getPuertoServidor() {
+        return puertoServidor;
+    }
+
+    public void setPuertoServidor(int puertoServidor) {
+        this.puertoServidor = puertoServidor;
+    }
+
+    public String getDatosSala() {
+        return datosSalaCache;
+    }
+
+    public void enviarEstoyListo() {
+        try {
+            String mensaje = idCliente + ":ESTOY_LISTO:" + miIp + "$" + miPuerto;
+            if (despachador != null) {
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String evento = evt.getPropertyName();
+        String payload = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
+
+        System.out.println("[CLIENTE DEBUG] Modelo recibió evento: " + evento);
+
+        switch (evento) {
+            case "ACCESO_DENEGADO":
+                notificarObservadores(Evento.ACCESO_DENEGADO);
+                break;
+
+            case "CREAR_PARTIDA":
+                System.out.println("[Modelo Cliente] ¡Recibí CREAR_PARTIDA! Notificando vista...");
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+
+            case "PUEDES_CONFIGURAR":
+                System.out.println("[Modelo Cliente] ¡Recibí PUEDES_CONFIGURAR! Notificando vista...");
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+
+            case "UNIRSE_PARTIDA":
+                System.out.println("[Modelo Cliente] ¡Permiso recibido (" + evento + ")! Yendo a registro...");
+                // Ir a la pantalla de poner nombre y avatar.
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+
+            case "PARTIDA-EXISTENTE":
+                notificarObservadores(Evento.PARTIDA_EXISTENTE);
+                break;
+
+            case "ACTUALIZAR_SALA":
+                this.datosSalaCache = payload;
+
+                // Avisamos a la VistaLobby que llegaron datos nuevos
+                notificarObservadores(Evento.ACTUALIZAR_SALA);
+                break;
+
+            case "MANO_INICIAL": //
+                System.out.println("[Modelo] ¡Recibí mi mano! El juego ha comenzado.");
+                // Guardamos la mano o se la pasamos a la vista de juego
+                // payload contiene: Cartas $ MazoCount $ Metadatos
+                notificarObservadores(Evento.INICIO_JUEGO);
+                break;
+
         }
     }
 }

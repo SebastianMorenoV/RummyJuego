@@ -2,6 +2,7 @@ vista\EleccionColores$2.class
 modelo\ModeloRegistro.class
 TipoEventos\EventoRegistro.class
 vista\RegistrarUsuario$1.class
+vista\RegistrarUsuario$4.class
 Util\SesionUsuario.class
 vista\EleccionColores$4.class
 vista\EleccionColores$5.class
@@ -14,5 +15,6 @@ modelo\iModeloRegistro.class
 vista\EleccionColores.class
 vista\EleccionColores$1.class
 vista\EleccionColores$3.class
+controlador\ControladorRegistro$1.class
 vista\EleccionColores$6.class
 vista\RegistrarUsuario$2.class

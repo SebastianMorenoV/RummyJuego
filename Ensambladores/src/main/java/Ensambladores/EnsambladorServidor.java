@@ -17,12 +17,14 @@ import contratos.iEnsambladorServidor;
 public class EnsambladorServidor implements iEnsambladorServidor {
 
     /**
-     * Este método conecta la lógica central del servidor mediante Procesador 
-     * configurado con la iPizarraJuego con el componente de escucha de red (ServerTCP).
+     * Este método conecta la lógica central del servidor mediante Procesador
+     * configurado con la iPizarraJuego con el componente de escucha de red
+     * (ServerTCP).
      *
-     * @param pizarra La Pizarra de Juego que contiene el estado compartido y la lógica a procesar.
-     * @return Una instancia de {@link iListener} (ServerTCP) que gestionará la recepción 
-     * de comandos de los clientes.
+     * @param pizarra La Pizarra de Juego que contiene el estado compartido y la
+     * lógica a procesar.
+     * @return Una instancia de {@link iListener} (ServerTCP) que gestionará la
+     * recepción de comandos de los clientes.
      */
     @Override
     public iListener ensamblarRedServidor(

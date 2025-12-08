@@ -6,6 +6,7 @@ import DTO.GrupoDTO;
 import DTO.JuegoDTO;
 import Modelo.IModelo;
 import Vista.VistaTablero;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -35,10 +36,10 @@ public class TableroUI extends JPanel {
     private final Map<Integer, FichaUI> fichasEnTableroValidas;
     private final Map<Integer, Point> posicionesValidas;
     private final IModelo modelo;
-    private final Controlador control;
+    private final iControlEjercerTurno control;
     private final VistaTablero vista;
 
-    public TableroUI(IModelo modelo, Controlador control, VistaTablero vista) {
+    public TableroUI(IModelo modelo, iControlEjercerTurno control, VistaTablero vista) {
         this.vista = vista;
         this.modelo = modelo;
         this.control = control;
@@ -83,7 +84,7 @@ public class TableroUI extends JPanel {
         for (FichaUI fichaExistente : fichasEnTablero.values()) {
             Point celdaExistente = calcularCeldaParaPunto(fichaExistente.getLocation());
             if (celdaExistente.equals(celda)) {
-                return false; 
+                return false;
             }
         }
 
@@ -233,6 +234,8 @@ public class TableroUI extends JPanel {
         if (juego == null) {
             return;
         }
+        
+
         List<GrupoDTO> gruposDelModelo = juego.getGruposEnTablero();
 
         Set<Integer> idsValidosDelModelo = new HashSet<>();
@@ -337,7 +340,7 @@ public class TableroUI extends JPanel {
         feedbackPanel.setBorder(BorderFactory.createLineBorder(borderColor, 2));
 
         this.add(feedbackPanel);
-        this.setComponentZOrder(feedbackPanel, getComponentCount() - 1); 
+        this.setComponentZOrder(feedbackPanel, getComponentCount() - 1);
     }
 
     /**
@@ -372,20 +375,21 @@ public class TableroUI extends JPanel {
     }
 
     /**
-     * Metodo que regresa las fichas en el tablero que sean validas.
-     * (que forman parte 
-     * de grupos que ya han sido confirmados en turnos anteriores)
-     * @return 
+     * Metodo que regresa las fichas en el tablero que sean validas. (que forman
+     * parte de grupos que ya han sido confirmados en turnos anteriores)
+     *
+     * @return
      */
     public Map<Integer, FichaUI> getFichasEnTableroValidas() {
         return fichasEnTableroValidas;
     }
 
-    /**Metodo que regresa todas las fichas que están actualmente colocadas 
-     * en el tablero, incluyendo tanto las fichas validadas como 
-     * las temporales del turno actual.
-     * 
-     * @return 
+    /**
+     * Metodo que regresa todas las fichas que están actualmente colocadas en el
+     * tablero, incluyendo tanto las fichas validadas como las temporales del
+     * turno actual.
+     *
+     * @return
      */
     public Map<Integer, FichaUI> getFichasEnTablero() {
         return fichasEnTablero;

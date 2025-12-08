@@ -2,6 +2,9 @@ package Controlador;
 
 import DTO.GrupoDTO;
 import Modelo.Modelo;
+import contratos.controladoresMVC.iControlCUPrincipal;
+import contratos.controladoresMVC.iControlEjercerTurno;
+import contratos.controladoresMVC.iControlSalaEspera;
 import java.util.List;
 
 /**
@@ -11,9 +14,11 @@ import java.util.List;
  *
  * @author moren
  */
-public class Controlador {
+public class Controlador implements iControlEjercerTurno {
 
     Modelo modelo;
+    iControlCUPrincipal controlPantallaPrincipal;
+    iControlSalaEspera controlSalaDeEspera;
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
@@ -57,6 +62,35 @@ public class Controlador {
      */
     public void terminarTurno() {
         modelo.terminarTurno();
+    }
+
+    @Override
+    public void abrirCU() {
+        modelo.abrirCU();
+    }
+
+    @Override
+    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
+
+    }
+
+    @Override
+    public void cerrarCUAnteriores() {
+        if (controlPantallaPrincipal != null) controlPantallaPrincipal.cerrarCU();
+        
+        if (controlSalaDeEspera != null) {
+            controlSalaDeEspera.cerrarCU();
+        }
+    }
+
+    @Override
+    public void setControlPantallaPrincipal(iControlCUPrincipal controlPantallaPrincipal) {
+        this.controlPantallaPrincipal = controlPantallaPrincipal;
+    }
+
+    @Override
+    public void setControlSalaEspera(iControlSalaEspera ControlSalaEspera) {
+        this.controlSalaDeEspera = ControlSalaEspera;
     }
 
 }

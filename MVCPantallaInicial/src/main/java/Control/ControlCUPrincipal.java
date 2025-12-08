@@ -2,8 +2,10 @@ package Control;
 
 import Modelo.ModeloCUPrincipal;
 import contratos.controladoresMVC.iControlCUPrincipal;
-import contratos.controladoresMVC.iControlConfig;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import contratos.controladoresMVC.iControlRegistro;
+import contratos.controladoresMVC.iControlSalaEspera;
+import vista.VistaSalaEspera;
 
 /**
  *
@@ -12,13 +14,16 @@ import contratos.controladoresMVC.iControlRegistro;
 public class ControlCUPrincipal implements iControlCUPrincipal {
 
     ModeloCUPrincipal modelo;
-    iControlConfig controladorConfig;
-    private iControlRegistro controlRegistro;
+    iControlEjercerTurno controladorEjercerTurno;
+    iControlRegistro controladorRegistro;
+    private VistaSalaEspera vistaSalaEspera;
+    iControlSalaEspera controlSalaEspera;
 
     public ControlCUPrincipal(ModeloCUPrincipal modelo) {
         this.modelo = modelo;
     }
 
+    @Override
     public void pantallaInicial() {
         modelo.iniciarLobby();
     }
@@ -34,29 +39,110 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     }
 
     @Override
-    public void casoUsoConfigurarPartida() {
-        if (this.controladorConfig != null) {
-            System.out.println("[ControlPrincipal] Navegando a Configurar Partida...");
-            this.controladorConfig.iniciarConfiguracion();
-        } else {
-            System.err.println("Error: ControladorConfig no ha sido ensamblado.");
-        }
-    }
-
-    public void setControladorConfig(iControlConfig controladorConfig) {
-        this.controladorConfig = controladorConfig;
+    public void ejercerTurno() {
+        controladorEjercerTurno.abrirCU();
     }
 
     @Override
-    public void setControladorRegistro(iControlRegistro controlRegistro) {
-        this.controlRegistro = controlRegistro;
+    public void iniciarCU() {
+        modelo.iniciarCU();
+    }
+
+    @Override
+    public void casoUsoConfigurarPartida() {
+        solicitarRegistro();
+        if (this.controladorRegistro != null) {
+            System.out.println("[ControlPrincipal] Saltando Configuración -> Yendo a Registro...");
+            this.controladorRegistro.iniciarRegistro();
+        } else {
+            System.err.println("Error: ControladorRegistro no ha sido ensamblado.");
+        }
+    }
+
+    @Override
+    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
+        if (modelo == null) {
+            System.err.println("[ControlCUPrincipal] Error: Modelo es null al configurar.");
+            return;
+        }
+
+        // Verifica que ipServidor no llegue null aquí
+        System.out.println("[ControlPrincipal] Configurando Servidor: " + ipServidor + ":" + puertoServidor);
+
+        modelo.setIpServidor(ipServidor);
+        modelo.setPuertoServidor(puertoServidor);
+        modelo.setMiIp(ipCliente);
+        modelo.setMiPuerto(puertoCliente);
+    }
+
+    @Override
+    public void setControladorEjercerTurno(iControlEjercerTurno control) {
+        this.controladorEjercerTurno = control;
+    }
+
+    @Override
+    public void cerrarCU() {
+        modelo.cerrarCU();
     }
 
     @Override
     public void solicitarRegistro() {
-        System.out.println("[ControlPrincipal] Delegando a ControladorRegistro...");
-        if (controlRegistro != null) {
-            controlRegistro.iniciarRegistro();
+        System.out.println("[Control] Solicitando cambio a pantalla de registro..."); // Debug
+        if (controladorRegistro != null) {
+            modelo.cerrarCU();
+            System.out.println("[ControlPrincipal] Ir a Registro...");
+            controladorRegistro.iniciarRegistro();
+        } else {
+            System.err.println("Error: ControladorRegistro no inyectado. Revisa EnsambladoresMVC.");
+        }
+    }
+
+    public void notificarListo() {
+        modelo.enviarEstoyListo();
+    }
+
+    @Override
+    public void setControladorRegistro(iControlRegistro controlRegistro) {
+        this.controladorRegistro = controlRegistro;
+    }
+
+    public void setVistaSalaEspera(VistaSalaEspera vista) {
+        this.vistaSalaEspera = vista;
+    }
+
+    @Override
+    public void setControlSalaEspera(iControlSalaEspera controlSalaEspera) {
+        this.controlSalaEspera = controlSalaEspera;
+    }
+
+    @Override
+    public void entrarSalaEspera() {
+        if (controlSalaEspera != null) {
+            System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
+            ((control.ControlSalaDeEspera) controlSalaEspera).iniciarCU();
+        } else {
+            System.err.println("[ControlPrincipal] Error: No tengo referencia al ControlSalaEspera");
+        }
+    }
+
+    // logica de navegacion
+    public void procesarActualizacionSala() {
+        // 1. Obtener los datos sucios del modelo 
+        String datosSala = modelo.getDatosSala();
+
+        // 2. Cerrar la pantalla de registro
+        if (controladorRegistro != null) {
+            ((controlador.ControladorRegistro) controladorRegistro).cerrarVista();
+        }
+
+        // 3. Abrir y actualizar Sala de Espera
+        if (vistaSalaEspera != null) {
+            if (!vistaSalaEspera.isVisible()) {
+                System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
+                vistaSalaEspera.setVisible(true);
+            }
+            // Mandar los datos a la vista para que pinte los avatares
+            vistaSalaEspera.actualizarJugadores(datosSala);
         }
     }
 

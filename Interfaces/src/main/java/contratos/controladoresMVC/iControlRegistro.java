@@ -12,8 +12,9 @@ import java.awt.Color;
  */
 public interface iControlRegistro {
 
-    void intentarRegistrar(String nickname, String avatar,
-            Color set1, Color set2, Color set3, Color set4);
+    void intentarRegistrar(String nickname, String avatar, Color set1, Color set2, Color set3, Color set4);
+
+    void setNavegacion(iControlCUPrincipal controlLobby);
 
     void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente);
 

@@ -16,9 +16,7 @@ public interface iDirectorio {
      * exponer la clase de implementación interna del Directorio.
      */
     public interface ClienteInfoDatos {
-
         String getHost();
-
         int getPuerto();
     }
 
@@ -29,7 +27,7 @@ public interface iDirectorio {
      * @param ip Host o IP del jugador.
      * @param puerto Puerto de escucha del jugador.
      */
-    void addJugador(String idJugador, String ip, int puerto, String avatar, int c1, int c2, int c3, int c4);
+    public void addJugador(String idJugador, String ip, int puerto);
 
     /**
      * Elimina a un jugador del directorio.

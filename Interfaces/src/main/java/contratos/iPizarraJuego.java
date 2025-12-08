@@ -108,4 +108,10 @@ public interface iPizarraJuego {
      * @return arreglo con String [comodines,fichas de cada mano.]
      */
     String[] getConfiguracionPartida();
+    
+    /**
+     * Método para obtener la cadena serializada de TODOS los jugadores (ID, Nombre, Avatar, etc.)
+     * @return 
+     */
+    String getMetadatosJugadores();
 }

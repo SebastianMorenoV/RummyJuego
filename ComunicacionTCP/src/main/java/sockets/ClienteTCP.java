@@ -36,7 +36,7 @@ public class ClienteTCP implements iDespachador, Runnable {
      * Este método actúa como el productor, aceptando la solicitud de envío 
      * y depositándola rápidamente en la cola de salida para ser gestionada 
      * por el hilo de red.
-     * * @param host La dirección IP del destinatario.
+     * @param host La dirección IP del destinatario.
      * @param puerto El puerto del destinatario.
      * @param mensaje El contenido de texto a enviar.
      * @throws IOException Si la operación de encolamiento es interrumpida.

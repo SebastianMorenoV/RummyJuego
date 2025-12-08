@@ -1,6 +1,5 @@
 package Vista;
 
-import Controlador.Controlador;
 import DTO.FichaJuegoDTO;
 import Dtos.ActualizacionDTO;
 import Modelo.IModelo;
@@ -9,15 +8,19 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import static Vista.TipoEvento.MOSTRAR_JUEGO;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -36,12 +39,11 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
  */
 public class VistaTablero extends javax.swing.JFrame implements Observador {
 
-    private Controlador control;
+    private iControlEjercerTurno control;
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
 
-    //cambio para el MOCK
     private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
 
     //private java.util.Map<String, JugadorUI> mapaJugadoresUI = new java.util.HashMap<>();
@@ -51,13 +53,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      *
      * @param control el control de el mvc.
      */
-    public VistaTablero(Controlador control) {
+    public VistaTablero(iControlEjercerTurno control) {
         this.control = control;
         this.setSize(920, 550);
         this.setTitle("Rummy Juego");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-        this.setVisible(true);
         initComponents();
     }
 
@@ -183,6 +184,11 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             actualizarEstadoJugadores(estadoJuego);
         }
         switch (dto.getTipoEvento()) {
+            case MOSTRAR_JUEGO:
+                this.setVisible(true);
+                control.cerrarCUAnteriores();
+                break;
+
             case CAMBIO_DE_TURNO:
                 if (dto.esMiTurno()) {
                     setTitle("Rummy - ¡Es tu turno!");
@@ -265,87 +271,73 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     /**
      * Metodo para cargar los jugadores aun no terminado (MOCK).
+     *
+     * @param jugadoresReales
      */
-    private void cargarJugadores() {
+    public void cargarJugadores(List<DTO.JugadorDTO> jugadoresReales) {
         listaJugadoresUI.clear();
 
-        byte[] defaultAvatar = new byte[0];
-        try {
-            java.io.InputStream is = getClass().getResourceAsStream("/avatares/avatar.png");
-            if (is != null) {
-                java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[1024];
-                while ((nRead = is.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-                defaultAvatar = buffer.toByteArray();
-            }
-        } catch (Exception e) {
+        // 1. Limpiar componentes viejos de GUIjuego
+        for (JugadorUI p : listaJugadoresUI) {
+            System.out.println("lista jugadores reales:::: " + p);
+            GUIjuego.remove(p);
         }
 
-        // Creamos los 4 huecos visuales fijos
-        // YO
-        JugadorUI jugador1 = new JugadorUI("Cargando...", 0, defaultAvatar);
-        jugador1.setSize(130, 130);
-        jugador1.setLocation(-10, 380); // Abajo Izquierda
-        GUIjuego.add(jugador1);
-        listaJugadoresUI.add(jugador1); // ÍNDICE 0
+        listaJugadoresUI.clear();
+        if (jugadoresReales == null) {
+            return;
+        }
+        // Posiciones fijas para 2, 3 o 4 jugadores
+        Point[] posiciones = {
+            new Point(-10, 380), // YO 
+            new Point(-10, -10),
+            new Point(780, -10),
+            new Point(780, 380)
+        };
 
-        // RIVAL 1
-        JugadorUI jugador2 = new JugadorUI("Rival 1", 14, defaultAvatar);
-        jugador2.setSize(130, 130);
-        jugador2.setLocation(-10, -10); // Arriba Izquierda
-        GUIjuego.add(jugador2);
-        listaJugadoresUI.add(jugador2);
+        int indexPos = 0;
 
-        // RIVAL 2
-        JugadorUI jugador3 = new JugadorUI("Rival 2", 14, defaultAvatar);
-        jugador3.setSize(130, 130);
-        jugador3.setLocation(780, -10); // Arriba Derecha
-        GUIjuego.add(jugador3);
-        listaJugadoresUI.add(jugador3);
+        for (DTO.JugadorDTO dto : jugadoresReales) {
+            if (indexPos >= 4) {
+                break;
+            }
 
-        // RIVAL 3
-        JugadorUI jugador4 = new JugadorUI("Rival 3", 14, defaultAvatar);
-        jugador4.setSize(130, 130);
-        jugador4.setLocation(780, 380); // Abajo Derecha
-        GUIjuego.add(jugador4);
-        listaJugadoresUI.add(jugador4);
+            // 1. Obtener imagen real
+            byte[] avatarBytes = cargarImagenPorIndice(dto.getIdAvatar());
 
-        //Codigo anterior 
-        /**
-         * String rutaImagen = "src/main/resources/avatares/avatar.png"; try {
-         * Path path = new File(rutaImagen).toPath(); byte[] imagenAvatarBytes =
-         * Files.readAllBytes(path);
-         *
-         * JugadorUI jugador1 = new JugadorUI("Jugador1", 14,
-         * imagenAvatarBytes); jugador1.setSize(130, 130);
-         * jugador1.setLocation(-10, -10); GUIjuego.add(jugador1);
-         * mapaJugadoresUI.put("Jugador1", jugador1); //JUSTO ESTO TIENE QUE
-         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-         *
-         * JugadorUI jugador2 = new JugadorUI("Jugador2", 14,
-         * imagenAvatarBytes); jugador2.setSize(130, 130);
-         * jugador2.setLocation(-10, 380); GUIjuego.add(jugador2);
-         * mapaJugadoresUI.put("Jugador2", jugador2); //JUSTO ESTO TIENE QUE
-         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-         *
-         * JugadorUI jugador3 = new JugadorUI("Jugador3", 14,
-         * imagenAvatarBytes); jugador3.setSize(130, 130);
-         * jugador3.setLocation(780, -10); GUIjuego.add(jugador3);
-         * mapaJugadoresUI.put("Jugador3", jugador3); //JUSTO ESTO TIENE QUE
-         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-         *
-         * JugadorUI jugador4 = new JugadorUI("Jugador4", 14,
-         * imagenAvatarBytes); jugador4.setSize(130, 130);
-         * jugador4.setLocation(780, 380); GUIjuego.add(jugador4);
-         * mapaJugadoresUI.put("Jugador4", jugador4); //JUSTO ESTO TIENE QUE
-         * MODIFICAR LA PERSONA QUE INICIE EL MVC DESDE SU CU INDIVIDUAL.
-         *
-         * } catch (IOException e) { System.err.println("Error: No se pudo
-         * encontrar o leer el archivo de imagen en la ruta: " + rutaImagen); }
-         */
+            // 2. Crear UI con datos reales
+            JugadorUI panelJugador = new JugadorUI(dto.getNombre(), dto.getFichasRestantes(), avatarBytes);
+
+            // 3. Posicionar
+            panelJugador.setSize(130, 130);
+            panelJugador.setLocation(posiciones[indexPos]);
+
+            // 4. Agregar a la ventana y a la lista local
+            GUIjuego.add(panelJugador);
+            listaJugadoresUI.add(panelJugador);
+
+            indexPos++;
+        }
+
+        GUIjuego.revalidate();
+        GUIjuego.repaint();
+    }
+
+    /**
+     *
+     * @param indice
+     * @return
+     */
+    private byte[] cargarImagenPorIndice(int indice) {
+        String rutaRecurso = "/avatares/avatar" + indice + ".png";
+        try (java.io.InputStream is = getClass().getResourceAsStream(rutaRecurso)) {
+            if (is != null) {
+                return is.readAllBytes();
+            }
+        } catch (IOException e) {
+            System.err.println("No se pudo cargar avatar: " + rutaRecurso);
+        }
+        return null;
     }
 
     /**
@@ -359,15 +351,25 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         crearManoUI();
         repintarMano(modelo, dto);
         crearMazo(modelo);
-        cargarJugadores();
 
+        // 1. Recuperamos el estado actual del juego desde el modelo
         DTO.JuegoDTO estadoJuego = modelo.getTablero();
+
+        // 2. Extraemos la lista de jugadores reales (con Avatares y Nombres del BB)
+        List<DTO.JugadorDTO> listaJugadores = (estadoJuego != null) ? estadoJuego.getJugadores() : null;
+
+        // 3. Llamamos a cargarJugadores pasándole la lista
+        cargarJugadores(listaJugadores);
+
         if (estadoJuego != null) {
             actualizarEstadoJugadores(estadoJuego);
         }
 
         btnFinalizarTurno.setVisible(false);
-        GUIjuego.add(fondo);
+
+        if (fondo.getParent() == GUIjuego) {
+            GUIjuego.setComponentZOrder(fondo, GUIjuego.getComponentCount() - 1);
+        }
 
         GUIjuego.revalidate();
         GUIjuego.repaint();
@@ -639,41 +641,18 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             if (i >= listaJugadoresUI.size()) {
                 break;
             }
-            DTO.JugadorDTO datosDTO = listaDatos.get(i);
+
             JugadorUI uiPanel = listaJugadoresUI.get(i);
+            DTO.JugadorDTO datosNuevos = listaDatos.get(i);
 
-            // actualizar nombre
-            uiPanel.setNombreJugador(datosDTO.getNombre());
+            // Actualizar info dinámica
+            uiPanel.setFichasRestantes(datosNuevos.getFichasRestantes());
 
-            // fichas
-            uiPanel.setFichasRestantes(datosDTO.getFichasRestantes());
+            boolean esSuTurno = datosNuevos.isEsTurno();
 
-            // avatar
-            if (datosDTO.getAvatar() != null && datosDTO.getAvatar().length > 0) {
-                uiPanel.setImagenAvatar(datosDTO.getAvatar());
-            }
-
-            boolean esSuTurno = datosDTO.getNombre().equals(nombreJugadorEnTurno);
             uiPanel.setEsTuTurno(esSuTurno);
         }
         GUIjuego.repaint();
-
-        //codigo anterior
-        /**
-         * String nombreJugadorEnTurno = estadoJuego.getJugadorActual();
-         * List<DTO.JugadorDTO> listaJugadores = estadoJuego.getJugadores();
-         *
-         * if (listaJugadores == null) { return; // Ahora esto no será null }
-         * for (DTO.JugadorDTO jDto : listaJugadores) { // Ahora buscará
-         * "Jugador1" en el mapa y SI lo encontrará JugadorUI ui =
-         * mapaJugadoresUI.get(jDto.getNombre());
-         *
-         * if (ui != null) { ui.setFichasRestantes(jDto.getFichasRestantes());
-         *
-         * // Esto activará el borde verde boolean esSuTurno =
-         * jDto.getNombre().equals(nombreJugadorEnTurno);
-         * ui.setEsTuTurno(esSuTurno); } }
-         */
     }
 
     /**

@@ -107,13 +107,13 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 fuente.setBorder(bordeSeleccion);
 
                 if (fuente == avatar1) {
-                    avatarSeleccionado = "avatar1";
+                    avatarSeleccionado = "1";
                 } else if (fuente == avatar2) {
-                    avatarSeleccionado = "avatar2";
+                    avatarSeleccionado = "2";
                 } else if (fuente == avatar3) {
-                    avatarSeleccionado = "avatar3";
+                    avatarSeleccionado = "3";
                 } else if (fuente == avatar4) {
-                    avatarSeleccionado = "avatar4";
+                    avatarSeleccionado = "4";
                 }
             }
         };
@@ -193,6 +193,11 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
 
         txtfldNombre.setBackground(new java.awt.Color(255, 255, 255));
         txtfldNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtfldNombre.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtfldNombreActionPerformed(evt);
+            }
+        });
         jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 310, 410, 40));
 
         txt2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
@@ -310,6 +315,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void txtfldNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtfldNombreActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtfldNombreActionPerformed
+
     private void abrirEleccionColores() {
         EleccionColores ventanaColores = new EleccionColores(this);
         ventanaColores.setVisible(true);
@@ -373,6 +382,17 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         btnColor.setOpaque(true);
         btnColor.setBackground(c1); // podrías hacer algo más fancy luego
         btnColor.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+    }
+
+    /**
+     * Muestra un mensaje de error al usuario. Llamado por el controlador cuando
+     * el servidor devuelve un error (ej. Nombre repetido).
+     */
+    public void mostrarError(String mensaje) {
+        javax.swing.JOptionPane.showMessageDialog(this,
+                mensaje,
+                "Error de Registro",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
     }
 
 }

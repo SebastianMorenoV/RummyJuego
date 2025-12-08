@@ -13,18 +13,19 @@ import vista.ObservadorRegistro;
  */
 public interface iModeloRegistro {
 
-    void setDespachador(iDespachador despachador);
+    public void setIpServidor(String ipServidor);
 
-    void registrarUsuario(String nickname, String avatar,
-            int color1, int color2, int color3, int color4);
+    public void setPuertoServidor(int puertoServidor);
+
+    public void setIpCliente(String ipCliente);
+    
+    public void setIdCliente(String idCliente);
+    
+    void setDespachador(iDespachador despachador);
+    
+    void registrarUsuario(String nickname, int idAvatar, int[] colores);
 
     void agregarObservador(ObservadorRegistro obs);
-
-    void setIpServidor(String ipServidor);
-
-    void setPuertoServidor(int puertoServidor);
-
-    void setIpCliente(String ipCliente);
 
     public void iniciar();
 }

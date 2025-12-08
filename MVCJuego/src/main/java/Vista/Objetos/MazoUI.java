@@ -1,6 +1,6 @@
 package Vista.Objetos;
 
-import Controlador.Controlador;
+import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -24,9 +24,9 @@ public class MazoUI extends JPanel implements MouseListener {
 
     List<FichaUI> fichasMazo;
     String numeroFichasRestantes;
-    Controlador control;
+    iControlEjercerTurno control;
 
-    public MazoUI(String numeroFichasRestantes, Controlador control) {
+    public MazoUI(String numeroFichasRestantes, iControlEjercerTurno control) {
         this.control = control;
         this.numeroFichasRestantes = numeroFichasRestantes;
         setPreferredSize(new Dimension(40, 70));
@@ -52,7 +52,7 @@ public class MazoUI extends JPanel implements MouseListener {
         JOptionPane.showMessageDialog(ventanaPadre,
                 "Ficha agarrada, Turno terminado",
                 "VISTA",
-                JOptionPane.WARNING_MESSAGE);   
+                JOptionPane.WARNING_MESSAGE);
     }
 
     @Override

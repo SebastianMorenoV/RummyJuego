@@ -25,6 +25,11 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     private final iDespachador despachador;
     private final iAgentePartida agentePartida;
 
+    // HARDCODEADO PARA EL MOCK
+    int limiteFichas = 13; // Valor default Rummy
+    int numeroComodines = 2; // Valor default Rummy
+    private boolean partidaConfigurada = true;
+
     public ControladorBlackboard(
             iAgentePartida agentePartida,
             iDirectorio directorio,
@@ -50,15 +55,38 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         String jugadorQueMovio = pizarra.getUltimoJugadorQueMovio();
         String ultimoPayload = pizarra.getUltimoTableroSerializado();
 
-        switch (evento) {
+        String eventoPuro = evento;
+        String idAfectado = "";
+
+        if (evento.contains(":")) {
+            String[] partes = evento.split(":", 2);
+            eventoPuro = partes[0];
+            idAfectado = partes[1];
+        }
+
+        switch (eventoPuro) {
+            case "ACCESO_DENEGADO":
+                enviarMensajeDirecto(idAfectado, "ACCESO_DENEGADO");
+                break;
 
             case "CONFIGURAR_PARTIDA":
-                //System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
-                //que deberia hacer aqui si todavia nadie se une?
-                //break;
-
                 System.out.println("Partida configurada por " + jugadorQueMovio);
                 enviarATodos("SERVIDOR:PARTIDA_CONFIGURADA:" + ultimoPayload);
+                break;
+
+            case "REGISTRO_EXITOSO":
+                System.out.println("[Controlador] Confirmando registro a " + idAfectado);
+                enviarMensajeDirecto(idAfectado, "REGISTRO_EXITOSO");
+                String listaActualizada = ((EstadoJuegoPizarra) pizarra).getMetadatosJugadores();
+                enviarATodos("ACTUALIZAR_SALA:" + listaActualizada);
+                break;
+
+            case "REGISTRAR_CANDIDATO":
+                String[] datosCandidato = pizarra.getIpCliente();
+                if (datosCandidato != null) {
+                    directorio.addJugador(datosCandidato[0], datosCandidato[1], Integer.parseInt(datosCandidato[2]));
+                    System.out.println("[Controlador] Candidato añadido al Directorio: " + datosCandidato[0]);
+                }
                 break;
 
             case "JUGADOR_UNIDO":
@@ -74,64 +102,92 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 int c3 = Integer.parseInt(datosJugador[6]);
                 int c4 = Integer.parseInt(datosJugador[7]);
 
-                directorio.addJugador(id, ip, puerto, avatar, c1, c2, c3, c4);
+                directorio.addJugador(datosJugador[0], datosJugador[1], Integer.parseInt(datosJugador[2]));
                 System.out.println("[Controlador] Jugador registrado: " + id);
-                
-                //para confirmar los datos
+
+                // para confirmar los datos
                 String confirmacion = "CONFIRMACION_REGISTRO:" + id + ":" + avatar + ":"
                         + c1 + ":" + c2 + ":" + c3 + ":" + c4;
                 enviarMensajeDirecto(id, confirmacion);
 
-                //Iniciamos con un jugador solamente para probar el CU
-                int numJugadores = pizarra.getOrdenDeTurnos().size();
-                if (pizarra.getOrdenDeTurnos().size() >= 1) {
-                    System.out.println("[Controlador] Iniciando partida automáticamente para entrega individual.");
+                // Iniciamos con dos jugadores solamente para probar el CU
+                /**
+                 * int numJugadores = pizarra.getOrdenDeTurnos().size(); if
+                 * (numJugadores == 2) { String idHost =
+                 * pizarra.getOrdenDeTurnos().get(0);
+                 * System.out.println("[Controlador] Hay 2 jugadores. Pidiendo
+                 * al Host (" + idHost + ") que inicie el juego.");
+                 * enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA"); }
+                 */
+                String listaJugadores = ((EstadoJuegoPizarra) pizarra).getMetadatosJugadores();
+                // Protocolo: "ACTUALIZAR_SALA:Jugador1,Avatar1;Jugador2,Avatar2"
+                enviarATodos("ACTUALIZAR_SALA:" + listaJugadores);
 
-                    // 1. Repartir manos (Mockeadas en AgentePartida)
-                    List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
-                    Map<String, String> manos = agentePartida.repartirManos(jugadoresIds);
-
-                    // 2. Enviar mano inicial al cliente (Esto carga los datos en EjercerTurno)
-                    for (String pid : manos.keySet()) {
-                        String manoPayload = manos.get(pid);
-                        // Enviamos formato: MANO_INICIAL:fichas$cantMazo
-                        enviarMensajeDirecto(pid, "MANO_INICIAL:" + manoPayload + "$" + 20);
-                    }
-
-                    // 3. Notificar turno
-                    notificarCambioDeTurno(pizarra);
-                }
                 break;
 
-            //Metodo anterior que ocupaba mas de un 1 jugador
-            /**
-             * if (numJugadores == 2) { String idHost =
-             * pizarra.getOrdenDeTurnos().get(0);
-             * System.out.println("[Controlador] Hay 2 jugadores. Pidiendo al
-             * Host (" + idHost + ") que inicie el juego.");
-             * enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA"); } break;
-             */
+            case "NOMBRE_REPETIDO":
+                System.out.println("[Controlador] Nombre repetido detectado para " + idAfectado);
+                enviarMensajeDirecto(idAfectado, "NOMBRE_REPETIDO");
+                break;
+
             case "EVENTO_PARTIDA_INICIADA":
                 System.out.println("[Controlador] Evento PARTIDA_INICIADA detectado. Creando juego...");
-
                 List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
-                System.out.println("[Controlador] Repartiendo para " + jugadoresIds.size() + " jugadores.");
 
-                Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds);
+                // --- MOCKEO DE CONFIGURACIÓN ---
+                int numFichas = 13; // Valor default Rummy
+                int numComodines = 2; // Valor default Rummy
+
+                String[] configuracion = pizarra.getConfiguracionPartida();
+
+                if (configuracion != null && configuracion.length >= 2) {
+                    try {
+                        numComodines = Integer.parseInt(configuracion[0]);
+                        numFichas = Integer.parseInt(configuracion[1]);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error leyendo config, usando defaults.");
+                    }
+                } else {
+                    System.out.println("[Server] No se recibió configuración (CU eliminado). Usando valores por defecto (13 fichas, 2 comodines).");
+                }
+
+                // Usamos el agente para crear las manos y el mazo con los números definidos arriba
+                Map<String, String> manosSerializadas = agentePartida.repartirManos(jugadoresIds, numFichas, numComodines);
+
+                // Obtenemos y guardamos el mazo restante en la pizarra
                 String mazoSerializado = agentePartida.getMazoSerializado();
-                int mazoCount = mazoSerializado.split("\\|").length;
+
+                // Evitamos error si el mazo está vacío o string vacio
+                int mazoCount = 0;
+                if (mazoSerializado != null && !mazoSerializado.isEmpty()) {
+                    mazoCount = mazoSerializado.split("\\|").length;
+                }
 
                 agentePartida.setMazoSerializado(mazoSerializado);
 
+                // mandamos los metadatos completos (Nombres, Avatares, etc.)
+                String listaJugadoresCompleta = pizarra.getMetadatosJugadores();
+
+                // finalmente mandamos los datos al cliente
                 for (Map.Entry<String, String> entry : manosSerializadas.entrySet()) {
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
 
-                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount;
+                    // Protocolo: MANO_INICIAL : CARTAS $ CANTIDAD_MAZO $ LISTA_METADATOS_JUGADORES
+                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount + "$" + listaJugadoresCompleta;
+
                     enviarMensajeDirecto(idJugador, mensajeMano);
                 }
 
                 notificarCambioDeTurno(pizarra);
+                break;
+
+            case "PERMISO_UNIRSE":
+                if (idAfectado != null && !idAfectado.isEmpty()) {
+                    System.out.println("[Controlador] Autorizando ingreso a: " + idAfectado);
+                    // Enviamos la señal para que el cliente vaya a la pantalla de Registro
+                    enviarMensajeDirecto(idAfectado, "UNIRSE_PARTIDA");
+                }
                 break;
 
             case "MOVIMIENTO":
@@ -156,11 +212,19 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 if (fichaSerializada != null) {
                     enviarMensajeDirecto(jugadorQueMovio, "FICHA_RECIBIDA:" + fichaSerializada);
-                    // 2. NUEVO: Actualizar contador en pizarra (+1 ficha)
                     ((EstadoJuegoPizarra) pizarra).incrementarFichasJugador(jugadorQueMovio);
                 }
 
                 pizarra.avanzarTurno();
+                break;
+
+            case "PERMISO_CREAR":
+                if (idAfectado == null || idAfectado.isEmpty()) {
+                    System.err.println("[Error Controlador] ID afectado es nulo en PERMISO_CREAR");
+                    break;
+                }
+                System.out.println("[Controlador] Enviando autorización a: " + idAfectado);
+                enviarMensajeDirecto(idAfectado, "CREAR_PARTIDA");
                 break;
 
             default:
@@ -262,4 +326,15 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             System.err.println("[Controlador] Error al enviar mensaje directo a " + idJugador + ": " + e.getMessage());
         }
     }
+
+    // Asegúrate de que los getters devuelvan estos valores fijos
+    public synchronized int getLimiteFichas() {
+        return this.limiteFichas;
+    }
+
+    // En el método donde validas si se puede iniciar
+    public synchronized boolean isPartidaConfigurada() {
+        return true; // Siempre true, porque usamos defaults
+    }
+
 }

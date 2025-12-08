@@ -19,7 +19,11 @@ import java.util.Map;
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
     private final List<iObservador> observadores;
+
     private Map<String, String> datosJugadores = new HashMap<>();
+
+    private Map<String, String> perfilesJugadores = new HashMap<>();
+
     private String ultimoTableroSerializado = "";
     private final List<String> ordenDeTurnos;
     private String ultimoJugadorQueMovio;
@@ -27,6 +31,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] jugadorARegistrarTemporal;
     private String[] configuracionPartida;
     private String mazoSerializado;
+    private List<String> jugadoresListos = new ArrayList<>();
+
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
 
     public EstadoJuegoPizarra() {
@@ -73,18 +79,22 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         this.datosJugadores.put(id, payloadMano);
         String[] partes = payloadMano.split("\\$");
 
-        jugadorARegistrarTemporal = new String[8];
-        jugadorARegistrarTemporal[0] = id; // ID
-        jugadorARegistrarTemporal[1] = partes[0]; // IP
-        jugadorARegistrarTemporal[2] = partes[1]; // Puerto
-        jugadorARegistrarTemporal[3] = partes[2]; // Avatar
-        jugadorARegistrarTemporal[4] = partes[3]; // Colores (4 sets)
-        jugadorARegistrarTemporal[5] = partes[4];
-        jugadorARegistrarTemporal[6] = partes[5];
-        jugadorARegistrarTemporal[7] = partes[6];
+        this.jugadorARegistrarTemporal = new String[10];
+        this.jugadorARegistrarTemporal[0] = id;
 
+        if (partes.length > 0) {
+            jugadorARegistrarTemporal[1] = partes[0]; // IP
+        }
+        if (partes.length > 1) {
+            jugadorARegistrarTemporal[2] = partes[1]; // Puerto
+        }
+
+        // Solo intentamos leer el resto si el payload es "completo" (viene del registro de usuario)
+        if (partes.length > 2) {
+            jugadorARegistrarTemporal[3] = partes[2]; // Avatar
+        }
         if (partes.length > 3) {
-            jugadorARegistrarTemporal[4] = partes[3];
+            jugadorARegistrarTemporal[4] = partes[3]; // Colores
         }
         if (partes.length > 4) {
             jugadorARegistrarTemporal[5] = partes[4];
@@ -98,6 +108,15 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         ordenDeTurnos.add(id);
 
+        // verificar elementos (ids)
+        for (String jugador : ordenDeTurnos) {
+            if (jugadorARegistrarTemporal[1].equals(jugador)) {
+                notificarObservadores("NOMBRE_REPETIDO");
+            }
+        }
+
+        //validacion
+        notificarObservadores("REGISTRAR_CANDIDATO");
         notificarObservadores("JUGADOR_UNIDO");
 
         /**
@@ -257,19 +276,116 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public void procesarComando(String idCliente, String comando, String payload) {
         if (indiceTurnoActual == -1) {
             switch (comando) {
+
                 case "REGISTRAR":
                     registrarJugador(idCliente, payload);
                     break; // Importante: break para no saltar al siguiente caso
+
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
                     if (iniciarPartidaSiCorresponde()) {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
                     }
                     break;
+
                 case "CONFIGURAR_PARTIDA":
                     System.out.println("Configurando partida en blackboard [CU Configurar Partida]:   ");
                     configurarPartida(idCliente, payload);
                     break;
+
+                case "ACTUALIZAR_PERFIL": //
+                    System.out.println("[Pizarra] Verificando perfil de " + idCliente);
+
+                    // El payload llega como: "Nombre$Avatar$Color..."
+                    String[] partesNuevas = payload.split("\\$");
+                    String nuevoNombre = (partesNuevas.length > 0) ? partesNuevas[0] : "";
+
+                    boolean nombreOcupado = false;
+
+                    // Recorremos los perfiles que ya tenemos guardados en el mapa 'perfilesJugadores'
+                    for (String datosExistentes : perfilesJugadores.values()) {
+                        // Extraemos el nombre de los datos existentes
+                        String[] partesExistentes = datosExistentes.split("\\$");
+                        String nombreExistente = (partesExistentes.length > 0) ? partesExistentes[0] : "";
+
+                        // Comparamos (ignorando mayúsculas/minúsculas)
+                        if (nombreExistente.equalsIgnoreCase(nuevoNombre)) {
+                            nombreOcupado = true;
+                            break;
+                        }
+                    }
+
+                    if (nombreOcupado) {
+                        System.out.println("[Pizarra] Error: El nombre '" + nuevoNombre + "' ya está en uso.");
+                        // El formato del evento será: "NOMBRE_REPETIDO:ID_DEL_CLIENTE"
+                        notificarObservadores("NOMBRE_REPETIDO:" + idCliente);
+                    } else {
+                        // Si está libre, procedemos normal
+                        perfilesJugadores.put(idCliente, payload);
+                        System.out.println("[Pizarra] Registro exitoso para " + nuevoNombre);
+                        notificarObservadores("REGISTRO_EXITOSO:" + idCliente);
+                    }
+                    break;
+
+                // mock?
+                case "SOLICITAR_CREACION":
+                    System.out.println("[Pizarra] Procesando solicitud de creación de: " + idCliente);
+
+                    // Si la lista está vacía O si YO soy el primero en la lista
+                    boolean soyElHost = ordenDeTurnos.isEmpty() || ordenDeTurnos.get(0).equals(idCliente);
+
+                    if (soyElHost) {
+                        System.out.println("[Pizarra] Permiso CONCEDIDO a " + idCliente);
+                        notificarObservadores("PERMISO_CREAR:" + idCliente);
+                    } else {
+                        System.out.println("[Pizarra] Permiso DENEGADO a " + idCliente);
+                        notificarObservadores("PARTIDA_EXISTENTE:" + idCliente);
+                    }
+                    break;
+
+                case "SOLICITAR_UNIRSE":
+                    System.out.println("[Pizarra] Solicitud de unirse recibida de: " + idCliente);
+
+                    // VALIDACIÓN:
+                    // 1. Debe haber alguien ya registrado (el Host)
+                    // 2. No debe haber iniciado el juego (indiceTurnoActual == -1, ya validado por el if padre)
+                    // 3. Máximo 4 jugadores
+                    boolean hayHost = !ordenDeTurnos.isEmpty();
+                    boolean hayEspacio = ordenDeTurnos.size() <= 4;
+
+                    if (hayHost && hayEspacio) {
+                        System.out.println("[Pizarra] Permiso de unirse CONCEDIDO a " + idCliente);
+                        notificarObservadores("PERMISO_UNIRSE:" + idCliente);
+                    } else {
+                        System.out.println("[Pizarra] Permiso de unirse DENEGADO (Sala vacía o llena).");
+                        notificarObservadores("ACCESO_DENEGADO:" + idCliente);
+                    }
+                    break;
+
+                case "ESTOY_LISTO":
+                    System.out.println("[Pizarra] Jugador listo: " + idCliente);
+
+                    if (!jugadoresListos.contains(idCliente)) {
+                        jugadoresListos.add(idCliente);
+                        notificarObservadores("ACTUALIZAR_ESTADO_SALA");
+                    }
+
+                    // Verificar si todos (o mínimo 2) están listos
+                    int totalEnSala = ordenDeTurnos.size();
+                    int totalListos = jugadoresListos.size();
+
+                    System.out.println("[Pizarra] Listos: " + totalListos + "/" + totalEnSala);
+
+                    // REGLA DE INICIO: Mínimo 2 jugadores y Todos deben estar listos
+                    if (totalEnSala >= 2 && totalListos == totalEnSala) {
+                        System.out.println("[Pizarra] ¡Todos listos! Iniciando partida...");
+
+                        if (iniciarPartidaSiCorresponde()) {
+                            notificarObservadores("EVENTO_PARTIDA_INICIADA");
+                        }
+                    }
+                    break;
+
             }
         }
 
@@ -321,8 +437,36 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
                     }
                     break;
+
             }
         }
+    }
+
+    /**
+     * NUEVO: Genera la cadena que contiene la info de TODOS los jugadores para
+     * que MVCJuego sepa a quién pintar. Formato de salida:
+     * "id1,payload1;id2,payload2;..."
+     */
+    @Override
+    public String getMetadatosJugadores() {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+
+        // Recorremos el orden de turnos para mantener la consistencia
+        for (String id : ordenDeTurnos) {
+            String datos = perfilesJugadores.get(id);
+            if (datos != null) {
+                // Separamos cada jugador por ";"
+                // Formato interno: ID,DATOS (donde DATOS ya trae $ separadores)
+                sb.append(id).append(",").append(datos);
+
+                if (count < ordenDeTurnos.size() - 1) {
+                    sb.append(";");
+                }
+                count++;
+            }
+        }
+        return sb.toString();
     }
 
     /**

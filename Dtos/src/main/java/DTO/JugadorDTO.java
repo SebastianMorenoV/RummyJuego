@@ -13,9 +13,9 @@ public class JugadorDTO {
     private boolean esTurno;
     
     //CURegistrarUsuario
-    private byte[] avatar;
+    private int idAvatar;
     private int[] colores;
-
+    
     public JugadorDTO() {
     }
 
@@ -57,14 +57,15 @@ public class JugadorDTO {
         this.manoDTO = manoDTO;
     }
 
-    public byte[] getAvatar() {
-        return avatar;
+    public int getIdAvatar() {
+        return idAvatar;
     }
 
-    public void setAvatar(byte[] avatar) {
-        this.avatar = avatar;
+    public void setIdAvatar(int idAvatar) {
+        this.idAvatar = idAvatar;
     }
 
+    
     public int[] getColores() {
         return colores;
     }

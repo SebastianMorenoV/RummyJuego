@@ -4,18 +4,31 @@
  */
 package vista;
 
+import java.awt.Image;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import modelo.IModeloSalaDeEspera;
+import tipoEventos.EventoSalaEspera;
+import control.ControlSalaDeEspera;
+import contratos.controladoresMVC.iControlSalaEspera;
+
 /**
  *
  * @author benja
  */
-public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VistaSalaEspera.class.getName());
+public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaDeEspera {
+
+    private iControlSalaEspera control;
 
     /**
      * Creates new form VistaSalaEspera
      */
-    public VistaSalaEspera() {
+    public VistaSalaEspera(iControlSalaEspera control) {
+        this.control = control;
+        this.setTitle("RummyKub | Vive la experiencia!");
+        this.setSize(920, 550);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
         initComponents();
     }
 
@@ -28,66 +41,209 @@ public class VistaSalaEspera extends javax.swing.JFrame implements Observador{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnIniciar = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        btnIniciarPartida = new javax.swing.JButton();
+        avatarJugador2 = new javax.swing.JLabel();
+        avatarJugador1 = new javax.swing.JLabel();
+        fondoNombre2 = new javax.swing.JPanel();
+        nombreJugador2 = new javax.swing.JLabel();
+        fondoNombre1 = new javax.swing.JPanel();
+        nombreJugador1 = new javax.swing.JLabel();
+        txtTitulo = new javax.swing.JLabel();
+        fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMaximumSize(new java.awt.Dimension(900, 500));
         setMinimumSize(new java.awt.Dimension(900, 500));
-        setPreferredSize(new java.awt.Dimension(900, 500));
         setResizable(false);
         setSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
-        btnIniciar.setBackground(new java.awt.Color(80, 118, 78));
-        btnIniciar.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        btnIniciar.setText("Iniciar Partida");
-        getContentPane().add(btnIniciar);
-        btnIniciar.setBounds(350, 340, 220, 70);
+        btnIniciarPartida.setBackground(new java.awt.Color(246, 220, 105));
+        btnIniciarPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnIniciarPartida.setForeground(new java.awt.Color(153, 102, 0));
+        btnIniciarPartida.setText("Iniciar Partida");
+        btnIniciarPartida.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIniciarPartidaActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnIniciarPartida);
+        btnIniciarPartida.setBounds(320, 360, 290, 70);
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(255, 235, 126));
-        jLabel2.setText("Sala de espera");
-        getContentPane().add(jLabel2);
-        jLabel2.setBounds(270, 30, 400, 90);
+        avatarJugador2.setForeground(new java.awt.Color(13, 87, 26));
+        avatarJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        avatarJugador2.setText("...");
+        getContentPane().add(avatarJugador2);
+        avatarJugador2.setBounds(160, 210, 70, 70);
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
-        jLabel1.setText("jLabel1");
-        getContentPane().add(jLabel1);
-        jLabel1.setBounds(-10, -10, 920, 520);
+        avatarJugador1.setForeground(new java.awt.Color(16, 101, 30));
+        avatarJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        avatarJugador1.setText("...");
+        getContentPane().add(avatarJugador1);
+        avatarJugador1.setBounds(160, 120, 70, 70);
+
+        fondoNombre2.setBackground(new java.awt.Color(237, 218, 218));
+
+        nombreJugador2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador2.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador2.setText("Jugador2");
+        fondoNombre2.add(nombreJugador2);
+
+        getContentPane().add(fondoNombre2);
+        fondoNombre2.setBounds(260, 230, 400, 40);
+
+        fondoNombre1.setBackground(new java.awt.Color(237, 218, 218));
+
+        nombreJugador1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador1.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador1.setText("Jugador1");
+        fondoNombre1.add(nombreJugador1);
+
+        getContentPane().add(fondoNombre1);
+        fondoNombre1.setBounds(260, 140, 400, 40);
+
+        txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
+        txtTitulo.setForeground(new java.awt.Color(255, 235, 126));
+        txtTitulo.setText("Sala de espera");
+        getContentPane().add(txtTitulo);
+        txtTitulo.setBounds(270, 30, 400, 90);
+
+        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
+        fondo.setText("jLabel1");
+        getContentPane().add(fondo);
+        fondo.setBounds(-10, -10, 930, 520);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+    private void btnIniciarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarPartidaActionPerformed
+        if (control != null) {
+            ((control.ControlSalaDeEspera) control).enviarVoto();
         }
-        //</editor-fold>
+    }//GEN-LAST:event_btnIniciarPartidaActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VistaSalaEspera().setVisible(true));
+    /**
+     * Recibe la cadena "sucia" del servidor y actualiza la UI.
+     *
+     * @param data Ejemplo: "ID1,Nombre$Avatar$C1..;ID2,Nombre2$Avatar..."
+     */
+    public void actualizarJugadores(String data) {
+        System.out.println("[VistaSalaEspera] Datos recibidos: " + data);
+        resetearVista();
+
+        if (data == null || data.isEmpty()) {
+            return;
+        }
+
+        String[] jugadores = data.split(";");
+
+        // 1. PINTAR JUGADORES
+        if (jugadores.length > 0) {
+            pintarJugador(jugadores[0], nombreJugador1, avatarJugador1);
+        }
+        if (jugadores.length > 1) {
+            pintarJugador(jugadores[1], nombreJugador2, avatarJugador2);
+        }
+
+        // 2. LOGICA DEL BOTÓN DE INICIO (VOTACIÓN)
+        // Solo habilitamos el botón si hay 2 o más jugadores conectados
+        if (jugadores.length >= 2) {
+            btnIniciarPartida.setEnabled(true);
+            btnIniciarPartida.setText("¡Estoy Listo!"); // Cambiamos texto para indicar acción de voto
+        } else {
+            btnIniciarPartida.setEnabled(false);
+            btnIniciarPartida.setText("Esperando jugadores...");
+        }
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnIniciar;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel avatarJugador1;
+    private javax.swing.JLabel avatarJugador2;
+    private javax.swing.JButton btnIniciarPartida;
+    private javax.swing.JLabel fondo;
+    private javax.swing.JPanel fondoNombre1;
+    private javax.swing.JPanel fondoNombre2;
+    private javax.swing.JLabel nombreJugador1;
+    private javax.swing.JLabel nombreJugador2;
+    private javax.swing.JLabel txtTitulo;
     // End of variables declaration//GEN-END:variables
+
+    private void pintarJugador(String rawData, JLabel lblNombre, JLabel lblAvatar) {
+        try {
+            // rawData: "ID,Nombre$Avatar$Color..."
+            String[] primeraSeparacion = rawData.split(",");
+            if (primeraSeparacion.length > 1) {
+                String payload = primeraSeparacion[1];
+                String[] datosUsuario = payload.split("\\$");
+
+                String nombre = datosUsuario[0];
+                String idAvatar = (datosUsuario.length > 1) ? datosUsuario[1] : "1";
+
+                lblNombre.setText(nombre);
+
+                // Si el ID es solo un número "1", le pegamos "avatar" -> "avatar1.png"
+                String nombreArchivo = "avatar" + idAvatar + ".png";
+                colocarImagen(lblAvatar, "/avatares/" + nombreArchivo);
+            }
+        } catch (Exception e) {
+            System.err.println("Error pintando jugador: " + e.getMessage());
+        }
+    }
+
+    private void colocarImagen(JLabel label, String ruta) {
+        try {
+            java.net.URL imgURL = getClass().getResource(ruta);
+            if (imgURL != null) {
+                ImageIcon icon = new ImageIcon(imgURL);
+                Image img = icon.getImage().getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
+                label.setIcon(new ImageIcon(img));
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    private void resetearVista() {
+        if (nombreJugador1 != null) {
+            nombreJugador1.setText("Esperando...");
+        }
+        if (nombreJugador2 != null) {
+            nombreJugador2.setText("Esperando...");
+        }
+        if (avatarJugador2 != null) {
+            avatarJugador2.setIcon(null);
+        }
+        if (avatarJugador1 != null) {
+            avatarJugador1.setIcon(null);
+        }
+    }
+
+    @Override
+    public void actualiza(IModeloSalaDeEspera modelo, EventoSalaEspera evento, Object datos) {
+        switch (evento) {
+            case MOSTRAR_SALA:
+                this.setVisible(true);
+                break;
+
+            case CERRAR_CU:
+                this.setVisible(false);
+                this.dispose();
+                break;
+
+            case VOTO_REGISTRADO:
+                btnIniciarPartida.setEnabled(false);
+                btnIniciarPartida.setText("Esperando al otro...");
+                break;
+
+            case ACTUALIZAR_DATOS_JUGADORES:
+                if (datos instanceof String) {
+                    actualizarJugadores((String) datos);
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
 }

@@ -13,6 +13,7 @@ import java.awt.Color;
 public class SesionUsuario {
 
     private static String nickname;
+    private static String idCliente;
     private static String avatar;
 
     // Colores de los 4 sets del usuario
@@ -71,4 +72,14 @@ public class SesionUsuario {
     public static boolean isEstaRegistrado() {
         return estaRegistrado;
     }
+
+    public static String getIdCliente() {
+        return idCliente;
+    }
+
+    public static void setIdCliente(String idCliente) {
+        SesionUsuario.idCliente = idCliente;
+    }
+    
+    
 }

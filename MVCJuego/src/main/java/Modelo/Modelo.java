@@ -4,6 +4,7 @@ import DTO.FichaJuegoDTO;
 import java.awt.Color;
 import DTO.GrupoDTO;
 import DTO.JuegoDTO;
+import DTO.JugadorDTO;
 import Dtos.ActualizacionDTO;
 import Entidades.Ficha;
 import Entidades.Grupo;
@@ -44,10 +45,16 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private String idJugadorEnTurnoGlobal = "";
     private boolean esMiTurno;
     private iDespachador despachador;
+
+    private Map<String, JugadorDTO> perfilesJugadores = new HashMap<>();
+    private List<String> nombresJugadores = new ArrayList<>();
+    private int mazoFichasRestantes = 0;
+
+    private boolean coloresCargados = false;
+
+    private String idCliente;
     private String miId;
     Configuracion config;
-
-    private int mazoFichasRestantes = 0;
 
     //variables adicionales de CU registrar jugador//
     private String miNickname = "Cargando...";
@@ -78,6 +85,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
         notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
     }
 
+    public void abrirCU() {
+        iniciarJuego();
+
+        notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
+    }
+
     /**
      * Maneja eventos recibidos desde red (servidor) usando observer pattern.
      * Actualiza el modelo según el tipo de evento.
@@ -96,24 +109,97 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
             case "MANO_INICIAL":
                 System.out.println("[Modelo] Evento 'MANO_INICIAL' detectado!");
+                System.out.println("PAYLOAD: " + payloadd);
                 try {
                     String[] payloadPartes = payloadd.split("\\$");
                     String manoPayload = payloadPartes[0];
 
-                    if (payloadPartes.length > 1) {
-                        this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]);
-                    }
+                    if (payloadPartes.length >= 3) {
+                        StringBuilder listaJugadoresBuilder = new StringBuilder();
+                        for (int i = 2; i < payloadPartes.length; i++) {
+                            listaJugadoresBuilder.append(payloadPartes[i]);
+                            if (i < payloadPartes.length - 1) {
+                                listaJugadoresBuilder.append("$");
+                            }
+                        }
+                        String listaJugadoresStr = listaJugadoresBuilder.toString();
+                        System.out.println("[Modelo Debug] Lista de jugadores completa reconstruida: " + listaJugadoresStr);
 
+                        String[] usuariosRaw = listaJugadoresStr.split(";");
+                        System.out.println("[Modelo Debug] Número de jugadores después de split por ';': " + usuariosRaw.length);
+
+                        this.nombresJugadores.clear();
+                        this.perfilesJugadores.clear();
+
+                        for (String usuario : usuariosRaw) {
+                            if (usuario == null || usuario.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            System.out.println("[Modelo Debug] Procesando cadena de usuario: " + usuario);
+
+                            String[] partes = usuario.split(",", 2);
+
+                            if (partes.length >= 2) {
+                                String idReal = partes[0];
+                                String datosPerfil = partes[1]; // "Nick$Avatar$..."
+
+                                String[] perfilSplit = datosPerfil.split("\\$");
+                                System.out.println("[Modelo Debug] Nickname: " + perfilSplit[0] + ", Avatar ID Raw: " + (perfilSplit.length > 1 ? perfilSplit[1] : "N/A"));
+
+                                // Creamos un DTO temporal para guardar estos datos estáticos
+                                JugadorDTO dtoPerfil = new JugadorDTO();
+                                dtoPerfil.setNombre(perfilSplit[0]); // Nickname real
+
+                                try {
+                                    if (perfilSplit.length > 1) {
+                                        dtoPerfil.setIdAvatar(Integer.parseInt(perfilSplit[1]));
+                                    }
+                                } catch (Exception e) {
+                                    dtoPerfil.setIdAvatar(1);
+                                }
+
+                                // 3. OBTENER COLORES (C1,C2,C3,C4) para todos los jugadores
+                                if (perfilSplit.length > 2) {
+                                    String[] colorStrings = perfilSplit[2].split(",");
+                                    int[] colores = new int[4];
+                                    for (int i = 0; i < 4 && i < colorStrings.length; i++) {
+                                        colores[i] = Integer.parseInt(colorStrings[i]);
+                                    }
+                                    dtoPerfil.setColores(colores);
+
+                                    // DEBUG: Muestra si los colores se procesaron.
+                                    System.out.println("[Modelo Debug] Colores cargados.");
+                                }
+
+                                this.perfilesJugadores.put(idReal, dtoPerfil);
+                                this.nombresJugadores.add(idReal);
+                            } else {
+                                System.err.println("[Modelo Debug] ERROR: Cadena de usuario mal formada (sin ',') para: " + usuario);
+                            }
+                        }
+                        System.out.println("[Modelo] Jugadores en la partida: " + this.nombresJugadores.toString());
+
+                        JugadorDTO miPerfil = this.perfilesJugadores.get(this.miId);
+                        if (miPerfil != null && miPerfil.getColores() != null) {
+                            this.misColores = miPerfil.getColores();
+                            this.coloresCargados = true;
+                            System.out.println("[Modelo Fix] Colores de mi jugador cargados desde MANO_INICIAL payload.");
+                        }
+                    }
                     List<FichaJuegoDTO> fichasDTO = deserializarMano(manoPayload);
                     List<Ficha> manoEntidad = fichasDTO.stream()
                             .map(this::convertirFichaDtoAEntidad)
                             .collect(Collectors.toList());
 
                     juego.setManoInicial(manoEntidad);
-                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
 
+                    // Notificar a la vista
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
+                    notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
+                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
+
                 } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
                     e.printStackTrace();
@@ -199,30 +285,52 @@ public class Modelo implements IModelo, PropertyChangeListener {
             case "CONFIRMACION_REGISTRO":
                 System.out.println("[Modelo] Datos de perfil recibidos del servidor.");
                 try {
-                    // Payload: NICK:AVATAR:C1:C2:C3:C4
+                    // El servidor envía: ID_FINAL:AVATAR_ID:C1:C2:C3:C4.
+                    // payloadd es la parte después de "CONFIRMACION_REGISTRO:"
                     String[] partes = payloadd.split(":");
 
-                    this.miNickname = partes[0];
-                    this.miAvatar = partes[1];
-                    this.misColores[0] = Integer.parseInt(partes[2]);
-                    this.misColores[1] = Integer.parseInt(partes[3]);
-                    this.misColores[2] = Integer.parseInt(partes[4]);
-                    this.misColores[3] = Integer.parseInt(partes[5]);
+                    if (partes.length >= 3) {
+                        String nuevoIdCliente = partes[0];
+                        if (!nuevoIdCliente.equals(this.miId)) {
+                            System.out.println("[Modelo] Actualizando mi ID de: " + this.miId + " a: " + nuevoIdCliente);
+                            this.miId = nuevoIdCliente;
+                        }
 
-                    // tenemos errores, usamos este sout para ver hasta donde llega el error
-                    System.out.println("[Modelo] Identidad actualizada: " + this.miNickname + " con " + this.miAvatar);
+                        // 2. Cargar datos de perfil (Avatar y Colores)
+                        this.miAvatar = partes[1]; // AVATAR_ID_STRING
 
-                    // Actualizamos la entidad local por si acaso
-                    juego.getJugadorActual().setNickname(this.miNickname);
+                        if (partes.length > 2) {
+                            String coloresStr = partes[2];
+                            String[] colorStrings = coloresStr.split(",");
+
+                            if (colorStrings.length >= 4) {
+                                this.misColores[0] = Integer.parseInt(colorStrings[0]); // C1
+                                this.misColores[1] = Integer.parseInt(colorStrings[1]); // C2
+                                this.misColores[2] = Integer.parseInt(colorStrings[2]); // C3
+                                this.misColores[3] = Integer.parseInt(colorStrings[3]); // C4
+
+                                System.out.println("[Modelo Debug] Colores personalizados cargados: "
+                                        + this.misColores[0] + ", "
+                                        + this.misColores[1] + ", "
+                                        + this.misColores[2] + ", "
+                                        + this.misColores[3]);
+                            }
+
+                        }
+
+                        // 3. ACTIVAR BANDERA (FIX COLORES)
+                        this.coloresCargados = true;
+
+                        System.out.println("[Modelo] Identidad y colores personalizados cargados y activados.");
+                    } else {
+                        System.err.println("[Modelo] Error de formato en CONFIRMACION_REGISTRO. Partes insuficientes: " + partes.length);
+                    }
 
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
                 } catch (Exception e) {
                     System.err.println("Error procesando confirmacion registro: " + e.getMessage());
+                    e.printStackTrace();
                 }
-                break;
-
-            default:
-                System.out.println("[Modelo] Evento PropertyChange desconocido: " + evento);
                 break;
         }
     }
@@ -263,8 +371,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         try {
             this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+
         } catch (IOException ex) {
-            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Modelo.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -286,7 +396,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
             this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeTomar);
 
         } catch (IOException ex) {
-            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Modelo.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -311,8 +422,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
                 String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
                 this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+
             } catch (IOException ex) {
-                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Modelo.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
@@ -327,8 +440,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     String payloadJuegoRevertido = serializarEstadoRevertido();
                     String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
                     this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+
                 } catch (IOException ex) {
-                    Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Modelo.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
                 notificarObservadores(TipoEvento.TOMAR_FICHA_POR_FINALIZARTURNO);
@@ -344,8 +459,28 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private String serializarJuegoFinal() {
         List<GrupoDTO> grupos = this.gruposDeTurnoDTO;
         StringBuilder payloadBuilder = new StringBuilder();
+
         for (int i = 0; i < grupos.size(); i++) {
-            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            GrupoDTO grupo = grupos.get(i);
+
+            List<FichaJuegoDTO> fichasOriginalColor = new ArrayList<>();
+            for (FichaJuegoDTO ficha : grupo.getFichasGrupo()) {
+                int originalRGB = aplicarColorOriginal(ficha.getColor().getRGB());
+
+                FichaJuegoDTO fichaOriginal = new FichaJuegoDTO(
+                        ficha.getIdFicha(), ficha.getNumeroFicha(), new Color(originalRGB),
+                        ficha.isComodin(), ficha.getFila(), ficha.getColumna()
+                );
+                fichasOriginalColor.add(fichaOriginal);
+            }
+
+            GrupoDTO grupoOriginal = new GrupoDTO(
+                    grupo.getTipo(), grupo.getCantidad(), fichasOriginalColor,
+                    grupo.getFila(), grupo.getColumna(), grupo.isEsTemporal()
+            );
+
+            payloadBuilder.append(grupoOriginal.serializarParaPayload());
+
             if (i < grupos.size() - 1) {
                 payloadBuilder.append("$");
             }
@@ -361,7 +496,28 @@ public class Modelo implements IModelo, PropertyChangeListener {
         StringBuilder payloadBuilder = new StringBuilder();
 
         for (int i = 0; i < grupos.size(); i++) {
-            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            GrupoDTO grupo = grupos.get(i);
+
+            // FichaDTOs colores originales
+            List<FichaJuegoDTO> fichasOriginalColor = new ArrayList<>();
+            for (FichaJuegoDTO ficha : grupo.getFichasGrupo()) {
+                int originalRGB = aplicarColorOriginal(ficha.getColor().getRGB());
+
+                FichaJuegoDTO fichaOriginal = new FichaJuegoDTO(
+                        ficha.getIdFicha(), ficha.getNumeroFicha(), new Color(originalRGB),
+                        ficha.isComodin(), ficha.getFila(), ficha.getColumna()
+                );
+                fichasOriginalColor.add(fichaOriginal);
+            }
+
+            // GrupoDTO temporal con los colores originales
+            GrupoDTO grupoOriginal = new GrupoDTO(
+                    grupo.getTipo(), grupo.getCantidad(), fichasOriginalColor,
+                    grupo.getFila(), grupo.getColumna(), grupo.isEsTemporal()
+            );
+
+            payloadBuilder.append(grupoOriginal.serializarParaPayload());
+
             if (i < grupos.size() - 1) {
                 payloadBuilder.append("$");
             }
@@ -435,13 +591,36 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 String payloadJuegoActualizado = serializarJuegoFinal();
                 String mensaje = this.miId + ":MOVER:" + payloadJuegoActualizado;
                 this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensaje);
+
             } catch (IOException ex) {
-                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Modelo.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
             notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
         }
+    }
+
+    private int aplicarColorOriginal(int colorCustom) {
+        if (this.misColores == null || this.misColores.length < 4) {
+            return colorCustom;
+        }
+
+        if (colorCustom == this.misColores[0]) {
+            return SERVER_NEGRO;
+        }
+        if (colorCustom == this.misColores[1]) {
+            return SERVER_AZUL;
+        }
+        if (colorCustom == this.misColores[2]) {
+            return SERVER_ROJO;
+        }
+        if (colorCustom == this.misColores[3]) {
+            return SERVER_AMARILLO;
+        }
+
+        return colorCustom;
     }
 
     /**
@@ -466,6 +645,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    //diferente puerto de escucha
     /**
      * Obtiene el estado actual del juego para enviarlo a la vista.
      */
@@ -490,104 +670,53 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         dto.setFichasMazo(this.mazoFichasRestantes);
 
-        String turnoActual = this.idJugadorEnTurnoGlobal;
-        dto.setJugadorActual(turnoActual);
-
-        //mock
-        List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
-        // MOCK: Array de IDs. El primero SIEMPRE debe ser miId (tu IP) para que coincida.
-        String[] idsTodosLosJugadores = {this.miId, "Rival 1", "Rival 2", "Rival 3"};
-
-        /*.JugadorDTO yo = new DTO.JugadorDTO();
-        yo.setNombre(this.miNickname); // Usamos el nick registrado
-        yo.setEsTurno(this.idJugadorEnTurnoGlobal.equals(this.miNickname) || this.idJugadorEnTurnoGlobal.equals(this.miId));
-
-        // Cargamos mis fichas reales
-        int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-        yo.setFichasRestantes(misFichas);*/
-        for (int i = 1; i <= 3; i++) {
-            DTO.JugadorDTO rival = new DTO.JugadorDTO();
-            String nombreRival = "Rival " + i;
-
-            rival.setNombre(nombreRival);
-            rival.setEsTurno(this.idJugadorEnTurnoGlobal.equals(nombreRival));
-
-            // Fichas del mapa o default 14
-            rival.setFichasRestantes(conteoFichasRivales.getOrDefault(nombreRival, 14));
-
-            // Avatar random o fijo para rivales
-            rival.setAvatar(cargarAvatarBytes("avatar" + (i + 1))); // avatar2, avatar3...
-
-            listaJugadoresDTO.add(rival);
-        }
-
-        //no mock
-        // Obtener nombre del jugador actual (quien tiene el turno)
-        String nombreJugadorActual = (juego.getJugadorActual() != null)
-                ? juego.getJugadorActual().getNickname()
-                : "...";
         dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
-        //no mock
+
+        List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
 
         // Lista de IDs que existen en tu juego (Debería venir del servidor, 
         // pero para que funcione visualmente ahora, usaremos los fijos).
-        //String[] idsTodosLosJugadores = {"Jugador1", "Jugador2", "Jugador3", "Jugador4"}; <- CODIGO ANTERIOR NO MOCK
-        //Mock
-        for (int i = 0; i < idsTodosLosJugadores.length; i++) {
-            String id = idsTodosLosJugadores[i];
+        List<String> ordenJugadoresUI = new ArrayList<>();
+
+        if (this.nombresJugadores.contains(this.miId)) {
+            ordenJugadoresUI.add(this.miId);
+        }
+
+        for (String id : this.nombresJugadores) {
+            if (!id.equals(this.miId)) {
+                ordenJugadoresUI.add(id);
+            }
+        }
+
+        for (String id : ordenJugadoresUI) { // Usar la lista con el orden fijo
             DTO.JugadorDTO jugadorDto = new DTO.JugadorDTO();
 
-            // verificacion 
-            if (id.equals(this.miId)) {
-                jugadorDto.setNombre(this.miNickname);
+            // 1. Buscamos la info estática (Avatar, Nombre Real)
+            JugadorDTO perfil = perfilesJugadores.get(id);
+            if (perfil != null) {
+                jugadorDto.setNombre(perfil.getNombre());
+                jugadorDto.setIdAvatar(perfil.getIdAvatar());
+                jugadorDto.setColores(perfil.getColores());
+            } else {
+                // Fallback
+                jugadorDto.setNombre(id);
+                jugadorDto.setIdAvatar(1);
+            }
 
-                jugadorDto.setAvatar(cargarAvatarBytes(this.miAvatar)); // "avatar2" -> bytes
+            // 2. Determinar si es turno
+            boolean esSuTurno = id.equals(this.idJugadorEnTurnoGlobal);
+            jugadorDto.setEsTurno(esSuTurno);
 
-                // Cargar fichas reales
+            if (id.equals(this.miId)) { // Compara contra el ID local
                 int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
                 jugadorDto.setFichasRestantes(cantidad);
-
-                // Verificar turno comparando con mi Nick o mi IP
-                boolean esSuTurno = turnoActual.equals(this.miNickname) || turnoActual.equals(this.miId);
-                jugadorDto.setEsTurno(esSuTurno);
-
             } else {
-                // rival
-                jugadorDto.setNombre(id);
-
-                // Avatar random para rivales
-                jugadorDto.setAvatar(cargarAvatarBytes("avatar" + (i + 1)));
-
-                // Fichas mock
                 int cantidadRival = conteoFichasRivales.getOrDefault(id, 14);
                 jugadorDto.setFichasRestantes(cantidadRival);
-
-                boolean esSuTurno = turnoActual.equals(id);
-                jugadorDto.setEsTurno(esSuTurno);
             }
 
             listaJugadoresDTO.add(jugadorDto);
-
-            //fin mock
-            /**
-             * for (String id : idsTodosLosJugadores) { DTO.JugadorDTO
-             * jugadorDto = new DTO.JugadorDTO(); jugadorDto.setNombre(id);
-             *
-             * // Determinar si es turno de este ID boolean esSuTurno =
-             * id.equals(nombreJugadorActual); jugadorDto.setEsTurno(esSuTurno);
-             *
-             * // Actualizar fichas: // Si soy YO (miId), obtengo el dato real
-             * de mi mano. if (id.equals(this.miId)) { // Lógica existente para
-             * MI mano int cantidad =
-             * juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-             * jugadorDto.setFichasRestantes(cantidad); } else { // Lógica NUEVA
-             * para rivales // Si el mapa tiene el dato, lo usa. Si no, pone 14
-             * por defecto. int cantidadRival =
-             * conteoFichasRivales.getOrDefault(id, 14);
-             * jugadorDto.setFichasRestantes(cantidadRival); }
-             */
         }
-
         // Asignar la lista al DTO
         dto.setJugadores(listaJugadoresDTO);
 
@@ -628,23 +757,23 @@ public class Modelo implements IModelo, PropertyChangeListener {
             return colorOriginal;
         }
 
-        if (this.misColores[0] == 0 && this.misColores[1] == 0) {
-            return colorOriginal;
+        if (colorOriginal == SERVER_NEGRO) {
+            return this.misColores[0]; // Set 1 (Color Personalizado 1)
+        }
+        // SERVER_AZUL = -16776961 (Blue)
+        if (colorOriginal == SERVER_AZUL) {
+            return this.misColores[1]; // Set 2 (Color Personalizado 2)
+        }
+        // SERVER_ROJO = -65536 (Red)
+        if (colorOriginal == SERVER_ROJO) {
+            return this.misColores[2]; // Set 3 (Color Personalizado 3)
+        }
+        // SERVER_AMARILLO = -14336 (Yellow)
+        if (colorOriginal == SERVER_AMARILLO) {
+            return this.misColores[3]; // Set 4 (Color Personalizado 4)
         }
 
-        if (colorOriginal == SERVER_NEGRO) {
-            return this.misColores[0]; // Set 1
-        }
-        if (colorOriginal == SERVER_AZUL) {
-            return this.misColores[1]; // Set 2
-        }
-        if (colorOriginal == SERVER_ROJO) {
-            return this.misColores[2]; // Set 3
-        }
-        if (colorOriginal == SERVER_AMARILLO) {
-            return this.misColores[3]; // Set 4
-        }
-        return colorOriginal; // Por si es un comodín u otro color
+        return colorOriginal; // Para comodines u otros colores.
     }
 
     /**
@@ -655,7 +784,17 @@ public class Modelo implements IModelo, PropertyChangeListener {
             return null;
         }
 
-        int colorFinal = aplicarColorPersonalizado(fDto.getColor().getRGB());
+        int colorOriginalRGB = fDto.getColor().getRGB();
+        int colorFinal = colorOriginalRGB;
+
+        if (this.coloresCargados) {
+            colorFinal = aplicarColorPersonalizado(colorOriginalRGB);
+
+            if (colorFinal != colorOriginalRGB) {
+                System.out.println("[Modelo Debug Ficha] Aplicado color personalizado. Original Server: "
+                        + colorOriginalRGB + ", Color Final Personalizado: " + colorFinal);
+            }
+        }
 
         return new Ficha(
                 fDto.getIdFicha(),
@@ -687,6 +826,56 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return mano;
     }
 
+    /**
+     * Método auxiliar para parsear la lista de jugadores que llega en el evento
+     * MANO_INICIAL
+     *
+     * @param payloadJugadores String con formato
+     * "id,nombre,avatar,c1,c2,c3,c4;..."
+     */
+    public List<JugadorDTO> deserializarListaJugadores(String payloadJugadores) {
+        List<JugadorDTO> lista = new ArrayList<>();
+
+        if (payloadJugadores == null || payloadJugadores.isEmpty()) {
+            return lista;
+        }
+
+        // Separar por jugador (;)
+        String[] jugadoresRaw = payloadJugadores.split(";");
+
+        for (String datos : jugadoresRaw) {
+            // Separar campos por (,)
+            String[] campos = datos.split(",");
+
+            // Validación básica para no tronar
+            if (campos.length >= 7) {
+                JugadorDTO dto = new JugadorDTO();
+                // campos[0] es el ID del socket, lo usamos internamente o como nombre si gustas
+                dto.setNombre(campos[1]); // Nickname real
+
+                try {
+                    dto.setIdAvatar(Integer.parseInt(campos[2]));
+
+                    int[] colores = new int[4];
+                    colores[0] = Integer.parseInt(campos[3]);
+                    colores[1] = Integer.parseInt(campos[4]);
+                    colores[2] = Integer.parseInt(campos[5]);
+                    colores[3] = Integer.parseInt(campos[6]);
+                    dto.setColores(colores);
+
+                    // Inicializamos fichas
+                    dto.setFichasRestantes(14);
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parseando datos de jugador: " + datos);
+                }
+
+                lista.add(dto);
+            }
+        }
+        return lista;
+    }
+
     public void enviarComandoIniciarPartida() {
         try {
             String mensaje = this.miId + ":INICIAR_PARTIDA:";
@@ -707,8 +896,12 @@ public class Modelo implements IModelo, PropertyChangeListener {
     /**
      * Establece la identificación única (ID) del cliente/jugador actual, usada
      * para construir los mensajes enviados al servidor.
+     *
+     * public void setMiId(String miId) { this.miId = miId; }
      */
-    public void setMiId(String miId) {
+    public void setIdCliente(String miId) {
         this.miId = miId;
+        this.idCliente = miId; // Es vital que ambas tengan el ID
+        System.out.println("[ModeloJuego] ID Cliente asignado: " + miId);
     }
 }
