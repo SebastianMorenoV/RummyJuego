@@ -1,6 +1,7 @@
 package contratos;
 
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 /**
  * Contrato para el Ensamblador de Componentes del Cliente (Factory).
@@ -29,5 +30,5 @@ public interface iEnsambladorCliente {
      * y recibirá las actualizaciones de la red.
      * @return Una instancia de {@link iListener} lista para recibir mensajes del servidor.
      */
-    iListener crearListener(String miId, PropertyChangeListener oyente);
+    iListener crearListener(String miId, List<PropertyChangeListener> oyentes);
 }

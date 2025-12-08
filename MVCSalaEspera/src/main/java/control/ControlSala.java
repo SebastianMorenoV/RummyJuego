@@ -15,12 +15,13 @@ import modelo.ModeloSala;
 public class ControlSala implements iControlSolicitarInicio{
     
     //???
-    iControlCUPrincipal controladorCUPrincipal;
+    iControlCUPrincipal controlCUPrincipal;
     ModeloSala modelo;
 
     public ControlSala(ModeloSala modelo) {
         this.modelo = modelo;
     }
+ 
     
     @Override
     public void notificarEstoyListo() {
@@ -28,14 +29,10 @@ public class ControlSala implements iControlSolicitarInicio{
     }
 
     @Override
-    public void setControladorCUPrincipal(iControlCUPrincipal controladorCUPrincipal) {
-        this.controladorCUPrincipal=controladorCUPrincipal;
+    public void setControladorCUPrincipal(iControlCUPrincipal controlCUPrincipal) {
+        this.controlCUPrincipal=controlCUPrincipal;
     }
     
-    @Override
-    public void setConfiguracion(String ipServidor,int puertoServidor, String ipCliente){
-        modelo.setIpServidor(ipServidor);
-        modelo.setPuertoServidor(puertoServidor);
-        modelo.setIpCliente(ipCliente);
-    }
+
+
 }

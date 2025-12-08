@@ -8,8 +8,6 @@ package contratos.controladoresMVC;
  *
  * @author gael_
  */
-public interface iControlSolicitarInicio {
-    public void notificarEstoyListo();
-    public void setControladorCUPrincipal(iControlCUPrincipal controladorCUPrincipal);
-
+public interface iControlJuego {
+    void iniciarPartida();
 }

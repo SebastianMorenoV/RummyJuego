@@ -3,7 +3,9 @@ package Control;
 import Modelo.ModeloCUPrincipal;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlConfig;
+import contratos.controladoresMVC.iControlJuego;
 import contratos.controladoresMVC.iControlSolicitarInicio;
+import contratos.vistasMVC.IVistaJuego;
 
 
 /**
@@ -13,8 +15,11 @@ import contratos.controladoresMVC.iControlSolicitarInicio;
 public class ControlCUPrincipal implements iControlCUPrincipal{
 
     ModeloCUPrincipal modelo;
-    iControlConfig controladorConfig;
     iControlSolicitarInicio controlSala;
+    private iControlJuego controladorJuego;
+    private IVistaJuego vistaTableroJuego;
+    
+    iControlConfig controladorConfig;
 
     public ControlCUPrincipal(ModeloCUPrincipal modelo) {
         this.modelo = modelo;
@@ -33,6 +38,28 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
     public void SolicitarUnirseAPartida() {
         modelo.SolicitarUnirseApartida();
     }
+    
+    @Override
+    public void casoUsoSolicitarUnirseAPartida() {
+        if (this.controlSala != null) {
+            System.out.println("[ControlPrincipal] Navegando a Sala de Espera...");
+        } else {
+            System.err.println("Error: ControladorSalaEspera no ha sido ensamblado.");
+        }
+    }
+    
+    @Override
+    public void casoUsoIniciarPartida() {
+        System.out.println("[Orquestador] INICIANDO PARTIDA: Condición cumplida. Lanzando VistaTablero.");
+
+        // 1. Delegar al Controlador de Juego la orden de inicio (Modelo envía el comando COMANDO_INICIAR_PARTIDA)
+        this.controladorJuego.iniciarPartida();
+
+        // 2. MOSTRAR LA VISTA INYECTADA
+        if (this.vistaTableroJuego != null) {
+            this.vistaTableroJuego.setVisible(true);
+        }
+    }
 
     @Override
     public void casoUsoConfigurarPartida() {
@@ -46,6 +73,14 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
 
     public void setControladorConfig(iControlConfig controladorConfig) {
         this.controladorConfig = controladorConfig;
+    }
+    
+    public void setControladorJuego(iControlJuego controladorJuego) {
+        this.controladorJuego = controladorJuego;
+    }
+    
+    public void setVistaTableroJuego(IVistaJuego vistaTableroJuego) {
+        this.vistaTableroJuego = vistaTableroJuego;
     }
 
     @Override

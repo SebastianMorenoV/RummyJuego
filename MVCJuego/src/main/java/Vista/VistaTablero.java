@@ -9,6 +9,7 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import contratos.vistasMVC.IVistaJuego;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -38,7 +39,7 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
  *
  * @author benja
  */
-public class VistaTablero extends javax.swing.JFrame implements Observador {
+public class VistaTablero extends javax.swing.JFrame implements Observador, IVistaJuego {
 
     private Controlador control;
     private TableroUI tableroUI;

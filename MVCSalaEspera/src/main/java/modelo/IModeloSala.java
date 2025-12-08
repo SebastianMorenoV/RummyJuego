@@ -5,6 +5,11 @@
 package modelo;
 
 import contratos.iDespachador;
+import contratos.iEnsambladorCliente;
+import java.util.List;
+import java.util.Map;
+import vista.ObservadorSala;
+import vista.TipoEventoSala;
 
 /**
  *
@@ -13,4 +18,15 @@ import contratos.iDespachador;
 public interface IModeloSala {
     public void setDespachador(iDespachador despachador);
     void enviarSolicitudInicio();
+    
+    void iniciarConexionRed(); 
+
+    String getMiId(); 
+
+    void setEnsambladorCliente(iEnsambladorCliente ensambladorCliente);
+
+    void setMiPuertoDeEscucha(int miPuertoDeEscucha);
+
+    void setMiId(String miId);
+
 }

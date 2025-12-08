@@ -21,4 +21,8 @@ public interface iControlCUPrincipal {
     public void setControladorConfig(iControlConfig controladorConfig);
     
     public void setControladorSalaEspera(iControlSolicitarInicio controladorSala);
+    
+    void casoUsoSolicitarUnirseAPartida();
+    
+    void casoUsoIniciarPartida();
 }
