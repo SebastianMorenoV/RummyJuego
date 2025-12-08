@@ -11,5 +11,7 @@ package contratos.controladoresMVC;
 public interface iControlSolicitarInicio {
     public void notificarEstoyListo();
     public void setControladorCUPrincipal(iControlCUPrincipal controladorCUPrincipal);
+    
+    public void mostrarVista();
 
 }

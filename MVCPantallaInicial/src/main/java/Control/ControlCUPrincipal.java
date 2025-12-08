@@ -43,6 +43,7 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
     public void casoUsoSolicitarUnirseAPartida() {
         if (this.controlSala != null) {
             System.out.println("[ControlPrincipal] Navegando a Sala de Espera...");
+            this.controlSala.mostrarVista();
         } else {
             System.err.println("Error: ControladorSalaEspera no ha sido ensamblado.");
         }

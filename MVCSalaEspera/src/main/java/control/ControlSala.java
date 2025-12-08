@@ -7,6 +7,7 @@ package control;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlSolicitarInicio;
 import modelo.ModeloSala;
+import vista.VistaSalaEspera;
 
 /**
  *
@@ -17,11 +18,15 @@ public class ControlSala implements iControlSolicitarInicio{
     //???
     iControlCUPrincipal controlCUPrincipal;
     ModeloSala modelo;
+    private VistaSalaEspera vista;
 
     public ControlSala(ModeloSala modelo) {
         this.modelo = modelo;
     }
  
+    public void setVista(VistaSalaEspera vista) {
+        this.vista = vista;
+    }
     
     @Override
     public void notificarEstoyListo() {
@@ -33,6 +38,13 @@ public class ControlSala implements iControlSolicitarInicio{
         this.controlCUPrincipal=controlCUPrincipal;
     }
     
-
+    @Override
+    public void mostrarVista() {
+        if (vista != null) {
+            vista.setVisible(true);
+        } else {
+            System.err.println("Error: La vista de Sala de Espera no fue inyectada al controlador.");
+        }
+    }
 
 }

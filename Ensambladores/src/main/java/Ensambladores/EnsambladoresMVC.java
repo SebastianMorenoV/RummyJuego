@@ -78,6 +78,8 @@ public class EnsambladoresMVC {
         // Se usa la interfaz IModeloSalaEspera en el constructor de ControlSalaEspera
         ControlSala controlSalaEspera = new ControlSala(modeliSalaEspera);
         VistaSalaEspera vistaSalaEspera = new VistaSalaEspera(controlSalaEspera);
+        controlSalaEspera.setVista(vistaSalaEspera);
+        
         modeliSalaEspera.añadirObservador(vistaSalaEspera);
 
         // 3. Ensamblar CU Principal (Lobby)
@@ -119,6 +121,10 @@ public class EnsambladoresMVC {
         IVistaJuego vistaJuego = vistaTablero;
 
         modeloEjercerTurno.agregarObservador(vistaTablero); // La instancia concreta escucha al Modelo
+        
+        vistaSalaEspera.setLanzador(() -> {
+        controlPrincipal.casoUsoIniciarPartida();
+    });
 
         // 4. Inyectar dependencias de navegación
         // El orquestador necesita los controladores y la vista de juego
@@ -141,6 +147,7 @@ public class EnsambladoresMVC {
         vistaLobby.setVisible(true);
         vistaSalaEspera.setVisible(false);
         vistaTablero.setVisible(false); // Controlamos la visibilidad de la única instancia
+        
     }
    
     // EN Ensambladores/EnsambladoresMVC.java

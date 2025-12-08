@@ -5,17 +5,17 @@
 package Modelo;
 
 import eventos.Evento;
-import Vista.Observador;
 import java.util.ArrayList;
 import java.util.List;
+import Vista.ObservadorLobby;
 
 /**
  *
  * @author benja
  */
-public class ModeloCUPrincipal implements IModelo {
+public class ModeloCUPrincipal implements IModeloLobby {
     
-    List<Observador> observadores;
+    List<ObservadorLobby> observadores;
     
     public ModeloCUPrincipal() {
         observadores = new ArrayList<>();
@@ -24,7 +24,7 @@ public class ModeloCUPrincipal implements IModelo {
     
     @Override
     public String getPartida() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return "Partida_De_Prueba";
     }
     
     public void SolicitarUnirseApartida(){
@@ -39,12 +39,12 @@ public class ModeloCUPrincipal implements IModelo {
         notificarObservadores(Evento.INICIO);
     }
     
-    public void añadirObservador(Observador obs) {
+    public void añadirObservador(ObservadorLobby obs) {
         observadores.add(obs);
     }
     
     public void notificarObservadores(Evento evento) {
-        for (Observador observador : observadores) {
+        for (ObservadorLobby observador : observadores) {
             observador.actualiza(this, evento);
         }
     }
