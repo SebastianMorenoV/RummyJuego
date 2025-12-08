@@ -26,11 +26,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>MVCConfigurarPartida</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>MVCSalaEspera</artifactId>
             <version>${project.version}</version>
         </dependency>

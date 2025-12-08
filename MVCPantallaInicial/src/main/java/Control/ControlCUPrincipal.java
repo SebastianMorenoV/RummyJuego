@@ -54,10 +54,8 @@ public class ControlCUPrincipal implements iControlCUPrincipal{
     public void casoUsoIniciarPartida() {
         System.out.println("[Orquestador] INICIANDO PARTIDA: Condición cumplida. Lanzando VistaTablero.");
 
-        // 1. Delegar al Controlador de Juego la orden de inicio (Modelo envía el comando COMANDO_INICIAR_PARTIDA)
         this.controladorJuego.iniciarPartida();
 
-        // 2. MOSTRAR LA VISTA INYECTADA
         if (this.vistaTableroJuego != null) {
             this.vistaTableroJuego.setVisible(true);
         }

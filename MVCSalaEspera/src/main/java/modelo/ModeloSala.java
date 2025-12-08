@@ -28,7 +28,7 @@ import vista.ObservadorSala;
 public class ModeloSala implements IModeloSala, PropertyChangeListener{
     private List<ObservadorSala> observadores;
     private iDespachador despachador;
-    private String miId; // Necesitas saber quién eres
+    private String miId;
 
     
     private final static Logger logger = Logger.getLogger(ModeloSala.class.getName());
@@ -42,17 +42,13 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
     }
     
 
-    /**
-     * ** MÉTODO DE INICIO DE CONEXIÓN ** Se llama desde EnsambladoresMVC.
-     */
     @Override
-    public void iniciarConexionRed() {//esto va pal ensamblador!!!!!!!!!!!!!!!!!
+    public void iniciarConexionRed() {
         if (ensambladorCliente == null) {
             logger.severe("ERROR: EnsambladorCliente no inyectado. La red no iniciará.");
             return;
         }
 
-        // 3. Registrar Cliente con el servidor (Este registro se usa para el envío del mensaje SALA_ACTUALIZADA)
         try {
             String ipCliente = InetAddress.getLocalHost().getHostAddress();
             String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
@@ -91,17 +87,6 @@ public class ModeloSala implements IModeloSala, PropertyChangeListener{
         this.miId = miId;
     }
     
-//    public void setIpServidor(String ipServidor) {
-//        this.ipServidor = ipServidor;
-//    }
-//
-//    public void setPuertoServidor(int puertoServidor) {
-//        this.puertoServidor = puertoServidor;
-//    }
-//
-//    public void setIpCliente(String ipCliente) {
-//        this.ipCliente = ipCliente;
-//    }
 
     @Override
     public void enviarSolicitudInicio() {

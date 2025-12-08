@@ -30,14 +30,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String mazoSerializado;
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); // NUEVO
     
-    private Set<String> jugadoresListos; //cu gal
+    private Set<String> jugadoresListos; 
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
         this.observadores = new ArrayList<>();
         this.mazoSerializado = "";
-        this.jugadoresListos = Collections.synchronizedSet(new HashSet<>()); //cu gal
+        this.jugadoresListos = Collections.synchronizedSet(new HashSet<>());
     }
 
     /**
@@ -168,7 +168,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * iniciada o no cumple con el número de jugadores.
      */
     @Override
-    public synchronized boolean iniciarPartidaSiCorresponde() { //cu gal
+    public synchronized boolean iniciarPartidaSiCorresponde() { 
         int numJugadores = ordenDeTurnos.size();
         int numListos = jugadoresListos.size();
         
