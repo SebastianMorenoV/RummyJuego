@@ -24,12 +24,7 @@ public class ControlSalaEspera implements iControlSalaEspera{
     @Override
     public void iniciarSalaEspera() {
         System.out.println("[ControlSalaEspera] Simulación de entrada de jugadores e inicio de Sala de Espera.");
-
-        // Llama al modelo para que simule la entrada de jugadores 
-        // y automáticamente notifique a la VistaSalaEspera.
         this.modelo.simularEntradaDeJugadores();
-
-        // La VistaSalaEspera recibirá la notificación y se hará visible.
     }
 
     public void jugadorPulsaListo() {
@@ -38,7 +33,6 @@ public class ControlSalaEspera implements iControlSalaEspera{
     
     public void iniciarPartidaFinal() {
         if (controlCUPrincipal != null) {
-            // Delega al orquestador (ControlCUPrincipal) la responsabilidad de iniciar
             controlCUPrincipal.casoUsoIniciarPartida();
         } else {
             System.err.println("Error: ControladorCUPrincipal no inyectado. No se puede iniciar la partida.");

@@ -39,10 +39,8 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     @Override
     public void casoUsoSolicitarUnirseAPartida() {
         if (this.controladorSalaEspera != null) {
-            System.out.println("[ControlPrincipal] Navegando a Sala de Espera...");
             this.controladorSalaEspera.iniciarSalaEspera();
         } else {
-            System.err.println("Error: ControladorSalaEspera no ha sido ensamblado.");
         }
     }
 

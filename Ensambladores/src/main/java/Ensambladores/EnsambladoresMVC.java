@@ -4,6 +4,7 @@ import Control.ControlCUPrincipal;
 import Controlador.Controlador;
 import Modelo.Modelo;
 import Modelo.ModeloCUPrincipal;
+import Util.Configuracion;
 import Vista.VistaLobby;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlCUPrincipal;
@@ -46,12 +47,11 @@ public class EnsambladoresMVC {
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
 
-        String miId = "Jugador1";
+        String miId = "Jugador2";
         int miPuertoDeEscucha = buscarPuertoLibre();
 
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
 
-        // ** Dependencias Globales **
         iEnsambladorCliente ensambladorCliente = new EnsambladorCliente();
 
         // 2. Ensamblar MVC Sala de Espera (Componente a Sincronizar)
@@ -61,7 +61,14 @@ public class EnsambladoresMVC {
         // 2.1. INYECCIÓN DE RECURSOS NECESARIOS PARA EL MODELO
         modeliSalaEspera.setDespachador(despachador);
         modeliSalaEspera.setMiId(miId);
+        //2.2 Iniciar Sincronización
         modeliSalaEspera.setEnsambladorCliente(ensambladorCliente);
+        String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
+        try {
+            this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeRegistro);
+        } catch (IOException ex) {
+            Logger.getLogger(IModeloSalaEspera.class.getName()).log(Level.SEVERE, null, ex);
+        }
         modeliSalaEspera.setMiPuertoDeEscucha(miPuertoDeEscucha);
 
         // Se usa la interfaz IModeloSalaEspera en el constructor de ControlSalaEspera
@@ -81,7 +88,7 @@ public class EnsambladoresMVC {
 
         modeloEjercerTurno.setDespachador(despachador);
         modeloEjercerTurno.setMiId(miId);
-        
+
         List<PropertyChangeListener> escuchadores = new ArrayList<>();
 //        escuchadores.add(modeloPrincipal);
         escuchadores.add(modeloEjercerTurno);
@@ -124,7 +131,7 @@ public class EnsambladoresMVC {
         controlSalaEspera.setControlCUPrincipal(controlPrincipal);
 
         // 5. ** ORDENAR AL MODELO QUE INICIE SU RED ** (Dispara la lógica de hilos/sockets dentro del Modelo)
-        modeliSalaEspera.iniciarConexionRed();
+        //modeliSalaEspera.iniciarConexionRed();
 
         System.out.println("[Ensamblador] Iniciando aplicación para ID: " + miId);
         vistaLobby.setVisible(true);
@@ -140,7 +147,6 @@ public class EnsambladoresMVC {
             return 9999; // Fallback en caso de error extremo
         }
     }
-    
 
     public static void main(String[] args) {
         EnsambladoresMVC e = new EnsambladoresMVC();

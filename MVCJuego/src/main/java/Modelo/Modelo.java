@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import Vista.ObservadorJuego;
+import jdk.jshell.execution.Util;
 
 /**
  * Clase Modelo en el patrón MVC. Gestiona el estado local del juego, interactúa

@@ -25,7 +25,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     private ControlSalaEspera control;
 
     /**
-     * Creates new form VistaSalaEspera
      *
      * @param control
      */
@@ -33,8 +32,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         this.control = control;
         initComponents();
         this.setLocationRelativeTo(null);
-
-        // Enlazar el botón de listo al controlador.
         btnJugadorListoParaIniciarPartida.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -45,15 +42,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         });
     }
 
-    // ******************************************************
-    // Constructor para PRUEBAS LOCALES (main) ***
-    // ******************************************************
     /**
      * Constructor auxiliar para el método main de pruebas. NO debe ser usado
      * por el flujo normal de la aplicación.
      */
     public VistaSalaEspera() {
-        // Llama a inicializar componentes para que la UI se dibuje
         initComponents();
         this.setLocationRelativeTo(null);
         if (btnJugadorListoParaIniciarPartida != null) {
@@ -68,7 +61,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             case SALA:
                 ModeloSalaEspera modelo = (ModeloSalaEspera) iModelo;
                 Map<String, Boolean> jugadoresListos = modelo.getJugadoresListos();
-                String miId = modelo.getMiId(); // ID de la instancia actual (Ej: "Jugador1")
+                String miId = modelo.getMiId(); 
 
                 // Mapeo de componentes de la UI a los slots fijos de la ventana
                 JLabel[] nombres = {txtNombreJ1, txtNombreJ2, txtNombreJ3, txtNombreJ4};
@@ -109,7 +102,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                     btnJugadorListoParaIniciarPartida.setEnabled(false);
                     this.setVisible(false); // Ocultar la sala de espera
                     control.iniciarPartidaFinal(); // Llamar al controlador para iniciar el CU de Juego
-                    // FIN DE LA LÓGICA DE TRANSICIÓN
                 } else if (miEstado) {
                     // El jugador actual está listo, esperando a los demás
                     this.setTitle("Sala de Espera - " + miId + " (¡LISTO!)");
@@ -122,13 +114,9 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                     btnJugadorListoParaIniciarPartida.setEnabled(true);
                 }
 
-                // ----------------------------------------------------
-                // LÍNEAS CRUCIALES: FORZAR REDIBUJADO DE LA INTERFAZ
                 this.revalidate();
                 this.repaint();
-                // ----------------------------------------------------
 
-                // Hace visible la ventana (o la mantiene visible si ya lo estaba)
                 this.setVisible(true);
 
                 break;

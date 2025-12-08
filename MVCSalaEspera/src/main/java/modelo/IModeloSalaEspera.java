@@ -27,8 +27,6 @@ public interface IModeloSalaEspera extends PropertyChangeListener {
 
     boolean isPartidaLista(); 
 
-    void iniciarConexionRed(); 
-
     void notificarObservadores(TipoEvento evt);
 
     void agregarObservador(ObservadorSalaEspera obs); 

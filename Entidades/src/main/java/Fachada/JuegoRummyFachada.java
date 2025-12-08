@@ -20,7 +20,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
     private Tablero tableroAlInicioDelTurno;
     private Mano manoAlInicioDelTurno;
     private List<Jugador> jugadores;
-    private Jugador jugadorLocal; // <--- CAMBIO 1: Campo para almacenar el objeto Jugador local
+    private Jugador jugadorLocal;
     private String idJugadorLocal;
 
     /**

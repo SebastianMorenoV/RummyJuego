@@ -6,7 +6,6 @@ import Util.Configuracion;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,36 +82,15 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
             }
         }
     }
-
-    /**
-     * ** MÉTODO DE INICIO DE CONEXIÓN ** Se llama desde EnsambladoresMVC.
-     */
-    public void iniciarConexionRed() {//esto va pal ensamblador!!!!!!!!!!!!!!!!!
-        if (ensambladorCliente == null) {
-            logger.severe("ERROR: EnsambladorCliente no inyectado. La red no iniciará.");
-            return;
-        }
-
-        // 3. Registrar Cliente con el servidor (Este registro se usa para el envío del mensaje SALA_ACTUALIZADA)
-        try {
-            String ipCliente = InetAddress.getLocalHost().getHostAddress();
-            String mensajeRegistro = miId + ":REGISTRAR:" + ipCliente + "$" + miPuertoDeEscucha;
-            this.despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), mensajeRegistro);
-        } catch (IOException ex) {
-            Logger.getLogger(ModeloSalaEspera.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
     
     /**
      * Lógica CU: El cliente envía el comando LISTO al servidor.
      */
+    @Override
     public void jugadorPulsaListo() {
         try {
             String comandoListo = miId + ":LISTO:";
             despachador.enviar(Configuracion.getIpServidor(), Configuracion.getPuerto(), comandoListo);
-
-            // Actualización LOCAL (Para que la respuesta sea instantánea)
             jugadoresListos.put(miId, true);
             notificarObservadores(TipoEvento.SALA);
 
@@ -121,10 +99,12 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
         }
     }
 
+    @Override
     public void iniciarCU() {
         simularEntradaDeJugadores();
     }
 
+    @Override
     public void simularEntradaDeJugadores() {
         this.idsJugadoresEnSala = new ArrayList<>();
         List<String> allPlayerIds = List.of("Jugador1", "Jugador2", "Jugador3", "Jugador4");
@@ -137,48 +117,58 @@ public class ModeloSalaEspera implements IModeloSalaEspera, PropertyChangeListen
         notificarObservadores(TipoEvento.SALA);
     }
 
+    @Override
     public void notificarObservadores(TipoEvento evt) {
         for (ObservadorSalaEspera observador : observadores) {
             observador.actualiza(this, evt);
         }
     }
 
+    @Override
     public void agregarObservador(ObservadorSalaEspera obs) {
         if (obs != null && !observadores.contains(obs)) {
             observadores.add(obs);
         }
     }
 
+    @Override
     public boolean isPartidaLista() {
         long jugadoresEnSala = idsJugadoresEnSala.size();
         long jugadoresListosCount = jugadoresListos.values().stream().filter(r -> r).count();
         return jugadoresEnSala >= 2 && jugadoresListosCount == jugadoresEnSala;
     }
 
+    @Override
     public void setEnsambladorCliente(iEnsambladorCliente ensambladorCliente) {
         this.ensambladorCliente = ensambladorCliente;
     }
 
+    @Override
     public void setMiPuertoDeEscucha(int miPuertoDeEscucha) {
         this.miPuertoDeEscucha = miPuertoDeEscucha;
     }
 
+    @Override
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
     }
 
+    @Override
     public void setMiId(String miId) {
         this.miId = miId;
     }
 
+    @Override
     public Map<String, Boolean> getJugadoresListos() {
         return jugadoresListos;
     }
 
+    @Override
     public List<String> getIdsJugadoresEnSala() {
         return idsJugadoresEnSala;
     }
 
+    @Override
     public String getMiId() {
         return miId;
     }
