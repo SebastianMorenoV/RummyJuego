@@ -391,6 +391,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         notificarObservadores("REGISTRO_EXITOSO:" + idCliente);
                     }
                     numeroDeJugadoresRegistrados++;
+                    if (ordenDeTurnos.size() == 4) {
+                        if (iniciarPartidaSiCorresponde()) {
+                            notificarObservadores("EVENTO_PARTIDA_INICIADA");
+                        }
+                    }
                     break;
                 case "ESTOY_LISTO":
                     System.out.println("[Pizarra] Jugador listo: " + idCliente);

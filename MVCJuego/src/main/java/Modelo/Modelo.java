@@ -753,60 +753,55 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
 
-        // Lista de IDs que existen en tu juego (Debería venir del servidor, 
-        // pero para que funcione visualmente ahora, usaremos los fijos).
-        List<String> jugadoresAPintar = this.nombresJugadores.isEmpty() ? new ArrayList<>() : this.nombresJugadores;
+        List<String> ordenJugadoresUI = new ArrayList<>();
 
-        for (String id : jugadoresAPintar) {
-            DTO.JugadorDTO jugadorDto = new DTO.JugadorDTO();
-            jugadorDto.setNombre(id); // Ahora 'id' es el UUID real (ej: Jugador_a1b2)
+        if (this.nombresJugadores.contains(this.miId)) {
+            ordenJugadoresUI.add(this.miId);
+        }
 
-            // Lista de IDs que existen en tu juego
-            List<String> ordenJugadoresUI = new ArrayList<>();
+        for (String idNombre : this.nombresJugadores) {
+            if (!idNombre.equals(this.miId)) {
+                ordenJugadoresUI.add(idNombre);
+            }
+        }
 
-            if (this.nombresJugadores.contains(this.miId)) {
-                ordenJugadoresUI.add(this.miId);
+        // 2. Recorrer la lista ORDENADA una sola vez
+        for (String idJugadores : ordenJugadoresUI) {
+            DTO.JugadorDTO jugadorDTO1 = new DTO.JugadorDTO();
+
+            // Buscamos la info estática (Avatar, Nombre Real)
+            JugadorDTO perfil = perfilesJugadores.get(idJugadores);
+            if (perfil != null) {
+                jugadorDTO1.setNombre(perfil.getNombre());
+                jugadorDTO1.setIdAvatar(perfil.getIdAvatar());
+                jugadorDTO1.setColores(perfil.getColores());
+            } else {
+                // Fallback
+                jugadorDTO1.setNombre(idJugadores);
+                jugadorDTO1.setIdAvatar(1);
             }
 
-            for (String idNombre : this.nombresJugadores) {
-                if (!idNombre.equals(this.miId)) {
-                    ordenJugadoresUI.add(idNombre);
-                }
-            }
+            // Determinar si es turno
+            boolean esSuTurno = idJugadores.equals(this.idJugadorEnTurnoGlobal);
+            jugadorDTO1.setEsTurno(esSuTurno);
 
-            for (String idJugadores : ordenJugadoresUI) {
-                DTO.JugadorDTO jugadorDTO1 = new DTO.JugadorDTO();
-
-                // 1. Buscamos la info estática (Avatar, Nombre Real)
-                JugadorDTO perfil = perfilesJugadores.get(idJugadores);
-                if (perfil != null) {
-                    jugadorDTO1.setNombre(perfil.getNombre());
-                    jugadorDTO1.setIdAvatar(perfil.getIdAvatar());
-                    jugadorDTO1.setColores(perfil.getColores());
-                } else {
-                    // Fallback
-                    jugadorDTO1.setNombre(idJugadores);
-                    jugadorDTO1.setIdAvatar(1);
-                }
-
-                // 2. Determinar si es turno
-                boolean esSuTurno = idJugadores.equals(this.idJugadorEnTurnoGlobal);
-                jugadorDTO1.setEsTurno(esSuTurno);
-
-                if (idJugadores.equals(this.miId)) {
+            if (idJugadores.equals(this.miId)) {
+                // Protección contra null pointer si el juego no ha iniciado bien
+                if (juego.getJugadorActual() != null && juego.getJugadorActual().getManoJugador() != null) {
                     int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
                     jugadorDTO1.setFichasRestantes(cantidad);
                 } else {
-                    int cantidadRival = conteoFichasRivales.getOrDefault(idJugadores, 14);
-                    jugadorDTO1.setFichasRestantes(cantidadRival);
+                    jugadorDTO1.setFichasRestantes(0);
                 }
-
-                listaJugadoresDTO.add(jugadorDTO1);
+            } else {
+                int cantidadRival = conteoFichasRivales.getOrDefault(idJugadores, 14);
+                jugadorDTO1.setFichasRestantes(cantidadRival);
             }
 
+            listaJugadoresDTO.add(jugadorDTO1);
         }
 
-        // Asignar la lista al DTO
+        // Asignar la lista limpia al DTO
         dto.setJugadores(listaJugadoresDTO);
 
         return dto;

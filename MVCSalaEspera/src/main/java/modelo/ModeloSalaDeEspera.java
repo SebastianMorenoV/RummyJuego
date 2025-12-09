@@ -128,5 +128,9 @@ public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeLi
                 System.out.println("[ModeloSala] Ignorando petición de voto propia.");
             }
         }
+        if (evento.equals("MANO_INICIAL")) {
+            System.out.println("[ModeloSala] Partida iniciada. Cerrando sala de espera...");
+            cerrarCU();
+        }
     }
 }

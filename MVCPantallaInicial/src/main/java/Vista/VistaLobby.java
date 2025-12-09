@@ -84,13 +84,13 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
         jLabel1.setBounds(-4, -4, 910, 530);
     }// </editor-fold>                        
 
-    private void btnCrearPartidaMouseClicked(java.awt.event.MouseEvent evt) {                                             
+    private void btnCrearPartidaMouseClicked(java.awt.event.MouseEvent evt) {
         control.iniciarCreacionPartida();
-    }                                            
+    }
 
-    private void btnUnirsePartidaMouseClicked(java.awt.event.MouseEvent evt) {                                              
+    private void btnUnirsePartidaMouseClicked(java.awt.event.MouseEvent evt) {
         control.SolicitarUnirseAPartida();
-    }                                             
+    }
 
     // Variables declaration - do not modify                     
     private javax.swing.JButton btnCrearPartida;
@@ -102,6 +102,9 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
     @Override
     public void actualiza(IModeloLobby modelo, Evento evento) {
         switch (evento) {
+            case PARTIDA_EXISTENTE:
+                JOptionPane.showMessageDialog(this, "No se puede crear una Nueva Partida, ya existe una corriendo localmente.");
+                break;
             case CERRAR_CU:
                 this.setVisible(false);
                 break;
@@ -115,7 +118,7 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
                 this.setVisible(false);
                 control.casoUsoConfigurarPartida();
                 break;
-             case SOLICITAR_UNIRSE_A_PARTIDA:
+            case SOLICITAR_UNIRSE_A_PARTIDA:
                 System.out.println("[VistaLobby] ¡Aceptado! Entrando...");
                 this.setVisible(false);
                 control.procesarNavegacionRegistrarJugador();
@@ -148,9 +151,9 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
                 JOptionPane.showMessageDialog(this,
                         "La sala esta vacia",
                         "0/0", JOptionPane.ERROR_MESSAGE);
-                
+
                 break;
-                
+
             default:
 
         }

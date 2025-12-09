@@ -4,6 +4,7 @@ import DTO.GrupoDTO;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -51,6 +52,7 @@ public class FichaUI extends JPanel {
         setSize(28, 45);
         setPreferredSize(new Dimension(28, 45));
         setOpaque(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         initDrag();
     }
 
@@ -63,6 +65,7 @@ public class FichaUI extends JPanel {
         this.color = color;
         this.comodin = comodin;
         this.originalLocation = originalLocation;
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     private void initDrag() {
@@ -72,6 +75,7 @@ public class FichaUI extends JPanel {
                 if (getParent() != null && !getParent().isEnabled()) {
                     return;
                 }
+                setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
                 glassPaneOffset = e.getPoint();
@@ -120,6 +124,7 @@ public class FichaUI extends JPanel {
              */
             @Override
             public void mouseReleased(MouseEvent e) {
+                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 if (getParent() != null && !getParent().isEnabled()) {
                     return;
                 }

@@ -6,11 +6,13 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.imageio.ImageIO;
 
 /**
- * Clase de presentación para dibujar un jugador en la interfaz de usuario. El
- * avatar es reemplazado por una imagen proporcionada como un array de bytes.
+ * Clase de presentación para dibujar un jugador en la interfaz de usuario. 
+ * Incluye animación de "respiración" cuando es el turno.
  *
  * @author Sebastian Moreno
  */
@@ -20,6 +22,11 @@ public class JugadorUI extends JPanel {
     private int fichasRestantes;
     private String nombreJugador;
     private boolean esTuTurno = false;
+
+    // Variables para la animación
+    private Timer timerAnimacion;
+    private float alpha = 1.0f; // Opacidad actual (0.0 a 1.0)
+    private boolean desvaneciendo = true; // Dirección de la animación
 
     public JugadorUI(String nombreJugador, int fichasRestantes, byte[] imagenAvatarBytes) {
         this.nombreJugador = nombreJugador;
@@ -36,6 +43,35 @@ public class JugadorUI extends JPanel {
 
         setPreferredSize(new Dimension(100, 100));
         setOpaque(false);
+        
+        initAnimacion(); // Inicializamos el timer
+    }
+
+    /**
+     * Configura el timer para el efecto de respiración.
+     */
+    private void initAnimacion() {
+        // Ejecuta cada 50ms (aprox 20 fps)
+        timerAnimacion = new Timer(50, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lógica de "Ping-Pong" para la opacidad
+                if (desvaneciendo) {
+                    alpha -= 0.05f; // Velocidad de desvanecimiento
+                    if (alpha <= 0.3f) { // Límite inferior de transparencia
+                        alpha = 0.3f;
+                        desvaneciendo = false;
+                    }
+                } else {
+                    alpha += 0.05f; // Velocidad de aparición
+                    if (alpha >= 1.0f) { // Límite superior
+                        alpha = 1.0f;
+                        desvaneciendo = true;
+                    }
+                }
+                repaint(); // Forzar repintado para ver el cambio
+            }
+        });
     }
 
     @Override
@@ -45,7 +81,6 @@ public class JugadorUI extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
         int panelWidth = getWidth();
@@ -60,15 +95,31 @@ public class JugadorUI extends JPanel {
 
         g2d.setColor(new Color(210, 180, 140));
         g2d.fillRoundRect(cardX, cardY, cardWidth, cardHeight, cornerRadius, cornerRadius);
+
+        // --- LÓGICA DE BORDE ANIMADO ---
         if (this.esTuTurno) {
-            g2d.setColor(Color.GREEN); // Color verde para el turno activo
-            g2d.setStroke(new BasicStroke(5)); // Borde más grueso para resaltar
+            // Creamos el color verde usando el Alpha dinámico
+            // (R, G, B, Alpha) -> Alpha va de 0 a 255
+            int alphaInt = Math.max(0, Math.min(255, (int) (alpha * 255)));
+            
+            // Efecto de brillo: Dibujamos un borde semitransparente grueso y uno solido delgado
+            g2d.setColor(new Color(0, 255, 0, alphaInt)); 
+            g2d.setStroke(new BasicStroke(6)); // Borde grueso para el brillo
+            g2d.drawRoundRect(cardX, cardY, cardWidth, cardHeight, cornerRadius, cornerRadius);
+            
+            // Borde base sólido para que no desaparezca del todo
+            g2d.setColor(new Color(0, 200, 0));
+            g2d.setStroke(new BasicStroke(2));
+            
         } else {
             g2d.setColor(new Color(150, 120, 90)); // Color original (café)
             g2d.setStroke(new BasicStroke(3)); // Grosor original
         }
+        
+        // Dibujar el borde final (o el café o el verde sólido interior)
         g2d.drawRoundRect(cardX, cardY, cardWidth, cardHeight, cornerRadius, cornerRadius);
 
+        // --- RESTO DEL DIBUJADO (Avatar, Texto, Fichas) ---
         int avatarSize = (int) (cardWidth * 0.5);
         int avatarX = cardX + (cardWidth - avatarSize) / 2;
         int avatarY = cardY + (int) (cardHeight * 0.08);
@@ -122,66 +173,58 @@ public class JugadorUI extends JPanel {
                 + (int) (avatarSize * 0.5), (int) (avatarSize * 0.8), bodyHeight, 0, 180);
     }
 
-    /**
-     * Permite actualizar la imagen del avatar en tiempo de ejecución cuando
-     * llega la información del servidor.
-     *
-     * @param imagenAvatarBytes
-     */
     public void setAvatarBytes(byte[] imagenAvatarBytes) {
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
             try {
                 this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));
-                this.repaint(); // Importante: repintar para que se vea el cambio
+                this.repaint();
             } catch (IOException e) {
                 System.err.println("Error actualizando avatar en UI: " + e.getMessage());
             }
         }
     }
 
-    /**
-     * Metodo para settear el numero de fichas restantes de un jugador. El
-     * numero de fichas restante sale debajo del nombre de un jugador
-     *
-     * @param fichasRestantes
-     */
     public void setFichasRestantes(int fichasRestantes) {
         this.fichasRestantes = fichasRestantes;
         repaint();
     }
 
-    /**
-     * Metodo para settear la imagen o "avatar" de un jugador.
-     *
-     * @param imagenAvatarBytes
-     */
     public void setImagenAvatar(byte[] imagenAvatarBytes) {
-
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
             try {
                 this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));
             } catch (IOException e) {
                 this.avatarImage = null;
-                System.err.println("Error al decodificar la nueva imagen del avatar: "
-                        + e.getMessage());
+                System.err.println("Error al decodificar la nueva imagen del avatar: " + e.getMessage());
             }
         }
         repaint();
     }
 
-    /**
-     * Metodo para settear el nombre de un jugador.
-     *
-     * @param nombreJugador
-     */
     public void setNombreJugador(String nombreJugador) {
         this.nombreJugador = nombreJugador;
-
         repaint();
     }
 
+    /**
+     * Activa o desactiva la animación de turno.
+     * @param esTuTurno 
+     */
     public void setEsTuTurno(boolean esTuTurno) {
         this.esTuTurno = esTuTurno;
-        repaint();
+        
+        // Controlamos el timer para no gastar recursos si no es el turno
+        if (esTuTurno) {
+            if (!timerAnimacion.isRunning()) {
+                timerAnimacion.start();
+            }
+        } else {
+            if (timerAnimacion.isRunning()) {
+                timerAnimacion.stop();
+            }
+            // Restauramos valores por defecto al terminar
+            alpha = 1.0f;
+            repaint();
+        }
     }
 }

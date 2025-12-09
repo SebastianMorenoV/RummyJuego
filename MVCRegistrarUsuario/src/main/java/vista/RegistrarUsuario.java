@@ -52,10 +52,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         initAvatarSelection();
 
         // Avatares al frente
-        jPanel1.setComponentZOrder(avatar1, 0);
-        jPanel1.setComponentZOrder(avatar2, 0);
-        jPanel1.setComponentZOrder(avatar3, 0);
-        jPanel1.setComponentZOrder(avatar4, 0);
     }
 
     /**
@@ -152,19 +148,18 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         txt2 = new javax.swing.JLabel();
         txt1 = new javax.swing.JLabel();
         txtSubtitulo = new javax.swing.JLabel();
-        avatar4 = new javax.swing.JLabel();
-        avatar3 = new javax.swing.JLabel();
-        avatar2 = new javax.swing.JLabel();
-        avatar1 = new javax.swing.JLabel();
         fondoavatar4 = new javax.swing.JPanel();
+        avatar4 = new javax.swing.JLabel();
         fondoAvatar3 = new javax.swing.JPanel();
+        avatar3 = new javax.swing.JLabel();
         fondoAvatar2 = new javax.swing.JPanel();
+        avatar2 = new javax.swing.JLabel();
         fondoAvatar1 = new javax.swing.JPanel();
+        avatar1 = new javax.swing.JLabel();
         txtTitulo = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(900, 500));
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -180,17 +175,17 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         panel.setLayout(panelLayout);
         panelLayout.setHorizontalGroup(
             panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnRegistrar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+            .addComponent(btnRegistrar, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
         );
         panelLayout.setVerticalGroup(
             panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(btnRegistrar, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
         );
 
-        jPanel1.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 480, 210, 60));
+        jPanel1.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 390, 210, 60));
 
         btnColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/color.png"))); // NOI18N
-        jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 380, -1, -1));
+        jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 320, -1, -1));
 
         txtfldNombre.setBackground(new java.awt.Color(255, 255, 255));
         txtfldNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -199,95 +194,101 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 txtfldNombreActionPerformed(evt);
             }
         });
-        jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 310, 410, 40));
+        jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 270, 410, 40));
 
         txt2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txt2.setForeground(new java.awt.Color(255, 255, 255));
         txt2.setText("Color de fichas:");
-        jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 380, -1, -1));
+        jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 320, -1, -1));
 
         txt1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txt1.setForeground(new java.awt.Color(255, 255, 255));
         txt1.setText("Nombre:");
-        jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 270, -1, -1));
+        jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 230, -1, -1));
 
         txtSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txtSubtitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtSubtitulo.setText("Seleccionar Avatar:");
-        jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 140, -1, -1));
-
-        avatar4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar4.png"))); // NOI18N
-        jPanel1.add(avatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 190, 70, 70));
-
-        avatar3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar3.png"))); // NOI18N
-        jPanel1.add(avatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 190, 70, 70));
-
-        avatar2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar2.png"))); // NOI18N
-        jPanel1.add(avatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 190, 70, 70));
-
-        avatar1.setBackground(new java.awt.Color(255, 255, 255));
-        avatar1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar1.png"))); // NOI18N
-        jPanel1.add(avatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 190, 70, 70));
+        jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 110, -1, -1));
 
         fondoavatar4.setBackground(new java.awt.Color(255, 255, 255));
+
+        avatar4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar4.png"))); // NOI18N
 
         javax.swing.GroupLayout fondoavatar4Layout = new javax.swing.GroupLayout(fondoavatar4);
         fondoavatar4.setLayout(fondoavatar4Layout);
         fondoavatar4Layout.setHorizontalGroup(
             fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(avatar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
         fondoavatar4Layout.setVerticalGroup(
             fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addGroup(fondoavatar4Layout.createSequentialGroup()
+                .addComponent(avatar4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jPanel1.add(fondoavatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 190, 70, 70));
+        jPanel1.add(fondoavatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 150, 70, 70));
 
         fondoAvatar3.setBackground(new java.awt.Color(255, 255, 255));
+
+        avatar3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar3.png"))); // NOI18N
 
         javax.swing.GroupLayout fondoAvatar3Layout = new javax.swing.GroupLayout(fondoAvatar3);
         fondoAvatar3.setLayout(fondoAvatar3Layout);
         fondoAvatar3Layout.setHorizontalGroup(
             fondoAvatar3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(avatar3, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
         fondoAvatar3Layout.setVerticalGroup(
             fondoAvatar3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar3Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(avatar3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 190, 70, 70));
+        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 150, 70, 70));
 
         fondoAvatar2.setBackground(new java.awt.Color(255, 255, 255));
+
+        avatar2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar2.png"))); // NOI18N
 
         javax.swing.GroupLayout fondoAvatar2Layout = new javax.swing.GroupLayout(fondoAvatar2);
         fondoAvatar2.setLayout(fondoAvatar2Layout);
         fondoAvatar2Layout.setHorizontalGroup(
             fondoAvatar2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addComponent(avatar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         fondoAvatar2Layout.setVerticalGroup(
             fondoAvatar2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar2Layout.createSequentialGroup()
+                .addComponent(avatar2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 190, 70, 70));
+        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 150, 70, 70));
 
         fondoAvatar1.setBackground(new java.awt.Color(255, 255, 255));
+
+        avatar1.setBackground(new java.awt.Color(255, 255, 255));
+        avatar1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar1.png"))); // NOI18N
 
         javax.swing.GroupLayout fondoAvatar1Layout = new javax.swing.GroupLayout(fondoAvatar1);
         fondoAvatar1.setLayout(fondoAvatar1Layout);
         fondoAvatar1Layout.setHorizontalGroup(
             fondoAvatar1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(avatar1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         fondoAvatar1Layout.setVerticalGroup(
             fondoAvatar1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 70, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(avatar1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 190, 70, 70));
+        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 150, 70, 70));
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
         txtTitulo.setForeground(new java.awt.Color(246, 220, 105));

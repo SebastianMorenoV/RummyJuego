@@ -25,8 +25,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     private final iDespachador despachador;
     private final iAgentePartida agentePartida;
 
-    int limiteFichas = 13; // Valor default Rummy
-
     public ControladorBlackboard(
             iAgentePartida agentePartida,
             iDirectorio directorio,
@@ -218,7 +216,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
 
-                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount + "$" + listaJugadoresString;
+                    String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount + "$" + listaJugadoresCompleta;
 
                     enviarMensajeDirecto(idJugador, mensajeMano);
                 }
@@ -370,9 +368,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
-    public synchronized int getLimiteFichas() {
-        return this.limiteFichas;
-    }
 
     public synchronized boolean isPartidaConfigurada() {
         return true; // Siempre true, porque usamos defaults

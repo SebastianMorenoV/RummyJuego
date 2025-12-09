@@ -26,7 +26,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     public VistaSalaEspera(iControlSalaEspera control) {
         this.control = control;
         this.setTitle("RummyKub | Vive la experiencia!");
-        this.setSize(920, 550);
+        this.setSize(900, 500);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         initComponents();
@@ -73,7 +73,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             }
         });
         getContentPane().add(btnIniciarPartida);
-        btnIniciarPartida.setBounds(320, 380, 290, 70);
+        btnIniciarPartida.setBounds(320, 370, 290, 70);
 
         avatarJugador2.setForeground(new java.awt.Color(13, 87, 26));
         avatarJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
