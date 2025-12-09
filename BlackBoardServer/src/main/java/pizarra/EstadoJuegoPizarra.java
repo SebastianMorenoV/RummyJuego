@@ -43,6 +43,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private int votosRecibidos = 0;
     private int totalVotantesEsperados = 0;
     private boolean votacionAprobada = false;
+    private boolean votacionInicioEnCurso = false;
+    private int votosInicioAfirmativos = 0;
+    private int votosInicioRecibidos = 0;
+    private int totalVotantesInicio = 0;
+    private String idSolicitanteInicio = "";
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
@@ -402,28 +407,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         }
                     }
                     break;
-                case "ESTOY_LISTO":
-                    System.out.println("[Pizarra] Jugador listo: " + idCliente);
-
-                    if (!jugadoresListos.contains(idCliente)) {
-                        jugadoresListos.add(idCliente);
-                        notificarObservadores("ACTUALIZAR_ESTADO_SALA");
-                    }
-
-                    // Verificar si todos (o mínimo 2) están listos
-                    int totalEnSala = ordenDeTurnos.size();
-                    int totalListos = jugadoresListos.size();
-
-                    System.out.println("[Pizarra] Listos: " + totalListos + "/" + totalEnSala);
-
-                    // REGLA DE INICIO: Mínimo 2 jugadores y Todos deben estar listos
-                    if (totalEnSala >= 2 && totalListos == totalEnSala) {
-                        System.out.println("[Pizarra] ¡Todos listos! Iniciando partida...");
-
-                        if (iniciarPartidaSiCorresponde()) {
-                            notificarObservadores("EVENTO_PARTIDA_INICIADA");
-                        }
-                    }
+                case "SOLICITAR_INICIO_PARTIDA":
+                    iniciarVotacionInicioPartida(idCliente);
+                    break;
+                case "RESPUESTA_VOTO_INICIO":
+                    boolean respuesta = Boolean.parseBoolean(payload);
+                    recibirVotoInicio(respuesta);
                     break;
 
             }
@@ -517,6 +506,57 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             }
         }
         return sb.toString();
+    }
+
+    public void recibirVotoInicio(boolean voto) {
+        if (!votacionInicioEnCurso) {
+            return;
+        }
+
+        votosInicioRecibidos++;
+        if (voto) {
+            votosInicioAfirmativos++;
+        }
+
+        System.out.println("[Pizarra] Voto inicio: " + voto + " (" + votosInicioRecibidos + "/" + totalVotantesInicio + ")");
+
+        if (votosInicioRecibidos >= totalVotantesInicio) {
+            votacionInicioEnCurso = false;
+
+            if (votosInicioAfirmativos == totalVotantesInicio) {
+                System.out.println("[Pizarra] Votación aprobada. Iniciando juego...");
+                if (iniciarPartidaSiCorresponde()) {
+                    notificarObservadores("EVENTO_PARTIDA_INICIADA");
+                }
+            } else {
+                System.out.println("[Pizarra] Votación rechazada.");
+                notificarObservadores("INICIO_PARTIDA_RECHAZADO");
+            }
+
+            votosInicioAfirmativos = 0;
+            votosInicioRecibidos = 0;
+        }
+    }
+
+    public void iniciarVotacionInicioPartida(String idSolicitante) {
+        if (this.votacionInicioEnCurso) {
+            return;
+        }
+
+        if (ordenDeTurnos.size() < 2) {
+            System.out.println("[Pizarra] No se puede iniciar votación: Insuficientes jugadores.");
+            return;
+        }
+
+        this.votacionInicioEnCurso = true;
+        this.idSolicitanteInicio = idSolicitante;
+        this.totalVotantesInicio = ordenDeTurnos.size();
+
+        this.votosInicioAfirmativos = 1;
+        this.votosInicioRecibidos = 1;
+
+        System.out.println("[Pizarra] Iniciando votación de partida solicitada por: " + idSolicitante);
+        notificarObservadores("SOLICITUD_INICIO_PARTIDA_ACTIVA:" + idSolicitante);
     }
 
     /**

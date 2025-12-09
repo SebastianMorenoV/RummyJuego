@@ -12,7 +12,6 @@ import contratos.iDespachador;
  */
 public interface IModeloSalaDeEspera {
 
-    void votarParaIniciar();
 
     void setDespachador(iDespachador despachador);
 
@@ -27,4 +26,8 @@ public interface IModeloSalaDeEspera {
     void cerrarCU();
 
     void enviarVoto(boolean aceptado);
+    
+    void enviarVotoInicio(boolean aceptado);
+    
+    void solicitarInicioPartida();
 }

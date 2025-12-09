@@ -17,7 +17,7 @@ import tipoEventos.EventoSalaEspera;
 public class ControlSalaDeEspera implements iControlSalaEspera {
 
     private IModeloSalaDeEspera modelo;
-
+    
     /**
      * Constructor que recibe el modelo.
      *
@@ -27,19 +27,13 @@ public class ControlSalaDeEspera implements iControlSalaEspera {
         this.modelo = modelo;
     }
 
-    /**
-     * Método llamado por la vista cuando se presiona "Iniciar Partida". Delega
-     * la acción al modelo para que envíe el voto al servidor.
-     */
-    public void enviarVoto() {
-        if (modelo != null) {
-            System.out.println("[ControlSalaDeEspera] Procesando clic en Iniciar Partida...");
-            modelo.votarParaIniciar();
-        } else {
-            System.err.println("[ControlSalaDeEspera] Error: El modelo es nulo.");
-        }
+    public void solicitarInicioPartida() {
+        modelo.solicitarInicioPartida();
     }
-
+    @Override
+    public void responderVotoInicio(boolean aceptado) {
+        modelo.enviarVotoInicio(aceptado);
+    }
     /**
      * Configura los datos de red en el modelo. Este método suele llamarse desde
      * el ensamblador o el controlador principal para inyectar las dependencias

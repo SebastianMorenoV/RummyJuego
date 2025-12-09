@@ -8,7 +8,7 @@ package Util;
  */
 public class Configuracion {
 
-    private static final String ipServidor = "192.168.1.72";
+    private static final String ipServidor = "192.168.100.98";
     private static final int puerto = 5000;
 
     public Configuracion() {

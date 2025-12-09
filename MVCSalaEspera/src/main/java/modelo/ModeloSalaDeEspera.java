@@ -29,24 +29,15 @@ public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeLi
     private List<ObservadorSalaDeEspera> observadores = new ArrayList<>();
 
     @Override
-    public void votarParaIniciar() {
-        // protocolo: ID:COMANDO:
-        String mensaje = idCliente + ":ESTOY_LISTO:";
-
-        System.out.println("[ModeloSalaEspera] Enviando voto de inicio al servidor...");
-
+    public void enviarVotoInicio(boolean aceptado) {
         try {
             if (despachador != null) {
+                // Enviamos el voto de vuelta al servidor
+                String mensaje = idCliente + ":RESPUESTA_VOTO_INICIO:" + aceptado;
                 despachador.enviar(ipServidor, puertoServidor, mensaje);
-
-                // Avisar a la vista localmente para que bloquee el botón
-                notificarObservadores(EventoSalaEspera.VOTO_REGISTRADO, null);
-
-            } else {
-                System.err.println("Error: El despachador no está inicializado.");
             }
         } catch (IOException ex) {
-            Logger.getLogger(ModeloSalaDeEspera.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
 
@@ -110,7 +101,17 @@ public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeLi
             ex.printStackTrace();
         }
     }
-
+    @Override
+    public void solicitarInicioPartida() {
+        try {
+            if (despachador != null) {
+                String mensaje = idCliente + ":SOLICITAR_INICIO_PARTIDA:"; 
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
@@ -132,5 +133,14 @@ public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeLi
             System.out.println("[ModeloSala] Partida iniciada. Cerrando sala de espera...");
             cerrarCU();
         }
+        if (evento.equals("PETICION_VOTO_INICIO")) {
+            notificarObservadores(EventoSalaEspera.PETICION_VOTO_INICIO, payload);
+        }
+        
+        if (evento.equals("INICIO_PARTIDA_RECHAZADA")) {
+            notificarObservadores(EventoSalaEspera.INICIO_PARTIDA_RECHAZADA, payload);
+        }
     }
+
+
 }

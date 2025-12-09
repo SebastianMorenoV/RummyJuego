@@ -90,6 +90,8 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
 
     private void btnUnirsePartidaMouseClicked(java.awt.event.MouseEvent evt) {
         control.SolicitarUnirseAPartida();
+        JOptionPane.showMessageDialog(this, "Se mando tu solicitud para unirte a la sala");
+        btnUnirsePartida.setVisible(false);
     }
 
     // Variables declaration - do not modify                     
@@ -128,29 +130,37 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
                 JOptionPane.showMessageDialog(this,
                         "La sala está llena (4/4 jugadores).\nNo se admiten más participantes.",
                         "Sala Llena", JOptionPane.WARNING_MESSAGE);
+                btnUnirsePartida.setVisible(true);
                 break;
 
             case ERROR_VOTACION_EN_CURSO:
                 JOptionPane.showMessageDialog(this,
                         "Hay una votación de ingreso en curso.\nPor favor, espera unos segundos e intenta de nuevo.",
                         "Servidor Ocupado", JOptionPane.WARNING_MESSAGE);
+                btnUnirsePartida.setVisible(true);
+
                 break;
 
             case ERROR_PARTIDA_YA_INICIADA:
                 JOptionPane.showMessageDialog(this,
                         "La partida ya ha comenzado.\nNo puedes unirte en este momento.",
                         "Juego Iniciado", JOptionPane.ERROR_MESSAGE);
+                btnUnirsePartida.setVisible(true);
+
                 break;
 
             case UNION_RECHAZADA:
                 JOptionPane.showMessageDialog(this,
                         "Tu solicitud de unión fue rechazada por los jugadores de la sala.",
                         "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
+                btnUnirsePartida.setVisible(true);
+
                 break;
             case SOLICITUD_RECHAZADA_VACIA:
                 JOptionPane.showMessageDialog(this,
                         "La sala esta vacia",
                         "0/0", JOptionPane.ERROR_MESSAGE);
+                btnUnirsePartida.setVisible(true);
 
                 break;
 

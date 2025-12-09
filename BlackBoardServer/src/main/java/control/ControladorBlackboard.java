@@ -59,6 +59,19 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             idAfectado = partes[1];
         }
         switch (eventoPuro) {
+            case "INICIO_PARTIDA_RECHAZADO":
+                enviarATodos("INICIO_PARTIDA_RECHAZADA");
+                break;
+            case "SOLICITUD_INICIO_PARTIDA_ACTIVA":
+                String solicitante = idAfectado;
+                List<String> jugadores = pizarra.getOrdenDeTurnos();
+
+                for (String id : jugadores) {
+                    if (!id.equals(solicitante)) {
+                        enviarMensajeDirecto(id, "PETICION_VOTO_INICIO:" + solicitante);
+                    }
+                }
+                break;
             case "NOTIFICAR_GANADOR":
                 // 1. Obtener quién ganó (viene en idAfectado)
                 String idGanador = idAfectado;
@@ -70,7 +83,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 // 3. Avisar a TODOS los jugadores (incluido el que ganó, para confirmar)
                 enviarATodos(mensajeFin);
-                
+
                 // Opcional: Aquí podrías reiniciar el servidor o limpiar la sala
                 break;
             case "SOLICITUD_ENTRANTE":
@@ -84,7 +97,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("[Controlador] Pizarra aceptó solicitud. Enviando petición de votos a la sala.");
 
                 List<String> jugadoresEnSala = pizarra.getOrdenDeTurnos();
-                
+
                 for (String idJugador : jugadoresEnSala) {
                     enviarMensajeDirecto(idJugador, "PETICION_VOTO:" + idCandidato);
                 }
@@ -381,7 +394,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             System.err.println("[Controlador] Error al enviar mensaje directo a " + idJugador + ": " + e.getMessage());
         }
     }
-
 
     public synchronized boolean isPartidaConfigurada() {
         return true; // Siempre true, porque usamos defaults

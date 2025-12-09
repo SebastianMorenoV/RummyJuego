@@ -159,7 +159,8 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
     private void btnIniciarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarPartidaActionPerformed
         if (control != null) {
-            ((control.ControlSalaDeEspera) control).enviarVoto();
+            control.solicitarInicioPartida();
+            btnIniciarPartida.setEnabled(false);
         }
     }//GEN-LAST:event_btnIniciarPartidaActionPerformed
 
@@ -258,20 +259,36 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
     private void resetearVista() {
         // Jugador 1
-        if (nombreJugador1 != null) nombreJugador1.setText("Esperando...");
-        if (avatarJugador1 != null) avatarJugador1.setIcon(null);
+        if (nombreJugador1 != null) {
+            nombreJugador1.setText("Esperando...");
+        }
+        if (avatarJugador1 != null) {
+            avatarJugador1.setIcon(null);
+        }
 
         // Jugador 2
-        if (nombreJugador2 != null) nombreJugador2.setText("Esperando...");
-        if (avatarJugador2 != null) avatarJugador2.setIcon(null);
+        if (nombreJugador2 != null) {
+            nombreJugador2.setText("Esperando...");
+        }
+        if (avatarJugador2 != null) {
+            avatarJugador2.setIcon(null);
+        }
 
         // Jugador 3
-        if (nombreJugador3 != null) nombreJugador3.setText("Esperando...");
-        if (avatarJugador3 != null) avatarJugador3.setIcon(null);
+        if (nombreJugador3 != null) {
+            nombreJugador3.setText("Esperando...");
+        }
+        if (avatarJugador3 != null) {
+            avatarJugador3.setIcon(null);
+        }
 
         // Jugador 4
-        if (nombreJugador4 != null) nombreJugador4.setText("Esperando...");
-        if (avatarJugador4 != null) avatarJugador4.setIcon(null);
+        if (nombreJugador4 != null) {
+            nombreJugador4.setText("Esperando...");
+        }
+        if (avatarJugador4 != null) {
+            avatarJugador4.setIcon(null);
+        }
     }
 
     @Override
@@ -287,8 +304,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 break;
 
             case VOTO_REGISTRADO:
-                btnIniciarPartida.setEnabled(false);
-                btnIniciarPartida.setText("Esperando al otro...");
+                JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
                 break;
 
             case ACTUALIZAR_DATOS_JUGADORES:
@@ -306,6 +322,22 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 );
                 boolean votoPositivo = (respuesta == JOptionPane.YES_OPTION);
                 control.enviarVoto(votoPositivo);
+                break;
+            case PETICION_VOTO_INICIO:
+                String quienPide = (String) datos;
+                int resp = JOptionPane.showConfirmDialog(this,
+                        "El jugador " + quienPide + " quiere iniciar la partida.\n¿Estás listo?",
+                        "Iniciar Partida",
+                        JOptionPane.YES_NO_OPTION);
+
+                boolean voto = (resp == JOptionPane.YES_OPTION);
+
+                ((control.ControlSalaDeEspera) control).responderVotoInicio(voto);
+                break;
+
+            case INICIO_PARTIDA_RECHAZADA:
+                JOptionPane.showMessageDialog(this, "La peticion para iniciar la partida fue denegada");
+                btnIniciarPartida.setEnabled(true);
                 break;
 
             default:
