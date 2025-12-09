@@ -25,10 +25,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     private final iDespachador despachador;
     private final iAgentePartida agentePartida;
 
-    // HARDCODEADO PARA EL MOCK
     int limiteFichas = 13; // Valor default Rummy
-    int numeroComodines = 2; // Valor default Rummy
-    private boolean partidaConfigurada = true;
 
     public ControladorBlackboard(
             iAgentePartida agentePartida,
@@ -105,21 +102,12 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 directorio.addJugador(datosJugador[0], datosJugador[1], Integer.parseInt(datosJugador[2]));
                 System.out.println("[Controlador] Jugador registrado: " + id);
 
-                // para confirmar los datos
                 String confirmacion = "CONFIRMACION_REGISTRO:" + id + ":" + avatar + ":"
                         + c1 + ":" + c2 + ":" + c3 + ":" + c4;
                 enviarMensajeDirecto(id, confirmacion);
 
-                // Iniciamos con dos jugadores solamente para probar el CU
-                /**
-                 * int numJugadores = pizarra.getOrdenDeTurnos().size(); if
-                 * (numJugadores == 2) { String idHost =
-                 * pizarra.getOrdenDeTurnos().get(0);
-                 * System.out.println("[Controlador] Hay 2 jugadores. Pidiendo
-                 * al Host (" + idHost + ") que inicie el juego.");
-                 * enviarMensajeDirecto(idHost, "COMANDO_INICIAR_PARTIDA"); }
-                 */
                 String listaJugadores = ((EstadoJuegoPizarra) pizarra).getMetadatosJugadores();
+                
                 // Protocolo: "ACTUALIZAR_SALA:Jugador1,Avatar1;Jugador2,Avatar2"
                 enviarATodos("ACTUALIZAR_SALA:" + listaJugadores);
 
@@ -134,7 +122,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("[Controlador] Evento PARTIDA_INICIADA detectado. Creando juego...");
                 List<String> jugadoresIds = pizarra.getOrdenDeTurnos();
 
-                // --- MOCKEO DE CONFIGURACIÓN ---
+                // MOCKEO DE CONFIGURAR PARTIDAA
                 int numFichas = 13; // Valor default Rummy
                 int numComodines = 2; // Valor default Rummy
 
@@ -165,10 +153,10 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 agentePartida.setMazoSerializado(mazoSerializado);
 
-                // mandamos los metadatos completos (Nombres, Avatares, etc.)
+                // Mandamos los metadatos completos (Nombres, Avatares, etc.)
                 String listaJugadoresCompleta = pizarra.getMetadatosJugadores();
 
-                // finalmente mandamos los datos al cliente
+                // Datos al cliente
                 for (Map.Entry<String, String> entry : manosSerializadas.entrySet()) {
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
@@ -327,12 +315,10 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         }
     }
 
-    // Asegúrate de que los getters devuelvan estos valores fijos
     public synchronized int getLimiteFichas() {
         return this.limiteFichas;
     }
 
-    // En el método donde validas si se puede iniciar
     public synchronized boolean isPartidaConfigurada() {
         return true; // Siempre true, porque usamos defaults
     }

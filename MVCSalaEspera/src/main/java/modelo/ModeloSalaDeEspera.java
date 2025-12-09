@@ -17,7 +17,7 @@ import vista.ObservadorSalaDeEspera;
 
 /**
  *
- * @author benja
+ * @author chris
  */
 public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeListener {
 

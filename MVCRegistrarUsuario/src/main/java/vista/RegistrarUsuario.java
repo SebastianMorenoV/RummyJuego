@@ -5,19 +5,15 @@
 package vista;
 
 import TipoEventos.EventoRegistro;
+import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.iNavegacion;
-import controlador.ControladorRegistro;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
-import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 /**
@@ -33,6 +29,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private String avatarSeleccionado = "avatar1";
     private Color colorSeleccionado = Color.WHITE;
     private Border bordeSeleccion = BorderFactory.createLineBorder(Color.RED, 3);
+
     // Colores de los 4 sets
     private Color colorSet1;
     private Color colorSet2;
@@ -54,24 +51,24 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         initEvents();
         initAvatarSelection();
 
-        //Avatares al frente (puse esto para arreglar un error)
+        // Avatares al frente
         jPanel1.setComponentZOrder(avatar1, 0);
         jPanel1.setComponentZOrder(avatar2, 0);
         jPanel1.setComponentZOrder(avatar3, 0);
         jPanel1.setComponentZOrder(avatar4, 0);
     }
 
+    /**
+     * Evento para el botón "Registrar"
+     */
     private void initEvents() {
-        //evento para el botón "Registrar"
         btnRegistrar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 String nombre = txtfldNombre.getText();
                 if (!nombre.trim().isEmpty()) {
 
-                    // Si todavía no abrió la ventana de colores, pon defaults
                     if (colorSet1 == null) {
-                        // Puedes usar los mismos que en EleccionColores si quieres
                         colorSet1 = Color.RED;
                         colorSet2 = Color.GREEN;
                         colorSet3 = Color.YELLOW;
@@ -92,7 +89,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
 
     }
 
-    // Lógica para resaltar el avatar seleccionado
+    /**
+     * Lógica para resaltar el avatar seleccionado
+     *
+     */
     private void initAvatarSelection() {
         MouseAdapter selector = new MouseAdapter() {
             @Override
@@ -123,7 +123,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         avatar3.addMouseListener(selector);
         avatar4.addMouseListener(selector);
 
-        //el primer icono se escoge por defecto
+        // El primer icono se escoge por defecto
         avatar1.setBorder(bordeSeleccion);
 
         // Listener para el Color
@@ -322,7 +322,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private void abrirEleccionColores() {
         EleccionColores ventanaColores = new EleccionColores(this);
         ventanaColores.setVisible(true);
-        // this.setVisible(false);  Opcional para ocultar la ventana mientras se elige
     }
 
     public void setNavegacion(iNavegacion navegacion) {
@@ -350,15 +349,36 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private javax.swing.JTextField txtfldNombre;
     // End of variables declaration//GEN-END:variables
 
-    //actualizar la ventana
     @Override
     public void actualiza(EventoRegistro evento, String mensaje) {
-        if (evento == EventoRegistro.REGISTRO_EXITOSO) {
-            System.out.println("[VistaRegistro] Registro enviado correctamente. Esperando respuesta del servidor...");
+        switch (evento) {
+            case REGISTRO_EXITOSO:
+                System.out.println("[VistaRegistro] Registro exitoso. Cerrando y navegando...");
+                // 1. Cerrar la vista actual
+                this.setVisible(false);
+                this.dispose();
 
-        } else if (evento == EventoRegistro.ABRIR_VENTANA) {
-            this.setVisible(true);
-            this.toFront();
+                // 2. Navegar a la Sala de Espera usando la referencia de navegación de la vista
+                if (navegacion != null) {
+                    // Hacemos cast seguro a iControlCUPrincipal porque es quien tiene el método entrarSalaEspera
+                    if (navegacion instanceof iControlCUPrincipal) {
+                        ((iControlCUPrincipal) navegacion).entrarSalaEspera();
+                    } else {
+                        System.err.println("[VistaRegistro] La interfaz de navegación no soporta entrarSalaEspera.");
+                    }
+                } else {
+                    System.err.println("[VistaRegistro] Error: No hay navegación configurada.");
+                }
+                break;
+
+            case NOMBRE_REPETIDO:
+                mostrarError("El nombre ya está en uso.");
+                break;
+
+            case ABRIR_VENTANA:
+                this.setVisible(true);
+                this.toFront();
+                break;
         }
     }
 
@@ -376,7 +396,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         this.colorSet3 = c3;
         this.colorSet4 = c4;
 
-        // Opcional: toma el Set 1 como "color principal" para mostrar en el icono
         this.colorSeleccionado = c1;
 
         btnColor.setOpaque(true);

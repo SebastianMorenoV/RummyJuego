@@ -20,7 +20,7 @@ public class EleccionColores extends javax.swing.JFrame {
     private RegistrarUsuario vistaPadre;
     private Color colorSeleccionado = null;
 
-    //colores default que no se repiten
+    // Colores default que no se repiten
     private final Color COLOR_SET_1 = new Color(255, 102, 102); // Rojo suave
     private final Color COLOR_SET_2 = new Color(102, 204, 255); // Azul cielo
     private final Color COLOR_SET_3 = new Color(153, 255, 153); // Verde claro
@@ -260,26 +260,26 @@ public class EleccionColores extends javax.swing.JFrame {
         btnConfirmar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // obtenemos los colores actuales de los paneles
+                // 1. Obtenemos los colores actuales de los paneles
                 Color c1 = colorSet1.getBackground();
                 Color c2 = colorSet2.getBackground();
                 Color c3 = colorSet3.getBackground();
                 Color c4 = colorSet4.getBackground();
 
-                // despues verificamos todas las combinaciones posibles de duplicados (cada set debe tener si o si un color distinto)
+                // 2. Despues verificamos todas las combinaciones posibles de duplicados (cada set debe tener si o si un color distinto)
                 if (c1.equals(c2) || c1.equals(c3) || c1.equals(c4)
                         || c2.equals(c3) || c2.equals(c4)
                         || c3.equals(c4)) {
 
-                    // Si se encuentran repetidos, mostramos el mensaje y NO cerramos la ventana (osea, no se puede continuar)
+                    // 3. Si se encuentran repetidos, mostramos el mensaje y NO cerramos la ventana (osea, no se puede continuar)
                     JOptionPane.showMessageDialog(EleccionColores.this,
                             "Has seleccionado colores repetidos.\nPor favor, elige un color distinto para cada Set.",
                             "Colores Duplicados",
                             JOptionPane.WARNING_MESSAGE);
-                    return; // El return detiene la ejecución aquí
+                    return;
                 }
 
-                // Cuando todo ya está correcto, permite guardar y salimos
+                // 4. Guardamos y salimos
                 vistaPadre.actualizarColoresUsuario(c1, c2, c3, c4);
                 dispose();
                 vistaPadre.setVisible(true);
@@ -296,8 +296,14 @@ public class EleccionColores extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Mini menu con colores limitados para elegir
+     *
+     * Popup que aparecerá al lado del botón
+     *
+     * @param panelDestino
+     */
     private void mostrarMiniSelectorColor(JPanel panelDestino) {
-        // Popup que aparecerá al lado del botón
         JPopupMenu popup = new JPopupMenu();
         JPanel grid = new JPanel(new java.awt.GridLayout(2, 6, 5, 5));
         grid.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));

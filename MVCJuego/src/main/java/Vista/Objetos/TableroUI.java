@@ -77,6 +77,10 @@ public class TableroUI extends JPanel {
 
     /**
      * Coloca una ficha en la celda más cercana y la guarda en el estado local.
+     *
+     * @param ficha
+     * @param punto
+     * @return
      */
     public boolean colocarFichaEnCelda(FichaUI ficha, Point punto) {
         Point celda = calcularCeldaParaPunto(punto);
@@ -99,6 +103,8 @@ public class TableroUI extends JPanel {
 
     /**
      * Remueve una ficha del estado local del tablero.
+     *
+     * @param idFicha
      */
     public void removerFicha(int idFicha) {
         FichaUI fichaParaRemover = fichasEnTablero.remove(idFicha);
@@ -228,14 +234,14 @@ public class TableroUI extends JPanel {
      * Sincroniza el tablero visual con el estado del Modelo. Esta versión
      * respeta las posiciones elegidas por el jugador, reposiciona los grupos y
      * actualiza los feedbacks visuales.
+     *
+     * @param esJugadaFinal
      */
     public void repintarTablero(boolean esJugadaFinal) {
         JuegoDTO juego = modelo.getTablero();
         if (juego == null) {
             return;
         }
-        
-
         List<GrupoDTO> gruposDelModelo = juego.getGruposEnTablero();
 
         Set<Integer> idsValidosDelModelo = new HashSet<>();

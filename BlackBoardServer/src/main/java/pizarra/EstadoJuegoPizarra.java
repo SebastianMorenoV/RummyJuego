@@ -1,6 +1,5 @@
 package pizarra;
 
-import DTO.GrupoDTO;
 import contratos.iObservador;
 import contratos.iPizarraJuego;
 import java.util.ArrayList;
@@ -118,18 +117,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         //validacion
         notificarObservadores("REGISTRAR_CANDIDATO");
         notificarObservadores("JUGADOR_UNIDO");
-
-        /**
-         * jugadorARegistrarTemporal = new String[3]; String[] partes =
-         * payloadMano.split("\\$", 2); jugadorARegistrarTemporal[0] = id;
-         * jugadorARegistrarTemporal[1] = partes[0];
-         * jugadorARegistrarTemporal[2] = partes[1];
-         *
-         * ordenDeTurnos.add(id);
-         *
-         * notificarObservadores("JUGADOR_UNIDO"); jugadorARegistrarTemporal =
-         * null;*
-         */
     }
 
     // Permite al Controlador obtener el payload completo (Avatar, Colores) de un jugador por su ID
@@ -270,7 +257,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * @param idCliente
      * @param comando
      * @param payload
-     * @return
      */
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
@@ -346,7 +332,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                 case "SOLICITAR_UNIRSE":
                     System.out.println("[Pizarra] Solicitud de unirse recibida de: " + idCliente);
 
-                    // VALIDACIÓN:
+                    // VALIDACIONES:
                     // 1. Debe haber alguien ya registrado (el Host)
                     // 2. No debe haber iniciado el juego (indiceTurnoActual == -1, ya validado por el if padre)
                     // 3. Máximo 4 jugadores
@@ -446,6 +432,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * NUEVO: Genera la cadena que contiene la info de TODOS los jugadores para
      * que MVCJuego sepa a quién pintar. Formato de salida:
      * "id1,payload1;id2,payload2;..."
+     *
+     * @return
      */
     @Override
     public String getMetadatosJugadores() {
@@ -527,19 +515,32 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return configuracionPartida;
     }
 
-    // NUEVO: Método para inicializar o actualizar fichas
+    /**
+     * Método para inicializar o actualizar fichas
+     *
+     * @param id
+     * @param cantidad
+     */
     public void setFichasJugador(String id, int cantidad) {
         fichasPorJugador.put(id, cantidad);
     }
 
-    // NUEVO: Método para sumar 1 ficha (cuando alguien come)
+    /**
+     * Método para sumar 1 ficha
+     *
+     * @param id
+     */
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
             fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
         }
     }
 
-    // NUEVO: Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
+    /**
+     * Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
+     *
+     * @return
+     */
     public String getFichasJugadoresSerializado() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> entry : fichasPorJugador.entrySet()) {

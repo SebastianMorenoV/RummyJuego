@@ -1,6 +1,5 @@
 package Vista.Objetos;
 
-import Controlador.Controlador;
 import DTO.GrupoDTO;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlEjercerTurno;
@@ -248,7 +247,7 @@ public class FichaUI extends JPanel {
     public boolean isComodin() {
         return comodin;
     }
-    
+
     public void setColor(Color color) {
         this.color = color;
     }

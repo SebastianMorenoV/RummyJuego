@@ -150,7 +150,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         // Solo habilitamos el botón si hay 2 o más jugadores conectados
         if (jugadores.length >= 2) {
             btnIniciarPartida.setEnabled(true);
-            btnIniciarPartida.setText("¡Estoy Listo!"); // Cambiamos texto para indicar acción de voto
+            btnIniciarPartida.setText("¡Estoy Listo!");
         } else {
             btnIniciarPartida.setEnabled(false);
             btnIniciarPartida.setText("Esperando jugadores...");

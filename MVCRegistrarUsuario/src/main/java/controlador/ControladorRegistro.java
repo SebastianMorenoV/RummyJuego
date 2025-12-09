@@ -16,7 +16,7 @@ import vista.RegistrarUsuario;
  *
  * @author chris
  */
-public class ControladorRegistro implements iControlRegistro, ObservadorRegistro {
+public class ControladorRegistro implements iControlRegistro {
 
     private iModeloRegistro modelo;
     private iControlCUPrincipal controlNavegacion;
@@ -61,17 +61,8 @@ public class ControladorRegistro implements iControlRegistro, ObservadorRegistro
             System.out.println("Error parseando avatar, usando default");
         }
 
-        // Enviamos al modelo
+        // 4. Enviamos al modelo
         modelo.registrarUsuario(nickname, idAvatar, colores);
-    }
-
-    public void navegarSiguientePantalla() {
-        if (controlNavegacion != null) {
-            System.out.println("[ControladorRegistro] Registro completado. Navegando al Lobby/Principal...");
-            controlNavegacion.iniciarCU();
-        } else {
-            System.err.println("[ControladorRegistro] Error Fatal: No se ha inyectado el controlador de navegación (iControlCUPrincipal).");
-        }
     }
 
     @Override
@@ -85,7 +76,7 @@ public class ControladorRegistro implements iControlRegistro, ObservadorRegistro
 
     public void cerrarVista() {
         if (vista != null) {
-            vista.setVisible(false); // Ahora sí existe 'vista'
+            vista.setVisible(false);
         } else {
             System.err.println("[ControladorRegistro] No se puede cerrar la vista: es null.");
         }
@@ -101,30 +92,12 @@ public class ControladorRegistro implements iControlRegistro, ObservadorRegistro
         this.controlNavegacion = controlNavegacion;
     }
 
-    @Override
-    public void actualiza(EventoRegistro evento, String mensajeDetalle) {
-        switch (evento) {
-            case REGISTRO_EXITOSO:
-                System.out.println("[ControladorRegistro] Registro exitoso. Cerrando y cambiando...");
-
-                // 1. Cerrar la vista actual
-                if (vista != null) {
-                    vista.setVisible(false);
-                    vista.dispose();
-                }
-
-                // 2. Navegar a la Sala de Espera (Gracias a la interfaz iControlCUPrincipal)
-                if (controlNavegacion != null) {
-                    controlNavegacion.entrarSalaEspera();
-                }
-                break;
-
-            case NOMBRE_REPETIDO:
-                if (vista != null) {
-                    vista.mostrarError("El nombre ya está en uso.");
-                }
-                break;
+    // Método opcional por si la vista necesita pedir la navegación explícitamente, 
+    // aunque idealmente la vista usará su propia referencia de navegación.
+    public void navegarSiguientePantalla() {
+        if (controlNavegacion != null) {
+            System.out.println("[ControladorRegistro] Navegando al Lobby/Principal...");
+            controlNavegacion.iniciarCU();
         }
     }
-
 }

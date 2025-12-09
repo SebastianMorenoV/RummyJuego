@@ -125,6 +125,8 @@ public class JugadorUI extends JPanel {
     /**
      * Permite actualizar la imagen del avatar en tiempo de ejecución cuando
      * llega la información del servidor.
+     *
+     * @param imagenAvatarBytes
      */
     public void setAvatarBytes(byte[] imagenAvatarBytes) {
         if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {

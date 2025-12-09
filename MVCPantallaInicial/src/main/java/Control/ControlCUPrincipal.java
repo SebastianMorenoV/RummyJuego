@@ -5,13 +5,14 @@ import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.controladoresMVC.iControlSalaEspera;
+import contratos.iNavegacion;
 import vista.VistaSalaEspera;
 
 /**
  *
  * @author benja
  */
-public class ControlCUPrincipal implements iControlCUPrincipal {
+public class ControlCUPrincipal implements iControlCUPrincipal, iNavegacion {
 
     ModeloCUPrincipal modelo;
     iControlEjercerTurno controladorEjercerTurno;
@@ -51,12 +52,13 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     @Override
     public void casoUsoConfigurarPartida() {
         solicitarRegistro();
-        if (this.controladorRegistro != null) {
-            System.out.println("[ControlPrincipal] Saltando Configuración -> Yendo a Registro...");
-            this.controladorRegistro.iniciarRegistro();
-        } else {
-            System.err.println("Error: ControladorRegistro no ha sido ensamblado.");
-        }
+        /**
+         * if (this.controladorRegistro != null) {
+         * System.out.println("[ControlPrincipal] Saltando Configuración ->
+         * Yendo a Registro..."); this.controladorRegistro.iniciarRegistro(); }
+         * else { System.err.println("Error: ControladorRegistro no ha sido
+         * ensamblado."); }
+         */
     }
 
     @Override
@@ -66,7 +68,7 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
             return;
         }
 
-        // Verifica que ipServidor no llegue null aquí
+        // DEBUG Verifica que ipServidor no llegue null
         System.out.println("[ControlPrincipal] Configurando Servidor: " + ipServidor + ":" + puertoServidor);
 
         modelo.setIpServidor(ipServidor);
@@ -125,7 +127,15 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
         }
     }
 
-    // logica de navegacion
+    @Override
+    public void iniciarConfiguracionPartida() {
+        this.casoUsoConfigurarPartida();
+    }
+
+    /**
+     * Logica de navegacion
+     *
+     */
     public void procesarActualizacionSala() {
         // 1. Obtener los datos sucios del modelo 
         String datosSala = modelo.getDatosSala();
@@ -141,7 +151,7 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
                 System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
                 vistaSalaEspera.setVisible(true);
             }
-            // Mandar los datos a la vista para que pinte los avatares
+            // 4. Mandar los datos a la vista para que pinte los avatares
             vistaSalaEspera.actualizarJugadores(datosSala);
         }
     }

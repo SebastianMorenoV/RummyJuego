@@ -42,7 +42,7 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
     @Override
     public String getPartida() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Aun no se usa");
     }
 
     public void SolicitarUnirseApartida() {
@@ -64,6 +64,11 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
             if (despachador != null) {
                 despachador.enviar(ipServidor, puertoServidor, mensaje);
             }
+            
+            // DEBUG
+            System.out.println("[MOCK] Saltando espera de red para pruebas locales.");
+            notificarObservadores(Evento.CREAR_PARTIDA);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,6 +146,9 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
         return datosSalaCache;
     }
 
+    /**
+     * Logica para la votacion en Sala de Espera
+     */
     public void enviarEstoyListo() {
         try {
             String mensaje = idCliente + ":ESTOY_LISTO:" + miIp + "$" + miPuerto;
@@ -176,6 +184,7 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
             case "UNIRSE_PARTIDA":
                 System.out.println("[Modelo Cliente] ¡Permiso recibido (" + evento + ")! Yendo a registro...");
+
                 // Ir a la pantalla de poner nombre y avatar.
                 notificarObservadores(Evento.CREAR_PARTIDA);
                 break;
@@ -193,6 +202,7 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
             case "MANO_INICIAL": //
                 System.out.println("[Modelo] ¡Recibí mi mano! El juego ha comenzado.");
+
                 // Guardamos la mano o se la pasamos a la vista de juego
                 // payload contiene: Cartas $ MazoCount $ Metadatos
                 notificarObservadores(Evento.INICIO_JUEGO);

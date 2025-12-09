@@ -5,10 +5,7 @@
 package modelo;
 
 import TipoEventos.EventoRegistro;
-import Util.Configuracion;
-import Util.SesionUsuario;
 import contratos.iDespachador;
-import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -73,7 +70,7 @@ public class ModeloRegistro implements iModeloRegistro, PropertyChangeListener {
         notificarObservadores(EventoRegistro.ABRIR_VENTANA, null);
     }
 
-    // MOCK ---------------
+    // MOCK de configuracion
     public void enviarConfiguracionMock() {
         try {
             // Valores por defecto (Mock ordenado por el maestro)
@@ -92,7 +89,6 @@ public class ModeloRegistro implements iModeloRegistro, PropertyChangeListener {
         }
     }
 
-    //
     /**
      * Método auxiliar para notificar a todas las vistas suscritas.
      *
@@ -139,6 +135,7 @@ public class ModeloRegistro implements iModeloRegistro, PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
+        
         // El payload puede venir en evt.getNewValue() si el servidor manda mensaje de error, etc.
         String mensajeServidor = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 

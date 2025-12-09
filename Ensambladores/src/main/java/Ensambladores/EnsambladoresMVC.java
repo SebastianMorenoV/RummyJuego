@@ -11,6 +11,7 @@ import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import contratos.iDespachador;
 import contratos.iListener;
+import contratos.iNavegacion;
 import control.ControlSalaDeEspera;
 import controlador.ControladorRegistro;
 import java.beans.PropertyChangeListener;
@@ -50,12 +51,14 @@ public class EnsambladoresMVC {
     } 
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
+        
         // 1. Identidad del Cliente
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
         System.out.println("ip cliente: " + ipCliente);
+        
         // Generar ID temporal(luego se asociará al nombre en el Blackboard)
         String idAleatorio = UUID.randomUUID().toString().substring(0, 5);
-        String idCliente = "Jugador" + idAleatorio; // <- cambiar Jugador_ por Jugador1 o Jugador2
+        String idCliente = "Jugador_" + idAleatorio; // <- cambiar Jugador_ por Jugador1 o Jugador2
 
         int puertoLocalEscucha = buscarPuertoLibre();
 
@@ -84,6 +87,8 @@ public class EnsambladoresMVC {
 
         controlPrincipal.setControladorRegistro(controladorRegistro);
         RegistrarUsuario vistaRegistro = new RegistrarUsuario(controladorRegistro);
+        
+        vistaRegistro.setNavegacion((iNavegacion) controlPrincipal);
 
         controladorRegistro.setVista(vistaRegistro);
 
@@ -94,7 +99,6 @@ public class EnsambladoresMVC {
         modeloRegistro.setDespachador(despachador);
         modeloRegistro.setIdCliente(idCliente);
         modeloRegistro.agregarObservador(vistaRegistro);
-        modeloRegistro.agregarObservador(controladorRegistro);
 
         // NAVEGACIÓN REGISTRO: Cuando el registro sea exitoso, el controlador llamará a controlPrincipal ---------
         controladorRegistro.setNavegacion(controlPrincipal);

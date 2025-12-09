@@ -4,7 +4,6 @@
  */
 package Vista;
 
-import Control.ControlCUPrincipal;
 import eventos.Evento;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import javax.swing.JOptionPane;
@@ -144,9 +143,10 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
                 break;
 
             case CREAR_PARTIDA:
+                
                 // MOCK, REDIRECCION A REGISTRO
                 System.out.println("[VistaLobby] Partida creada/solicitada. Redirigiendo a Registro de Jugador...");
-                this.setVisible(false); // Ocultamos el Lobby
+                this.setVisible(false);
 
                 // MOCK: Vamos directo al registro
                 control.casoUsoConfigurarPartida();

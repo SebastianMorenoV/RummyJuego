@@ -46,7 +46,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
 
-    //private java.util.Map<String, JugadorUI> mapaJugadoresUI = new java.util.HashMap<>();
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
      * siguiente componente de MVC.
@@ -144,12 +143,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
         // TODO add your handling code here:
-
     }//GEN-LAST:event_btnOrdenarPorGruposMouseClicked
 
     private void btnOrdenarMayorAMenorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarMayorAMenorMouseClicked
         // TODO add your handling code here:
-
     }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
 
 
@@ -160,6 +157,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JLabel btnOrdenarPorGrupos;
     private javax.swing.JLabel fondo;
     // End of variables declaration//GEN-END:variables
+    
     /**
      * Metodo implementado por la interfaz Observer. Reacciona a las
      * notificaciones del Modelo para actualizar la interfaz gráfica.
@@ -289,7 +287,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         }
         // Posiciones fijas para 2, 3 o 4 jugadores
         Point[] posiciones = {
-            new Point(-10, 380), // YO 
+            new Point(-10, 380),
             new Point(-10, -10),
             new Point(780, -10),
             new Point(780, 380)
@@ -645,7 +643,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             JugadorUI uiPanel = listaJugadoresUI.get(i);
             DTO.JugadorDTO datosNuevos = listaDatos.get(i);
 
-            // Actualizar info dinámica
+            // Actualizar informacion dinámica
             uiPanel.setFichasRestantes(datosNuevos.getFichasRestantes());
 
             boolean esSuTurno = datosNuevos.isEsTurno();
@@ -660,7 +658,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * el tablero de juego. Este panel contiene los grupos de fichas colocados
      * por los jugadores.
      *
-     * * @return El objeto TableroUI que es el componente visual del tablero.
+     * @return El objeto TableroUI que es el componente visual del tablero.
      */
     public TableroUI getPanelTablero() {
         return tableroUI;
@@ -670,7 +668,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * Obtiene el panel de interfaz de usuario (UI) que representa visualmente
      * la mano o área de fichas del jugador actual.
      *
-     * * @return El objeto ManoUI que es el componente visual de la mano del
+     * @return El objeto ManoUI que es el componente visual de la mano del
      * jugador.
      */
     public ManoUI getPanelMano() {
