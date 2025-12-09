@@ -1,7 +1,7 @@
 package vista;
 
-import controlador.ControladorConfig;
 import TipoEventos.EventoConfig;
+import controlador.ControladorConfig;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -266,6 +266,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
 
             case PARTIDA_CREADA:
                 JOptionPane.showMessageDialog(this, "Partida Configurada y Creada con: " + numComodines + " comodin(es) y " + numFichas + " fichas!, Esperando Jugadores...");
+                control.avanzarARegistro();
                 break;
             default:
                 throw new AssertionError();

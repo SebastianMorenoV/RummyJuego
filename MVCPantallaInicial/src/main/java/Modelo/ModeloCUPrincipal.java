@@ -63,9 +63,9 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
                 despachador.enviar(ipServidor, puertoServidor, mensaje);
             }
 
-            // DEBUG
-            System.out.println("[MOCK] Saltando espera de red para pruebas locales.");
-            notificarObservadores(Evento.CREAR_PARTIDA);
+//            // DEBUG
+//            System.out.println("[MOCK] Saltando espera de red para pruebas locales.");
+//            notificarObservadores(Evento.CREAR_PARTIDA);
 
         } catch (IOException e) {
             e.printStackTrace();

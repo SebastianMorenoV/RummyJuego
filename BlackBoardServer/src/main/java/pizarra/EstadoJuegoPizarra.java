@@ -155,6 +155,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * @param payload
      */
     public void configurarPartida(String idCliente, String payload) {
+        ordenDeTurnos.add(idCliente);
         configuracionPartida = new String[2];
 
         String[] partes = payload.split("\\$");
@@ -164,7 +165,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             configuracionPartida[1] = partes[1];
             partidaConfigurada = true;
             System.out.println("[Pizarra] Configuración guardada: " + partes[0] + " comodines, " + partes[1] + " fichas.");
-            notificarObservadores("CONFIGURAR_PARTIDA");
+            notificarObservadores("CONFIGURAR_PARTIDA:" + idCliente);
         } else {
             System.err.println("[Pizarra] Error: Payload de configuración incompleto: " + payload);
         }
@@ -277,6 +278,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     if (this.partidaConfigurada || !ordenDeTurnos.isEmpty()) {
                         notificarObservadores("PARTIDA_EXISTENTE:" + idCliente);
                     } else {
+                        almacenarUsuarioTemporal(idCliente, payload);
                         notificarObservadores("PERMISO_CREAR:" + idCliente);
                     }
                     break;
@@ -316,7 +318,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     String payloadHost = candidatos.get(idCliente);
 
                     if (payloadHost != null) {
-                        registrarJugador(idCliente, payloadHost);
+//                        registrarJugador(idCliente, payloadHost);
                         configurarPartida(idCliente, payload);
                     } else {
                         System.err.println("[Error] El usuario " + idCliente + " no estaba en la lista de candidatos.");

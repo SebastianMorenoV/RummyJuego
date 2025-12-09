@@ -9,7 +9,6 @@ import contratos.controladoresMVC.iControlRegistro;
 import contratos.controladoresMVC.iControlSalaEspera;
 import contratos.iNavegacion;
 
-
 /**
  * Esta clase representa el control del caso de uso Principal.
  *
@@ -22,7 +21,6 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     iControlEjercerTurno controladorEjercerTurno;
     iControlRegistro controladorRegistro;
     iControlSalaEspera controlSalaEspera;
-
 
     public ControlCUPrincipal(ModeloCUPrincipal modelo) {
         this.modelo = modelo;
@@ -61,17 +59,18 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     @Override
 
     public void casoUsoConfigurarPartida() {
-        solicitarRegistro();
+        if (controladorConfig != null) {
+            modelo.cerrarCU(); // Oculta el Lobby
+            controladorConfig.iniciarConfiguracion(); // Abre la config
+        } else {
+            System.err.println("Error: ControladorConfig es nulo.");
+        }
     }
-
-    
 
     @Override
     public void setControladorEjercerTurno(iControlEjercerTurno control) {
         this.controladorEjercerTurno = control;
     }
-
- 
 
     @Override
     public void solicitarRegistro() {
@@ -98,7 +97,6 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
         this.controladorConfig = controladorConfig;
     }
 
-
     public void notificarListo() {
         modelo.enviarEstoyListo();
     }
@@ -108,7 +106,6 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
         this.controladorRegistro = controlRegistro;
     }
 
-    
     @Override
     public void setControlSalaEspera(iControlSalaEspera controlSalaEspera) {
         this.controlSalaEspera = controlSalaEspera;
@@ -116,7 +113,7 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
 
     @Override
     public void entrarSalaEspera() {
-        
+
         controlSalaEspera.iniciarCU();
 //        if (controlSalaEspera != null) {
 //            System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
@@ -142,7 +139,6 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
 //        if (controladorRegistro != null) {
 //            ((controlador.ControladorRegistro) controladorRegistro).cerrarVista();
 //        }
-
         // 3. Abrir y actualizar Sala de Espera TODO ESTO MAL
 //        if (vistaSalaEspera != null) {
 //            if (!vistaSalaEspera.isVisible()) {

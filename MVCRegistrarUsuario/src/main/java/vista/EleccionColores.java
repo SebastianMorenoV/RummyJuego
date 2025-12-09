@@ -32,7 +32,7 @@ public class EleccionColores extends javax.swing.JFrame {
     public EleccionColores(RegistrarUsuario padre) {
         this.vistaPadre = padre;
         this.setTitle("RummyKub | Escoge tus set!");
-        this.setSize(920, 550);
+        this.setSize(900, 500);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         initComponents();

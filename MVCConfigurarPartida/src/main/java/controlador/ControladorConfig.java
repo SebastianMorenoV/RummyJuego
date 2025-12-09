@@ -37,6 +37,11 @@ public class ControladorConfig implements iControlConfig {
         modelo.cerrarCU();
     }
 
+    public void avanzarARegistro() {
+        this.cerrarCU(); // Cierra la ventana de config
+        controladorCUPrincipal.solicitarRegistro(); // Pide al principal que abra el registro
+    }
+
     @Override
     public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
         modelo.setIpServidor(ipServidor);

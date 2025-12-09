@@ -44,7 +44,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     public RegistrarUsuario(iControlRegistro control) {
         this.control = control;
         this.setTitle("RummyKub | Vive la experiencia!");
-        this.setSize(920, 550);
+        this.setSize(900, 500);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         initComponents();
@@ -164,6 +164,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(900, 500));
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 

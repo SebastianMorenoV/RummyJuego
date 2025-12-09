@@ -64,8 +64,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             case "ACCESO_DENEGADO":
                 enviarMensajeDirecto(idAfectado, "ACCESO_DENEGADO");
                 break;
-               
-                case "REGISTRO_EXITOSO":
+
+            case "REGISTRO_EXITOSO":
                 System.out.println("[Controlador] Confirmando registro a " + idAfectado);
                 enviarMensajeDirecto(idAfectado, "REGISTRO_EXITOSO");
                 String listaActualizada = ((EstadoJuegoPizarra) pizarra).getMetadatosJugadores();
@@ -78,28 +78,28 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 enviarMensajeDirecto(idAfectado, "PARTIDA-EXISTENTE");
                 break;
             case "CONFIGURAR_PARTIDA":
-                List<String> jugadores = pizarra.getOrdenDeTurnos();
+                // 1. Usamos idAfectado (que viene del evento) en lugar de buscar en la lista vacía
+                String idHost = idAfectado;
 
-                if (jugadores != null && !jugadores.isEmpty()) {
-                    String idHost = jugadores.get(0);
-
+                if (idHost != null && !idHost.isEmpty()) {
+                    // 2. Buscamos en el Directorio (donde ya debería estar gracias al Paso 1)
                     iDirectorio.ClienteInfoDatos datosHost = directorio.getClienteInfo(idHost);
 
                     if (datosHost != null) {
                         String ipJugador = datosHost.getHost();
-                        int puertoJugador = datosHost.getPuerto();
                         System.out.println("[Controlador] IP obtenida del Host (" + idHost + "): " + ipJugador);
-                        enviarMensajeDirecto(idHost, "PARTIDA-CREADA-EXITO");
 
+                        // 3. Enviamos el éxito solo al creador
+                        enviarMensajeDirecto(idHost, "PARTIDA-CREADA-EXITO");
                     } else {
                         System.err.println("[Controlador] Error: No se encontró info de red para el jugador " + idHost);
                     }
+                } else {
+                    System.err.println("[Controlador] Error: ID de Host nulo en evento CONFIGURAR_PARTIDA");
                 }
-
-                System.out.println("Si llego hasta aqui significa que ya termine el caso de uso.");
                 break;
             case "REGISTRAR_CANDIDATO":
-                String[] datosCandidato = pizarra.getIpCliente(); 
+                String[] datosCandidato = pizarra.getIpCliente();
                 if (datosCandidato != null) {
                     directorio.addJugador(
                             datosCandidato[0], // ID
@@ -130,7 +130,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 enviarMensajeDirecto(id, confirmacion);
 
                 String listaJugadores = ((EstadoJuegoPizarra) pizarra).getMetadatosJugadores();
-                
+
                 // Protocolo: "ACTUALIZAR_SALA:Jugador1,Avatar1;Jugador2,Avatar2"
                 enviarATodos("ACTUALIZAR_SALA:" + listaJugadores);
 
@@ -169,7 +169,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 for (Map.Entry<String, String> entry : manosSerializadas.entrySet()) {
                     String idJugador = entry.getKey();
                     String manoPayload = entry.getValue();
-
 
                     String mensajeMano = "MANO_INICIAL:" + manoPayload + "$" + mazoCount + "$" + listaJugadoresString;
 
@@ -213,7 +212,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 }
                 pizarra.avanzarTurno();
                 break;
-                //ESTI TIENE QUE SER CAMBIADO.
+            //ESTI TIENE QUE SER CAMBIADO.
 //            case "PERMISO_CREAR":
 //                if (idAfectado == null || idAfectado.isEmpty()) {
 //                    System.err.println("[Error Controlador] ID afectado es nulo en PERMISO_CREAR");
