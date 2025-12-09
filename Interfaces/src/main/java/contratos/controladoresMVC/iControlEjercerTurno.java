@@ -35,6 +35,9 @@ public interface iControlEjercerTurno {
     public void cerrarCUAnteriores();
 
     public void setControlConfiguracion(iControlConfig controlConfiguracion);
-    
+
     public void setControlPantallaPrincipal(iControlCUPrincipal controlPantallaPrincipal);
+
+    void setControlSalaEspera(iControlSalaEspera controlSalaEspera);
+
 }

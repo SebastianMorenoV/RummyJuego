@@ -1,8 +1,10 @@
 package Modelo;
 
 import DTO.FichaJuegoDTO;
+import java.awt.Color;
 import DTO.GrupoDTO;
 import DTO.JuegoDTO;
+import DTO.JugadorDTO;
 import Dtos.ActualizacionDTO;
 import Entidades.Ficha;
 import Entidades.Grupo;
@@ -47,8 +49,20 @@ public class Modelo implements IModelo, PropertyChangeListener {
     int puertoCliente;
     private List<String> nombresJugadores = new ArrayList<>();
     private int mazoFichasRestantes = 0;
-
     private String miId;
+    private Map<String, JugadorDTO> perfilesJugadores = new HashMap<>();
+    private boolean coloresCargados = false;
+    private String idCliente;
+
+    //variables adicionales de CU registrar jugador//
+    private String miNickname = "Cargando...";
+    private String miAvatar = "avatar1";
+    private int[] misColores = {0, 0, 0, 0};
+
+    private static final int SERVER_NEGRO = -16777216;
+    private static final int SERVER_ROJO = -65536;
+    private static final int SERVER_AZUL = -16776961;
+    private static final int SERVER_AMARILLO = -14336;
 
     public Modelo() {
         this.observadores = new ArrayList<>();
@@ -92,22 +106,83 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
             case "MANO_INICIAL":
                 System.out.println("[Modelo] Evento 'MANO_INICIAL' detectado!");
+                System.out.println("PAYLOAD: " + payloadd);
                 try {
                     String[] payloadPartes = payloadd.split("\\$");
                     String manoPayload = payloadPartes[0];
 
-                    if (payloadPartes.length > 1) {
-                        this.mazoFichasRestantes = Integer.parseInt(payloadPartes[1]);
-                    }
-                    if (payloadPartes.length > 2) {
-                        String listaJugadoresStr = payloadPartes[2]; 
-                        String[] arrayNombres = listaJugadoresStr.split(",");
+                    if (payloadPartes.length >= 3) {
+                        StringBuilder listaJugadoresBuilder = new StringBuilder();
+                        for (int i = 2; i < payloadPartes.length; i++) {
+                            listaJugadoresBuilder.append(payloadPartes[i]);
+                            if (i < payloadPartes.length - 1) {
+                                listaJugadoresBuilder.append("$");
+                            }
+                        }
+                        String listaJugadoresStr = listaJugadoresBuilder.toString();
+                        System.out.println("[Modelo Debug] Lista de jugadores completa reconstruida: " + listaJugadoresStr);
+
+                        String[] usuariosRaw = listaJugadoresStr.split(";");
+                        System.out.println("[Modelo Debug] Número de jugadores después de split por ';': " + usuariosRaw.length);
 
                         this.nombresJugadores.clear();
-                        for (String nombre : arrayNombres) {
-                            this.nombresJugadores.add(nombre);
+                        this.perfilesJugadores.clear();
+
+                        for (String usuario : usuariosRaw) {
+                            if (usuario == null || usuario.trim().isEmpty()) {
+                                continue;
+                            }
+
+                            System.out.println("[Modelo Debug] Procesando cadena de usuario: " + usuario);
+
+                            String[] partes = usuario.split(",", 2);
+
+                            if (partes.length >= 2) {
+                                String idReal = partes[0];
+                                String datosPerfil = partes[1]; // "Nick$Avatar$..."
+
+                                String[] perfilSplit = datosPerfil.split("\\$");
+                                System.out.println("[Modelo Debug] Nickname: " + perfilSplit[0] + ", Avatar ID Raw: " + (perfilSplit.length > 1 ? perfilSplit[1] : "N/A"));
+
+                                // Creamos un DTO temporal para guardar estos datos estáticos
+                                JugadorDTO dtoPerfil = new JugadorDTO();
+                                dtoPerfil.setNombre(perfilSplit[0]);
+
+                                try {
+                                    if (perfilSplit.length > 1) {
+                                        dtoPerfil.setIdAvatar(Integer.parseInt(perfilSplit[1]));
+                                    }
+                                } catch (Exception e) {
+                                    dtoPerfil.setIdAvatar(1);
+                                }
+
+                                // 3. OBTENER COLORES (C1,C2,C3,C4) para todos los jugadores
+                                if (perfilSplit.length > 2) {
+                                    String[] colorStrings = perfilSplit[2].split(",");
+                                    int[] colores = new int[4];
+                                    for (int i = 0; i < 4 && i < colorStrings.length; i++) {
+                                        colores[i] = Integer.parseInt(colorStrings[i]);
+                                    }
+                                    dtoPerfil.setColores(colores);
+
+                                    // DEBUG: Muestra si los colores se procesaron.
+                                    System.out.println("[Modelo Debug] Colores cargados.");
+                                }
+
+                                this.perfilesJugadores.put(idReal, dtoPerfil);
+                                this.nombresJugadores.add(idReal);
+                            } else {
+                                System.err.println("[Modelo Debug] ERROR: Cadena de usuario mal formada (sin ',') para: " + usuario);
+                            }
                         }
-                        System.out.println("[Modelo] Jugadores en la partida: " + this.nombresJugadores);
+                        System.out.println("[Modelo] Jugadores en la partida: " + this.nombresJugadores.toString());
+
+                        JugadorDTO miPerfil = this.perfilesJugadores.get(this.miId);
+                        if (miPerfil != null && miPerfil.getColores() != null) {
+                            this.misColores = miPerfil.getColores();
+                            this.coloresCargados = true;
+                            System.out.println("[Modelo Fix] Colores de mi jugador cargados desde MANO_INICIAL payload.");
+                        }
                     }
                     List<FichaJuegoDTO> fichasDTO = deserializarMano(manoPayload);
                     List<Ficha> manoEntidad = fichasDTO.stream()
@@ -116,10 +191,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                     juego.setManoInicial(manoEntidad);
 
-                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
+                    // Notificar a la vista
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
                     notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
+                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                 } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
                     e.printStackTrace();
@@ -160,7 +236,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 }
 
                 if (partesTurno.length > 2) {
-                    String dataContadores = partesTurno[2]; // "J1=14;J2=13;"
+                    String dataContadores = partesTurno[2];
                     String[] pares = dataContadores.split(";");
                     for (String par : pares) {
                         String[] kv = par.split("=");
@@ -177,9 +253,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
             case "MOVIMIENTO_RECIBIDO":
                 System.out.println("[Modelo] Evento 'MOVIMIENTO_RECIBIDO' (Temporal) detectado!");
                 try {
+
+                    String[] partes = payloadd.split(":", 2);
+                    String idJugadorMovimiento = partes[0];
+                    String payloadGrupos = (partes.length > 1) ? partes[1] : "";
+
                     List<GrupoDTO> gruposMovidos = GrupoDTO.deserializarLista(payloadd);
                     if (gruposMovidos != null) {
-                        this.actualizarVistaTemporal(gruposMovidos);
+                        this.actualizarVistaRival(gruposMovidos, idJugadorMovimiento);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -200,10 +281,59 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     e.printStackTrace();
                 }
                 break;
+            //nuevo metodo para CU Registrar Jugador
+            case "CONFIRMACION_REGISTRO":
+                System.out.println("[Modelo] Datos de perfil recibidos del servidor.");
+                try {
+                    // El servidor envía: ID_FINAL:AVATAR_ID:C1:C2:C3:C4.
 
+                    // payloadd es la parte después de "CONFIRMACION_REGISTRO:"
+                    String[] partes = payloadd.split(":");
+
+                    if (partes.length >= 3) {
+                        String nuevoIdCliente = partes[0];
+                        if (!nuevoIdCliente.equals(this.miId)) {
+                            System.out.println("[Modelo] Actualizando mi ID de: " + this.miId + " a: " + nuevoIdCliente);
+                            this.miId = nuevoIdCliente;
+                        }
+
+                        // 2. Cargar datos de perfil (Avatar y Colores)
+                        this.miAvatar = partes[1];
+
+                        if (partes.length > 2) {
+                            String coloresStr = partes[2];
+                            String[] colorStrings = coloresStr.split(",");
+
+                            if (colorStrings.length >= 4) {
+                                this.misColores[0] = Integer.parseInt(colorStrings[0]);
+                                this.misColores[1] = Integer.parseInt(colorStrings[1]);
+                                this.misColores[2] = Integer.parseInt(colorStrings[2]);
+                                this.misColores[3] = Integer.parseInt(colorStrings[3]);
+
+                                System.out.println("[Modelo Debug] Colores personalizados cargados: "
+                                        + this.misColores[0] + ", "
+                                        + this.misColores[1] + ", "
+                                        + this.misColores[2] + ", "
+                                        + this.misColores[3]);
+                            }
+
+                        }
+
+                        this.coloresCargados = true;
+
+                        System.out.println("[Modelo] Identidad y colores personalizados cargados y activados.");
+                    } else {
+                        System.err.println("[Modelo] Error de formato en CONFIRMACION_REGISTRO. Partes insuficientes: " + partes.length);
+                    }
+
+                    notificarObservadores(TipoEvento.REPINTAR_MANO);
+                } catch (Exception e) {
+                    System.err.println("Error procesando confirmacion registro: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
             default:
                 System.out.println("[Modelo MVC] Evento PropertyChange desconocido: " + evento);
-                break;
         }
     }
 
@@ -211,40 +341,120 @@ public class Modelo implements IModelo, PropertyChangeListener {
      * Refresca estado del tablero temporalmente antes de validar jugada.
      */
     private void actualizarVistaTemporal(List<GrupoDTO> gruposPropuestos) {
-        this.gruposDeTurnoDTO = gruposPropuestos;
+        List<Grupo> nuevosGrupos = new ArrayList<>();
 
-        List<Grupo> nuevosGrupos = gruposPropuestos.stream()
-                .map(this::convertirGrupoDtoAEntidad)
-                .collect(Collectors.toList());
+        for (GrupoDTO dto : gruposPropuestos) {
+
+            List<Ficha> fichasEntity = new ArrayList<>();
+            for (FichaJuegoDTO fichaDto : dto.getFichasGrupo()) {
+
+                // 1. Convertir a Entity. Aquí se aplica el color personalizado (MIS colores)
+                // Usamos this.miId por defecto.
+                Ficha fichaEntity = convertirFichaDtoAEntidad(fichaDto, this.miId, true);
+                fichasEntity.add(fichaEntity);
+
+                // 2. Actualizar el DTO con el nuevo color para la vista.
+                fichaDto.setColor(fichaEntity.getColor());
+            }
+
+            // 3. Crear el Grupo Entity para pasarlo a la lógica del juego (Facade)
+            Grupo grupo = new Grupo(dto.getTipo(), fichasEntity.size(), fichasEntity);
+            if (!dto.isEsTemporal()) {
+                grupo.setValidado();
+            }
+            nuevosGrupos.add(grupo);
+        }
+
         juego.colocarFichasEnTablero(nuevosGrupos);
 
+        // 4. Almacenar la lista de DTOs original, ahora con los colores actualizados.
+        this.gruposDeTurnoDTO = gruposPropuestos;
+
+        // [FIN DE MODIFICACIÓN]
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
     }
 
     /**
+     * Refresca estado del tablero con el movimiento de un rival. Utiliza los
+     * colores personalizados del jugador que realizó el movimiento.
+     */
+    private void actualizarVistaRival(List<GrupoDTO> gruposPropuestos, String idJugadorMovimiento) {
+
+        // [INICIO DE MODIFICACIÓN: Conversión Entity/DTO con actualización de color local]
+        List<Grupo> nuevosGrupos = new ArrayList<>();
+
+        for (GrupoDTO dto : gruposPropuestos) {
+
+            List<Ficha> fichasEntity = new ArrayList<>();
+            for (FichaJuegoDTO fichaDto : dto.getFichasGrupo()) {
+
+                // 1. Convertir a Entity. Aquí se aplica el color personalizado (MIS colores)
+                // Usamos el ID del jugador que movió, pero la lógica de conversión usará this.misColores.
+                Ficha fichaEntity = convertirFichaDtoAEntidad(fichaDto, idJugadorMovimiento, false);
+                fichasEntity.add(fichaEntity);
+
+                // 2. Actualizar el DTO con el nuevo color para la vista.
+                fichaDto.setColor(fichaEntity.getColor());
+            }
+
+            // 3. Crear el Grupo Entity para pasarlo a la lógica del juego (Facade)
+            Grupo grupo = new Grupo(dto.getTipo(), fichasEntity.size(), fichasEntity);
+            if (!dto.isEsTemporal()) {
+                grupo.setValidado();
+            }
+            nuevosGrupos.add(grupo);
+        }
+
+        juego.colocarFichasEnTablero(nuevosGrupos);
+
+        // 4. Almacenar la lista de DTOs original, ahora con los colores actualizados.
+        this.gruposDeTurnoDTO = gruposPropuestos;
+
+        // [FIN DE MODIFICACIÓN]
+        notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+    }
+
+    /**
+     * Convierte DTO de grupo a entidad Grupo, usando los colores del jugador
+     * especificado.
+     */
+    private Grupo convertirGrupoDtoAEntidadRival(GrupoDTO dto, String idJugador) {
+        List<Ficha> fichas = dto.getFichasGrupo().stream()
+                // Pasar el ID del jugador a la función de conversión de ficha
+                .map(fichaDto -> convertirFichaDtoAEntidad(fichaDto, idJugador, false))
+                .collect(Collectors.toList());
+
+        Grupo grupo = new Grupo(dto.getTipo(), fichas.size(), fichas);
+        if (!dto.isEsTemporal()) {
+            grupo.setValidado();
+        }
+        return grupo;
+    }
+
+    /**
      * Envía movimiento al servidor y actualiza tablero local.
+     *
+     * @param grupos
      */
     public void colocarFicha(List<GrupoDTO> grupos) {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'colocarFicha' ignorada. No es mi turno.");
             return;
         }
+        // 1. Actualiza el estado local (gruposDeTurnoDTO ahora tiene colores CUSTOM)
         this.actualizarVistaTemporal(grupos);
 
-        StringBuilder payloadBuilder = new StringBuilder();
-        for (int i = 0; i < grupos.size(); i++) {
-            payloadBuilder.append(grupos.get(i).serializarParaPayload());
-            if (i < grupos.size() - 1) {
-                payloadBuilder.append("$");
-            }
-        }
-        String payloadCompleto = payloadBuilder.toString();
+        // 2. Serializa el estado con los colores originales del servidor.
+        String payloadCompleto = serializarJuegoFinal();
+
         String mensaje = this.miId + ":MOVER:" + payloadCompleto;
 
         try {
             this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+
         } catch (IOException ex) {
-            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Modelo.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -266,7 +476,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
             this.despachador.enviar(ipServidor, puertoServidor, mensajeTomar);
 
         } catch (IOException ex) {
-            Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Modelo.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -291,8 +502,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
                 String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
                 this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+
             } catch (IOException ex) {
-                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Modelo.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
@@ -302,13 +515,17 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 System.out.println(gruposDTOAlInicioDelTurno.toString());
                 System.out.println(gruposDeTurnoDTO.toString());
 
+                this.gruposDeTurnoDTO = new ArrayList<>(this.gruposDTOAlInicioDelTurno);
+
                 notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
                 try {
                     String payloadJuegoRevertido = serializarEstadoRevertido();
                     String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
                     this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+
                 } catch (IOException ex) {
-                    Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Modelo.class
+                            .getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
                 notificarObservadores(TipoEvento.TOMAR_FICHA_POR_FINALIZARTURNO);
@@ -324,8 +541,28 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private String serializarJuegoFinal() {
         List<GrupoDTO> grupos = this.gruposDeTurnoDTO;
         StringBuilder payloadBuilder = new StringBuilder();
+
         for (int i = 0; i < grupos.size(); i++) {
-            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            GrupoDTO grupo = grupos.get(i);
+
+            List<FichaJuegoDTO> fichasOriginalColor = new ArrayList<>();
+            for (FichaJuegoDTO ficha : grupo.getFichasGrupo()) {
+                int originalRGB = aplicarColorOriginal(ficha.getColor().getRGB());
+
+                FichaJuegoDTO fichaOriginal = new FichaJuegoDTO(
+                        ficha.getIdFicha(), ficha.getNumeroFicha(), new Color(originalRGB),
+                        ficha.isComodin(), ficha.getFila(), ficha.getColumna()
+                );
+                fichasOriginalColor.add(fichaOriginal);
+            }
+
+            GrupoDTO grupoOriginal = new GrupoDTO(
+                    grupo.getTipo(), grupo.getCantidad(), fichasOriginalColor,
+                    grupo.getFila(), grupo.getColumna(), grupo.isEsTemporal()
+            );
+
+            payloadBuilder.append(grupoOriginal.serializarParaPayload());
+
             if (i < grupos.size() - 1) {
                 payloadBuilder.append("$");
             }
@@ -341,7 +578,28 @@ public class Modelo implements IModelo, PropertyChangeListener {
         StringBuilder payloadBuilder = new StringBuilder();
 
         for (int i = 0; i < grupos.size(); i++) {
-            payloadBuilder.append(grupos.get(i).serializarParaPayload());
+            GrupoDTO grupo = grupos.get(i);
+
+            // FichaDTOs colores originales
+            List<FichaJuegoDTO> fichasOriginalColor = new ArrayList<>();
+            for (FichaJuegoDTO ficha : grupo.getFichasGrupo()) {
+                int originalRGB = aplicarColorOriginal(ficha.getColor().getRGB());
+
+                FichaJuegoDTO fichaOriginal = new FichaJuegoDTO(
+                        ficha.getIdFicha(), ficha.getNumeroFicha(), new Color(originalRGB),
+                        ficha.isComodin(), ficha.getFila(), ficha.getColumna()
+                );
+                fichasOriginalColor.add(fichaOriginal);
+            }
+
+            // GrupoDTO temporal con los colores originales
+            GrupoDTO grupoOriginal = new GrupoDTO(
+                    grupo.getTipo(), grupo.getCantidad(), fichasOriginalColor,
+                    grupo.getFila(), grupo.getColumna(), grupo.isEsTemporal()
+            );
+
+            payloadBuilder.append(grupoOriginal.serializarParaPayload());
+
             if (i < grupos.size() - 1) {
                 payloadBuilder.append("$");
             }
@@ -351,6 +609,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     /**
      * Registra observadores para actualizaciones del modelo (patrón Observer).
+     *
+     * @param obs
      */
     public void agregarObservador(Observador obs) {
         if (obs != null && !observadores.contains(obs)) {
@@ -360,6 +620,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     /**
      * Notifica cambios a las vistas con un DTO de actualización.
+     *
+     * @param tipoEvento
      */
     public void notificarObservadores(TipoEvento tipoEvento) {
         for (Observador observer : this.observadores) {
@@ -379,6 +641,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     /**
      * Regresa ficha a la mano (si el movimiento es válido) y actualiza la UI.
+     *
+     * @param idFicha
      */
     public void regresarFichaAMano(int idFicha) {
         if (!this.esMiTurno) {
@@ -415,8 +679,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 String payloadJuegoActualizado = serializarJuegoFinal();
                 String mensaje = this.miId + ":MOVER:" + payloadJuegoActualizado;
                 this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+
             } catch (IOException ex) {
-                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Modelo.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
@@ -425,7 +691,37 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
+     * Metodo para tornar los sets a sus colores originales
+     *
+     * Logica para el cambio de colores dinamico entre jugadores.
+     *
+     * @param colorCustom
+     * @return
+     */
+    private int aplicarColorOriginal(int colorCustom) {
+        if (this.misColores == null || this.misColores.length < 4) {
+            return colorCustom;
+        }
+
+        if (colorCustom == this.misColores[0]) {
+            return SERVER_NEGRO;
+        }
+        if (colorCustom == this.misColores[1]) {
+            return SERVER_AZUL;
+        }
+        if (colorCustom == this.misColores[2]) {
+            return SERVER_ROJO;
+        }
+        if (colorCustom == this.misColores[3]) {
+            return SERVER_AMARILLO;
+        }
+        return colorCustom;
+    }
+
+    /**
      * Obtiene el estado actual del juego para enviarlo a la vista.
+     *
+     * @return
      */
     @Override
     public JuegoDTO getTablero() {
@@ -452,9 +748,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String nombreJugadorActual = (juego.getJugadorActual() != null)
                 ? juego.getJugadorActual().getNickname()
                 : "...";
+
         dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
-        // --- CORRECCIÓN PRINCIPAL: Llenar la lista de jugadores ---
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
 
         // Lista de IDs que existen en tu juego (Debería venir del servidor, 
@@ -465,27 +761,52 @@ public class Modelo implements IModelo, PropertyChangeListener {
             DTO.JugadorDTO jugadorDto = new DTO.JugadorDTO();
             jugadorDto.setNombre(id); // Ahora 'id' es el UUID real (ej: Jugador_a1b2)
 
-            // Determinar si es turno de este ID
-            boolean esSuTurno = id.equals(nombreJugadorActual);
-            jugadorDto.setEsTurno(esSuTurno);
+            // Lista de IDs que existen en tu juego
+            List<String> ordenJugadoresUI = new ArrayList<>();
 
-            // Actualizar fichas:
-            // Si soy YO (miId), obtengo el dato real de mi mano.
-            if (id.equals(this.miId)) {
-                // Lógica existente para MI mano
-                int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-                jugadorDto.setFichasRestantes(cantidad);
-            } else {
-                // Lógica NUEVA para rivales
-                // Si el mapa tiene el dato, lo usa. Si no, pone 14 por defecto.
-                int cantidadRival = conteoFichasRivales.getOrDefault(id, 14);
-                jugadorDto.setFichasRestantes(cantidadRival);
+            if (this.nombresJugadores.contains(this.miId)) {
+                ordenJugadoresUI.add(this.miId);
             }
 
-            listaJugadoresDTO.add(jugadorDto);
+            for (String idNombre : this.nombresJugadores) {
+                if (!idNombre.equals(this.miId)) {
+                    ordenJugadoresUI.add(idNombre);
+                }
+            }
+
+            for (String idJugadores : ordenJugadoresUI) {
+                DTO.JugadorDTO jugadorDTO1 = new DTO.JugadorDTO();
+
+                // 1. Buscamos la info estática (Avatar, Nombre Real)
+                JugadorDTO perfil = perfilesJugadores.get(idJugadores);
+                if (perfil != null) {
+                    jugadorDTO1.setNombre(perfil.getNombre());
+                    jugadorDTO1.setIdAvatar(perfil.getIdAvatar());
+                    jugadorDTO1.setColores(perfil.getColores());
+                } else {
+                    // Fallback
+                    jugadorDTO1.setNombre(idJugadores);
+                    jugadorDTO1.setIdAvatar(1);
+                }
+
+                // 2. Determinar si es turno
+                boolean esSuTurno = idJugadores.equals(this.idJugadorEnTurnoGlobal);
+                jugadorDTO1.setEsTurno(esSuTurno);
+
+                if (idJugadores.equals(this.miId)) {
+                    int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
+                    jugadorDTO1.setFichasRestantes(cantidad);
+                } else {
+                    int cantidadRival = conteoFichasRivales.getOrDefault(idJugadores, 14);
+                    jugadorDTO1.setFichasRestantes(cantidadRival);
+                }
+
+                listaJugadoresDTO.add(jugadorDTO1);
+            }
+
         }
 
-        // ¡IMPORTANTE! Asignar la lista al DTO
+        // Asignar la lista al DTO
         dto.setJugadores(listaJugadoresDTO);
 
         return dto;
@@ -517,14 +838,86 @@ public class Modelo implements IModelo, PropertyChangeListener {
     }
 
     /**
-     * Convierte DTO de ficha a entidad Ficha.
+     * Parte de CU Registrar Usuario Traduce el color "oficial" del servidor al
+     * color personalizado que el usuario eligió en el registro.
+     *
+     * @param coloresSet Colores del jugador para aplicar (ya sea mío o del
+     * rival).
      */
-    private Ficha convertirFichaDtoAEntidad(FichaJuegoDTO fDto) {
+    private int aplicarColorPersonalizado(int colorOriginal, int[] coloresSet) {
+        if (coloresSet == null || coloresSet.length < 4) {
+            return colorOriginal;
+        }
+
+        if (colorOriginal == SERVER_NEGRO) {
+            return coloresSet[0]; // Lo cambio por el Set 1 del jugador
+        }
+        if (colorOriginal == SERVER_AZUL) {
+            return coloresSet[1]; // Lo cambio por el Set 2 del jugador
+        }
+        if (colorOriginal == SERVER_ROJO) {
+            return coloresSet[2]; // Lo cambio por el Set 3 del jugador
+        }
+        if (colorOriginal == SERVER_AMARILLO) {
+            return coloresSet[3]; // Lo cambio por el Set 4 del jugador
+        }
+        return colorOriginal; // Para comodines u otros colores.
+    }
+
+    private int aplicarColorPersonalizado(int colorOriginal) {
+        return aplicarColorPersonalizado(colorOriginal, this.misColores);
+    }
+
+    /**
+     * Convierte DTO de ficha a entidad Ficha, aplicando los colores
+     * personalizados del jugador especificado.
+     */
+    private Ficha convertirFichaDtoAEntidad(FichaJuegoDTO fDto, String idJugador, boolean esLocal) {
         if (fDto == null) {
             return null;
         }
-        return new Ficha(fDto.getIdFicha(), fDto.getNumeroFicha(),
-                fDto.getColor(), fDto.isComodin());
+
+        int colorOriginalRGB = fDto.getColor().getRGB();
+        int colorFinal = colorOriginalRGB;
+
+        // Aplicamos siempre los colores personalizados del jugador local (this.misColores)
+        // para que las fichas del rival se vean con el set de colores que eligió el jugador local.
+        if (!esLocal) {
+            int[] coloresJugador = this.misColores;
+
+            if (coloresJugador != null) {
+                colorFinal = aplicarColorPersonalizado(colorOriginalRGB, coloresJugador);
+
+                if (colorFinal != colorOriginalRGB) {
+                    System.out.println("[Modelo Debug Ficha] Aplicado color de " + idJugador
+                            + ". Original Server: " + colorOriginalRGB + ", Color Final Personalizado: " + colorFinal);
+                }
+            }
+        }
+
+        return new Ficha(
+                fDto.getIdFicha(),
+                fDto.getNumeroFicha(),
+                new Color(colorFinal),
+                fDto.isComodin()
+        );
+
+    }
+
+    /**
+     * Obtiene el arreglo de colores personalizado de un jugador por su ID.
+     */
+    private int[] obtenerColoresDeRival(String idJugador) {
+        JugadorDTO perfil = perfilesJugadores.get(idJugador);
+        if (perfil != null && perfil.getColores() != null) {
+            return perfil.getColores();
+        }
+        // Fallback a null o algún color por defecto si no se encuentra
+        return null;
+    }
+
+    private Ficha convertirFichaDtoAEntidad(FichaJuegoDTO fDto) {
+        return convertirFichaDtoAEntidad(fDto, this.miId, false);
     }
 
     /**
@@ -549,6 +942,57 @@ public class Modelo implements IModelo, PropertyChangeListener {
         return mano;
     }
 
+    /**
+     * Método auxiliar para parsear la lista de jugadores que llega en el evento
+     * MANO_INICIAL
+     *
+     * @param payloadJugadores String con formato
+     * "id,nombre,avatar,c1,c2,c3,c4;..."
+     * @return
+     */
+    public List<JugadorDTO> deserializarListaJugadores(String payloadJugadores) {
+        List<JugadorDTO> lista = new ArrayList<>();
+
+        if (payloadJugadores == null || payloadJugadores.isEmpty()) {
+            return lista;
+        }
+
+        // Separar por jugador (;)
+        String[] jugadoresRaw = payloadJugadores.split(";");
+
+        for (String datos : jugadoresRaw) {
+            // Separar campos por (,)
+            String[] campos = datos.split(",");
+
+            // Validación básica para no tronar
+            if (campos.length >= 7) {
+                JugadorDTO dto = new JugadorDTO();
+                // campos[0] es el ID del socket, lo usamos internamente o como nombre si gustas
+                dto.setNombre(campos[1]); // Nickname real
+
+                try {
+                    dto.setIdAvatar(Integer.parseInt(campos[2]));
+
+                    int[] colores = new int[4];
+                    colores[0] = Integer.parseInt(campos[3]);
+                    colores[1] = Integer.parseInt(campos[4]);
+                    colores[2] = Integer.parseInt(campos[5]);
+                    colores[3] = Integer.parseInt(campos[6]);
+                    dto.setColores(colores);
+
+                    // Inicializamos fichas
+                    dto.setFichasRestantes(14);
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Error parseando datos de jugador: " + datos);
+                }
+
+                lista.add(dto);
+            }
+        }
+        return lista;
+    }
+
     public void enviarComandoIniciarPartida() {
         try {
             String mensaje = this.miId + ":INICIAR_PARTIDA:";
@@ -561,6 +1005,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     /**
      * Envía comando al servidor para iniciar partida.
+     *
+     * @param despachador
      */
     public void setDespachador(iDespachador despachador) {
         this.despachador = despachador;
@@ -569,9 +1015,15 @@ public class Modelo implements IModelo, PropertyChangeListener {
     /**
      * Establece la identificación única (ID) del cliente/jugador actual, usada
      * para construir los mensajes enviados al servidor.
+     *
+     * public void setMiId(String miId) { this.miId = miId; }
+     *
+     * @param miId
      */
-    public void setMiId(String miId) {
+    public void setIdCliente(String miId) {
         this.miId = miId;
+        this.idCliente = miId; // Es vital que ambas tengan el ID
+        System.out.println("[ModeloJuego] ID Cliente asignado: " + miId);
     }
 
     public String getIpCliente() {
@@ -584,6 +1036,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     public String getIpServidor() {
         return ipServidor;
+    }
+
+    public void setPuertoCliente(int puertoCliente) {
+        this.puertoCliente = puertoCliente;
     }
 
     public void setIpServidor(String ipServidor) {
@@ -600,14 +1056,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     public int getPuertoCliente() {
         return puertoCliente;
-    }
-
-    public void setPuertoCliente(int puertoCliente) {
-        this.puertoCliente = puertoCliente;
-    }
-    
-    public void setIdCliente(String id) {
-        this.miId = id;
     }
 
 }

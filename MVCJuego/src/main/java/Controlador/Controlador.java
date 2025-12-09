@@ -5,6 +5,9 @@ import Modelo.Modelo;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlConfig;
 import contratos.controladoresMVC.iControlEjercerTurno;
+import contratos.controladoresMVC.iControlEjercerTurno;
+import contratos.controladoresMVC.iControlSalaEspera;
+
 import java.util.List;
 
 /**
@@ -17,8 +20,11 @@ import java.util.List;
 public class Controlador implements iControlEjercerTurno {
 
     Modelo modelo;
+
     iControlConfig controlConfiguracion;
     iControlCUPrincipal controlPantallaPrincipal;
+    iControlSalaEspera controlSalaDeEspera;
+
 
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
@@ -74,6 +80,13 @@ public class Controlador implements iControlEjercerTurno {
         modelo.abrirCU();
     }
 
+    
+
+    @Override
+    public void setControlSalaEspera(iControlSalaEspera ControlSalaEspera) {
+        this.controlSalaDeEspera = ControlSalaEspera;
+    }
+
     @Override
     public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
         modelo.setIpServidor(ipServidor);
@@ -81,6 +94,7 @@ public class Controlador implements iControlEjercerTurno {
         modelo.setIpCliente(ipCliente);
         modelo.setPuertoCliente(puertoCliente);
     }
+
 
     @Override
     public void cerrarCUAnteriores() {
@@ -97,5 +111,6 @@ public class Controlador implements iControlEjercerTurno {
     public void setControlPantallaPrincipal(iControlCUPrincipal controlPantallaPrincipal) {
         this.controlPantallaPrincipal = controlPantallaPrincipal;
     }
+
 
 }

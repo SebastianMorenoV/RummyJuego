@@ -11,7 +11,11 @@ public class JugadorDTO {
     private int fichasRestantes;
     private ManoDTO manoDTO;
     private boolean esTurno;
-
+    
+    //CURegistrarUsuario
+    private int idAvatar;
+    private int[] colores;
+    
     public JugadorDTO() {
     }
 
@@ -53,4 +57,23 @@ public class JugadorDTO {
         this.manoDTO = manoDTO;
     }
 
+    public int getIdAvatar() {
+        return idAvatar;
+    }
+
+    public void setIdAvatar(int idAvatar) {
+        this.idAvatar = idAvatar;
+    }
+
+    
+    public int[] getColores() {
+        return colores;
+    }
+
+    public void setColores(int[] colores) {
+        this.colores = colores;
+    }
+
+    
+    
 }

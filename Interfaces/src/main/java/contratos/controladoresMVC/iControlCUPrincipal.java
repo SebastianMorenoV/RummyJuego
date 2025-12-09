@@ -13,6 +13,10 @@ public interface iControlCUPrincipal {
     public void iniciarCreacionPartida();
 
     public void SolicitarUnirseAPartida();
+    
+    void solicitarRegistro();
+    
+    void setControladorRegistro(iControlRegistro controlRegistro);
 
     public void casoUsoConfigurarPartida();
 
@@ -29,4 +33,9 @@ public interface iControlCUPrincipal {
     public void cerrarCU();
     
     public void iniciarCU();
+
+    public void setControlSalaEspera(iControlSalaEspera controlSalaEspera);
+    
+    void entrarSalaEspera();
+
 }

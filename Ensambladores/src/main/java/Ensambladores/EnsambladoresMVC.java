@@ -9,9 +9,18 @@ import Vista.VistaLobby;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlEjercerTurno;
+
 import contratos.iDespachador;
 import contratos.iListener;
 import controlador.ControladorConfig;
+
+import contratos.controladoresMVC.iControlRegistro;
+import contratos.controladoresMVC.iControlSalaEspera;
+import contratos.iDespachador;
+import contratos.iListener;
+import control.ControlSalaDeEspera;
+import controlador.ControladorRegistro;
+
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -22,9 +31,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import modelo.IModeloSalaDeEspera;
 import modelo.ModeloConfig;
+import modelo.ModeloRegistro;
+import modelo.ModeloSalaDeEspera;
 import sockets.ClienteTCP;
 import vista.ConfigurarPartida;
+import vista.RegistrarUsuario;
+import vista.VistaSalaEspera;
 
 /**
  * Esta clase ensambla los mvcs necesarios en el sistema atraves de inyeccion de dependencias.
@@ -47,7 +61,8 @@ public class EnsambladoresMVC {
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
 
-        //Tomar la ip del cliente ejecutando el MVC.
+
+
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
         System.out.println("ip cliente: " + ipCliente);
         String idAleatorio = UUID.randomUUID().toString().substring(0, 5);
@@ -62,6 +77,7 @@ public class EnsambladoresMVC {
         modeloEjercerTurno.agregarObservador(vistaEjercerTurno);
         modeloEjercerTurno.setIdCliente(idCliente);
 
+
         ModeloConfig modeloConfiguracion = new ModeloConfig();
         modeloConfiguracion.setDespachador(despachador);
         ControladorConfig controladorConfiguracion = new ControladorConfig(modeloConfiguracion);
@@ -69,12 +85,48 @@ public class EnsambladoresMVC {
         modeloConfiguracion.añadirObservador(vistaConfig);
         modeloConfiguracion.setIdCliente(idCliente);
 
+        controlEjercerTurno.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(), idCliente, puertoLocalEscucha);
+        modeloEjercerTurno.setDespachador(despachador);
+        modeloEjercerTurno.agregarObservador(vistaEjercerTurno);
+        modeloEjercerTurno.setIdCliente(idCliente); // El juego necesita saber quién soy
+
+        //ENSAMBLAJE: MVC PANTALLA PRINCIPAL LOBBY ------------
         ModeloCUPrincipal modeloPrincipal = new ModeloCUPrincipal();
         modeloPrincipal.setDespachador(despachador);
         iControlCUPrincipal controlPrincipal = new ControlCUPrincipal(modeloPrincipal);
+        modeloPrincipal.setIdCliente(idCliente);
+
         VistaLobby vistaLobby = new VistaLobby(controlPrincipal);
         modeloPrincipal.añadirObservador(vistaLobby);
         modeloPrincipal.setIdCliente(idCliente);
+
+        ModeloRegistro modeloRegistro = new ModeloRegistro();
+        iControlRegistro controladorRegistro = new ControladorRegistro(modeloRegistro);
+        controlPrincipal.setControladorRegistro(controladorRegistro);
+        RegistrarUsuario vistaRegistro = new RegistrarUsuario(controladorRegistro);
+
+        // Configuracion de registro
+        modeloRegistro.setDespachador(despachador);
+        modeloRegistro.setIdCliente(idCliente);
+        modeloRegistro.agregarObservador(vistaRegistro);
+        
+          // ENSAMBLAJE: MVC SALA DE ESPERA ------
+        IModeloSalaDeEspera modeloSalaDeEspera = new ModeloSalaDeEspera();
+        ModeloSalaDeEspera modeloSala = new ModeloSalaDeEspera();
+        iControlSalaEspera controlSala = new ControlSalaDeEspera(modeloSala);
+        VistaSalaEspera vistaSala = new VistaSalaEspera(controlSala);
+ 
+        modeloSala.agregarObservador(vistaSala);
+        modeloSala.setIdCliente(idCliente);
+
+        // Inyectar red a la sala para que pueda enviar el VOTO
+        controlSala.setConfiguracionRed(Configuracion.getIpServidor(), Configuracion.getPuerto(), idCliente, despachador);
+
+        // El Lobby necesita saber del Registro para abrirlo cuando des clic en "Crear Partida"
+        controlPrincipal.setControladorRegistro(controladorRegistro);
+
+        // NAVEGACIÓN REGISTRO: Cuando el registro sea exitoso, el controlador llamará a controlPrincipal ---------
+        controladorRegistro.setNavegacion(controlPrincipal);
 
         controlPrincipal.setControladorConfig(controladorConfiguracion);
         controladorConfiguracion.setControladorCUPrincipal(controlPrincipal);
@@ -106,9 +158,38 @@ public class EnsambladoresMVC {
             }
         }).start();
 
-        System.out.println("[Ensamblador] Iniciando aplicación...");
+       
+
+
+       
+
+      
+        // Inyecciones para Registro --
+        System.out.println("IP CONFIGURADA: " + Configuracion.getIpServidor()); //para ver hasta donde llegamos antes de un error
+
+        
+
+        controlPrincipal.setControladorRegistro(controladorRegistro);
+        controlPrincipal.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(), ipCliente, puertoLocalEscucha);
+        controladorRegistro.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(), ipCliente);
+
+      
+
+        // 5. CONEXIONES CRUZADAS Y CONFIGURACIÓN FINAL
+        controlPrincipal.setControladorEjercerTurno(controlEjercerTurno);
+        controlEjercerTurno.setControlPantallaPrincipal(controlPrincipal);
+        controlEjercerTurno.setControlSalaEspera(controlSala);
+        controlPrincipal.setControlSalaEspera(controlSala);
+
+       
+
+        // 7. Arranque de la Aplicación
+        System.out.println("[Ensamblador] Arrancando aplicación para: " + idCliente);
+
+        // FLUJO DE INICIO
         vistaLobby.setVisible(true);
-        vistaConfig.setVisible(false);
+        vistaRegistro.setVisible(false);
+        vistaSala.setVisible(false);
 
         controlPrincipal.iniciarCU();
     }
@@ -125,8 +206,35 @@ public class EnsambladoresMVC {
             return socket.getLocalPort();
         } catch (IOException e) {
             System.err.println("No se pudo encontrar un puerto libre, usando por defecto 9999");
+
             return 9999;
         }
+
+    }
+
+    public RegistrarUsuario ensamblarMVCRegistro(iDespachador despachador, String ipCliente, iControlCUPrincipal controlPrincipal, int puertoEscuchaCliente) {
+        System.out.println("[Ensamblador] Ensamblando MVC Registro...");
+
+        ModeloRegistro modeloRegistro = new ModeloRegistro();
+        modeloRegistro.setDespachador(despachador);
+
+        ControladorRegistro controladorRegistro = new ControladorRegistro(modeloRegistro);
+
+        controladorRegistro.setConfiguracion(
+                Configuracion.getIpServidor(), // IP Servidor
+                puertoEscuchaCliente, // Puerto Cliente (Payload)
+                ipCliente // IP Cliente
+        );
+
+        if (controlPrincipal != null) {
+            controlPrincipal.setControladorRegistro(controladorRegistro);
+        }
+
+        RegistrarUsuario vistaRegistro = new RegistrarUsuario(controladorRegistro);
+        modeloRegistro.agregarObservador(vistaRegistro);
+
+        return vistaRegistro;
+
     }
 
     public static void main(String[] args) {

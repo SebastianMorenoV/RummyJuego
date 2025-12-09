@@ -123,6 +123,23 @@ public class JugadorUI extends JPanel {
     }
 
     /**
+     * Permite actualizar la imagen del avatar en tiempo de ejecución cuando
+     * llega la información del servidor.
+     *
+     * @param imagenAvatarBytes
+     */
+    public void setAvatarBytes(byte[] imagenAvatarBytes) {
+        if (imagenAvatarBytes != null && imagenAvatarBytes.length > 0) {
+            try {
+                this.avatarImage = ImageIO.read(new ByteArrayInputStream(imagenAvatarBytes));
+                this.repaint(); // Importante: repintar para que se vea el cambio
+            } catch (IOException e) {
+                System.err.println("Error actualizando avatar en UI: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Metodo para settear el numero de fichas restantes de un jugador. El
      * numero de fichas restante sale debajo del nombre de un jugador
      *
@@ -168,4 +185,3 @@ public class JugadorUI extends JPanel {
         repaint();
     }
 }
-    

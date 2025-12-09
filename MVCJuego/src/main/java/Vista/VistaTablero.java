@@ -9,6 +9,7 @@ import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
 import Vista.Objetos.TableroUI;
+import static Vista.TipoEvento.MOSTRAR_JUEGO;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -43,7 +44,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
-    private java.util.Map<String, JugadorUI> mapaJugadoresUI = new java.util.HashMap<>();
+
+    private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -75,30 +77,27 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.setBackground(new java.awt.Color(0, 0, 0));
         GUIjuego.setLayout(null);
 
-        btnOrdenarMayorAMenor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button.png"))); // NOI18N
-        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnOrdenarMayorAMenor.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOrdenarMayorAMenorMouseClicked(evt);
             }
         });
         GUIjuego.add(btnOrdenarMayorAMenor);
-        btnOrdenarMayorAMenor.setBounds(820, 280, 50, 29);
+        btnOrdenarMayorAMenor.setBounds(820, 280, 50, 0);
 
-        btnOrdenarPorGrupos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button (1).png"))); // NOI18N
-        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnOrdenarPorGrupos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOrdenarPorGruposMouseClicked(evt);
             }
         });
         GUIjuego.add(btnOrdenarPorGrupos);
-        btnOrdenarPorGrupos.setBounds(820, 241, 50, 29);
+        btnOrdenarPorGrupos.setBounds(820, 241, 50, 0);
 
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
@@ -107,7 +106,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(btnFinalizarTurno);
         btnFinalizarTurno.setBounds(800, 320, 90, 50);
 
-        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
         fondo.setText("jLabel1");
         GUIjuego.add(fondo);
         fondo.setBounds(0, 0, 900, 500);
@@ -142,12 +140,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
         // TODO add your handling code here:
-
     }//GEN-LAST:event_btnOrdenarPorGruposMouseClicked
 
     private void btnOrdenarMayorAMenorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarMayorAMenorMouseClicked
         // TODO add your handling code here:
-
     }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
 
 
@@ -158,6 +154,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JLabel btnOrdenarPorGrupos;
     private javax.swing.JLabel fondo;
     // End of variables declaration//GEN-END:variables
+    
     /**
      * Metodo implementado por la interfaz Observer. Reacciona a las
      * notificaciones del Modelo para actualizar la interfaz gráfica.
@@ -268,56 +265,75 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     /**
      * Metodo para cargar los jugadores aun no terminado (MOCK).
+     *
+     * @param jugadoresReales
      */
-    private void cargarJugadores(List<JugadorDTO> jugadoresReales) {
-        mapaJugadoresUI.clear();
+    public void cargarJugadores(List<DTO.JugadorDTO> jugadoresReales) {
+        listaJugadoresUI.clear();
 
-        Point[] posiciones = {
-            new Point(-10, -10), 
-            new Point(-10, 380), 
-            new Point(780, -10),
-            new Point(780, 380) 
-        };
-
-        String rutaImagen = "src/main/resources/avatares/avatar.png";
-        byte[] imagenAvatarBytes = null;
-        try {
-            java.io.InputStream is = getClass().getResourceAsStream("/avatares/avatar.png");
-            if (is != null) {
-                imagenAvatarBytes = is.readAllBytes();
-                is.close();
-            } else {
-                System.out.println("Error: No se encontró la imagen /avatares/avatar.png");
-            }
-        } catch (IOException e) {
-            System.err.println("Error al cargar imagen: " + e.getMessage());
+        // 1. Limpiar componentes viejos de GUIjuego
+        for (JugadorUI p : listaJugadoresUI) {
+            System.out.println("lista jugadores reales:::: " + p);
+            GUIjuego.remove(p);
         }
 
-        int index = 0;
-        if (jugadoresReales != null) {
-            for (JugadorDTO jugadorDto : jugadoresReales) {
-                if (index >= posiciones.length) {
-                    break; 
-                }
-                String idReal = jugadorDto.getNombre();
-                int fichas = jugadorDto.getFichasRestantes();
+        listaJugadoresUI.clear();
+        if (jugadoresReales == null) {
+            return;
+        }
+        // Posiciones fijas para 2, 3 o 4 jugadores
+        Point[] posiciones = {
+            new Point(-10, 380),
+            new Point(-10, -10),
+            new Point(780, -10),
+            new Point(780, 380)
+        };
 
-                JugadorUI jugadorUI = new JugadorUI(idReal, fichas, imagenAvatarBytes);
-                jugadorUI.setSize(130, 130);
+        int indexPos = 0;
 
-                jugadorUI.setLocation(posiciones[index].x, posiciones[index].y);
-
-                GUIjuego.add(jugadorUI);
-                mapaJugadoresUI.put(idReal, jugadorUI);
-
-                System.out.println("[Vista] Jugador pintado: " + idReal + " en posición " + index);
-
-                index++;
+        for (DTO.JugadorDTO dto : jugadoresReales) {
+            if (indexPos >= 4) {
+                break;
             }
+
+            // 1. Obtener imagen real
+            byte[] avatarBytes = cargarImagenPorIndice(dto.getIdAvatar());
+
+            // 2. Crear UI con datos reales
+            JugadorUI panelJugador = new JugadorUI(dto.getNombre(), dto.getFichasRestantes(), avatarBytes);
+
+            // 3. Posicionar
+            panelJugador.setSize(130, 130);
+            panelJugador.setLocation(posiciones[indexPos]);
+
+            // 4. Agregar a la ventana y a la lista local
+            GUIjuego.add(panelJugador);
+            listaJugadoresUI.add(panelJugador);
+
+            indexPos++;
+
         }
 
         GUIjuego.revalidate();
         GUIjuego.repaint();
+
+    }
+
+    /**
+     *
+     * @param indice
+     * @return
+     */
+    private byte[] cargarImagenPorIndice(int indice) {
+        String rutaRecurso = "/avatares/avatar" + indice + ".png";
+        try (java.io.InputStream is = getClass().getResourceAsStream(rutaRecurso)) {
+            if (is != null) {
+                return is.readAllBytes();
+            }
+        } catch (IOException e) {
+            System.err.println("No se pudo cargar avatar: " + rutaRecurso);
+        }
+        return null;
     }
 
     /**
@@ -331,10 +347,26 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         crearManoUI();
         repintarMano(modelo, dto);
         crearMazo(modelo);
-        List<JugadorDTO> listaJugadores = modelo.getTablero().getJugadores();
+ 
+
+        // 1. Recuperamos el estado actual del juego desde el modelo
+        DTO.JuegoDTO estadoJuego = modelo.getTablero();
+
+        // 2. Extraemos la lista de jugadores reales (con Avatares y Nombres del BB)
+        List<DTO.JugadorDTO> listaJugadores = (estadoJuego != null) ? estadoJuego.getJugadores() : null;
+
+        // 3. Llamamos a cargarJugadores pasándole la lista
         cargarJugadores(listaJugadores);
+
+        if (estadoJuego != null) {
+            actualizarEstadoJugadores(estadoJuego);
+        }
+
         btnFinalizarTurno.setVisible(false);
-        GUIjuego.add(fondo);
+
+        if (fondo.getParent() == GUIjuego) {
+            GUIjuego.setComponentZOrder(fondo, GUIjuego.getComponentCount() - 1);
+        }
 
         GUIjuego.revalidate();
         GUIjuego.repaint();
@@ -595,23 +627,29 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      */
     private void actualizarEstadoJugadores(DTO.JuegoDTO estadoJuego) {
         String nombreJugadorEnTurno = estadoJuego.getJugadorActual();
-        List<DTO.JugadorDTO> listaJugadores = estadoJuego.getJugadores();
+        List<DTO.JugadorDTO> listaDatos = estadoJuego.getJugadores();
 
-        if (listaJugadores == null) {
-            return; // Ahora esto no será null
+        if (listaDatos == null || listaDatos.isEmpty()) {
+            return;
         }
-        for (DTO.JugadorDTO jDto : listaJugadores) {
-            // Ahora buscará "Jugador1" en el mapa y SI lo encontrará
-            JugadorUI ui = mapaJugadoresUI.get(jDto.getNombre());
 
-            if (ui != null) {
-                ui.setFichasRestantes(jDto.getFichasRestantes());
-
-                // Esto activará el borde verde
-                boolean esSuTurno = jDto.getNombre().equals(nombreJugadorEnTurno);
-                ui.setEsTuTurno(esSuTurno);
+        // El Modelo SIEMPRE debe mandar la lista ordenada: [YO, Rival1, Rival2, Rival3]
+        for (int i = 0; i < listaDatos.size(); i++) {
+            if (i >= listaJugadoresUI.size()) {
+                break;
             }
+
+            JugadorUI uiPanel = listaJugadoresUI.get(i);
+            DTO.JugadorDTO datosNuevos = listaDatos.get(i);
+
+            // Actualizar informacion dinámica
+            uiPanel.setFichasRestantes(datosNuevos.getFichasRestantes());
+
+            boolean esSuTurno = datosNuevos.isEsTurno();
+
+            uiPanel.setEsTuTurno(esSuTurno);
         }
+        GUIjuego.repaint();
     }
 
     /**
@@ -619,7 +657,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * el tablero de juego. Este panel contiene los grupos de fichas colocados
      * por los jugadores.
      *
-     * * @return El objeto TableroUI que es el componente visual del tablero.
+     * @return El objeto TableroUI que es el componente visual del tablero.
      */
     public TableroUI getPanelTablero() {
         return tableroUI;
@@ -629,7 +667,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * Obtiene el panel de interfaz de usuario (UI) que representa visualmente
      * la mano o área de fichas del jugador actual.
      *
-     * * @return El objeto ManoUI que es el componente visual de la mano del
+     * @return El objeto ManoUI que es el componente visual de la mano del
      * jugador.
      */
     public ManoUI getPanelMano() {

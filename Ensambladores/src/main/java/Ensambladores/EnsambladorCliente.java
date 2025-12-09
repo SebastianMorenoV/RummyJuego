@@ -45,6 +45,7 @@ public final class EnsambladorCliente implements iEnsambladorCliente {
      * mensajes entrantes (ServerTCP).
      *
      * @param miId El identificador único del cliente.
+     * @param oyentes
      * @return Una instancia de {@link iListener} (ServerTCP) lista para recibir
      * conexiones.
      */

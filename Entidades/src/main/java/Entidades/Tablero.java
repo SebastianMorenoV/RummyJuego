@@ -25,8 +25,8 @@ public class Tablero {
 
     /**
      * Verifica que TODOS los grupos en el tablero sean estructuralmente válidos
-     *  y no "Invalido" o "Temporal" (incompleto). Un
-     * grupo es "Temporal" si tiene menos de 3 fichas.
+     * y no "Invalido" o "Temporal" (incompleto). Un grupo es "Temporal" si
+     * tiene menos de 3 fichas.
      */
     public boolean esEstructuraDeGruposValida() {
         return this.fichasEnTablero.stream()
@@ -42,7 +42,7 @@ public class Tablero {
      */
     public List<Grupo> getGruposTemporales() {
         return this.fichasEnTablero.stream()
-                .filter(Grupo::esTemporal) 
+                .filter(Grupo::esTemporal)
                 .collect(Collectors.toList());
     }
 
@@ -53,7 +53,7 @@ public class Tablero {
      */
     public int calcularPuntosDeLaJugada() {
         return this.fichasEnTablero.stream()
-                .filter(Grupo::esTemporal) 
+                .filter(Grupo::esTemporal)
                 .mapToInt(Grupo::calcularPuntos)
                 .sum();
     }
@@ -84,7 +84,7 @@ public class Tablero {
                     grupoIterator.remove();
                 }
 
-                return fichaRemovida; 
+                return fichaRemovida;
 
             }
         }
@@ -172,7 +172,7 @@ public class Tablero {
                             .map(f -> new Ficha(f.getId(), f.getNumero(),
                             f.getColor(), f.isComodin()))
                             .collect(Collectors.toList());
-                    
+
                     return new Grupo(g.getTipo(), fichasCopia.size(), fichasCopia);
                 })
                 .collect(Collectors.toList());

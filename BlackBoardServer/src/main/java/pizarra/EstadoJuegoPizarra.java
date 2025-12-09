@@ -18,6 +18,11 @@ import java.util.Map;
 public class EstadoJuegoPizarra implements iPizarraJuego {
 
     private final List<iObservador> observadores;
+
+    private Map<String, String> datosJugadores = new HashMap<>();
+
+    private Map<String, String> perfilesJugadores = new HashMap<>();
+
     private String ultimoTableroSerializado = "";
     private final List<String> ordenDeTurnos;
     private String ultimoJugadorQueMovio;
@@ -26,8 +31,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] configuracionPartida;
     private boolean partidaConfigurada = false;
     private String mazoSerializado;
+
     private Map<String, Integer> fichasPorJugador = new HashMap<>(); 
     private Map<String, String> candidatos = new HashMap<>();
+    private List<String> jugadoresListos = new ArrayList<>();
+
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
@@ -70,17 +78,58 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void registrarJugador(String id, String payloadMano) {
-        jugadorARegistrarTemporal = new String[3];
-        String[] partes = payloadMano.split("\\$", 2);
-        jugadorARegistrarTemporal[0] = id;
-        jugadorARegistrarTemporal[1] = partes[0];
-        jugadorARegistrarTemporal[2] = partes[1];
+        this.datosJugadores.put(id, payloadMano);
+        String[] partes = payloadMano.split("\\$");
+
+        this.jugadorARegistrarTemporal = new String[10];
+        this.jugadorARegistrarTemporal[0] = id;
+
+        if (partes.length > 0) {
+            jugadorARegistrarTemporal[1] = partes[0]; // IP
+        }
+        if (partes.length > 1) {
+            jugadorARegistrarTemporal[2] = partes[1]; // Puerto
+        }
+
+        // Solo intentamos leer el resto si el payload es "completo" (viene del registro de usuario)
+        if (partes.length > 2) {
+            jugadorARegistrarTemporal[3] = partes[2]; // Avatar
+        }
+        if (partes.length > 3) {
+            jugadorARegistrarTemporal[4] = partes[3]; // Colores
+        }
+        if (partes.length > 4) {
+            jugadorARegistrarTemporal[5] = partes[4];
+        }
+        if (partes.length > 5) {
+            jugadorARegistrarTemporal[6] = partes[5];
+        }
+        if (partes.length > 6) {
+            jugadorARegistrarTemporal[7] = partes[6];
+        }
 
         ordenDeTurnos.add(id);
 
+        // verificar elementos (ids)
+        for (String jugador : ordenDeTurnos) {
+            if (jugadorARegistrarTemporal[1].equals(jugador)) {
+                notificarObservadores("NOMBRE_REPETIDO");
+            }
+        }
+
+        //validacion
+        notificarObservadores("REGISTRAR_CANDIDATO");
         notificarObservadores("JUGADOR_UNIDO");
+
         jugadorARegistrarTemporal = null;
         candidatos.remove(id);
+
+    }
+
+    // Permite al Controlador obtener el payload completo (Avatar, Colores) de un jugador por su ID
+    public String getDatosJugador(String idJugador) {
+        return this.datosJugadores.get(idJugador);
+
     }
 
     /**
@@ -147,7 +196,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public synchronized boolean iniciarPartidaSiCorresponde() {
         int numJugadores = ordenDeTurnos.size();
 
-        if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
+        // MOCK: Se cambio para permitir iniciar con 1 para pruebas si es necesario, pero la regla es 2-4
+        if (indiceTurnoActual == -1 && numJugadores >= 1 && numJugadores <= 4) {
             indiceTurnoActual = 0; // Inicia el turno del primer jugador
             String idPrimerJugador = ordenDeTurnos.get(0);
             System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");
@@ -216,13 +266,13 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      * @param idCliente
      * @param comando
      * @param payload
-     * @return
      */
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
 
         if (indiceTurnoActual == -1) {
             switch (comando) {
+
                 case "SOLICITAR_CREACION":
                     if (this.partidaConfigurada || !ordenDeTurnos.isEmpty()) {
                         notificarObservadores("PARTIDA_EXISTENTE:" + idCliente);
@@ -253,12 +303,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                 case "REGISTRAR":
                     almacenarUsuarioTemporal(idCliente, payload);
                     break;
+
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
                     if (iniciarPartidaSiCorresponde()) {
                         notificarObservadores("EVENTO_PARTIDA_INICIADA");
                     }
                     break;
+
                 case "CONFIGURAR_PARTIDA":
                     System.out.println("Configurando partida... Promoviendo al Host: " + idCliente);
                     String payloadHost = candidatos.get(idCliente);
@@ -270,6 +322,64 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         System.err.println("[Error] El usuario " + idCliente + " no estaba en la lista de candidatos.");
                     }
                     break;
+
+                case "ACTUALIZAR_PERFIL": //
+                    System.out.println("[Pizarra] Verificando perfil de " + idCliente);
+
+                    // El payload llega como: "Nombre$Avatar$Color..."
+                    String[] partesNuevas = payload.split("\\$");
+                    String nuevoNombre = (partesNuevas.length > 0) ? partesNuevas[0] : "";
+
+                    boolean nombreOcupado = false;
+
+                    // Recorremos los perfiles que ya tenemos guardados en el mapa 'perfilesJugadores'
+                    for (String datosExistentes : perfilesJugadores.values()) {
+                        // Extraemos el nombre de los datos existentes
+                        String[] partesExistentes = datosExistentes.split("\\$");
+                        String nombreExistente = (partesExistentes.length > 0) ? partesExistentes[0] : "";
+
+                        // Comparamos (ignorando mayúsculas/minúsculas)
+                        if (nombreExistente.equalsIgnoreCase(nuevoNombre)) {
+                            nombreOcupado = true;
+                            break;
+                        }
+                    }
+
+                    if (nombreOcupado) {
+                        System.out.println("[Pizarra] Error: El nombre '" + nuevoNombre + "' ya está en uso.");
+                        // El formato del evento será: "NOMBRE_REPETIDO:ID_DEL_CLIENTE"
+                        notificarObservadores("NOMBRE_REPETIDO:" + idCliente);
+                    } else {
+                        // Si está libre, procedemos normal
+                        perfilesJugadores.put(idCliente, payload);
+                        System.out.println("[Pizarra] Registro exitoso para " + nuevoNombre);
+                        notificarObservadores("REGISTRO_EXITOSO:" + idCliente);
+                    }
+                    break;
+                case "ESTOY_LISTO":
+                    System.out.println("[Pizarra] Jugador listo: " + idCliente);
+
+                    if (!jugadoresListos.contains(idCliente)) {
+                        jugadoresListos.add(idCliente);
+                        notificarObservadores("ACTUALIZAR_ESTADO_SALA");
+                    }
+
+                    // Verificar si todos (o mínimo 2) están listos
+                    int totalEnSala = ordenDeTurnos.size();
+                    int totalListos = jugadoresListos.size();
+
+                    System.out.println("[Pizarra] Listos: " + totalListos + "/" + totalEnSala);
+
+                    // REGLA DE INICIO: Mínimo 2 jugadores y Todos deben estar listos
+                    if (totalEnSala >= 2 && totalListos == totalEnSala) {
+                        System.out.println("[Pizarra] ¡Todos listos! Iniciando partida...");
+
+                        if (iniciarPartidaSiCorresponde()) {
+                            notificarObservadores("EVENTO_PARTIDA_INICIADA");
+                        }
+                    }
+                    break;
+
             }
         }
 
@@ -320,6 +430,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         System.err.println("[Pizarra] Comando desconocido o fuera de lugar: " + comando);
                     }
                     break;
+
             }
         }
     }
@@ -336,6 +447,35 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         System.out.println("[Pizarra] Candidato registrado en sala de espera: " + idCliente);
 
         notificarObservadores("REGISTRAR_CANDIDATO");
+    }
+
+    /**
+     * NUEVO: Genera la cadena que contiene la info de TODOS los jugadores para
+     * que MVCJuego sepa a quién pintar. Formato de salida:
+     * "id1,payload1;id2,payload2;..."
+     *
+     * @return
+     */
+    @Override
+    public String getMetadatosJugadores() {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+
+        // Recorremos el orden de turnos para mantener la consistencia
+        for (String id : ordenDeTurnos) {
+            String datos = perfilesJugadores.get(id);
+            if (datos != null) {
+                // Separamos cada jugador por ";"
+                // Formato interno: ID,DATOS (donde DATOS ya trae $ separadores)
+                sb.append(id).append(",").append(datos);
+
+                if (count < ordenDeTurnos.size() - 1) {
+                    sb.append(";");
+                }
+                count++;
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -397,17 +537,34 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return configuracionPartida;
     }
 
+
+    /**
+     * Método para inicializar o actualizar fichas
+     *
+     * @param id
+     * @param cantidad
+     */
     public void setFichasJugador(String id, int cantidad) {
         fichasPorJugador.put(id, cantidad);
     }
 
+
+    /**
+     * Método para sumar 1 ficha
+     *
+     * @param id
+     */
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
             fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
         }
     }
 
-    // NUEVO: Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
+    /**
+     * Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
+     *
+     * @return
+     */
     public String getFichasJugadoresSerializado() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> entry : fichasPorJugador.entrySet()) {

@@ -1,6 +1,5 @@
 package Vista.Objetos;
 
-import Controlador.Controlador;
 import DTO.GrupoDTO;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlEjercerTurno;
@@ -41,7 +40,7 @@ public class FichaUI extends JPanel {
     }
 
     public FichaUI(int idFicha, int numero, Color color, boolean comodin,
-           iControlEjercerTurno controlador, VistaTablero vista) {
+            iControlEjercerTurno controlador, VistaTablero vista) {
         this.control = controlador;
         this.vista = vista;
         this.idFicha = idFicha;
@@ -171,7 +170,7 @@ public class FichaUI extends JPanel {
                         if (fichasValidadas.containsValue(FichaUI.this)) {
                             devolverFichaAlOrigen();
                         } else {
-                              control.regresarFichaAMano(FichaUI.this.idFicha);
+                            control.regresarFichaAMano(FichaUI.this.idFicha);
                         }
 
                     } else {
@@ -247,5 +246,9 @@ public class FichaUI extends JPanel {
 
     public boolean isComodin() {
         return comodin;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 }

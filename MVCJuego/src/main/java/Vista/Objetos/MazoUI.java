@@ -1,5 +1,6 @@
 package Vista.Objetos;
 
+
 import Controlador.Controlador;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
@@ -53,7 +54,7 @@ public class MazoUI extends JPanel implements MouseListener {
         JOptionPane.showMessageDialog(ventanaPadre,
                 "Ficha agarrada, Turno terminado",
                 "VISTA",
-                JOptionPane.WARNING_MESSAGE);   
+                JOptionPane.WARNING_MESSAGE);
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import Vista.ObservadorLobby;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,27 +27,20 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
     int puertoServidor;
     private String idCliente;
 
+    private String datosSalaCache;
+
+    public void setIdCliente(String id) {
+        this.idCliente = id;
+    }
+
     public ModeloCUPrincipal() {
         observadores = new ArrayList<>();
 
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        String evento = evt.getPropertyName();
+    public String getPartida() {
+        throw new UnsupportedOperationException("Aun no se usa");
 
-        switch (evento) {
-            case "ACCESO_DENEGADO":
-                notificarObservadores(Evento.ACCESO_DENEGADO);
-                break;
-            case "PARTIDA-EXISTENTE":
-                notificarObservadores(Evento.PARTIDA_EXISTENTE); // agregar aqui
-                break;
-
-            case "PUEDES_CONFIGURAR":
-                notificarObservadores(Evento.CREAR_PARTIDA);
-                break;
-        }
     }
 
     public void SolicitarUnirseApartida() {
@@ -62,11 +56,17 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
     public void iniciarCreacionPartida() {
         try {
+
             String mensaje = idCliente + ":SOLICITAR_CREACION:" + miIp + "$" + miPuerto;
 
             if (despachador != null) {
                 despachador.enviar(ipServidor, puertoServidor, mensaje);
             }
+
+            // DEBUG
+            System.out.println("[MOCK] Saltando espera de red para pruebas locales.");
+            notificarObservadores(Evento.CREAR_PARTIDA);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -92,12 +92,6 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
 
     public void iniciarLobby() {
         notificarObservadores(Evento.INICIO);
-    }
-
-    @Override
-    public String getPartida() {
-        System.out.println("No utilizado.");
-        return null;
     }
 
     public void añadirObservador(ObservadorLobby obs) {
@@ -146,8 +140,71 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
         this.puertoServidor = puertoServidor;
     }
 
-    public void setIdCliente(String id) {
-        this.idCliente = id;
+    public String getDatosSala() {
+        return datosSalaCache;
+    }
+
+    /**
+     * Logica para la votacion en Sala de Espera
+     */
+    public void enviarEstoyListo() {
+        try {
+            String mensaje = idCliente + ":ESTOY_LISTO:" + miIp + "$" + miPuerto;
+            if (despachador != null) {
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        String evento = evt.getPropertyName();
+        String payload = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
+
+        System.out.println("[CLIENTE DEBUG] Modelo recibió evento: " + evento);
+
+        switch (evento) {
+            case "ACCESO_DENEGADO":
+                notificarObservadores(Evento.ACCESO_DENEGADO);
+                break;
+            case "PARTIDA-EXISTENTE":
+                notificarObservadores(Evento.PARTIDA_EXISTENTE); // agregar aqui
+                break;
+
+            case "PUEDES_CONFIGURAR":
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+
+            case "CREAR_PARTIDA":
+                System.out.println("[Modelo Cliente] ¡Recibí CREAR_PARTIDA! Notificando vista...");
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+
+            case "UNIRSE_PARTIDA":
+                System.out.println("[Modelo Cliente] ¡Permiso recibido (" + evento + ")! Yendo a registro...");
+
+                // Ir a la pantalla de poner nombre y avatar.
+                notificarObservadores(Evento.CREAR_PARTIDA);
+                break;
+
+            case "ACTUALIZAR_SALA":
+                this.datosSalaCache = payload;
+
+                // Avisamos a la VistaLobby que llegaron datos nuevos
+                notificarObservadores(Evento.ACTUALIZAR_SALA);
+                break;
+
+            case "MANO_INICIAL": //
+                System.out.println("[Modelo] ¡Recibí mi mano! El juego ha comenzado.");
+
+                // Guardamos la mano o se la pasamos a la vista de juego
+                // payload contiene: Cartas $ MazoCount $ Metadatos
+                notificarObservadores(Evento.INICIO_JUEGO);
+                break;
+
+        }
     }
 
 }

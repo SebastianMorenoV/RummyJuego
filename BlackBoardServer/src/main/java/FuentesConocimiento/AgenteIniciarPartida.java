@@ -26,6 +26,8 @@ public class AgenteIniciarPartida implements iAgentePartida {
     /**
      * Al ser creado, este agente instancia el dominio del juego y crea el mazo
      * completo.
+     *
+     * @param pizarra
      */
     public AgenteIniciarPartida(EstadoJuegoPizarra pizarra) {
         this.pizarra = pizarra;
@@ -37,10 +39,13 @@ public class AgenteIniciarPartida implements iAgentePartida {
      * Reparte las manos para todos los jugadores IDs provistos.
      *
      * @param jugadorIds La lista de IDs de los jugadores en la partida.
+     * @param numFichas
+     * @param numComodines
      * @return Un mapa de [ID_Jugador -> ManoSerializada]
      */
     @Override
-    public Map<String, String> repartirManos(List<String> jugadorIds, int numFichas,int numComodines) {
+
+    public Map<String, String> repartirManos(List<String> jugadorIds, int numFichas, int numComodines) {
 
         this.tableroDeJuego.crearMazoCompleto(numComodines);
         Map<String, String> manosSerializadas = new HashMap<>();
