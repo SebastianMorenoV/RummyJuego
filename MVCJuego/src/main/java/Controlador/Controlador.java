@@ -27,6 +27,7 @@ public class Controlador implements iControlEjercerTurno {
     /**
      * Metodo que le habla al modelo para iniciar el juego.
      */
+    @Override
     public void iniciarJuego() {
         modelo.iniciarJuego();
     }
@@ -36,6 +37,7 @@ public class Controlador implements iControlEjercerTurno {
      * LISTA ENTERA de DTOs a un solo String. 3 Le dice al Ensamblador que envíe
      * ESE ÚNICO String.
      */
+    @Override
     public void colocarFicha(List<GrupoDTO> grupos) {
         modelo.colocarFicha(grupos);
     }
@@ -46,6 +48,7 @@ public class Controlador implements iControlEjercerTurno {
      *
      * @param idFicha id de la ficha a regresar.
      */
+    @Override
     public void regresarFichaAMano(int idFicha) {
         modelo.regresarFichaAMano(idFicha);
     }
@@ -53,6 +56,7 @@ public class Controlador implements iControlEjercerTurno {
     /**
      * Metodo que le habla al modelo para pasar el Turno.
      */
+    @Override
     public void pasarTurno() {
         modelo.tomarFichaMazo();
     }
@@ -60,6 +64,7 @@ public class Controlador implements iControlEjercerTurno {
     /**
      * Metodo que le habla al modelo para terminar el turno de un jugador.
      */
+    @Override
     public void terminarTurno() {
         modelo.terminarTurno();
     }
@@ -70,14 +75,11 @@ public class Controlador implements iControlEjercerTurno {
     }
 
     @Override
-    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
-
-    }
-
-    @Override
     public void cerrarCUAnteriores() {
-        if (controlPantallaPrincipal != null) controlPantallaPrincipal.cerrarCU();
-        
+        if (controlPantallaPrincipal != null) {
+            controlPantallaPrincipal.cerrarCU();
+        }
+
         if (controlSalaDeEspera != null) {
             controlSalaDeEspera.cerrarCU();
         }
@@ -93,4 +95,11 @@ public class Controlador implements iControlEjercerTurno {
         this.controlSalaDeEspera = ControlSalaEspera;
     }
 
+    @Override
+    public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
+        modelo.setIpServidor(ipServidor);
+        modelo.setPuertoServidor(puertoServidor);
+        modelo.setIpCliente(ipCliente);
+        modelo.setPuertoCliente(puertoCliente);
+    }
 }

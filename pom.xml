@@ -14,7 +14,6 @@
         <module>Ensambladores</module>
         <module>Interfaces</module>
         <module>MVCPantallaInicial</module>
-        <module>MVCConfigurarPartida</module>
         <module>MVCSalaEspera</module>
         <module>MVCRegistrarUsuario</module>
     </modules>

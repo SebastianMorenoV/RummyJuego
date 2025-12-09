@@ -68,7 +68,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 String nombre = txtfldNombre.getText();
                 if (!nombre.trim().isEmpty()) {
 
-                    if (colorSet1 == null) {
+                    if (colorSet1 == null) { //color inicial de las fichas?
                         colorSet1 = Color.RED;
                         colorSet2 = Color.GREEN;
                         colorSet3 = Color.YELLOW;
@@ -356,19 +356,9 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 System.out.println("[VistaRegistro] Registro exitoso. Cerrando y navegando...");
                 // 1. Cerrar la vista actual
                 this.setVisible(false);
-                this.dispose();
 
-                // 2. Navegar a la Sala de Espera usando la referencia de navegación de la vista
-                if (navegacion != null) {
-                    // Hacemos cast seguro a iControlCUPrincipal porque es quien tiene el método entrarSalaEspera
-                    if (navegacion instanceof iControlCUPrincipal) {
-                        ((iControlCUPrincipal) navegacion).entrarSalaEspera();
-                    } else {
-                        System.err.println("[VistaRegistro] La interfaz de navegación no soporta entrarSalaEspera.");
-                    }
-                } else {
-                    System.err.println("[VistaRegistro] Error: No hay navegación configurada.");
-                }
+                control.entrarSalaEspera();
+
                 break;
 
             case NOMBRE_REPETIDO:

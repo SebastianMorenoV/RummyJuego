@@ -19,9 +19,8 @@ import vista.RegistrarUsuario;
 public class ControladorRegistro implements iControlRegistro {
 
     private iModeloRegistro modelo;
-    private iControlCUPrincipal controlNavegacion;
+    private iControlCUPrincipal controlCUPrincipal;
     private RegistrarUsuario vista;
-
     public ControladorRegistro(iModeloRegistro modelo) {
         this.modelo = modelo;
     }
@@ -33,6 +32,10 @@ public class ControladorRegistro implements iControlRegistro {
         modelo.setIpCliente(ipCliente);
 
         System.out.println("[ControladorRegistro] Configuración de red establecida en el modelo.");
+    }
+    
+    public void entrarSalaEspera() {
+        controlCUPrincipal.entrarSalaEspera();
     }
 
     @Override
@@ -89,15 +92,15 @@ public class ControladorRegistro implements iControlRegistro {
      */
     @Override
     public void setNavegacion(iControlCUPrincipal controlNavegacion) {
-        this.controlNavegacion = controlNavegacion;
+        this.controlCUPrincipal = controlNavegacion;
     }
 
     // Método opcional por si la vista necesita pedir la navegación explícitamente, 
     // aunque idealmente la vista usará su propia referencia de navegación.
     public void navegarSiguientePantalla() {
-        if (controlNavegacion != null) {
+        if (controlCUPrincipal != null) {
             System.out.println("[ControladorRegistro] Navegando al Lobby/Principal...");
-            controlNavegacion.iniciarCU();
+            controlCUPrincipal.iniciarCU();
         }
     }
 }

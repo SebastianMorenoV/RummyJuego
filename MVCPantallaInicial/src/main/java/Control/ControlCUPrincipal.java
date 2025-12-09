@@ -6,18 +6,16 @@ import contratos.controladoresMVC.iControlEjercerTurno;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.controladoresMVC.iControlSalaEspera;
 import contratos.iNavegacion;
-import vista.VistaSalaEspera;
 
 /**
  *
  * @author benja
  */
-public class ControlCUPrincipal implements iControlCUPrincipal, iNavegacion {
+public class ControlCUPrincipal implements iControlCUPrincipal {
 
     ModeloCUPrincipal modelo;
     iControlEjercerTurno controladorEjercerTurno;
     iControlRegistro controladorRegistro;
-    private VistaSalaEspera vistaSalaEspera;
     iControlSalaEspera controlSalaEspera;
 
     public ControlCUPrincipal(ModeloCUPrincipal modelo) {
@@ -101,10 +99,7 @@ public class ControlCUPrincipal implements iControlCUPrincipal, iNavegacion {
         this.controladorRegistro = controlRegistro;
     }
 
-    public void setVistaSalaEspera(VistaSalaEspera vista) {
-        this.vistaSalaEspera = vista;
-    }
-
+    
     @Override
     public void setControlSalaEspera(iControlSalaEspera controlSalaEspera) {
         this.controlSalaEspera = controlSalaEspera;
@@ -112,15 +107,16 @@ public class ControlCUPrincipal implements iControlCUPrincipal, iNavegacion {
 
     @Override
     public void entrarSalaEspera() {
-        if (controlSalaEspera != null) {
-            System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
-            ((control.ControlSalaDeEspera) controlSalaEspera).iniciarCU();
-        } else {
-            System.err.println("[ControlPrincipal] Error: No tengo referencia al ControlSalaEspera");
-        }
+        
+        controlSalaEspera.iniciarCU();
+//        if (controlSalaEspera != null) {
+//            System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
+//            ((control.ControlSalaDeEspera) controlSalaEspera).iniciarCU();
+//        } else {
+//            System.err.println("[ControlPrincipal] Error: No tengo referencia al ControlSalaEspera");
+//        }
     }
 
-    @Override
     public void iniciarConfiguracionPartida() {
         this.casoUsoConfigurarPartida();
     }
@@ -133,20 +129,20 @@ public class ControlCUPrincipal implements iControlCUPrincipal, iNavegacion {
         // 1. Obtener los datos sucios del modelo 
         String datosSala = modelo.getDatosSala();
 
-        // 2. Cerrar la pantalla de registro
-        if (controladorRegistro != null) {
-            ((controlador.ControladorRegistro) controladorRegistro).cerrarVista();
-        }
+//        // 2. Cerrar la pantalla de registro
+//        if (controladorRegistro != null) {
+//            ((controlador.ControladorRegistro) controladorRegistro).cerrarVista();
+//        }
 
-        // 3. Abrir y actualizar Sala de Espera
-        if (vistaSalaEspera != null) {
-            if (!vistaSalaEspera.isVisible()) {
-                System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
-                vistaSalaEspera.setVisible(true);
-            }
-            // 4. Mandar los datos a la vista para que pinte los avatares
-            vistaSalaEspera.actualizarJugadores(datosSala);
-        }
+        // 3. Abrir y actualizar Sala de Espera TODO ESTO MAL
+//        if (vistaSalaEspera != null) {
+//            if (!vistaSalaEspera.isVisible()) {
+//                System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
+//                vistaSalaEspera.setVisible(true);
+//            }
+//            // 4. Mandar los datos a la vista para que pinte los avatares
+//            vistaSalaEspera.actualizarJugadores(datosSala);
+//        }
     }
 
 }

@@ -19,4 +19,6 @@ public interface iControlRegistro {
     void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente);
 
     void iniciarRegistro();
+
+    void entrarSalaEspera();
 }

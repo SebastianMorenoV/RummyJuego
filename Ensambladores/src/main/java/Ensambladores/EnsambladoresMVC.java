@@ -9,9 +9,10 @@ import Vista.VistaLobby;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlEjercerTurno;
+import contratos.controladoresMVC.iControlRegistro;
+import contratos.controladoresMVC.iControlSalaEspera;
 import contratos.iDespachador;
 import contratos.iListener;
-import contratos.iNavegacion;
 import control.ControlSalaDeEspera;
 import controlador.ControladorRegistro;
 import java.beans.PropertyChangeListener;
@@ -48,14 +49,14 @@ public class EnsambladoresMVC {
         } catch (UnknownHostException ex) {
             Logger.getLogger(EnsambladoresMVC.class.getName()).log(Level.SEVERE, null, ex);
         }
-    } 
+    }
 
     public void ensamblarMVCPrincipal(iDespachador despachador) throws UnknownHostException {
-        
+
         // 1. Identidad del Cliente
         String ipCliente = InetAddress.getLocalHost().getHostAddress();
         System.out.println("ip cliente: " + ipCliente);
-        
+
         // Generar ID temporal(luego se asociará al nombre en el Blackboard)
         String idAleatorio = UUID.randomUUID().toString().substring(0, 5);
         String idCliente = "Jugador_" + idAleatorio; // <- cambiar Jugador_ por Jugador1 o Jugador2
@@ -67,6 +68,8 @@ public class EnsambladoresMVC {
         iControlEjercerTurno controlEjercerTurno = new Controlador(modeloEjercerTurno);
         VistaTablero vistaEjercerTurno = new VistaTablero(controlEjercerTurno);
 
+        
+        controlEjercerTurno.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(), idCliente, puertoLocalEscucha);
         modeloEjercerTurno.setDespachador(despachador);
         modeloEjercerTurno.agregarObservador(vistaEjercerTurno);
         modeloEjercerTurno.setIdCliente(idCliente); // El juego necesita saber quién soy
@@ -83,15 +86,13 @@ public class EnsambladoresMVC {
 
         // ENSAMBLAJE: MVC REGISTRAR USUARIO -----------
         ModeloRegistro modeloRegistro = new ModeloRegistro();
-        ControladorRegistro controladorRegistro = new ControladorRegistro(modeloRegistro);
+        iControlRegistro controladorRegistro = new ControladorRegistro(modeloRegistro);
 
         controlPrincipal.setControladorRegistro(controladorRegistro);
         RegistrarUsuario vistaRegistro = new RegistrarUsuario(controladorRegistro);
-        
-        vistaRegistro.setNavegacion((iNavegacion) controlPrincipal);
 
-        controladorRegistro.setVista(vistaRegistro);
-
+        // vistaRegistro.setNavegacion((iNavegacion) controlPrincipal);
+//        controladorRegistro.setVista(vistaRegistro); ESTO NO DEBE DE IR****
         // Inyecciones para Registro --
         System.out.println("IP CONFIGURADA: " + Configuracion.getIpServidor()); //para ver hasta donde llegamos antes de un error
 
@@ -110,12 +111,12 @@ public class EnsambladoresMVC {
         // ENSAMBLAJE: MVC SALA DE ESPERA ------
         IModeloSalaDeEspera modeloSalaDeEspera = new ModeloSalaDeEspera();
         ModeloSalaDeEspera modeloSala = new ModeloSalaDeEspera();
-        ControlSalaDeEspera controlSala = new ControlSalaDeEspera(modeloSala);
+        iControlSalaEspera controlSala = new ControlSalaDeEspera(modeloSala);
         VistaSalaEspera vistaSala = new VistaSalaEspera(controlSala);
 
         modeloSala.agregarObservador(vistaSala);
         modeloSala.setIdCliente(idCliente);
-        
+
         // Inyectar red a la sala para que pueda enviar el VOTO
         controlSala.setConfiguracionRed(Configuracion.getIpServidor(), Configuracion.getPuerto(), idCliente, despachador);
 
@@ -127,7 +128,7 @@ public class EnsambladoresMVC {
         controlEjercerTurno.setControlPantallaPrincipal(controlPrincipal);
         controlEjercerTurno.setControlSalaEspera(controlSala);
         controlPrincipal.setControlSalaEspera(controlSala);
-        
+
         // Configuraciones de Red del Principal y Juego
         controlEjercerTurno.setConfiguracion(Configuracion.getIpServidor(), Configuracion.getPuerto(), ipCliente, puertoLocalEscucha);
 

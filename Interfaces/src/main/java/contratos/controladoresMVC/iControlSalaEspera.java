@@ -4,10 +4,14 @@
  */
 package contratos.controladoresMVC;
 
+import contratos.iDespachador;
+
 /**
  *
  * @author chris
  */
 public interface iControlSalaEspera {
     void cerrarCU();
+    void setConfiguracionRed(String ipServidor, int puertoServidor, String idCliente, iDespachador despachador);
+    void iniciarCU();
 }

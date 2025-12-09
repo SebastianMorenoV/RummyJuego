@@ -8,26 +8,26 @@
     </parent>
     <artifactId>Ensambladores</artifactId>
     <packaging>jar</packaging>
+    <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+        <exec.mainClass>com.itson.ensambladoress.Ensambladoress</exec.mainClass>
+    </properties>
+    <name>Ensambladores</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>interfaces</artifactId>
+            <artifactId>Interfaces</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mycompany</groupId>
-            <artifactId>ComunicacionTCP</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>MVCRegistrarUsuario</artifactId>
+            <artifactId>MVCJuego</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.itson</groupId>
-            <artifactId>MVCJuego</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>MVCSalaEspera</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -36,18 +36,13 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>Interfaces</artifactId>
+            <artifactId>MVCRegistrarUsuario</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>MVCSalaEspera</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.mycompany</groupId>
+            <artifactId>ComunicacionTCP</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-    <properties>
-        <maven.compiler.release>21</maven.compiler.release>
-        <exec.mainClass>com.itson.ensambladoress.Ensambladoress</exec.mainClass>
-    </properties>
-    <name>Ensambladores</name>
 </project>
