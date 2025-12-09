@@ -6,6 +6,7 @@ import pizarra.EstadoJuegoPizarra;
 import sockets.ClienteTCP;
 import Ensambladores.EnsambladorServidor;
 import FuentesConocimiento.AgenteIniciarPartida;
+import FuentesConocimiento.AgenteRegistro;
 import contratos.iEnsambladorServidor;
 import contratos.iControladorBlackboard;
 import contratos.iDespachador;
@@ -34,8 +35,9 @@ public class BlackBoardServer {
         EstadoJuegoPizarra pizarra = new EstadoJuegoPizarra();
 
         AgenteIniciarPartida agentePartida = new AgenteIniciarPartida(pizarra);
-
-        iControladorBlackboard controladorBlackboard = new ControladorBlackboard(agentePartida, directorio, despachador);
+        
+        AgenteRegistro agenteRegistro = new AgenteRegistro(pizarra);
+        iControladorBlackboard controladorBlackboard = new ControladorBlackboard(agentePartida, directorio, despachador,agenteRegistro);
 
         pizarra.addObservador((iObservador) controladorBlackboard);
 

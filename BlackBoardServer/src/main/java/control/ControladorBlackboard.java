@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import pizarra.EstadoJuegoPizarra;
 import contratos.iAgentePartida;
+import contratos.iAgenteRegistro;
 
 /**
  * Controlador principal para la arquitectura Blackboard en el servidor. Escucha
@@ -24,16 +25,18 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
     private final iDirectorio directorio;
     private final iDespachador despachador;
     private final iAgentePartida agentePartida;
+    private final iAgenteRegistro agenteRegistro;
 
     public ControladorBlackboard(
             iAgentePartida agentePartida,
             iDirectorio directorio,
-            iDespachador despachador) {
+            iDespachador despachador,
+            iAgenteRegistro agenteRegistro) {
 
         this.directorio = directorio;
         this.despachador = despachador;
         this.agentePartida = agentePartida;
-
+        this.agenteRegistro= agenteRegistro;
     }
 
     /**
@@ -97,7 +100,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                         iDirectorio.ClienteInfoDatos info = directorio.getCandidatoInfo(id);
                         if (info != null) {
                             // Registrar dispara JUGADOR_UNIDO después
-                            pizarra.registrarJugador(id, info.getHost() + "$" + info.getPuerto());
+                            String payload= info.getHost() + "$" + info.getPuerto();
+                            agenteRegistro.registrarJugador(id, payload);
                             enviarMensajeCandidato(id, "UNION_ACEPTADA");
                         }
                         directorio.removerCandidato(id);
