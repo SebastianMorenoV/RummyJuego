@@ -50,5 +50,11 @@ public interface iDirectorio {
      * @return Un Mapa de [idJugador -> InfoDeConexion]
      */
     public Map<String, ClienteInfoDatos> getAllClienteInfo();
+    
+    void agregarCandidato(String id, String ip, int puerto);
+    
+    ClienteInfoDatos getCandidatoInfo(String id);
+    
+    void removerCandidato(String id);
 
 }

@@ -269,7 +269,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
                 control.avanzarARegistro();
                 break;
             default:
-                throw new AssertionError();
+
         }
     }
 

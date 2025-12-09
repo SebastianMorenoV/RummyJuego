@@ -37,5 +37,7 @@ public interface iControlCUPrincipal {
     public void setControlSalaEspera(iControlSalaEspera controlSalaEspera);
     
     void entrarSalaEspera();
+    
+    void procesarNavegacionRegistrarJugador ();
 
 }

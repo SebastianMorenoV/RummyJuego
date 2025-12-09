@@ -34,6 +34,7 @@ public class ControladorRegistro implements iControlRegistro {
         System.out.println("[ControladorRegistro] Configuración de red establecida en el modelo.");
     }
     
+    @Override
     public void entrarSalaEspera() {
         controlCUPrincipal.entrarSalaEspera();
     }

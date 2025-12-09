@@ -9,8 +9,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import modelo.IModeloSalaDeEspera;
 import tipoEventos.EventoSalaEspera;
-import control.ControlSalaDeEspera;
 import contratos.controladoresMVC.iControlSalaEspera;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -43,7 +43,13 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
         btnIniciarPartida = new javax.swing.JButton();
         avatarJugador2 = new javax.swing.JLabel();
+        avatarJugador3 = new javax.swing.JLabel();
+        avatarJugador4 = new javax.swing.JLabel();
         avatarJugador1 = new javax.swing.JLabel();
+        fondoNombre4 = new javax.swing.JPanel();
+        nombreJugador4 = new javax.swing.JLabel();
+        fondoNombre3 = new javax.swing.JPanel();
+        nombreJugador3 = new javax.swing.JLabel();
         fondoNombre2 = new javax.swing.JPanel();
         nombreJugador2 = new javax.swing.JLabel();
         fondoNombre1 = new javax.swing.JPanel();
@@ -67,30 +73,64 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             }
         });
         getContentPane().add(btnIniciarPartida);
-        btnIniciarPartida.setBounds(320, 360, 290, 70);
+        btnIniciarPartida.setBounds(320, 380, 290, 70);
 
         avatarJugador2.setForeground(new java.awt.Color(13, 87, 26));
         avatarJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         avatarJugador2.setText("...");
         getContentPane().add(avatarJugador2);
-        avatarJugador2.setBounds(160, 210, 70, 70);
+        avatarJugador2.setBounds(180, 180, 40, 40);
+
+        avatarJugador3.setForeground(new java.awt.Color(13, 87, 26));
+        avatarJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        avatarJugador3.setText("...");
+        getContentPane().add(avatarJugador3);
+        avatarJugador3.setBounds(180, 240, 40, 40);
+
+        avatarJugador4.setForeground(new java.awt.Color(13, 87, 26));
+        avatarJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        avatarJugador4.setText("...");
+        getContentPane().add(avatarJugador4);
+        avatarJugador4.setBounds(180, 310, 40, 40);
 
         avatarJugador1.setForeground(new java.awt.Color(16, 101, 30));
         avatarJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         avatarJugador1.setText("...");
         getContentPane().add(avatarJugador1);
-        avatarJugador1.setBounds(160, 120, 70, 70);
+        avatarJugador1.setBounds(180, 120, 40, 40);
+
+        fondoNombre4.setBackground(new java.awt.Color(237, 218, 218));
+
+        nombreJugador4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador4.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador4.setText("Esperando jugador 4...");
+        fondoNombre4.add(nombreJugador4);
+
+        getContentPane().add(fondoNombre4);
+        fondoNombre4.setBounds(260, 310, 400, 40);
+
+        fondoNombre3.setBackground(new java.awt.Color(237, 218, 218));
+
+        nombreJugador3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador3.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador3.setText("Esperando jugador 3...");
+        fondoNombre3.add(nombreJugador3);
+
+        getContentPane().add(fondoNombre3);
+        fondoNombre3.setBounds(260, 240, 400, 40);
 
         fondoNombre2.setBackground(new java.awt.Color(237, 218, 218));
 
         nombreJugador2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         nombreJugador2.setForeground(new java.awt.Color(0, 0, 0));
         nombreJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        nombreJugador2.setText("Jugador2");
+        nombreJugador2.setText("Esperando jugador 2...");
         fondoNombre2.add(nombreJugador2);
 
         getContentPane().add(fondoNombre2);
-        fondoNombre2.setBounds(260, 230, 400, 40);
+        fondoNombre2.setBounds(260, 180, 400, 40);
 
         fondoNombre1.setBackground(new java.awt.Color(237, 218, 218));
 
@@ -101,7 +141,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         fondoNombre1.add(nombreJugador1);
 
         getContentPane().add(fondoNombre1);
-        fondoNombre1.setBounds(260, 140, 400, 40);
+        fondoNombre1.setBounds(260, 120, 400, 40);
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
         txtTitulo.setForeground(new java.awt.Color(255, 235, 126));
@@ -138,15 +178,21 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
         String[] jugadores = data.split(";");
 
-        // 1. PINTAR JUGADORES
+        // 1. PINTAR JUGADORES (Ahora soportamos hasta 4)
         if (jugadores.length > 0) {
             pintarJugador(jugadores[0], nombreJugador1, avatarJugador1);
         }
         if (jugadores.length > 1) {
             pintarJugador(jugadores[1], nombreJugador2, avatarJugador2);
         }
+        if (jugadores.length > 2) {
+            pintarJugador(jugadores[2], nombreJugador3, avatarJugador3);
+        }
+        if (jugadores.length > 3) {
+            pintarJugador(jugadores[3], nombreJugador4, avatarJugador4);
+        }
 
-        // 2. LOGICA DEL BOTÓN DE INICIO (VOTACIÓN)
+        // 2. LOGICA DEL BOTÓN DE INICIO
         // Solo habilitamos el botón si hay 2 o más jugadores conectados
         if (jugadores.length >= 2) {
             btnIniciarPartida.setEnabled(true);
@@ -161,12 +207,18 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel avatarJugador1;
     private javax.swing.JLabel avatarJugador2;
+    private javax.swing.JLabel avatarJugador3;
+    private javax.swing.JLabel avatarJugador4;
     private javax.swing.JButton btnIniciarPartida;
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel fondoNombre1;
     private javax.swing.JPanel fondoNombre2;
+    private javax.swing.JPanel fondoNombre3;
+    private javax.swing.JPanel fondoNombre4;
     private javax.swing.JLabel nombreJugador1;
     private javax.swing.JLabel nombreJugador2;
+    private javax.swing.JLabel nombreJugador3;
+    private javax.swing.JLabel nombreJugador4;
     private javax.swing.JLabel txtTitulo;
     // End of variables declaration//GEN-END:variables
 
@@ -205,18 +257,21 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     }
 
     private void resetearVista() {
-        if (nombreJugador1 != null) {
-            nombreJugador1.setText("Esperando...");
-        }
-        if (nombreJugador2 != null) {
-            nombreJugador2.setText("Esperando...");
-        }
-        if (avatarJugador2 != null) {
-            avatarJugador2.setIcon(null);
-        }
-        if (avatarJugador1 != null) {
-            avatarJugador1.setIcon(null);
-        }
+        // Jugador 1
+        if (nombreJugador1 != null) nombreJugador1.setText("Esperando...");
+        if (avatarJugador1 != null) avatarJugador1.setIcon(null);
+
+        // Jugador 2
+        if (nombreJugador2 != null) nombreJugador2.setText("Esperando...");
+        if (avatarJugador2 != null) avatarJugador2.setIcon(null);
+
+        // Jugador 3
+        if (nombreJugador3 != null) nombreJugador3.setText("Esperando...");
+        if (avatarJugador3 != null) avatarJugador3.setIcon(null);
+
+        // Jugador 4
+        if (nombreJugador4 != null) nombreJugador4.setText("Esperando...");
+        if (avatarJugador4 != null) avatarJugador4.setIcon(null);
     }
 
     @Override
@@ -240,6 +295,17 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 if (datos instanceof String) {
                     actualizarJugadores((String) datos);
                 }
+                break;
+            case PETICION_VOTO:
+                String idCandidato = (String) datos;
+                int respuesta = JOptionPane.showConfirmDialog(
+                        this,
+                        "El jugador '" + idCandidato + "' solicita unirse.\n¿Permitir acceso?",
+                        "Votación",
+                        JOptionPane.YES_NO_OPTION
+                );
+                boolean votoPositivo = (respuesta == JOptionPane.YES_OPTION);
+                control.enviarVoto(votoPositivo);
                 break;
 
             default:

@@ -31,17 +31,25 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private String[] configuracionPartida;
     private boolean partidaConfigurada = false;
     private String mazoSerializado;
-
-    private Map<String, Integer> fichasPorJugador = new HashMap<>(); 
+    private int numeroDeJugadoresRegistrados;
+    private Map<String, Integer> fichasPorJugador = new HashMap<>();
     private Map<String, String> candidatos = new HashMap<>();
     private List<String> jugadoresListos = new ArrayList<>();
-
+    private String[] candidatoTemporal;
+    private String[] candidatoRechazado;
+    private String[] ultimoResultadoVotacion;
+    private boolean votacionEnCurso = false;
+    private int votosAfirmativos = 0;
+    private int votosRecibidos = 0;
+    private int totalVotantesEsperados = 0;
+    private boolean votacionAprobada = false;
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
         this.indiceTurnoActual = -1;
         this.observadores = new ArrayList<>();
         this.mazoSerializado = "";
+        this.numeroDeJugadoresRegistrados = 0;
     }
 
     /**
@@ -270,7 +278,31 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
+        switch (comando) {
 
+            case "SOLICITAR_UNIRSE":
+                registrarCandidato(idCliente, payload);
+                break;
+
+            case "RESPUESTA_VOTO":
+                if (!votacionEnCurso) {
+                    return;
+                }
+
+                boolean voto = Boolean.parseBoolean(payload);
+                votosRecibidos++;
+                if (voto) {
+                    votosAfirmativos++;
+                }
+
+                System.out.println("[Pizarra] Voto recibido de " + idCliente + ": " + voto
+                        + " (" + votosRecibidos + "/" + totalVotantesEsperados + ")");
+
+                if (votosRecibidos >= totalVotantesEsperados) {
+                    finalizarConteo();
+                }
+                break;
+        }
         if (indiceTurnoActual == -1) {
             switch (comando) {
 
@@ -282,7 +314,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         notificarObservadores("PERMISO_CREAR:" + idCliente);
                     }
                     break;
-                case "SOLICITAR_UNIRSE": 
                 case "UNIRSE_PARTIDA":
                     if (this.partidaConfigurada) {
                         String payloadJugador = candidatos.get(idCliente);
@@ -293,7 +324,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                         if (payloadJugador != null) {
                             registrarJugador(idCliente, payloadJugador);
 
-                            if (ordenDeTurnos.size() == 2) { 
+                            if (ordenDeTurnos.size() == 2) {
                                 System.out.println("[Pizarra] Sala lista para iniciar.");
                             }
                         }
@@ -325,22 +356,17 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                     }
                     break;
 
-                case "ACTUALIZAR_PERFIL": //
+                case "ACTUALIZAR_PERFIL":
                     System.out.println("[Pizarra] Verificando perfil de " + idCliente);
 
-                    // El payload llega como: "Nombre$Avatar$Color..."
                     String[] partesNuevas = payload.split("\\$");
                     String nuevoNombre = (partesNuevas.length > 0) ? partesNuevas[0] : "";
-
                     boolean nombreOcupado = false;
 
-                    // Recorremos los perfiles que ya tenemos guardados en el mapa 'perfilesJugadores'
                     for (String datosExistentes : perfilesJugadores.values()) {
-                        // Extraemos el nombre de los datos existentes
                         String[] partesExistentes = datosExistentes.split("\\$");
                         String nombreExistente = (partesExistentes.length > 0) ? partesExistentes[0] : "";
 
-                        // Comparamos (ignorando mayúsculas/minúsculas)
                         if (nombreExistente.equalsIgnoreCase(nuevoNombre)) {
                             nombreOcupado = true;
                             break;
@@ -349,14 +375,22 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
                     if (nombreOcupado) {
                         System.out.println("[Pizarra] Error: El nombre '" + nuevoNombre + "' ya está en uso.");
-                        // El formato del evento será: "NOMBRE_REPETIDO:ID_DEL_CLIENTE"
                         notificarObservadores("NOMBRE_REPETIDO:" + idCliente);
                     } else {
                         // Si está libre, procedemos normal
                         perfilesJugadores.put(idCliente, payload);
+
+                        // --- AGREGA ESTO AQUÍ ---
+                        // Añadimos al jugador a la lista oficial de la sala si no estaba ya
+                        if (!ordenDeTurnos.contains(idCliente)) {
+                            ordenDeTurnos.add(idCliente);
+                        }
+                        // ------------------------
+
                         System.out.println("[Pizarra] Registro exitoso para " + nuevoNombre);
                         notificarObservadores("REGISTRO_EXITOSO:" + idCliente);
                     }
+                    numeroDeJugadoresRegistrados++;
                     break;
                 case "ESTOY_LISTO":
                     System.out.println("[Pizarra] Jugador listo: " + idCliente);
@@ -387,11 +421,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
         if (indiceTurnoActual != -1) {
             switch (comando) {
-
-                case "SOLICITAR_UNIRSE":
-                    notificarObservadores("ACCESO_DENEGADO:" + idCliente);
-                    System.out.println("[Pizarra] " + idCliente + " intentó unirse pero no hay partida configurada.");
-                    break;
                 case "MOVER":
                     this.ultimoJugadorQueMovio = idCliente;
                     this.ultimoTableroSerializado = payload;
@@ -539,7 +568,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return configuracionPartida;
     }
 
-
     /**
      * Método para inicializar o actualizar fichas
      *
@@ -550,7 +578,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         fichasPorJugador.put(id, cantidad);
     }
 
-
     /**
      * Método para sumar 1 ficha
      *
@@ -560,6 +587,31 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         if (fichasPorJugador.containsKey(id)) {
             fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
         }
+    }
+
+    @Override
+    public int getNumeroDeJugadoresRegistrados() {
+        return numeroDeJugadoresRegistrados;
+    }
+
+    @Override
+    public String[] getUltimoResultadoVotacion() {
+        return ultimoResultadoVotacion;
+    }
+
+    @Override
+    public boolean isVotacionAprobada() {
+        return votacionAprobada;
+    }
+
+    @Override
+    public int getIndiceTurnoActual() {
+        return indiceTurnoActual;
+    }
+
+    @Override
+    public String[] getCandidatoTemporal() {
+        return candidatoTemporal;
     }
 
     /**
@@ -574,4 +626,83 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         }
         return sb.toString();
     }
+
+    @Override
+    public void registrarCandidato(String id, String payloadRed) {
+        String[] datos = new String[3];
+        String[] partes = payloadRed.split("\\$");
+        datos[0] = id;
+        datos[1] = partes[0];
+        datos[2] = partes[1];
+
+        if (this.votacionEnCurso) {
+            this.candidatoRechazado = datos;
+            System.out.println("[Pizarra] OCUPADO. Rechazando solicitud de: " + id);
+            notificarObservadores("SOLICITUD_RECHAZADA_OCUPADO");
+            return;
+        }
+
+        this.candidatoTemporal = datos;
+
+        if (this.indiceTurnoActual != -1) {
+            System.out.println("[Pizarra] Rechazo automático: Partida iniciada.");
+            notificarObservadores("SOLICITUD_RECHAZADA_INICIADA");
+            this.candidatoTemporal = null;
+            return;
+        }
+
+        if (getNumeroDeJugadoresRegistrados() >= 4) {
+            System.out.println("[Pizarra] Rechazo automático: Sala llena.");
+            notificarObservadores("SOLICITUD_RECHAZADA_LLENA");
+            this.candidatoTemporal = null;
+            return;
+        }
+
+        if (getNumeroDeJugadoresRegistrados() == 0) {
+            System.out.println("[Pizarra] Sala vacía. Aceptando automáticamente al anfitrión: " + id);
+
+            this.candidatoTemporal = datos;
+            notificarObservadores("SOLICITUD_RECHAZADA_VACIA");
+
+            this.candidatoTemporal = null;
+            return;
+        }
+
+        System.out.println("[Pizarra] Solicitud válida. Iniciando estado de votación.");
+        this.votacionEnCurso = true;
+        this.votosAfirmativos = 0;
+        this.votosRecibidos = 0;
+        this.totalVotantesEsperados = getNumeroDeJugadoresRegistrados();
+
+        notificarObservadores("SOLICITUD_ENTRANTE");
+    }
+
+    @Override
+    public String[] getCandidatoRechazado() {
+        return this.candidatoRechazado;
+    }
+
+    @Override
+    public void limpiarCandidatoActual() {
+        this.candidatoTemporal = null;
+        this.votacionEnCurso = false;
+        System.out.println("[Pizarra] Sala liberada para nuevas solicitudes.");
+    }
+
+    @Override
+    public void finalizarConteo() {
+        this.votacionAprobada = (votosAfirmativos == totalVotantesEsperados);
+
+        this.ultimoResultadoVotacion = this.candidatoTemporal;
+
+        this.candidatoTemporal = null;
+        this.votacionEnCurso = false;
+        this.votosAfirmativos = 0;
+        this.votosRecibidos = 0;
+
+        System.out.println("[Pizarra] Votación finalizada. Sala liberada automáticamente.");
+
+        notificarObservadores("VOTACION_FINALIZADA");
+    }
+
 }

@@ -74,16 +74,13 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
 
     @Override
     public void solicitarRegistro() {
-        System.out.println("[Control] Solicitando cambio a pantalla de registro..."); // Debug
-        if (controladorRegistro != null) {
-            modelo.cerrarCU();
-            System.out.println("[ControlPrincipal] Ir a Registro...");
-            controladorRegistro.iniciarRegistro();
-        } else {
-            System.err.println("Error: ControladorRegistro no inyectado. Revisa EnsambladoresMVC.");
-        }
+        
     }
-
+    @Override
+    public void procesarNavegacionRegistrarJugador (){
+        modelo.cerrarCU();
+        controladorRegistro.iniciarRegistro();
+    }
     @Override
     public void setConfiguracion(String ipServidor, int puertoServidor, String ipCliente, int puertoCliente) {
         modelo.setIpServidor(ipServidor);
@@ -115,12 +112,6 @@ public class ControlCUPrincipal implements iControlCUPrincipal {
     public void entrarSalaEspera() {
 
         controlSalaEspera.iniciarCU();
-//        if (controlSalaEspera != null) {
-//            System.out.println("[ControlPrincipal] Abriendo Sala de Espera...");
-//            ((control.ControlSalaDeEspera) controlSalaEspera).iniciarCU();
-//        } else {
-//            System.err.println("[ControlPrincipal] Error: No tengo referencia al ControlSalaEspera");
-//        }
     }
 
     public void iniciarConfiguracionPartida() {

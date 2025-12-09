@@ -61,6 +61,56 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             idAfectado = partes[1];
         }
         switch (eventoPuro) {
+            case "SOLICITUD_ENTRANTE":
+                String[] datos = pizarra.getCandidatoTemporal();
+                String idCandidato = datos[0];
+                String ip = datos[1];
+                int puerto = Integer.parseInt(datos[2]);
+
+                directorio.agregarCandidato(idCandidato, ip, puerto);
+
+                System.out.println("[Controlador] Pizarra aceptó solicitud. Enviando petición de votos a la sala.");
+
+                List<String> jugadoresEnSala = pizarra.getOrdenDeTurnos();
+                
+                for (String idJugador : jugadoresEnSala) {
+                    enviarMensajeDirecto(idJugador, "PETICION_VOTO:" + idCandidato);
+                }
+                break;
+
+            case "SOLICITUD_RECHAZADA_INICIADA":
+                manejarRechazoInmediato(pizarra, "ERROR_PARTIDA_INICIADA");
+                break;
+
+            case "SOLICITUD_RECHAZADA_LLENA":
+                manejarRechazoInmediato(pizarra, "ERROR_SALA_LLENA");
+                break;
+
+            case "SOLICITUD_RECHAZADA_OCUPADO":
+                String[] rechazado = pizarra.getCandidatoRechazado();
+                if (rechazado != null) {
+                    registrarYRechazar(rechazado[0], rechazado[1], Integer.parseInt(rechazado[2]), "ERROR_VOTACION_EN_CURSO");
+                }
+                break;
+            case "VOTACION_FINALIZADA":
+                String[] resultado = pizarra.getUltimoResultadoVotacion();
+                if (resultado != null) {
+                    String id = resultado[0];
+                    if (pizarra.isVotacionAprobada()) {
+                        iDirectorio.ClienteInfoDatos info = directorio.getCandidatoInfo(id);
+                        if (info != null) {
+                            enviarMensajeCandidato(id, "UNION_ACEPTADA");
+                        }
+                        directorio.removerCandidato(id);
+                    } else {
+                        enviarMensajeCandidato(id, "UNION_RECHAZADA");
+                        directorio.removerCandidato(id);
+                    }
+                }
+                break;
+            case "SOLICITUD_RECHAZADA_VACIA":
+                manejarRechazoInmediato(pizarra, "SOLICITUD_RECHAZADA_VACIA");
+                break;
             case "ACCESO_DENEGADO":
                 enviarMensajeDirecto(idAfectado, "ACCESO_DENEGADO");
                 break;
@@ -112,9 +162,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             case "JUGADOR_UNIDO":
                 String[] datosJugador = pizarra.getIpCliente();
                 String id = datosJugador[0];
-                String ip = datosJugador[1];
 
-                int puerto = Integer.parseInt(datosJugador[2]);
                 String avatar = datosJugador[3];
 
                 int c1 = Integer.parseInt(datosJugador[4]);
@@ -330,4 +378,34 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
         return true; // Siempre true, porque usamos defaults
     }
 
+    public void manejarRechazoInmediato(iPizarraJuego pizarra, String mensajeError) {
+        String[] datos = pizarra.getCandidatoTemporal();
+        if (datos != null) {
+            String id = datos[0];
+            String ip = datos[1];
+            int puerto = Integer.parseInt(datos[2]);
+
+            registrarYRechazar(id, ip, puerto, mensajeError);
+        }
+    }
+
+    public void registrarYRechazar(String id, String ip, int puerto, String msg) {
+        directorio.agregarCandidato(id, ip, puerto);
+        enviarMensajeCandidato(id, msg);
+        directorio.removerCandidato(id);
+    }
+
+    public void enviarMensajeCandidato(String idCandidato, String mensaje) {
+        try {
+            iDirectorio.ClienteInfoDatos destino = directorio.getCandidatoInfo(idCandidato);
+            if (destino != null) {
+                System.out.println("[Controlador] Respondiendo a candidato " + idCandidato + ": " + mensaje);
+                this.despachador.enviar(destino.getHost(), destino.getPuerto(), mensaje);
+            } else {
+                System.err.println("[Controlador] No se encontró al candidato " + idCandidato + " en el directorio.");
+            }
+        } catch (IOException e) {
+            System.err.println("[Controlador] Error al enviar a candidato: " + e.getMessage());
+        }
+    }
 }

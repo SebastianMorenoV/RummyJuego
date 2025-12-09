@@ -114,4 +114,22 @@ public interface iPizarraJuego {
      * @return 
      */
     String getMetadatosJugadores();
+    
+    void registrarCandidato(String id, String payloadRed);
+    
+    String[] getCandidatoRechazado();
+    
+    void limpiarCandidatoActual();
+    
+    void finalizarConteo();
+    
+    String[] getUltimoResultadoVotacion();
+    
+    boolean isVotacionAprobada();
+    
+    int getNumeroDeJugadoresRegistrados();
+    
+    int getIndiceTurnoActual();
+    
+    String[] getCandidatoTemporal();
 }

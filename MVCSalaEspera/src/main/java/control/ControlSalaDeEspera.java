@@ -71,5 +71,10 @@ public class ControlSalaDeEspera implements iControlSalaEspera {
             modelo.iniciarCU();
         }
     }
+    public void enviarVoto(boolean aceptado) {
+        System.out.println("[ControlSalaEspera] Procesando voto: " + aceptado);
+        modelo.enviarVoto(aceptado);
+    }
+
 
 }

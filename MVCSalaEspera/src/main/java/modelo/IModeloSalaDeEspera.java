@@ -25,4 +25,6 @@ public interface IModeloSalaDeEspera {
     void iniciarCU();
 
     void cerrarCU();
+
+    void enviarVoto(boolean aceptado);
 }

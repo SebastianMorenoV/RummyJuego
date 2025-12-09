@@ -99,6 +99,19 @@ public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeLi
     }
 
     @Override
+    public void enviarVoto(boolean aceptado) {
+        try {
+            if (despachador != null) {
+                String mensaje = idCliente + ":RESPUESTA_VOTO:" + aceptado;
+                System.out.println("[ModeloSalaEspera] Enviando voto: " + mensaje);
+                despachador.enviar(ipServidor, puertoServidor, mensaje);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
         String payload = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
@@ -107,6 +120,13 @@ public class ModeloSalaDeEspera implements IModeloSalaDeEspera, PropertyChangeLi
             System.out.println("[ModeloSala] Recibí lista de jugadores: " + payload);
             // Avisamos a la vista y le pasamos los datos sucios (String)
             notificarObservadores(EventoSalaEspera.ACTUALIZAR_DATOS_JUGADORES, payload);
+        }
+        if (evento.equals("PETICION_VOTO")) {
+            if (!payload.equals(this.idCliente)) {
+                notificarObservadores(EventoSalaEspera.PETICION_VOTO, payload);
+            } else {
+                System.out.println("[ModeloSala] Ignorando petición de voto propia.");
+            }
         }
     }
 }

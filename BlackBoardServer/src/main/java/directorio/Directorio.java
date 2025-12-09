@@ -13,9 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Directorio implements iDirectorio {
 
     private final Map<String, ClienteInfo> directorioJugadores;
-
+    private final Map<String, ClienteInfo> candidatosPendientes;
     public Directorio() {
         this.directorioJugadores = new ConcurrentHashMap<>();
+        this.candidatosPendientes = new ConcurrentHashMap<>();
     }
 
     /**
@@ -27,17 +28,23 @@ public class Directorio implements iDirectorio {
         public final String host;
         public final int puerto;
 
-        // Constructor LIMPIO
         public ClienteInfo(String host, int puerto) {
             this.host = host;
             this.puerto = puerto;
         }
 
+        /**
+         * @return La dirección IP o nombre de host del cliente.
+         */
         @Override
         public String getHost() {
             return host;
         }
 
+        /**
+         * @return El número de puerto en el que el cliente está escuchando 
+         * para recibir mensajes (puerto de retorno del cliente).
+         */
         @Override
         public int getPuerto() {
             return puerto;
@@ -45,36 +52,47 @@ public class Directorio implements iDirectorio {
     }
 
     /**
-     * Guarda la referencia de red de un jugador.
-     *
-     * @param idJugador
-     * @param ip
-     * @param puerto
+     * Agrega un nuevo jugador al directorio.
+     * La información se almacena usando el ID del jugador como clave.
+     * * @param idJugador El ID único del jugador (cliente).
+     * @param ip La dirección IP del cliente.
+     * @param puerto El puerto de escucha del cliente.
      */
     @Override
     public void addJugador(String idJugador, String ip, int puerto) {
         directorioJugadores.put(idJugador, new ClienteInfo(ip, puerto));
-        System.out.println("[Directorio] Socket registrado para ID: " + idJugador + " en " + ip + ":" + puerto);
+        System.out.println("[Directorio] Jugador " + idJugador + " registrado en " + ip + ":" + puerto);
     }
 
     /**
      * Elimina un jugador y su información de conexión del directorio.
-     *
      * * @param idJugador El ID del jugador a eliminar.
-     * @param idJugador
      */
     @Override
     public void removeJugador(String idJugador) {
         directorioJugadores.remove(idJugador);
-        System.out.println("[Directorio] Jugador eliminado: " + idJugador);
+    }
+    @Override
+    public void agregarCandidato(String id, String ip, int puerto) {
+        candidatosPendientes.put(id, new ClienteInfo(ip, puerto));
+        System.out.println("[Directorio] Candidato en espera guardado: " + id);
     }
 
+    @Override
+    public ClienteInfoDatos getCandidatoInfo(String id) {
+        return candidatosPendientes.get(id);
+    }
+
+    @Override
+    public void removerCandidato(String id) {
+        candidatosPendientes.remove(id);
+        System.out.println("[Directorio] Candidato removido de espera: " + id);
+    }
     /**
-     * Devuelve un mapa de solo lectura (una copia) con la información de
-     * conexión de todos los jugadores registrados.
+     * Devuelve un mapa de solo lectura (una copia) con la información de conexión 
+     * de todos los jugadores registrados.
      *
-     * @return Un {@code Map<String, ClienteInfoDatos>} con el ID del jugador
-     * como clave.
+     * @return Un {@code Map<String, ClienteInfoDatos>} con el ID del jugador como clave.
      */
     @Override
     public Map<String, ClienteInfoDatos> getAllClienteInfo() {
@@ -82,12 +100,10 @@ public class Directorio implements iDirectorio {
     }
 
     /**
-     * Devuelve la información de conexión (IP y Puerto) de un jugador
-     * específico.
+     * Devuelve la información de conexión (IP y Puerto) de un jugador específico.
      *
      * @param idJugador El ID del jugador cuya información se desea obtener.
-     * @return El objeto {@link ClienteInfoDatos} con la IP y el Puerto, o null
-     * si el ID no existe.
+     * @return El objeto {@link ClienteInfoDatos} con la IP y el Puerto, o null si el ID no existe.
      */
     @Override
     public ClienteInfoDatos getClienteInfo(String idJugador) {

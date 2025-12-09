@@ -102,9 +102,6 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
     @Override
     public void actualiza(IModeloLobby modelo, Evento evento) {
         switch (evento) {
-            case ACCESO_DENEGADO:
-                JOptionPane.showMessageDialog(this, "No se pudo unir: La partida esta llena (4 jugadores) o falta partida a la cual unirse", "No se pudo unir", JOptionPane.WARNING_MESSAGE);
-                break;
             case CERRAR_CU:
                 this.setVisible(false);
                 break;
@@ -114,36 +111,48 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
                 break;
 
             case CREAR_PARTIDA:
-                // MOCK, REDIRECCION A REGISTRO
                 System.out.println("[VistaLobby] Partida creada/solicitada. Redirigiendo a Registro de Jugador...");
                 this.setVisible(false);
-                // MOCK: Vamos directo al registro
                 control.casoUsoConfigurarPartida();
                 break;
-            case SOLICITAR_UNIRSE_A_PARTIDA:
-                if (modelo.getPartida() == null) {
-                    System.out.println("No hay partida a la que unirse");
-                } else {
-                    System.out.println("Se solicito unirse a partida");
-                }
-                break;
-
-            case PARTIDA_EXISTENTE:
-                JOptionPane.showMessageDialog(this, "No se puede crear una Nueva Partida, ya existe una corriendo localmente. Uniendose Automaticamente..");
-                break;
-
-            case ACTUALIZAR_SALA:
-                control.entrarSalaEspera();
-                break;
-
-            case INICIO_JUEGO:
-                System.out.println("[VistaLobby] El juego ha iniciado. Cerrando lobby.");
+             case SOLICITAR_UNIRSE_A_PARTIDA:
+                System.out.println("[VistaLobby] ¡Aceptado! Entrando...");
                 this.setVisible(false);
-                this.dispose();
+                control.procesarNavegacionRegistrarJugador();
                 break;
 
+            case ERROR_SALA_LLENA:
+                JOptionPane.showMessageDialog(this,
+                        "La sala está llena (4/4 jugadores).\nNo se admiten más participantes.",
+                        "Sala Llena", JOptionPane.WARNING_MESSAGE);
+                break;
+
+            case ERROR_VOTACION_EN_CURSO:
+                JOptionPane.showMessageDialog(this,
+                        "Hay una votación de ingreso en curso.\nPor favor, espera unos segundos e intenta de nuevo.",
+                        "Servidor Ocupado", JOptionPane.WARNING_MESSAGE);
+                break;
+
+            case ERROR_PARTIDA_YA_INICIADA:
+                JOptionPane.showMessageDialog(this,
+                        "La partida ya ha comenzado.\nNo puedes unirte en este momento.",
+                        "Juego Iniciado", JOptionPane.ERROR_MESSAGE);
+                break;
+
+            case UNION_RECHAZADA:
+                JOptionPane.showMessageDialog(this,
+                        "Tu solicitud de unión fue rechazada por los jugadores de la sala.",
+                        "Acceso Denegado", JOptionPane.INFORMATION_MESSAGE);
+                break;
+            case SOLICITUD_RECHAZADA_VACIA:
+                JOptionPane.showMessageDialog(this,
+                        "La sala esta vacia",
+                        "0/0", JOptionPane.ERROR_MESSAGE);
+                
+                break;
+                
             default:
-                throw new AssertionError();
+
         }
     }
 }

@@ -39,7 +39,7 @@ public class ControladorConfig implements iControlConfig {
 
     public void avanzarARegistro() {
         this.cerrarCU(); // Cierra la ventana de config
-        controladorCUPrincipal.solicitarRegistro(); // Pide al principal que abra el registro
+        controladorCUPrincipal.procesarNavegacionRegistrarJugador(); // Pide al principal que abra el registro
     }
 
     @Override

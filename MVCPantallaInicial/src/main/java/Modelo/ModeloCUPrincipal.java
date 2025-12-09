@@ -196,12 +196,27 @@ public class ModeloCUPrincipal implements IModeloLobby, PropertyChangeListener {
                 notificarObservadores(Evento.ACTUALIZAR_SALA);
                 break;
 
-            case "MANO_INICIAL": //
-                System.out.println("[Modelo] ¡Recibí mi mano! El juego ha comenzado.");
-
-                // Guardamos la mano o se la pasamos a la vista de juego
-                // payload contiene: Cartas $ MazoCount $ Metadatos
-                notificarObservadores(Evento.INICIO_JUEGO);
+            case "UNION_ACEPTADA":
+                notificarObservadores(Evento.SOLICITAR_UNIRSE_A_PARTIDA);
+                break;
+                
+            case "UNION_RECHAZADA":
+                notificarObservadores(Evento.UNION_RECHAZADA);
+                break;
+                
+            case "ERROR_SALA_LLENA":
+                notificarObservadores(Evento.ERROR_SALA_LLENA);
+                break;
+                
+            case "ERROR_VOTACION_EN_CURSO":
+                notificarObservadores(Evento.ERROR_VOTACION_EN_CURSO);
+                break;
+                
+            case "ERROR_PARTIDA_INICIADA":
+                notificarObservadores(Evento.ERROR_PARTIDA_YA_INICIADA);
+                break;
+            case "SOLICITUD_RECHAZADA_VACIA":
+                notificarObservadores(Evento.SOLICITUD_RECHAZADA_VACIA);
                 break;
 
         }

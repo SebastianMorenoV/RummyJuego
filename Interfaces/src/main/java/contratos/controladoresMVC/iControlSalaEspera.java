@@ -14,4 +14,5 @@ public interface iControlSalaEspera {
     void cerrarCU();
     void setConfiguracionRed(String ipServidor, int puertoServidor, String idCliente, iDespachador despachador);
     void iniciarCU();
+    void enviarVoto(boolean aceptado);
 }

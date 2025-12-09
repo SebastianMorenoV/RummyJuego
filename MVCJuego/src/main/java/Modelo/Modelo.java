@@ -192,10 +192,10 @@ public class Modelo implements IModelo, PropertyChangeListener {
                     juego.setManoInicial(manoEntidad);
 
                     // Notificar a la vista
+                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
                     notificarObservadores(TipoEvento.MOSTRAR_JUEGO);
-                    notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                 } catch (Exception e) {
                     System.err.println("[Modelo] Error al procesar MANO_INICIAL: " + e.getMessage());
                     e.printStackTrace();
