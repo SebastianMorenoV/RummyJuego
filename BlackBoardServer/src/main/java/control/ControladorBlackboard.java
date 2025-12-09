@@ -59,7 +59,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 if (datosAceptado != null) {
                     String id = datosAceptado[0];
                     System.out.println("[Controlador] El jugador " + id + " entró directo (Host).");
-                    // Le avisamos al cliente que entre a la sala de espera
                     enviarMensajeDirecto(id, "UNION_ACEPTADA");
                 }
                 break;
@@ -96,10 +95,8 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 if (resultado != null) {
                     String id = resultado[0];
                     if (pizarra.isVotacionAprobada()) {
-                        // Recuperar info para registrar
                         iDirectorio.ClienteInfoDatos info = directorio.getCandidatoInfo(id);
                         if (info != null) {
-                            // Registrar dispara JUGADOR_UNIDO después
                             String payload= info.getHost() + "$" + info.getPuerto();
                             agenteRegistro.registrarJugador(id, payload);
                             enviarMensajeCandidato(id, "UNION_ACEPTADA");
@@ -113,20 +110,17 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 break;
             case "JUGADOR_UNIDO":
                 String[] ipJugador = pizarra.getIpCliente();
-                // 1. Registrar oficialmente
                 directorio.addJugador(ipJugador[0], ipJugador[1], Integer.parseInt(ipJugador[2]));
                 System.out.println("[Controlador] Jugador " + ipJugador[0] + " unido.");
 
-                // 2. CONSTRUIR LISTA DE JUGADORES
                 StringBuilder listaNombres = new StringBuilder();
                 for (String id : directorio.getAllClienteInfo().keySet()) {
                     listaNombres.append(id).append(",");
                 }
                 if (listaNombres.length() > 0) {
-                    listaNombres.setLength(listaNombres.length() - 1); // Quitar última coma
+                    listaNombres.setLength(listaNombres.length() - 1); 
                 }
 
-                // 3. ENVIAR A TODOS (Broadcast)
                 enviarATodos("ACTUALIZAR_LISTA:" + listaNombres.toString());
                 break;
 
@@ -175,7 +169,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 if (fichaSerializada != null) {
                     enviarMensajeDirecto(jugadorQueMovio, "FICHA_RECIBIDA:" + fichaSerializada);
-                    // 2. NUEVO: Actualizar contador en pizarra (+1 ficha)
                     ((EstadoJuegoPizarra) pizarra).incrementarFichasJugador(jugadorQueMovio);
                 }
 

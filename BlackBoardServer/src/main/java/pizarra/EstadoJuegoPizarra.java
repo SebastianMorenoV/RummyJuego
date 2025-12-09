@@ -135,7 +135,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         int numJugadores = ordenDeTurnos.size();
 
         if (indiceTurnoActual == -1 && numJugadores >= 2 && numJugadores <= 4) {
-            indiceTurnoActual = 0; // Inicia el turno del primer jugador
+            indiceTurnoActual = 0; 
             String idPrimerJugador = ordenDeTurnos.get(0);
             System.out.println("[Pizarra] ¡Partida iniciada! " + numJugadores + " jugadores.");
             System.out.println("[Pizarra] Turno de: " + idPrimerJugador);
@@ -232,7 +232,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
             switch (comando) {
                 case "REGISTRAR":
                     registrarJugador(idCliente, payload);
-                    break; // Importante: break para no saltar al siguiente caso
+                    break; 
                 case "INICIAR_PARTIDA":
                     System.out.println("[Pizarra] Recibido comando INICIAR_PARTIDA de " + idCliente);
                     if (iniciarPartidaSiCorresponde()) {
@@ -253,19 +253,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
 
                 case "FINALIZAR_TURNO":
                     this.ultimoJugadorQueMovio = idCliente;
-                    // [NUEVA LÓGICA] Separar el tablero del contador de fichas usando "#"
-                    // El payload viene como: "GRUPO1;...$GRUPO2...#5"
                     String[] partesFinalizar = payload.split("#");
 
-                    // La parte 0 es el tablero serializado (lo de siempre)
                     this.ultimoTableroSerializado = partesFinalizar[0];
 
-                    // La parte 1 (si existe) es el número de fichas que le quedaron al jugador
                     if (partesFinalizar.length > 1) {
                         try {
                             int fichasRestantes = Integer.parseInt(partesFinalizar[1]);
 
-                            // Guardamos este dato en la Pizarra
                             setFichasJugador(idCliente, fichasRestantes);
 
                             System.out.println("[Pizarra] " + idCliente + " finalizó con " + fichasRestantes + " fichas.");
@@ -454,12 +449,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public String[] getUltimoResultadoVotacion() {
         return this.ultimoResultadoVotacion;
     }
-    // NUEVO: Método para inicializar o actualizar fichas
     public void setFichasJugador(String id, int cantidad) {
         fichasPorJugador.put(id, cantidad);
     }
 
-    // NUEVO: Método para sumar 1 ficha (cuando alguien come)
     @Override
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
@@ -467,7 +460,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         }
     }
 
-    // NUEVO: Generar cadena para enviar por red (Ej: "Jugador1=14;Jugador2=13")
     @Override
     public String getFichasJugadoresSerializado() {
         StringBuilder sb = new StringBuilder();

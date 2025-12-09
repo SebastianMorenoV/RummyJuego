@@ -144,7 +144,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     }
 
     private void actualizarLabels(String[] jugadores) {
-        // 1. Limpiar todos primero
         lblJugador1.setText("Esperando...");
         lblJugador2.setText("Esperando...");
         lblJugador3.setText("Esperando...");
