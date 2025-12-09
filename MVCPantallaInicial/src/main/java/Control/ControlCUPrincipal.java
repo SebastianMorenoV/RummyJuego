@@ -52,13 +52,6 @@ public class ControlCUPrincipal implements iControlCUPrincipal, iNavegacion {
     @Override
     public void casoUsoConfigurarPartida() {
         solicitarRegistro();
-        /**
-         * if (this.controladorRegistro != null) {
-         * System.out.println("[ControlPrincipal] Saltando Configuración ->
-         * Yendo a Registro..."); this.controladorRegistro.iniciarRegistro(); }
-         * else { System.err.println("Error: ControladorRegistro no ha sido
-         * ensamblado."); }
-         */
     }
 
     @Override
