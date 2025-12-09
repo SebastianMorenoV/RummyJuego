@@ -279,7 +279,12 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
         switch (comando) {
-
+            case "GANADOR":
+                System.out.println("[Pizarra] ¡Tenemos un ganador! Jugador: " + idCliente);
+                // Avisar a TODOS (incluyendo al que envió, aunque él ya lo sabe localmente no hace daño)
+                // El ControladorBlackboard debe tener un método para enviar "JUEGO_TERMINADO:ID_GANADOR" a todos.
+                notificarObservadores("NOTIFICAR_GANADOR:" + idCliente);
+                break;
             case "SOLICITAR_UNIRSE":
                 registrarCandidato(idCliente, payload);
                 break;

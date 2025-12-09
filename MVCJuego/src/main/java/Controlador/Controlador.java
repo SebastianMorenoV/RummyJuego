@@ -58,7 +58,9 @@ public class Controlador implements iControlEjercerTurno {
     public void regresarFichaAMano(int idFicha) {
         modelo.regresarFichaAMano(idFicha);
     }
-
+    public void mockGanarPartida(){
+        modelo.mockGanarPartida();
+    }
     /**
      * Metodo que le habla al modelo para pasar el Turno.
      */

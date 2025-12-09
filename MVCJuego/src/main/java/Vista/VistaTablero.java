@@ -140,6 +140,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
         control.terminarTurno();
+        //control.mockGanarPartida();
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
@@ -242,6 +243,19 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case TOMAR_FICHA_POR_FINALIZARTURNO:
                 JOptionPane.showMessageDialog(this, "Turno finalizado, tomando ficha... ", "Turno finalizado", JOptionPane.INFORMATION_MESSAGE);
                 control.pasarTurno();
+                break;
+            case PARTIDA_GANADA:
+                JOptionPane.showMessageDialog(this,
+                        "¡FELICIDADES!\nHas ganado la partida de Rummy.",
+                        "¡Victoria!",
+                        JOptionPane.INFORMATION_MESSAGE);
+                break;
+
+            case PARTIDA_PERDIDA:
+                JOptionPane.showMessageDialog(this,
+                        "El juego ha terminado.\nOtro jugador se ha quedado sin fichas.",
+                        "Fin del Juego",
+                        JOptionPane.WARNING_MESSAGE);
                 break;
         }
 

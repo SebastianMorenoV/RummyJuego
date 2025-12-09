@@ -59,6 +59,20 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             idAfectado = partes[1];
         }
         switch (eventoPuro) {
+            case "NOTIFICAR_GANADOR":
+                // 1. Obtener quién ganó (viene en idAfectado)
+                String idGanador = idAfectado;
+                System.out.println("[Controlador] ¡Victoria confirmada para " + idGanador + "! Finalizando partida...");
+
+                // 2. Construir el mensaje de broadcast
+                // Protocolo: JUEGO_TERMINADO:ID_DEL_GANADOR
+                String mensajeFin = "JUEGO_TERMINADO:" + idGanador;
+
+                // 3. Avisar a TODOS los jugadores (incluido el que ganó, para confirmar)
+                enviarATodos(mensajeFin);
+                
+                // Opcional: Aquí podrías reiniciar el servidor o limpiar la sala
+                break;
             case "SOLICITUD_ENTRANTE":
                 String[] datos = pizarra.getCandidatoTemporal();
                 String idCandidato = datos[0];

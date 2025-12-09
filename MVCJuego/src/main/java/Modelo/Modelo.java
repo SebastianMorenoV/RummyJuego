@@ -98,7 +98,15 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String payloadd = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         switch (evento) {
+            case "JUEGO_TERMINADO":
+                String idGanador = payloadd;
+                System.out.println("[Modelo] El juego terminó. Ganador: " + idGanador);
 
+                if (!idGanador.equals(this.miId)) {
+                    // Si el ID que llega no es el mío, entonces perdí
+                    notificarObservadores(TipoEvento.PARTIDA_PERDIDA);
+                }
+                break;
             case "COMANDO_INICIAR_PARTIDA":
                 System.out.println("[Modelo] Recibida orden del servidor para iniciar la partida.");
                 enviarComandoIniciarPartida();
@@ -497,17 +505,34 @@ public class Modelo implements IModelo, PropertyChangeListener {
         if (jugadaFueValida) {
 
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
-            try {
-                String payloadJuego = serializarJuegoFinal();
-                int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-                String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
-                this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+            int misFichasRestantes = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
 
-            } catch (IOException ex) {
-                Logger.getLogger(Modelo.class
-                        .getName()).log(Level.SEVERE, null, ex);
+            if (misFichasRestantes == 0) {
+                // --- CASO VICTORIA ---
+                System.out.println("[Modelo] ¡Felicidades! Has ganado la partida.");
+
+                // 1. Notificar a mi vista local
+                notificarObservadores(TipoEvento.PARTIDA_GANADA);
+
+                // 2. Avisar al servidor que gané
+                try {
+                    String mensaje = this.miId + ":GANADOR:";
+                    this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                try {
+                    String payloadJuego = serializarJuegoFinal();
+                    int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
+                    String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
+                    this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+
+                } catch (IOException ex) {
+                    Logger.getLogger(Modelo.class
+                            .getName()).log(Level.SEVERE, null, ex);
+                }
             }
-
         } else {
             if (!gruposDTOAlInicioDelTurno.equals(gruposDeTurnoDTO)) {
 
@@ -995,6 +1020,29 @@ public class Modelo implements IModelo, PropertyChangeListener {
             this.despachador.enviar(ipServidor, puertoServidor, mensaje);
         } catch (IOException ex) {
             System.err.println("[Modelo] Error al enviar comando INICIAR_PARTIDA: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * MOCK / CHEAT: Fuerza la victoria inmediatamente para pruebas. Simula que
+     * el jugador se quedó sin fichas.
+     */
+    public void mockGanarPartida() {
+        System.out.println("[MOCK] Ejecutando truco de victoria instantánea...");
+
+        // 1. Simular que ganamos localmente (para ver el mensaje de "Felicidades")
+        notificarObservadores(TipoEvento.PARTIDA_GANADA);
+
+        // 2. Enviar el comando real al servidor para que le avise a los rivales que perdieron
+        try {
+            // Protocolo: ID:GANADOR:
+            String mensaje = this.miId + ":GANADOR:";
+            if (this.despachador != null) {
+                this.despachador.enviar(ipServidor, puertoServidor, mensaje);
+                System.out.println("[MOCK] Enviado comando GANADOR al servidor.");
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 

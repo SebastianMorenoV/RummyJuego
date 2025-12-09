@@ -10,16 +10,20 @@ import java.util.List;
 /**
  *
  * @author moren
+ *
  */
 public interface iControlEjercerTurno {
 
     public void iniciarJuego();
 
     /**
+     *
      * Le dice al Modelo que coloque la ficha (para la UI local). Serializa la
      * LISTA ENTERA de DTOs a un solo String. 3 Le dice al Ensamblador que envíe
      * ESE ÚNICO String.
      */
+    void mockGanarPartida();
+
     public void colocarFicha(List<GrupoDTO> grupos);
 
     public void regresarFichaAMano(int idFicha);
