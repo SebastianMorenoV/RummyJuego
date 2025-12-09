@@ -83,7 +83,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
 
                 // 3. Avisar a TODOS los jugadores (incluido el que ganó, para confirmar)
                 enviarATodos(mensajeFin);
-
+                
                 // Opcional: Aquí podrías reiniciar el servidor o limpiar la sala
                 break;
             case "SOLICITUD_ENTRANTE":
@@ -97,7 +97,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("[Controlador] Pizarra aceptó solicitud. Enviando petición de votos a la sala.");
 
                 List<String> jugadoresEnSala = pizarra.getOrdenDeTurnos();
-
+                
                 for (String idJugador : jugadoresEnSala) {
                     enviarMensajeDirecto(idJugador, "PETICION_VOTO:" + idCandidato);
                 }
@@ -394,6 +394,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             System.err.println("[Controlador] Error al enviar mensaje directo a " + idJugador + ": " + e.getMessage());
         }
     }
+
 
     public synchronized boolean isPartidaConfigurada() {
         return true; // Siempre true, porque usamos defaults

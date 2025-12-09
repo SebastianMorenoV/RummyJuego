@@ -160,6 +160,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     private void btnIniciarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarPartidaActionPerformed
         if (control != null) {
             control.solicitarInicioPartida();
+            JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
             btnIniciarPartida.setEnabled(false);
         }
     }//GEN-LAST:event_btnIniciarPartidaActionPerformed
@@ -303,10 +304,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 this.dispose();
                 break;
 
-            case VOTO_REGISTRADO:
-                JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
-                break;
-
             case ACTUALIZAR_DATOS_JUGADORES:
                 if (datos instanceof String) {
                     actualizarJugadores((String) datos);
@@ -324,9 +321,8 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 control.enviarVoto(votoPositivo);
                 break;
             case PETICION_VOTO_INICIO:
-                String quienPide = (String) datos;
                 int resp = JOptionPane.showConfirmDialog(this,
-                        "El jugador " + quienPide + " quiere iniciar la partida.\n¿Estás listo?",
+                        "Un jugador quiere iniciar la partida.\n¿Estás listo?",
                         "Iniciar Partida",
                         JOptionPane.YES_NO_OPTION);
 
