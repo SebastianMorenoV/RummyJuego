@@ -355,18 +355,16 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
             List<Ficha> fichasEntity = new ArrayList<>();
             for (FichaJuegoDTO fichaDto : dto.getFichasGrupo()) {
-
-                // 1. Convertir a Entity. Aquí se aplica el color personalizado (MIS colores)
-                // Usamos this.miId por defecto.
                 Ficha fichaEntity = convertirFichaDtoAEntidad(fichaDto, this.miId, true);
                 fichasEntity.add(fichaEntity);
 
-                // 2. Actualizar el DTO con el nuevo color para la vista.
                 fichaDto.setColor(fichaEntity.getColor());
             }
 
-            // 3. Crear el Grupo Entity para pasarlo a la lógica del juego (Facade)
-            Grupo grupo = new Grupo(dto.getTipo(), fichasEntity.size(), fichasEntity);
+            String tipoParaBackend = dto.isEsTemporal() ? "Temporal" : dto.getTipo();
+
+            Grupo grupo = new Grupo(tipoParaBackend, fichasEntity.size(), fichasEntity);
+            
             if (!dto.isEsTemporal()) {
                 grupo.setValidado();
             }
@@ -375,10 +373,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         juego.colocarFichasEnTablero(nuevosGrupos);
 
-        // 4. Almacenar la lista de DTOs original, ahora con los colores actualizados.
+        // 4. Almacenar la lista de DTOs original
         this.gruposDeTurnoDTO = gruposPropuestos;
 
-        // [FIN DE MODIFICACIÓN]
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
     }
 
@@ -669,6 +666,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
      *
      * @param idFicha
      */
+    /**
+     * Regresa ficha a la mano (si el movimiento es válido) y actualiza la UI.
+     * Ahora maneja la DIVISIÓN de grupos y actualiza el feedback inmediatamente.
+     *
+     * @param idFicha
+     */
+    
     public void regresarFichaAMano(int idFicha) {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'regresarFichaAMano' ignorada. No es mi turno.");
@@ -679,25 +683,55 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         if (fueRegresadaExitosamente) {
 
-            boolean fichaEncontrada = false;
-            for (GrupoDTO grupoDTO : this.gruposDeTurnoDTO) {
-                Iterator<FichaJuegoDTO> iter = grupoDTO.getFichasGrupo().iterator();
-                while (iter.hasNext()) {
-                    if (iter.next().getIdFicha() == idFicha) {
-                        iter.remove();
-                        grupoDTO.setCantidad(grupoDTO.getFichasGrupo().size());
-                        fichaEncontrada = true;
+            GrupoDTO grupoObjetivo = null;
+            int indiceFicha = -1;
+
+            for (GrupoDTO grupo : this.gruposDeTurnoDTO) {
+                for (int i = 0; i < grupo.getFichasGrupo().size(); i++) {
+                    if (grupo.getFichasGrupo().get(i).getIdFicha() == idFicha) {
+                        grupoObjetivo = grupo;
+                        indiceFicha = i;
                         break;
                     }
                 }
-                if (fichaEncontrada) {
-                    break;
+                if (grupoObjetivo != null) break;
+            }
+
+            if (grupoObjetivo != null) {
+                grupoObjetivo.getFichasGrupo().remove(indiceFicha);
+                grupoObjetivo.setCantidad(grupoObjetivo.getFichasGrupo().size());
+
+
+                if (indiceFicha > 0 && indiceFicha < grupoObjetivo.getFichasGrupo().size()) {
+                    
+                    List<FichaJuegoDTO> fichasDerecha = new ArrayList<>(
+                            grupoObjetivo.getFichasGrupo().subList(indiceFicha, grupoObjetivo.getFichasGrupo().size())
+                    );
+                    
+                    grupoObjetivo.getFichasGrupo().subList(indiceFicha, grupoObjetivo.getFichasGrupo().size()).clear();
+                    grupoObjetivo.setCantidad(grupoObjetivo.getFichasGrupo().size());
+
+
+                    int nuevaColumna = grupoObjetivo.getColumna() + indiceFicha + 1;
+                    
+                    GrupoDTO nuevoGrupoDTO = new GrupoDTO(
+                            "Temporal", 
+                            fichasDerecha.size(),
+                            fichasDerecha,
+                            grupoObjetivo.getFila(),
+                            nuevaColumna,
+                            true
+                    );
+
+                    this.gruposDeTurnoDTO.add(nuevoGrupoDTO);
                 }
             }
 
             this.gruposDeTurnoDTO.removeIf(g -> g.getFichasGrupo().isEmpty());
 
-            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+
+            actualizarVistaTemporal(this.gruposDeTurnoDTO);
+            
             notificarObservadores(TipoEvento.REPINTAR_MANO);
 
             try {
@@ -706,8 +740,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 this.despachador.enviar(ipServidor, puertoServidor, mensaje);
 
             } catch (IOException ex) {
-                Logger.getLogger(Modelo.class
-                        .getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
@@ -748,18 +781,33 @@ public class Modelo implements IModelo, PropertyChangeListener {
      *
      * @return
      */
-    @Override
+   @Override
     public JuegoDTO getTablero() {
         JuegoDTO dto = new JuegoDTO();
         List<Grupo> gruposDelJuego = juego.getGruposEnTablero();
 
-        if (this.gruposDeTurnoDTO != null && this.gruposDeTurnoDTO.size() == gruposDelJuego.size()) {
-            for (int i = 0; i < gruposDelJuego.size(); i++) {
-                String tipoValidado = gruposDelJuego.get(i).getTipo();
-                this.gruposDeTurnoDTO.get(i).setTipo(tipoValidado);
-                this.gruposDeTurnoDTO.get(i).setEsTemporal(gruposDelJuego.get(i).esTemporal());
+        if (this.gruposDeTurnoDTO != null && !this.gruposDeTurnoDTO.isEmpty()) {
+            
+            for (GrupoDTO dtoGrupo : this.gruposDeTurnoDTO) {
+                if (dtoGrupo.getFichasGrupo() == null || dtoGrupo.getFichasGrupo().isEmpty()) {
+                    continue;
+                }
+
+                int idFichaRastreadora = dtoGrupo.getFichasGrupo().get(0).getIdFicha();
+
+                for (Grupo gLogico : gruposDelJuego) {
+                    boolean esEsteGrupo = gLogico.getFichas().stream()
+                            .anyMatch(f -> f.getId() == idFichaRastreadora);
+                    
+                    if (esEsteGrupo) {
+                        dtoGrupo.setTipo(gLogico.getTipo());
+                        dtoGrupo.setEsTemporal(gLogico.esTemporal());
+                        break; 
+                    }
+                }
             }
             dto.setGruposEnTablero(this.gruposDeTurnoDTO);
+
         } else {
             List<GrupoDTO> gruposDTO = gruposDelJuego.stream()
                     .map(this::convertirGrupoEntidadADto)
@@ -768,16 +816,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
 
         dto.setFichasMazo(this.mazoFichasRestantes);
-
-        // Obtener nombre del jugador actual (quien tiene el turno)
-        String nombreJugadorActual = (juego.getJugadorActual() != null)
-                ? juego.getJugadorActual().getNickname()
-                : "...";
-
         dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
-
         List<String> ordenJugadoresUI = new ArrayList<>();
 
         if (this.nombresJugadores.contains(this.miId)) {
@@ -790,43 +831,35 @@ public class Modelo implements IModelo, PropertyChangeListener {
             }
         }
 
-        // 2. Recorrer la lista ORDENADA una sola vez
         for (String idJugadores : ordenJugadoresUI) {
             DTO.JugadorDTO jugadorDTO1 = new DTO.JugadorDTO();
-
-            // Buscamos la info estática (Avatar, Nombre Real)
             JugadorDTO perfil = perfilesJugadores.get(idJugadores);
+            
             if (perfil != null) {
                 jugadorDTO1.setNombre(perfil.getNombre());
                 jugadorDTO1.setIdAvatar(perfil.getIdAvatar());
                 jugadorDTO1.setColores(perfil.getColores());
             } else {
-                // Fallback
                 jugadorDTO1.setNombre(idJugadores);
                 jugadorDTO1.setIdAvatar(1);
             }
 
-            // Determinar si es turno
             boolean esSuTurno = idJugadores.equals(this.idJugadorEnTurnoGlobal);
             jugadorDTO1.setEsTurno(esSuTurno);
 
             if (idJugadores.equals(this.miId)) {
-                // Protección contra null pointer si el juego no ha iniciado bien
                 if (juego.getJugadorActual() != null && juego.getJugadorActual().getManoJugador() != null) {
-                    int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-                    jugadorDTO1.setFichasRestantes(cantidad);
+                    jugadorDTO1.setFichasRestantes(juego.getJugadorActual().getManoJugador().getFichasEnMano().size());
                 } else {
                     jugadorDTO1.setFichasRestantes(0);
                 }
             } else {
-                int cantidadRival = conteoFichasRivales.getOrDefault(idJugadores, 14);
-                jugadorDTO1.setFichasRestantes(cantidadRival);
+                jugadorDTO1.setFichasRestantes(conteoFichasRivales.getOrDefault(idJugadores, 14));
             }
 
             listaJugadoresDTO.add(jugadorDTO1);
         }
 
-        // Asignar la lista limpia al DTO
         dto.setJugadores(listaJugadoresDTO);
 
         return dto;
