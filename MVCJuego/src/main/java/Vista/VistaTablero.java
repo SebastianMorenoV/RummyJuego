@@ -465,6 +465,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 break;
             case MOSTRAR_JUEGO:
                 this.setVisible(true);
+                GestorSonidos.reproducirEnBucle(GestorSonidos.SONIDO__JUEGO);
                 control.cerrarCUAnteriores();
                 break;
             case CAMBIO_DE_TURNO:
@@ -535,6 +536,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 if (panelInfo != null) {
                     panelInfo.detenerCronometro();
                 }
+                GestorSonidos.detenerMusica();
+
                 break;
 
             case PARTIDA_PERDIDA:
@@ -587,6 +590,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case RESULTADOS_VOTACION:
                 String tabla = modelo.getTablero().getMensaje();
                 JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
+                GestorSonidos.detenerMusica();
 
                 this.dispose();
                 control.salirAlLobby();
@@ -673,7 +677,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @return
      */
     private byte[] cargarImagenPorIndice(int indice) {
-        String extension = ".png"; 
+        String extension = ".png";
         if (indice == 7) {
             extension = ".jpeg";
         } else if (indice == 8 || indice == 9) {
@@ -1147,6 +1151,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         });
         animTimer.start();
     }
+
     private void configurarIconoVentana() {
         try {
             // 1. Intentar cargar la ruta del icono

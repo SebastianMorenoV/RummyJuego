@@ -7,6 +7,7 @@ import java.net.URL;
 public class GestorSonidos {
 
     // Nombres de archivos sugeridos (guárdalos en src/main/resources/sonidos/)
+    public static final String SONIDO__JUEGO = "musicaJuego.wav";
     public static final String SONIDO__SELECCIONAR = "seleccionar.wav";
     public static final String SONIDO_ENOJO = "enojo.wav";
     public static final String SONIDO_LLORO = "lloriqueo.wav";
@@ -18,6 +19,7 @@ public class GestorSonidos {
     public static final String SONIDO_CAMBIOTURNO = "turno.wav";
     public static final String SONIDO_EFECTO = "efecto.wav";
     public static final String SONIDO_BARAJACARTAS = "barajaCartas.wav";
+    private static Clip clipFondo;
 
     public static void reproducir(String nombreArchivo) {
         new Thread(() -> { // Ejecutar en hilo separado para no congelar la UI
@@ -39,5 +41,45 @@ public class GestorSonidos {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    /**
+     * Reproduce un sonido en bucle infinito (Música de fondo). Se detendrá
+     * automáticamente cuando se cierre la aplicación (System.exit).
+     */
+    public static void reproducirEnBucle(String nombreArchivo) {
+        // Detenemos cualquier música anterior para no empalmar audios
+        detenerMusica();
+
+        new Thread(() -> {
+            try {
+                URL url = GestorSonidos.class.getResource("/sonidos/" + nombreArchivo);
+                if (url == null) {
+                    System.err.println("⚠ Música no encontrada: " + nombreArchivo);
+                    return;
+                }
+
+                AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);
+                clipFondo = AudioSystem.getClip();
+                clipFondo.open(audioIn);
+
+                // Configurar para bucle infinito
+                clipFondo.loop(Clip.LOOP_CONTINUOUSLY);
+                clipFondo.start();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
+     * Detiene la música de fondo manualmente (útil si pasas a la partida).
+     */
+    public static void detenerMusica() {
+        if (clipFondo != null && clipFondo.isRunning()) {
+            clipFondo.stop();
+            clipFondo.close();
+        }
     }
 }

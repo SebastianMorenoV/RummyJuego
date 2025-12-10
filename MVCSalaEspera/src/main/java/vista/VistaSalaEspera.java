@@ -407,7 +407,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 } else if (idAvatar.equals("8") || idAvatar.equals("9")) {
                     extension = ".jpg";
                 }
-                
+
                 String nombreArchivo = "avatar" + idAvatar + extension;
                 colocarImagen(lblAvatar, "/avatares/" + nombreArchivo);
             }
@@ -467,10 +467,14 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         switch (evento) {
             case MOSTRAR_SALA:
                 this.setVisible(true);
+                GestorSonidos.reproducirEnBucle(GestorSonidos.SONIDO_SALA);
+
                 break;
 
             case CERRAR_CU:
                 this.setVisible(false);
+                GestorSonidos.detenerMusica();
+
                 this.dispose();
                 break;
 
