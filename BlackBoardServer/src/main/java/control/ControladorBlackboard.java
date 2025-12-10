@@ -63,7 +63,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 // Alguien ganó (idAfectado). Pedimos puntaje a los DEMÁS.
                 String idGanador = idAfectado;
                 List<String> jugadores2 = pizarra.getOrdenDeTurnos();
-                
+
                 for (String id : jugadores2) {
                     if (!id.equals(idGanador)) {
                         // Enviamos petición para que calculen su mano
@@ -72,6 +72,14 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 }
                 break;
 
+            case "NUEVO_MENSAJE_CHAT":
+                // Obtenemos el mensaje limpio (Nombre:Texto) desde la pizarra
+                String msgChat = ((EstadoJuegoPizarra) pizarra).getUltimoMensajeChat();
+
+                // Lo enviamos a TODOS con el prefijo que espera el Modelo del cliente
+                // El Modelo espera: "CHAT_MENSAJE:Nombre:Texto"
+                enviarATodos("CHAT_MENSAJE:" + msgChat);
+                break;
             case "PARTIDA_FINALIZADA":
                 // idAfectado contiene la tabla de posiciones completa
                 enviarATodos("JUEGO_TERMINADO_CON_TABLA:" + idAfectado);
@@ -103,7 +111,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                     }
                 }
                 break;
-            
+
             case "SOLICITUD_ENTRANTE":
                 String[] datos = pizarra.getCandidatoTemporal();
                 String idCandidato = datos[0];
@@ -115,7 +123,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 System.out.println("[Controlador] Pizarra aceptó solicitud. Enviando petición de votos a la sala.");
 
                 List<String> jugadoresEnSala = pizarra.getOrdenDeTurnos();
-                
+
                 for (String idJugador : jugadoresEnSala) {
                     enviarMensajeDirecto(idJugador, "PETICION_VOTO:" + idCandidato);
                 }
@@ -412,7 +420,6 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             System.err.println("[Controlador] Error al enviar mensaje directo a " + idJugador + ": " + e.getMessage());
         }
     }
-
 
     public synchronized boolean isPartidaConfigurada() {
         return true; // Siempre true, porque usamos defaults

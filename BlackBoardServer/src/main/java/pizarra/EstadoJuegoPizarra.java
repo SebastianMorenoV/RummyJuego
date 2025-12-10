@@ -52,6 +52,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private Map<String, Integer> puntajesFinales = new ConcurrentHashMap<>();
     private boolean recolectandoPuntajes = false;
 
+    private String ultimoMensajeChat = "";
+
     private Map<String, Integer> votosTerminar = new ConcurrentHashMap<>();
     private boolean votacionTerminarEnCurso = false;
 
@@ -316,6 +318,13 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
         switch (comando) {
+
+            case "CHAT":
+                // Payload llega como: "NombreEmisor:Mensaje"
+                this.ultimoMensajeChat = payload;
+                System.out.println("[Pizarra] Chat recibido de " + idCliente + ": " + payload);
+                notificarObservadores("NUEVO_MENSAJE_CHAT");
+                break;
             case "GANADOR":
                 // Un jugador dice que ganó (0 fichas).
                 // Iniciamos la recolección de puntos de TODOS para armar la tabla real.
@@ -697,11 +706,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     }
 
     // --- GENERACIÓN DE TABLA FINAL ---
-   private void finalizarPartidaConResultados() {
+    private void finalizarPartidaConResultados() {
         System.out.println("[Pizarra] Generando tabla de posiciones final...");
-        
+
         // Detenemos la recolección para que nadie más envíe puntos tarde
-        this.recolectandoPuntajes = false; 
+        this.recolectandoPuntajes = false;
 
         StringBuilder sb = new StringBuilder();
         sb.append("=== RESULTADOS FINALES ===\n");
@@ -928,6 +937,10 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         System.out.println("[Pizarra] Votación finalizada. Sala liberada automáticamente.");
 
         notificarObservadores("VOTACION_FINALIZADA");
+    }
+
+    public String getUltimoMensajeChat() {
+        return ultimoMensajeChat;
     }
 
     private void reiniciarPizarra() {

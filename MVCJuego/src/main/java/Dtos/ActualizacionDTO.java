@@ -25,11 +25,10 @@ public class ActualizacionDTO {
         this.mensaje = null;
     }
 
-    public ActualizacionDTO(TipoEvento tipoEvento, String mensaje) {
+    public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno, String mensaje) {
         this.tipoEvento = tipoEvento;
+        this.esMiTurno = esMiTurno; // ¡Usamos el valor real!
         this.mensaje = mensaje;
-        // Valores por defecto para lo demás
-        this.esMiTurno = false;
         this.manoDelJugador = null;
     }
 

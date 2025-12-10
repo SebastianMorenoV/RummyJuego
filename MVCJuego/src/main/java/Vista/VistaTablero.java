@@ -33,6 +33,8 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
@@ -48,8 +50,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private ManoUI manoUI;
     private MazoUI mazoUI;
     private boolean yaSeRepartio = false;
-
+    private boolean animacionEnCurso = false; // Bandera para bloquear actualizaciones externas
     private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
+    private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -64,18 +67,95 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         initComponents();
+
+        configurarHovers();
     }
 
+    /**
+     * Aplica la magia visual a los botones clave.
+     */
+    private void configurarHovers() {
+        // Botones de ordenamiento (imágenes cuadradas/rectangulares)
+        agregarEfectoHover(btnOrdenarMayorAMenor);
+        agregarEfectoHover(btnOrdenarPorGrupos);
 
+        // Botón grande de finalizar turno (imagen irregular, el borde será un recuadro)
+        agregarEfectoHover(btnFinalizarTurno);
+
+        // Botón Terminar Partida:
+        // El trigger es el texto (btnTerminarPartida), pero el que se anima es el panel azul (panelRound1)
+        agregarEfectoHover(btnTerminarPartida, panelRound1);
+    }
+
+    private void agregarEfectoHover(JComponent componente) {
+        agregarEfectoHover(componente, componente);
+    }
+
+    /**
+     * Crea un MouseAdapter que maneja el Zoom y el Borde al mismo tiempo.
+     *
+     * @param trigger El componente que recibe el mouse (ej. el JLabel con
+     * texto/icono).
+     * @param target El componente que se transforma (ej. el Panel de fondo).
+     */
+    private void agregarEfectoHover(JComponent trigger, JComponent target) {
+        trigger.addMouseListener(new MouseAdapter() {
+            private Rectangle boundsOriginales; // Para recordar dónde estaba
+            private Border bordeOriginal;       // Para recordar si tenía borde antes
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!trigger.isEnabled() || !trigger.isVisible()) {
+                    return;
+                }
+
+                // 1. Guardar estado original (solo la primera vez que entra para evitar bugs)
+                if (boundsOriginales == null) {
+                    boundsOriginales = target.getBounds();
+                    bordeOriginal = target.getBorder();
+                }
+
+                // 2. EFECTO ZOOM (Crecer desde el centro)
+                int pixelCrecer = 4; // Cuánto crece en total
+                int offset = pixelCrecer / 2; // Cuánto se mueve para centrar
+
+                target.setBounds(
+                        boundsOriginales.x - offset,
+                        boundsOriginales.y - offset,
+                        boundsOriginales.width + pixelCrecer,
+                        boundsOriginales.height + pixelCrecer
+                );
+
+                // 3. EFECTO BORDE DORADO
+                // Le ponemos el borde amarillo brillante
+                target.setBorder(BORDE_HOVER);
+
+                // 4. CURSOR DE MANO
+                trigger.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                // Opcional: Sonido muy sutil de "aire" o "tick" al pasar el mouse
+                // GestorSonidos.reproducir("hover.wav"); 
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (boundsOriginales != null) {
+                    // Restaurar todo a la normalidad
+                    target.setBounds(boundsOriginales);
+                    target.setBorder(bordeOriginal); // Quita el borde amarillo
+                }
+            }
+        });
+    }
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         GUIjuego = new javax.swing.JPanel();
-        btnSalirJuego = new javax.swing.JButton();
-        btnTerminarPartida = new javax.swing.JButton();
         btnFinalizarTurno = new javax.swing.JLabel();
         btnOrdenarMayorAMenor = new javax.swing.JLabel();
         btnOrdenarPorGrupos = new javax.swing.JLabel();
+        panelRound1 = new Vista.PanelRound();
+        btnTerminarPartida = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -83,28 +163,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.setBackground(new java.awt.Color(0, 0, 0));
         GUIjuego.setLayout(null);
 
-        btnSalirJuego.setText("salir del juego");
-        btnSalirJuego.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSalirJuegoActionPerformed(evt);
-            }
-        });
-        GUIjuego.add(btnSalirJuego);
-        btnSalirJuego.setBounds(10, 230, 120, 24);
-
-        btnTerminarPartida.setText("Terminar partida");
-        btnTerminarPartida.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnTerminarPartidaActionPerformed(evt);
-            }
-        });
-        GUIjuego.add(btnTerminarPartida);
-        btnTerminarPartida.setBounds(10, 270, 120, 24);
-
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
@@ -114,7 +176,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnFinalizarTurno.setBounds(800, 320, 90, 50);
 
         btnOrdenarMayorAMenor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button.png"))); // NOI18N
-        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnOrdenarMayorAMenor.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOrdenarMayorAMenorMouseClicked(evt);
@@ -124,7 +186,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnOrdenarMayorAMenor.setBounds(820, 280, 50, 30);
 
         btnOrdenarPorGrupos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button (1).png"))); // NOI18N
-        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnOrdenarPorGrupos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOrdenarPorGruposMouseClicked(evt);
@@ -132,6 +194,37 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         });
         GUIjuego.add(btnOrdenarPorGrupos);
         btnOrdenarPorGrupos.setBounds(820, 240, 50, 30);
+
+        panelRound1.setBackground(new java.awt.Color(20, 86, 118));
+        panelRound1.setRoundBottomLeft(30);
+        panelRound1.setRoundBottomRight(30);
+        panelRound1.setRoundTopLeft(30);
+        panelRound1.setRoundTopRight(30);
+
+        btnTerminarPartida.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        btnTerminarPartida.setForeground(new java.awt.Color(255, 255, 255));
+        btnTerminarPartida.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnTerminarPartida.setText("Terminar Partida");
+        btnTerminarPartida.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnTerminarPartida.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnTerminarPartidaMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout panelRound1Layout = new javax.swing.GroupLayout(panelRound1);
+        panelRound1.setLayout(panelRound1Layout);
+        panelRound1Layout.setHorizontalGroup(
+            panelRound1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnTerminarPartida, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+        );
+        panelRound1Layout.setVerticalGroup(
+            panelRound1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnTerminarPartida, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+        );
+
+        GUIjuego.add(panelRound1);
+        panelRound1.setBounds(10, 290, 100, 30);
 
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoR.png"))); // NOI18N
         fondo.setText("jLabel1");
@@ -177,19 +270,15 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
     }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
 
-    private void btnSalirJuegoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirJuegoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnSalirJuegoActionPerformed
-
-    private void btnTerminarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTerminarPartidaActionPerformed
+    private void btnTerminarPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnTerminarPartidaMouseClicked
         int confirm = JOptionPane.showConfirmDialog(this,
                 "¿Quieres proponer terminar la partida a votación?",
                 "Terminar Partida", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-          control.solicitarTerminarPartida();
+            control.solicitarTerminarPartida();
         }
-    }//GEN-LAST:event_btnTerminarPartidaActionPerformed
+    }//GEN-LAST:event_btnTerminarPartidaMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -197,9 +286,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private javax.swing.JLabel btnFinalizarTurno;
     private javax.swing.JLabel btnOrdenarMayorAMenor;
     private javax.swing.JLabel btnOrdenarPorGrupos;
-    private javax.swing.JButton btnSalirJuego;
-    private javax.swing.JButton btnTerminarPartida;
+    private javax.swing.JLabel btnTerminarPartida;
     private javax.swing.JLabel fondo;
+    private Vista.PanelRound panelRound1;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -213,6 +302,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     public void actualiza(IModelo modelo, ActualizacionDTO dto) {
 
         if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
+
+            this.yaSeRepartio = false;
+
             if (this.yaSeRepartio) {
                 return;
             }
@@ -309,15 +401,32 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 break;
 
             case NUEVO_MENSAJE_CHAT:
-                // El DTO debe traer quién envió el mensaje y qué dijo.
-                // Supongamos que dto.getMensaje() trae "NombreJugador:MensajeTexto"
-                String payload = dto.getMensaje(); // "Pepe:Hola a todos"
+                String payload = dto.getMensaje();
                 if (payload != null && payload.contains(":")) {
                     String[] partes = payload.split(":", 2);
                     String nombreEmisor = partes[0];
                     String textoMensaje = partes[1];
 
-                    GestorSonidos.reproducir(GestorSonidos.SONIDO_EFECTO);
+                    // --- LÓGICA DE SONIDOS INTELIGENTE ---
+                    String mensajeLower = textoMensaje.toLowerCase();
+
+                    if (mensajeLower.contains("jajaja") || mensajeLower.contains("jeje")) {
+                        // Si se ríe
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_RISA);
+
+                    } else if (mensajeLower.contains("suerte") || mensajeLower.contains("apúrate")) {
+                        // Si molesta o se queja (burla/tensión)
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_RISA);
+
+                    } else if (textoMensaje.contains("😭")) {
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_LLORO);
+                    } else if (textoMensaje.contains("😡")) {
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_ENOJO);
+                    } else {
+                        // Mensaje normal (Hola, Buena jugada, etc.)
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_EFECTO);
+                    }
+
                     // Buscar el JugadorUI correspondiente y mostrar la burbuja
                     for (JugadorUI jUI : listaJugadoresUI) {
                         if (jUI.getNombre().equals(nombreEmisor)) {
@@ -327,22 +436,22 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     }
                 }
                 break;
-                case RESULTADOS_VOTACION:
+            case RESULTADOS_VOTACION:
                 String tabla = modelo.getTablero().getMensaje();
                 JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
-                
+
                 this.dispose();
                 control.salirAlLobby();
                 break;
 
             case SOLICITUD_VOTO_TERMINAR:
                 String solicitante = modelo.getTablero().getMensaje();
-                int resp = JOptionPane.showConfirmDialog(this, 
+                int resp = JOptionPane.showConfirmDialog(this,
                         "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
                         "Votación", JOptionPane.YES_NO_OPTION);
                 control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
                 break;
-                
+
             case VOTACION_FALLIDA:
                 JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
                 break;
@@ -454,11 +563,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @param modelo el modelo de donde se sacan los datos para crearse.
      */
     private void iniciarComponentesDeJuego(IModelo modelo, ActualizacionDTO dto) {
+
+        crearTablero(modelo);
         if (tableroUI != null) {
             tableroUI.limpiarTablero();
         }
-        crearTablero(modelo);
         crearManoUI();
+
 //        repintarMano(modelo, dto);
         crearMazo(modelo);
 
@@ -580,13 +691,16 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @param modelo el modelo que pasa los datos a actualizar.
      */
     private void repintarMano(IModelo modelo, ActualizacionDTO dto) {
+        if (this.animacionEnCurso) {
+            return;
+        }
+
         if (manoUI == null) {
             return;
         }
         manoUI.removeAll();
 
         List<FichaJuegoDTO> fichasMano = dto.getManoDelJugador();
-
         validacionesDeManoUI(fichasMano);
     }
 
@@ -799,42 +913,40 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             return;
         }
 
-        // 1. Limpiar mano visualmente
+        // 1. Bloqueamos actualizaciones externas y limpiamos
+        this.animacionEnCurso = true;
         manoUI.removeAll();
         manoUI.revalidate();
         manoUI.repaint();
-        //GestorSonidos.reproducir(GestorSonidos.SONIDO_BARAJACARTAS);
-        // 2. Coordenada global del MAZO (Origen)
-        // Usamos SwingUtilities para convertir la posicion del mazo al LayeredPane (capa de encima)
+
         Point mazoPos = SwingUtilities.convertPoint(mazoUI, 0, 0, getLayeredPane());
 
-        // 3. Timer para soltar cartas una por una (efecto "metralleta")
-        // Delay de 100ms entre carta y carta
         Timer dealTimer = new Timer(200, null);
         final int[] index = {0};
 
         dealTimer.addActionListener(e -> {
+            // VERIFICACIÓN DE FIN DE ANIMACIÓN
             if (index[0] >= fichasMano.size()) {
                 dealTimer.stop();
-                // Al finalizar todo, nos aseguramos que la mano esté perfecta
+
+                // [CORRECCIÓN] Liberamos el bloqueo para permitir actualizaciones futuras
+                this.animacionEnCurso = false;
+
                 manoUI.revalidate();
                 manoUI.repaint();
                 return;
             }
 
             FichaJuegoDTO dto = fichasMano.get(index[0]);
-
-            // Calculamos dónde va a caer esta ficha en la ManoUI (Destino)
             Point destinoLocal = manoUI.calcularPosicionIndice(index[0]);
-            // Convertimos ese destino local a coordenadas globales del LayeredPane
             Point destinoGlobal = SwingUtilities.convertPoint(manoUI, destinoLocal, getLayeredPane());
 
-            // Lanzamos la ficha voladora
             lanzarFichaVoladora(dto, mazoPos, destinoGlobal);
 
             index[0]++;
         });
         dealTimer.start();
+
     }
 
     /**

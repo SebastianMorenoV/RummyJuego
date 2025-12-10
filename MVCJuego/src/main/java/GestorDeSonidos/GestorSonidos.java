@@ -7,6 +7,10 @@ import java.net.URL;
 public class GestorSonidos {
 
     // Nombres de archivos sugeridos (guárdalos en src/main/resources/sonidos/)
+    public static final String SONIDO__SELECCIONAR = "seleccionar.wav";
+    public static final String SONIDO_ENOJO = "enojo.wav";
+    public static final String SONIDO_LLORO = "lloriqueo.wav";
+    public static final String SONIDO_RISA = "risa.wav";
     public static final String SONIDO_CLICK = "carta2.wav";
     public static final String SONIDO_SOLTAR = "click.wav";     // Ficha colocada bien
     public static final String SONIDO_ERROR = "error.wav";     // Jugada inválida

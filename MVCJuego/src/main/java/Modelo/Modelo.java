@@ -111,15 +111,18 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 System.out.println("[Modelo] Recibida orden del servidor para iniciar la partida.");
                 enviarComandoIniciarPartida();
                 break;
-
+            case "CHAT_MENSAJE":
+                // payload llega como: "NombreEmisor:Mensaje"
+                notificarObservadoresChat(payloadd);
+                break;
             case "MANO_INICIAL":
                 System.out.println("[Modelo] Evento 'MANO_INICIAL' detectado!");
                 System.out.println("PAYLOAD: " + payloadd);
                 try {
                     // 1. PRIMERO: Limpiamos todo rastro de la partida anterior
                     // Reiniciamos la lógica (Fachada)
-                    juego.iniciarPartida(); 
-                    
+                    juego.iniciarPartida();
+
                     // Reiniciamos las listas temporales del Modelo (para borrar grupos viejos de la UI)
                     if (this.gruposDeTurnoDTO != null) {
                         this.gruposDeTurnoDTO.clear();
@@ -141,7 +144,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                             }
                         }
                         String listaJugadoresStr = listaJugadoresBuilder.toString();
-                        
+
                         String[] usuariosRaw = listaJugadoresStr.split(";");
 
                         this.nombresJugadores.clear();
@@ -159,7 +162,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                                 String datosPerfil = partes[1]; // "Nick$Avatar$..."
 
                                 String[] perfilSplit = datosPerfil.split("\\$");
-                                
+
                                 JugadorDTO dtoPerfil = new JugadorDTO();
                                 dtoPerfil.setNombre(perfilSplit[0]);
 
@@ -183,9 +186,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                                 this.perfilesJugadores.put(idReal, dtoPerfil);
                                 this.nombresJugadores.add(idReal);
-                            } 
+                            }
                         }
-                        
 
                         JugadorDTO miPerfil = this.perfilesJugadores.get(this.miId);
 
@@ -202,7 +204,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                         }
                     }
-                    
+
                     // 3. Establecemos la nueva mano
                     List<FichaJuegoDTO> fichasDTO = deserializarMano(manoPayload);
                     List<Ficha> manoEntidad = fichasDTO.stream()
@@ -289,13 +291,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
             case "JUEGO_TERMINADO_CON_TABLA":
                 System.out.println("[Modelo] Tabla recibida: " + payloadd);
-                this.mensajeTemporalVista = payloadd; 
+                this.mensajeTemporalVista = payloadd;
                 notificarObservadores(TipoEvento.RESULTADOS_VOTACION);
                 break;
 
             case "PETICION_VOTO_TERMINAR":
-                String idSolicitante = payloadd; 
-                String nombreMostrar = idSolicitante; 
+                String idSolicitante = payloadd;
+                String nombreMostrar = idSolicitante;
 
                 if (perfilesJugadores.containsKey(idSolicitante)) {
                     JugadorDTO perfil = perfilesJugadores.get(idSolicitante);
@@ -305,7 +307,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 }
 
                 this.mensajeTemporalVista = nombreMostrar;
-                
+
                 notificarObservadores(TipoEvento.SOLICITUD_VOTO_TERMINAR);
                 break;
 
@@ -394,7 +396,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     private void notificarObservadoresChat(String payload) {
         for (Observador observer : this.observadores) {
-            ActualizacionDTO dto = new ActualizacionDTO(TipoEvento.NUEVO_MENSAJE_CHAT, payload);
+            ActualizacionDTO dto = new ActualizacionDTO(TipoEvento.NUEVO_MENSAJE_CHAT, this.esMiTurno, payload);
             observer.actualiza(this, dto);
         }
     }
@@ -871,51 +873,72 @@ public class Modelo implements IModelo, PropertyChangeListener {
      *
      * @return
      */
-    @Override
     public JuegoDTO getTablero() {
         JuegoDTO dto = new JuegoDTO();
-        
-        // 1. Lógica de Grupos (Tablero)
+
+        // 1. Obtenemos la verdad absoluta desde la lógica (Entidades)
         List<Grupo> gruposDelJuego = juego.getGruposEnTablero();
 
-        if (this.gruposDeTurnoDTO != null && !this.gruposDeTurnoDTO.isEmpty()) {
+        // 2. DECISIÓN: Usamos el caché visual si existe.
+        // ELIMINAMOS 'this.esMiTurno' de la condición.
+        // Necesitamos usar los DTOs siempre que existan, porque son los únicos 
+        // que saben en qué fila/columna están las fichas (el backend no lo sabe).
+        boolean hayDatosVisuales = (this.gruposDeTurnoDTO != null && !this.gruposDeTurnoDTO.isEmpty());
+
+        if (hayDatosVisuales) {
+            // Sincronizamos el estado lógico (Valido/Invalido) sobre los DTOs visuales (Fila/Columna)
+
+            // Creamos una lista temporal para limpiar grupos visuales que ya no existen en la lógica
+            // (Esto arregla la desincronización si se borran grupos)
+            List<GrupoDTO> gruposVisualesValidos = new ArrayList<>();
+
             for (GrupoDTO dtoGrupo : this.gruposDeTurnoDTO) {
                 if (dtoGrupo.getFichasGrupo() == null || dtoGrupo.getFichasGrupo().isEmpty()) {
                     continue;
                 }
 
                 int idFichaRastreadora = dtoGrupo.getFichasGrupo().get(0).getIdFicha();
+                boolean existeEnLogica = false;
 
                 for (Grupo gLogico : gruposDelJuego) {
                     boolean esEsteGrupo = gLogico.getFichas().stream()
                             .anyMatch(f -> f.getId() == idFichaRastreadora);
 
                     if (esEsteGrupo) {
+                        // Inyectamos el estado REAL del backend en el visual
                         dtoGrupo.setTipo(gLogico.getTipo());
                         dtoGrupo.setEsTemporal(gLogico.esTemporal());
+                        existeEnLogica = true;
                         break;
                     }
                 }
+
+                // Solo añadimos el grupo visual si todavía existe en la lógica del juego
+                if (existeEnLogica) {
+                    gruposVisualesValidos.add(dtoGrupo);
+                }
             }
+
+            // Actualizamos la lista local y el DTO de salida
+            this.gruposDeTurnoDTO = gruposVisualesValidos;
             dto.setGruposEnTablero(this.gruposDeTurnoDTO);
 
         } else {
-            // Si no hay cambios locales, usamos la verdad del sistema
+            // Solo entramos aquí si la lista visual está vacía (inicio de partida o error).
+            // Aquí se pierden las posiciones (se van a 0,0), pero es mejor que no mostrar nada.
             List<GrupoDTO> gruposDTO = gruposDelJuego.stream()
                     .map(this::convertirGrupoEntidadADto)
                     .collect(Collectors.toList());
             dto.setGruposEnTablero(gruposDTO);
         }
 
-        // 2. Información General
+        // 3. RESTO DE LA LÓGICA (Sin cambios)
         dto.setFichasMazo(this.mazoFichasRestantes);
         dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
-        // 3. Construcción de Jugadores (Rivales y Yo)
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
         List<String> ordenJugadoresUI = new ArrayList<>();
 
-        // Ordenar para que "YO" siempre aparezca primero o en posición fija si lo deseas
         if (this.nombresJugadores.contains(this.miId)) {
             ordenJugadoresUI.add(this.miId);
         }
@@ -956,12 +979,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
 
         dto.setJugadores(listaJugadoresDTO);
-
-        // --- CORRECCIÓN CLAVE AQUÍ ---
-        // Inyectamos el mensaje guardado (Tabla de posiciones, Ganador, etc.) 
-        // para que la Vista lo pueda leer en el OptionPane.
         dto.setMensaje(this.mensajeTemporalVista);
-        // -----------------------------
 
         return dto;
     }
