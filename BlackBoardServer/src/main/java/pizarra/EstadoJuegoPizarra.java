@@ -835,8 +835,8 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                 notificarObservadores("ALERTA_FICHAS:" + id + ":1");
             } else if (nuevaCantidad == 5) {
                 notificarObservadores("ALERTA_FICHAS:" + id + ":5");
-            } else if (nuevaCantidad == 11) {
-                notificarObservadores("ALERTA_FICHAS:" + id + ":11");
+            } else if (nuevaCantidad == 20) {
+                notificarObservadores("ALERTA_FICHAS:" + id + ":20");
             }
             // ---------------------------------------
         }

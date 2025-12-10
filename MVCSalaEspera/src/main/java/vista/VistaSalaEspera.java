@@ -31,6 +31,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
     private iControlSalaEspera control;
     private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
+    private int cantidadJugadores = 0;
 
     /**
      * Creates new form VistaSalaEspera
@@ -220,6 +221,13 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnIniciarPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarPartidaMouseClicked
+        if (this.cantidadJugadores < 2) {
+            JOptionPane.showMessageDialog(this,
+                    "Se necesitan al menos 2 jugadores para iniciar la partida.",
+                    "Esperando jugadores",
+                    JOptionPane.WARNING_MESSAGE);
+            return; // "Le da para atrás": se sale del método y no envía nada.
+        }
         if (control != null) {
             GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
 
@@ -229,6 +237,13 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         }    }//GEN-LAST:event_btnIniciarPartidaMouseClicked
 
     private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        if (this.cantidadJugadores < 2) {
+            JOptionPane.showMessageDialog(this,
+                    "Se necesitan al menos 2 jugadores para iniciar la partida.",
+                    "Esperando jugadores",
+                    JOptionPane.WARNING_MESSAGE);
+            return; // "Le da para atrás": se sale del método y no envía nada.
+        }
         if (control != null) {
             control.solicitarInicioPartida();
             JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
@@ -324,16 +339,18 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     public void actualizarJugadores(String data) {
         System.out.println("[VistaSalaEspera] Datos recibidos: " + data);
         resetearVista();
-
         GestorSonidos.reproducir(GestorSonidos.SONIDO__NUEVO);
-
         if (data == null || data.isEmpty()) {
+            this.cantidadJugadores = 0; // No hay jugadores conectados
             return;
         }
 
         String[] jugadores = data.split(";");
 
-        // 1. PINTAR JUGADORES (Ahora soportamos hasta 4)
+        // --- AQUÍ GUARDAMOS CUÁNTOS JUGADORES HAY PARA USARLO EN EL BOTÓN ---
+        this.cantidadJugadores = jugadores.length;
+
+        // 1. PINTAR JUGADORES (Soportamos hasta 4)
         if (jugadores.length > 0) {
             pintarJugador(jugadores[0], nombreJugador1, avatarJugador1);
         }
@@ -345,10 +362,6 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         }
         if (jugadores.length > 3) {
             pintarJugador(jugadores[3], nombreJugador4, avatarJugador4);
-        }
-
-        if (jugadores.length >= 2) {
-        } else {
         }
     }
 

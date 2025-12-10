@@ -120,8 +120,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
                         mensajeAlerta = "¡CUIDADO! A " + nombreMostrar + " le queda 1 ficha.";
                     } else if (cantidad == 5) {
                         mensajeAlerta = "¡Atención! " + nombreMostrar + " tiene 5 fichas.";
-                    } else if (cantidad == 11) { // <--- NUEVO MENSAJE
-                        mensajeAlerta = "¡Información! " + nombreMostrar + " bajó a 11 fichas.";
+                    } else if (cantidad == 20) { // <--- NUEVO MENSAJE
+                        mensajeAlerta = "¡Información! " + nombreMostrar + " subio a 20 fichas. JAJA";
                     }
 
                     // Notificar a la vista (Usamos el constructor de chat que recibe String)
