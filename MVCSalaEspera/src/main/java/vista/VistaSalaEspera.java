@@ -46,13 +46,13 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         avatarJugador3 = new javax.swing.JLabel();
         avatarJugador4 = new javax.swing.JLabel();
         avatarJugador1 = new javax.swing.JLabel();
-        fondoNombre4 = new javax.swing.JPanel();
+        fondoNombre4 = new PanelRedondo(20);
         nombreJugador4 = new javax.swing.JLabel();
-        fondoNombre3 = new javax.swing.JPanel();
+        fondoNombre3 = new PanelRedondo(20);
         nombreJugador3 = new javax.swing.JLabel();
-        fondoNombre2 = new javax.swing.JPanel();
+        fondoNombre2 = new PanelRedondo(20);
         nombreJugador2 = new javax.swing.JLabel();
-        fondoNombre1 = new javax.swing.JPanel();
+        fondoNombre1 = new PanelRedondo(20);
         nombreJugador1 = new javax.swing.JLabel();
         txtTitulo = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
@@ -63,9 +63,9 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         setSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
-        btnIniciarPartida.setBackground(new java.awt.Color(246, 220, 105));
+        btnIniciarPartida.setBackground(new java.awt.Color(20, 86, 128));
         btnIniciarPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        btnIniciarPartida.setForeground(new java.awt.Color(153, 102, 0));
+        btnIniciarPartida.setForeground(new java.awt.Color(232, 241, 251));
         btnIniciarPartida.setText("Iniciar Partida");
         btnIniciarPartida.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -75,34 +75,34 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         getContentPane().add(btnIniciarPartida);
         btnIniciarPartida.setBounds(320, 370, 290, 70);
 
-        avatarJugador2.setForeground(new java.awt.Color(13, 87, 26));
+        avatarJugador2.setForeground(new java.awt.Color(54, 144, 144));
         avatarJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         avatarJugador2.setText("...");
         getContentPane().add(avatarJugador2);
         avatarJugador2.setBounds(180, 180, 40, 40);
 
-        avatarJugador3.setForeground(new java.awt.Color(13, 87, 26));
+        avatarJugador3.setForeground(new java.awt.Color(54, 144, 144));
         avatarJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         avatarJugador3.setText("...");
         getContentPane().add(avatarJugador3);
         avatarJugador3.setBounds(180, 240, 40, 40);
 
-        avatarJugador4.setForeground(new java.awt.Color(13, 87, 26));
+        avatarJugador4.setForeground(new java.awt.Color(54, 144, 144));
         avatarJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         avatarJugador4.setText("...");
         getContentPane().add(avatarJugador4);
         avatarJugador4.setBounds(180, 310, 40, 40);
 
-        avatarJugador1.setForeground(new java.awt.Color(16, 101, 30));
+        avatarJugador1.setForeground(new java.awt.Color(54, 144, 144));
         avatarJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         avatarJugador1.setText("...");
         getContentPane().add(avatarJugador1);
         avatarJugador1.setBounds(180, 120, 40, 40);
 
-        fondoNombre4.setBackground(new java.awt.Color(237, 218, 218));
+        fondoNombre4.setBackground(new java.awt.Color(198, 219, 243));
 
         nombreJugador4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador4.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador4.setForeground(new java.awt.Color(20, 86, 128));
         nombreJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         nombreJugador4.setText("Esperando jugador 4...");
         fondoNombre4.add(nombreJugador4);
@@ -110,10 +110,10 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         getContentPane().add(fondoNombre4);
         fondoNombre4.setBounds(260, 310, 400, 40);
 
-        fondoNombre3.setBackground(new java.awt.Color(237, 218, 218));
+        fondoNombre3.setBackground(new java.awt.Color(198, 219, 243));
 
         nombreJugador3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador3.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador3.setForeground(new java.awt.Color(20, 86, 128));
         nombreJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         nombreJugador3.setText("Esperando jugador 3...");
         fondoNombre3.add(nombreJugador3);
@@ -121,10 +121,10 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         getContentPane().add(fondoNombre3);
         fondoNombre3.setBounds(260, 240, 400, 40);
 
-        fondoNombre2.setBackground(new java.awt.Color(237, 218, 218));
+        fondoNombre2.setBackground(new java.awt.Color(198, 219, 243));
 
         nombreJugador2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador2.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador2.setForeground(new java.awt.Color(20, 86, 128));
         nombreJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         nombreJugador2.setText("Esperando jugador 2...");
         fondoNombre2.add(nombreJugador2);
@@ -132,10 +132,10 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         getContentPane().add(fondoNombre2);
         fondoNombre2.setBounds(260, 180, 400, 40);
 
-        fondoNombre1.setBackground(new java.awt.Color(237, 218, 218));
+        fondoNombre1.setBackground(new java.awt.Color(198, 219, 243));
 
         nombreJugador1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador1.setForeground(new java.awt.Color(0, 0, 0));
+        nombreJugador1.setForeground(new java.awt.Color(20, 86, 128));
         nombreJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         nombreJugador1.setText("Jugador1");
         fondoNombre1.add(nombreJugador1);
@@ -144,10 +144,10 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         fondoNombre1.setBounds(260, 120, 400, 40);
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(255, 235, 126));
+        txtTitulo.setForeground(new java.awt.Color(232, 241, 251));
         txtTitulo.setText("Sala de espera");
         getContentPane().add(txtTitulo);
-        txtTitulo.setBounds(270, 30, 400, 90);
+        txtTitulo.setBounds(270, 20, 400, 90);
 
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
         fondo.setText("jLabel1");
