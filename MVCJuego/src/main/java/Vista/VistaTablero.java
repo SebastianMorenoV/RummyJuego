@@ -31,6 +31,8 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
 /**
@@ -45,6 +47,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private TableroUI tableroUI;
     private ManoUI manoUI;
     private MazoUI mazoUI;
+    private boolean yaSeRepartio = false;
 
     private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
 
@@ -87,7 +90,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         });
         GUIjuego.add(btnSalirJuego);
-        btnSalirJuego.setBounds(10, 230, 120, 23);
+        btnSalirJuego.setBounds(10, 230, 120, 24);
 
         btnTerminarPartida.setText("Terminar partida");
         btnTerminarPartida.addActionListener(new java.awt.event.ActionListener() {
@@ -96,7 +99,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         });
         GUIjuego.add(btnTerminarPartida);
-        btnTerminarPartida.setBounds(10, 270, 120, 23);
+        btnTerminarPartida.setBounds(10, 270, 120, 24);
 
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -130,7 +133,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.add(btnOrdenarPorGrupos);
         btnOrdenarPorGrupos.setBounds(820, 240, 50, 30);
 
-        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.jpg"))); // NOI18N
+        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoR.png"))); // NOI18N
         fondo.setText("jLabel1");
         GUIjuego.add(fondo);
         fondo.setBounds(0, 0, 900, 500);
@@ -184,7 +187,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 "Terminar Partida", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-//            control.solicitarTerminarPartida();
+          control.solicitarTerminarPartida();
         }
     }//GEN-LAST:event_btnTerminarPartidaActionPerformed
 
@@ -210,7 +213,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     public void actualiza(IModelo modelo, ActualizacionDTO dto) {
 
         if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
+            if (this.yaSeRepartio) {
+                return;
+            }
+            this.yaSeRepartio = true;
             iniciarComponentesDeJuego(modelo, dto);
+            animarReparticionInicial(dto.getManoDelJugador());
             habilitarControles(dto.esMiTurno());
             return;
         }
@@ -299,25 +307,45 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                         "Fin del Juego",
                         JOptionPane.WARNING_MESSAGE);
                 break;
-//                case RESULTADOS_VOTACION:
-//                String tabla = modelo.getTablero().getMensaje();
-//                JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
-//                
-//                this.dispose();
-//                control.salirAlLobby();
-//                break;
-//
-//            case SOLICITUD_VOTO_TERMINAR:
-//                String solicitante = modelo.getTablero().getMensaje();
-//                int resp = JOptionPane.showConfirmDialog(this, 
-//                        "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
-//                        "Votación", JOptionPane.YES_NO_OPTION);
-//                control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
-//                break;
-//                
-//            case VOTACION_FALLIDA:
-//                JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
-//                break;
+
+            case NUEVO_MENSAJE_CHAT:
+                // El DTO debe traer quién envió el mensaje y qué dijo.
+                // Supongamos que dto.getMensaje() trae "NombreJugador:MensajeTexto"
+                String payload = dto.getMensaje(); // "Pepe:Hola a todos"
+                if (payload != null && payload.contains(":")) {
+                    String[] partes = payload.split(":", 2);
+                    String nombreEmisor = partes[0];
+                    String textoMensaje = partes[1];
+
+                    GestorSonidos.reproducir(GestorSonidos.SONIDO_EFECTO);
+                    // Buscar el JugadorUI correspondiente y mostrar la burbuja
+                    for (JugadorUI jUI : listaJugadoresUI) {
+                        if (jUI.getNombre().equals(nombreEmisor)) {
+                            jUI.mostrarMensaje(textoMensaje);
+                            break;
+                        }
+                    }
+                }
+                break;
+                case RESULTADOS_VOTACION:
+                String tabla = modelo.getTablero().getMensaje();
+                JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
+                
+                this.dispose();
+                control.salirAlLobby();
+                break;
+
+            case SOLICITUD_VOTO_TERMINAR:
+                String solicitante = modelo.getTablero().getMensaje();
+                int resp = JOptionPane.showConfirmDialog(this, 
+                        "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
+                        "Votación", JOptionPane.YES_NO_OPTION);
+                control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
+                break;
+                
+            case VOTACION_FALLIDA:
+                JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
+                break;
         }
 
         btnOrdenarMayorAMenor.addMouseListener(
@@ -354,8 +382,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         for (JugadorUI p : listaJugadoresUI) {
             GUIjuego.remove(p);
         }
-
-        // 2. AHORA SÍ: Limpiamos la lista y refrescamos el panel para borrar "fantasmas"
         listaJugadoresUI.clear();
         GUIjuego.repaint();
 
@@ -363,38 +389,43 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             return;
         }
 
-        // Posiciones fijas para 2, 3 o 4 jugadores
-        Point[] posiciones = {
-            new Point(-10, 380), // Izquierda abajo
-            new Point(-10, -10), // Izquierda arriba
-            new Point(780, -10), // Derecha arriba
-            new Point(780, 380) // Derecha abajo
-        };
+        // ... (definicion de Point[] posiciones) ...
+        Point[] posiciones = {new Point(-10, 380), new Point(-10, -10), new Point(780, -10), new Point(780, 380)};
 
         int indexPos = 0;
 
+        // OBTENEMOS MI NOMBRE DEL CONTROLADOR PARA DEPURAR
+        String miNombreLocal = control.getNombreJugadorLocal();
+        System.out.println("[VISTA DEBUG] Soy: " + miNombreLocal);
+
         for (DTO.JugadorDTO dto : jugadoresReales) {
             if (indexPos >= 4) {
-                break; // Protección
+                break;
             }
-            // 1. Obtener imagen real
+
             byte[] avatarBytes = cargarImagenPorIndice(dto.getIdAvatar());
-
-            // 2. Crear UI con datos reales
             JugadorUI panelJugador = new JugadorUI(dto.getNombre(), dto.getFichasRestantes(), avatarBytes);
-
-            // 3. Posicionar
             panelJugador.setSize(130, 130);
             panelJugador.setLocation(posiciones[indexPos]);
 
-            // 4. Agregar a la ventana y a la lista local para poder borrarlo luego
+            // --- CORRECCION DE IDENTIFICACION ---
+            // Imprimimos qué estamos comparando para ver por qué falla
+            System.out.println("   -> Comparando DTO(" + dto.getNombre() + ") vs LOCAL(" + miNombreLocal + ")");
+
+            // INTENTO DE MATCH: Comparamos directamente Strings
+            boolean esYo = dto.getNombre().equals(miNombreLocal);
+
+            // Si falla y miNombreLocal parece un ID (empieza con Jugador_), tal vez el DTO tiene un campo ID que no estamos viendo,
+            // pero por ahora confiaremos en el nombre.
+            panelJugador.setEsMiJugador(esYo, e -> {
+                String mensaje = e.getActionCommand();
+                control.enviarMensajeChat(mensaje);
+            });
+
             GUIjuego.add(panelJugador);
             listaJugadoresUI.add(panelJugador);
-
             indexPos++;
         }
-
-        // Refrescar la interfaz final
         GUIjuego.revalidate();
         GUIjuego.repaint();
     }
@@ -423,9 +454,12 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @param modelo el modelo de donde se sacan los datos para crearse.
      */
     private void iniciarComponentesDeJuego(IModelo modelo, ActualizacionDTO dto) {
+        if (tableroUI != null) {
+            tableroUI.limpiarTablero();
+        }
         crearTablero(modelo);
         crearManoUI();
-        repintarMano(modelo, dto);
+//        repintarMano(modelo, dto);
         crearMazo(modelo);
 
         // 1. Recuperamos el estado actual del juego desde el modelo
@@ -751,5 +785,105 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      */
     public ManoUI getPanelMano() {
         return this.manoUI;
+    }
+
+    /**
+     * --- ANIMACIÓN DE REPARTO (MODO PRO) --- Crea fichas voladoras desde el
+     * mazo hacia la mano.
+     */
+    private void animarReparticionInicial(List<FichaJuegoDTO> fichasMano) {
+        if (fichasMano == null || fichasMano.isEmpty()) {
+            return;
+        }
+        if (mazoUI == null || manoUI == null) {
+            return;
+        }
+
+        // 1. Limpiar mano visualmente
+        manoUI.removeAll();
+        manoUI.revalidate();
+        manoUI.repaint();
+        //GestorSonidos.reproducir(GestorSonidos.SONIDO_BARAJACARTAS);
+        // 2. Coordenada global del MAZO (Origen)
+        // Usamos SwingUtilities para convertir la posicion del mazo al LayeredPane (capa de encima)
+        Point mazoPos = SwingUtilities.convertPoint(mazoUI, 0, 0, getLayeredPane());
+
+        // 3. Timer para soltar cartas una por una (efecto "metralleta")
+        // Delay de 100ms entre carta y carta
+        Timer dealTimer = new Timer(200, null);
+        final int[] index = {0};
+
+        dealTimer.addActionListener(e -> {
+            if (index[0] >= fichasMano.size()) {
+                dealTimer.stop();
+                // Al finalizar todo, nos aseguramos que la mano esté perfecta
+                manoUI.revalidate();
+                manoUI.repaint();
+                return;
+            }
+
+            FichaJuegoDTO dto = fichasMano.get(index[0]);
+
+            // Calculamos dónde va a caer esta ficha en la ManoUI (Destino)
+            Point destinoLocal = manoUI.calcularPosicionIndice(index[0]);
+            // Convertimos ese destino local a coordenadas globales del LayeredPane
+            Point destinoGlobal = SwingUtilities.convertPoint(manoUI, destinoLocal, getLayeredPane());
+
+            // Lanzamos la ficha voladora
+            lanzarFichaVoladora(dto, mazoPos, destinoGlobal);
+
+            index[0]++;
+        });
+        dealTimer.start();
+    }
+
+    /**
+     * Crea una ficha temporal en el aire y la mueve hacia el destino.
+     */
+    private void lanzarFichaVoladora(FichaJuegoDTO dto, Point start, Point end) {
+        // Crear Ficha visual
+        FichaUI fichaVoladora = new FichaUI(dto.getIdFicha(), dto.getNumeroFicha(), dto.getColor(), dto.isComodin(), control, this);
+        fichaVoladora.setSize(28, 45); // Tamaño standar
+        fichaVoladora.setLocation(start);
+
+        // Agregar al LayeredPane en capa DRAG (muy arriba)
+        getLayeredPane().add(fichaVoladora, javax.swing.JLayeredPane.DRAG_LAYER);
+        getLayeredPane().repaint(); // Forzar pintado inmediato
+
+        // Sonido de reparto "swish"
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
+        // Timer de Animación (Interpolación)
+        // Se mueve cada 10ms, tarda 400ms en llegar
+        final long startTime = System.currentTimeMillis();
+        final int duration = 400;
+
+        Timer animTimer = new Timer(10, null);
+        animTimer.addActionListener(e -> {
+            long now = System.currentTimeMillis();
+            float progress = (float) (now - startTime) / duration;
+
+            if (progress >= 1.0f) {
+                // FIN DEL VIAJE
+                animTimer.stop();
+                getLayeredPane().remove(fichaVoladora); // Borrar la voladora
+                getLayeredPane().repaint();
+
+                // AGREGAR LA REAL a la mano
+                // Creamos una nueva instancia para la mano (o reusamos, pero mejor nueva limpia)
+                FichaUI fichaFinal = new FichaUI(dto.getIdFicha(), dto.getNumeroFicha(), dto.getColor(), dto.isComodin(), control, this);
+                fichaFinal.setOrigen(FichaUI.Origen.MANO);
+                manoUI.agregarFicha(fichaFinal); // Se añade y ManoUI la acomoda
+            } else {
+                // Easing (suavizado de movimiento)
+                // Usamos una función cúbica para que frene al llegar
+                double ease = 1 - Math.pow(1 - progress, 3);
+
+                int newX = (int) (start.x + (end.x - start.x) * ease);
+                int newY = (int) (start.y + (end.y - start.y) * ease);
+                fichaVoladora.setLocation(newX, newY);
+            }
+        });
+        animTimer.start();
     }
 }

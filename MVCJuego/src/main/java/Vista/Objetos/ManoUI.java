@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
@@ -16,7 +17,7 @@ import javax.swing.JPanel;
  */
 public class ManoUI extends JPanel {
 
-    private List<FichaUI> fichas; 
+    private List<FichaUI> fichas;
 
     private static final int MARGEN_IZQUIERDO = 20;
     private static final int FICHAS_POR_FILA = 14;
@@ -73,6 +74,19 @@ public class ManoUI extends JPanel {
     }
 
     /**
+     * --- NUEVO METODO PRO --- Calcula dónde debería ir una ficha según su
+     * índice (0, 1, 2...). Esto permite a la VistaTablero saber el "destino" de
+     * la animación.
+     */
+    public Point calcularPosicionIndice(int i) {
+        int fila = i / FICHAS_POR_FILA;
+        int columna = i % FICHAS_POR_FILA;
+        int x = MARGEN_IZQUIERDO + (columna * SEPARACION_HORIZONTAL);
+        int y = MARGEN_VERTICAL + (fila * ALTURA_FILA);
+        return new Point(x, y);
+    }
+
+    /**
      * Este metodo le dice al JScrollPane qué tan grande debe ser el panel. El
      * ancho es fijo, pero el alto crece a medida que se añaden filas.
      */
@@ -94,7 +108,7 @@ public class ManoUI extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(new Color(156, 113, 17));
+        g.setColor(new Color(21,56,96));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
     }
 
@@ -123,6 +137,7 @@ public class ManoUI extends JPanel {
 
     /**
      * Metodo para contar la cantidad de fichas dentro de la mano del jugador
+     *
      * @return cantidad de fichas en la mano
      */
     public int getCantidadFichas() {

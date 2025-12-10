@@ -15,12 +15,22 @@ public class ActualizacionDTO {
     private final TipoEvento tipoEvento;
     private final boolean esMiTurno;
     private final List<FichaJuegoDTO> manoDelJugador;
+    private String mensaje;
 
     public ActualizacionDTO(TipoEvento tipoEvento, boolean esMiTurno,
             List<FichaJuegoDTO> manoDelJugador) {
         this.tipoEvento = tipoEvento;
         this.esMiTurno = esMiTurno;
         this.manoDelJugador = manoDelJugador;
+        this.mensaje = null;
+    }
+
+    public ActualizacionDTO(TipoEvento tipoEvento, String mensaje) {
+        this.tipoEvento = tipoEvento;
+        this.mensaje = mensaje;
+        // Valores por defecto para lo demás
+        this.esMiTurno = false;
+        this.manoDelJugador = null;
     }
 
     /**
@@ -48,5 +58,14 @@ public class ActualizacionDTO {
      */
     public List<FichaJuegoDTO> getManoDelJugador() {
         return manoDelJugador;
+    }
+
+    /**
+     * Obtiene el mensaje de chat o notificación asociado al evento.
+     *
+     * @return String con el mensaje (ej: "Juan: Hola a todos")
+     */
+    public String getMensaje() {
+        return mensaje;
     }
 }

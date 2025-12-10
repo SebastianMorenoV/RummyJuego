@@ -22,6 +22,10 @@ public interface iControlEjercerTurno {
      * LISTA ENTERA de DTOs a un solo String. 3 Le dice al Ensamblador que envíe
      * ESE ÚNICO String.
      */
+    void enviarMensajeChat(String mensaje);
+
+    String getNombreJugadorLocal();
+
     void mockGanarPartida();
 
     public void colocarFicha(List<GrupoDTO> grupos);
@@ -47,7 +51,7 @@ public interface iControlEjercerTurno {
     void solicitarTerminarPartida();
 
     void enviarVotoTerminar(boolean aceptaTerminar);
-    
+
     void salirAlLobby();
 
 }

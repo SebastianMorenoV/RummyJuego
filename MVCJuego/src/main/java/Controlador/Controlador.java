@@ -28,13 +28,15 @@ public class Controlador implements iControlEjercerTurno {
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
     }
-     @Override
+
+    @Override
     public void solicitarTerminarPartida() {
         modelo.solicitarTerminarPartida();
     }
+
     @Override
     public void salirAlLobby() {
-        
+
         if (controlPantallaPrincipal != null) {
             System.out.println("[Controlador] Regresando al Lobby Principal...");
             controlPantallaPrincipal.pantallaInicial();
@@ -42,10 +44,12 @@ public class Controlador implements iControlEjercerTurno {
             System.err.println("[Controlador] Error: No hay referencia a PantallaPrincipal");
         }
     }
+
     @Override
     public void enviarVotoTerminar(boolean aceptaTerminar) {
         modelo.enviarVotoTerminar(aceptaTerminar);
-    }   
+    }
+
     /**
      * Metodo que le habla al modelo para iniciar el juego.
      */
@@ -103,6 +107,16 @@ public class Controlador implements iControlEjercerTurno {
     @Override
     public void setControlSalaEspera(iControlSalaEspera ControlSalaEspera) {
         this.controlSalaDeEspera = ControlSalaEspera;
+    }
+
+    @Override
+    public void enviarMensajeChat(String mensaje) {
+        modelo.enviarMensajeChat(mensaje);
+    }
+
+    @Override
+    public String getNombreJugadorLocal() {
+        return modelo.getMiNickname(); // Asumiendo que el modelo tiene esto
     }
 
     @Override

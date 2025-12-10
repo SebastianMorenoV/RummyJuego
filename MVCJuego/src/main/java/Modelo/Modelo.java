@@ -188,9 +188,18 @@ public class Modelo implements IModelo, PropertyChangeListener {
                         
 
                         JugadorDTO miPerfil = this.perfilesJugadores.get(this.miId);
-                        if (miPerfil != null && miPerfil.getColores() != null) {
-                            this.misColores = miPerfil.getColores();
-                            this.coloresCargados = true;
+
+                        if (miPerfil != null) {
+                            if (miPerfil.getColores() != null) {
+                                this.misColores = miPerfil.getColores();
+                                this.coloresCargados = true;
+                            }
+                            // 1. ACTUALIZAR EL NICKNAME REAL
+                            if (miPerfil.getNombre() != null) {
+                                this.miNickname = miPerfil.getNombre();
+                                System.out.println("[Modelo Fix] Nickname actualizado correctamente a: " + this.miNickname);
+                            }
+
                         }
                     }
                     
@@ -380,6 +389,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 break;
             default:
                 System.out.println("[Modelo MVC] Evento PropertyChange desconocido: " + evento);
+        }
+    }
+
+    private void notificarObservadoresChat(String payload) {
+        for (Observador observer : this.observadores) {
+            ActualizacionDTO dto = new ActualizacionDTO(TipoEvento.NUEVO_MENSAJE_CHAT, payload);
+            observer.actualiza(this, dto);
         }
     }
 
@@ -863,7 +879,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
         List<Grupo> gruposDelJuego = juego.getGruposEnTablero();
 
         if (this.gruposDeTurnoDTO != null && !this.gruposDeTurnoDTO.isEmpty()) {
-            // Si estamos en medio de un turno, usamos los DTOs locales para mantener la UI fluida
             for (GrupoDTO dtoGrupo : this.gruposDeTurnoDTO) {
                 if (dtoGrupo.getFichasGrupo() == null || dtoGrupo.getFichasGrupo().isEmpty()) {
                     continue;
@@ -1161,6 +1176,27 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    public void enviarMensajeChat(String mensaje) {
+        if (this.miNickname.equals("Cargando...")) {
+            System.err.println("No se puede enviar chat: Nickname no cargado.");
+            return;
+        }
+        // Protocolo sugerido: ID:CHAT:Mensaje
+        // Pero como el servidor es Blackboard, tal vez solo retransmita todo lo que no entienda
+        // O necesitamos un comando específico.
+        // Vamos a usar un formato simple que el servidor retransmita a todos:
+        // MI_ID:CHAT:NOMBRE_EMISOR:MENSAJE
+        // Asi el Blackboard lo manda a todos y el cliente lo procesa.
+
+        try {
+            String comando = this.miId + ":CHAT:" + this.miNickname + ":" + mensaje;
+            System.out.println("[Modelo] Enviando chat: " + comando);
+            this.despachador.enviar(ipServidor, puertoServidor, comando);
+        } catch (IOException ex) {
+            System.err.println("Error enviando chat: " + ex.getMessage());
+        }
+    }
+
     /**
      * Envía comando al servidor para iniciar partida.
      *
@@ -1214,6 +1250,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     public int getPuertoCliente() {
         return puertoCliente;
+    }
+
+    public String getMiId() {
+        return miId;
+    }
+
+    public String getMiNickname() {
+        return miNickname;
     }
 
 }
