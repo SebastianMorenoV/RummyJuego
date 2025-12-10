@@ -67,6 +67,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private void initComponents() {
 
         GUIjuego = new javax.swing.JPanel();
+        btnSalirJuego = new javax.swing.JButton();
+        btnTerminarPartida = new javax.swing.JButton();
         btnFinalizarTurno = new javax.swing.JLabel();
         btnOrdenarMayorAMenor = new javax.swing.JLabel();
         btnOrdenarPorGrupos = new javax.swing.JLabel();
@@ -77,10 +79,28 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         GUIjuego.setBackground(new java.awt.Color(0, 0, 0));
         GUIjuego.setLayout(null);
 
+        btnSalirJuego.setText("salir del juego");
+        btnSalirJuego.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirJuegoActionPerformed(evt);
+            }
+        });
+        GUIjuego.add(btnSalirJuego);
+        btnSalirJuego.setBounds(10, 230, 120, 23);
+
+        btnTerminarPartida.setText("Terminar partida");
+        btnTerminarPartida.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTerminarPartidaActionPerformed(evt);
+            }
+        });
+        GUIjuego.add(btnTerminarPartida);
+        btnTerminarPartida.setBounds(10, 270, 120, 23);
+
         btnFinalizarTurno.setForeground(new java.awt.Color(255, 51, 51));
         btnFinalizarTurno.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnFinalizarTurno.setIcon(new javax.swing.ImageIcon(getClass().getResource("/finalizarTurno.png"))); // NOI18N
-        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnFinalizarTurno.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnFinalizarTurno.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnFinalizarTurnoMouseClicked(evt);
@@ -90,7 +110,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnFinalizarTurno.setBounds(800, 320, 90, 50);
 
         btnOrdenarMayorAMenor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button.png"))); // NOI18N
-        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOrdenarMayorAMenor.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnOrdenarMayorAMenor.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOrdenarMayorAMenorMouseClicked(evt);
@@ -100,7 +120,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         btnOrdenarMayorAMenor.setBounds(820, 280, 50, 30);
 
         btnOrdenarPorGrupos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/button (1).png"))); // NOI18N
-        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOrdenarPorGrupos.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         btnOrdenarPorGrupos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOrdenarPorGruposMouseClicked(evt);
@@ -151,12 +171,28 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
 
+    private void btnSalirJuegoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirJuegoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnSalirJuegoActionPerformed
+
+    private void btnTerminarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTerminarPartidaActionPerformed
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Quieres proponer terminar la partida a votación?",
+                "Terminar Partida", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            control.solicitarTerminarPartida();
+        }
+    }//GEN-LAST:event_btnTerminarPartidaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel GUIjuego;
     private javax.swing.JLabel btnFinalizarTurno;
     private javax.swing.JLabel btnOrdenarMayorAMenor;
     private javax.swing.JLabel btnOrdenarPorGrupos;
+    private javax.swing.JButton btnSalirJuego;
+    private javax.swing.JButton btnTerminarPartida;
     private javax.swing.JLabel fondo;
     // End of variables declaration//GEN-END:variables
 
@@ -197,7 +233,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     JOptionPane.showMessageDialog(this, "Esperando al oponente.. ", "Esperando..", JOptionPane.INFORMATION_MESSAGE);
                 }
                 break;
-
+                
             case REPINTAR_MANO:
                 repintarMano(modelo, dto);
                 break;
@@ -256,6 +292,25 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                         "El juego ha terminado.\nOtro jugador se ha quedado sin fichas.",
                         "Fin del Juego",
                         JOptionPane.WARNING_MESSAGE);
+                break;
+                case RESULTADOS_VOTACION:
+                String tabla = modelo.getTablero().getMensaje();
+                JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
+                
+                this.dispose();
+                control.salirAlLobby();
+                break;
+
+            case SOLICITUD_VOTO_TERMINAR:
+                String solicitante = modelo.getTablero().getMensaje();
+                int resp = JOptionPane.showConfirmDialog(this, 
+                        "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
+                        "Votación", JOptionPane.YES_NO_OPTION);
+                control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
+                break;
+                
+            case VOTACION_FALLIDA:
+                JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
                 break;
         }
 
