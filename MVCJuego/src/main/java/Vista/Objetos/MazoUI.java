@@ -2,6 +2,7 @@ package Vista.Objetos;
 
 
 import Controlador.Controlador;
+import GestorDeSonidos.GestorSonidos;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,8 +48,10 @@ public class MazoUI extends JPanel implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         if (!isEnabled()) {
+            GestorSonidos.reproducir(GestorSonidos.SONIDO_ERROR);
             return;
         }
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_TOMAR);
         control.pasarTurno();
         java.awt.Window ventanaPadre = javax.swing.SwingUtilities.getWindowAncestor(this);
         JOptionPane.showMessageDialog(ventanaPadre,

@@ -1,6 +1,7 @@
 package Vista.Objetos;
 
 import DTO.GrupoDTO;
+import GestorDeSonidos.GestorSonidos;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlEjercerTurno;
 import java.awt.Color;
@@ -75,6 +76,8 @@ public class FichaUI extends JPanel {
                 if (getParent() != null && !getParent().isEnabled()) {
                     return;
                 }
+                GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
                 setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
@@ -159,6 +162,7 @@ public class FichaUI extends JPanel {
                     boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, dropPoint);
 
                     if (colocada) {
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
                         origen = Origen.TABLERO;
 
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
@@ -175,11 +179,12 @@ public class FichaUI extends JPanel {
                         if (fichasValidadas.containsValue(FichaUI.this)) {
                             devolverFichaAlOrigen();
                         } else {
+                            GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
                             control.regresarFichaAMano(FichaUI.this.idFicha);
                         }
 
                     } else {
-
+                        
                         devolverFichaAlOrigen();
                     }
 
@@ -201,6 +206,7 @@ public class FichaUI extends JPanel {
              * estaba colocada.
              */
             private void devolverFichaAlOrigen() {
+                GestorSonidos.reproducir(GestorSonidos.SONIDO_ERROR);
                 setLocation(originalLocation);
                 originalParent.add(FichaUI.this);
                 originalParent.revalidate();

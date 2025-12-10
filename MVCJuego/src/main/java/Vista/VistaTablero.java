@@ -3,6 +3,7 @@ package Vista;
 import DTO.FichaJuegoDTO;
 import DTO.JugadorDTO;
 import Dtos.ActualizacionDTO;
+import GestorDeSonidos.GestorSonidos;
 import Modelo.IModelo;
 import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;
@@ -159,16 +160,18 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnFinalizarTurnoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnFinalizarTurnoMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
         control.terminarTurno();
         //control.mockGanarPartida();
     }//GEN-LAST:event_btnFinalizarTurnoMouseClicked
 
     private void btnOrdenarPorGruposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarPorGruposMouseClicked
-        // TODO add your handling code here:
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
     }//GEN-LAST:event_btnOrdenarPorGruposMouseClicked
 
     private void btnOrdenarMayorAMenorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOrdenarMayorAMenorMouseClicked
-        // TODO add your handling code here:
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
+
     }//GEN-LAST:event_btnOrdenarMayorAMenorMouseClicked
 
     private void btnSalirJuegoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirJuegoActionPerformed
@@ -181,7 +184,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 "Terminar Partida", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            control.solicitarTerminarPartida();
+//            control.solicitarTerminarPartida();
         }
     }//GEN-LAST:event_btnTerminarPartidaActionPerformed
 
@@ -226,6 +229,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 break;
             case CAMBIO_DE_TURNO:
                 if (dto.esMiTurno()) {
+                    GestorSonidos.reproducir(GestorSonidos.SONIDO_CAMBIOTURNO);
                     setTitle("Rummy - ¡Es tu turno!");
                     JOptionPane.showMessageDialog(this, "¡Ahora es tu turno! ", "Estas en turno", JOptionPane.INFORMATION_MESSAGE);
                 } else {
@@ -233,7 +237,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                     JOptionPane.showMessageDialog(this, "Esperando al oponente.. ", "Esperando..", JOptionPane.INFORMATION_MESSAGE);
                 }
                 break;
-                
+
             case REPINTAR_MANO:
                 repintarMano(modelo, dto);
                 break;
@@ -253,6 +257,8 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case JUGADA_INVALIDA_REVERTIR:
                 if (tableroUI != null) {
                     tableroUI.revertirCambiosVisuales();
+                    GestorSonidos.reproducir(GestorSonidos.SONIDO_ERROR);
+
                     JOptionPane.showMessageDialog(this,
                             "Movimiento inválido: El tablero no cumple las reglas.\nSe ha revertido la jugada.",
                             "Jugada Inválida",
@@ -293,25 +299,25 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                         "Fin del Juego",
                         JOptionPane.WARNING_MESSAGE);
                 break;
-                case RESULTADOS_VOTACION:
-                String tabla = modelo.getTablero().getMensaje();
-                JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
-                
-                this.dispose();
-                control.salirAlLobby();
-                break;
-
-            case SOLICITUD_VOTO_TERMINAR:
-                String solicitante = modelo.getTablero().getMensaje();
-                int resp = JOptionPane.showConfirmDialog(this, 
-                        "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
-                        "Votación", JOptionPane.YES_NO_OPTION);
-                control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
-                break;
-                
-            case VOTACION_FALLIDA:
-                JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
-                break;
+//                case RESULTADOS_VOTACION:
+//                String tabla = modelo.getTablero().getMensaje();
+//                JOptionPane.showMessageDialog(this, tabla, "Resultados de la Partida", JOptionPane.INFORMATION_MESSAGE);
+//                
+//                this.dispose();
+//                control.salirAlLobby();
+//                break;
+//
+//            case SOLICITUD_VOTO_TERMINAR:
+//                String solicitante = modelo.getTablero().getMensaje();
+//                int resp = JOptionPane.showConfirmDialog(this, 
+//                        "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
+//                        "Votación", JOptionPane.YES_NO_OPTION);
+//                control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
+//                break;
+//                
+//            case VOTACION_FALLIDA:
+//                JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
+//                break;
         }
 
         btnOrdenarMayorAMenor.addMouseListener(
