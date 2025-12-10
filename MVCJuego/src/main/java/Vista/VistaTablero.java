@@ -57,6 +57,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private PanelInfoUI panelInfo; // <--- Nuevo atributo
     private javax.swing.JLabel lblBannerAlerta; // Nuevo Label
     private Timer timerAlerta; // Timer para ocultarlo
+    private List<FichaJuegoDTO> manoCache;
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -74,6 +75,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         configurarHovers();
         initBannerAlerta();
+        configurarListenersOrdenamiento();
     }
 
     private void initBannerAlerta() {
@@ -139,8 +141,60 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         agregarEfectoHover(btnTerminarPartida, panelRound1);
     }
 
+    private void configurarListenersOrdenamiento() {
+        btnOrdenarMayorAMenor.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                repintarManoOrdenadaPorNumero();
+            }
+        });
+
+        btnOrdenarPorGrupos.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                repintarManoOrdenadaPorGrupos();
+            }
+        });
+    }
+
     private void agregarEfectoHover(JComponent componente) {
         agregarEfectoHover(componente, componente);
+    }
+
+    private void repintarManoOrdenadaPorNumero() {
+        if (manoUI == null || this.manoCache == null) {
+            return;
+        }
+        manoUI.removeAll();
+
+        // Usamos la lista cacheada
+        List<FichaJuegoDTO> fichasMano = this.manoCache;
+
+        fichasMano.sort(Comparator.comparing((FichaJuegoDTO f) -> f.getColor().toString())
+                .thenComparingInt(FichaJuegoDTO::getNumeroFicha));
+        validacionesDeManoUI(fichasMano);
+
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
+    }
+
+    /**
+     * Metodo que repinta la mano del jugador en la interfaz con un orden de
+     * "Grupos". CORREGIDO: Usa la manoCache en lugar del DTO que puede venir
+     * nulo
+     */
+    private void repintarManoOrdenadaPorGrupos() {
+        if (manoUI == null || this.manoCache == null) {
+            return;
+        }
+        manoUI.removeAll();
+
+        // Usamos la lista cacheada
+        List<FichaJuegoDTO> fichasMano = this.manoCache;
+
+        fichasMano.sort(Comparator.comparingInt(FichaJuegoDTO::getNumeroFicha));
+        validacionesDeManoUI(fichasMano);
+
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
     }
 
     /**
@@ -353,6 +407,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     @Override
     public void actualiza(IModelo modelo, ActualizacionDTO dto) {
 
+        if (dto.getManoDelJugador() != null && !dto.getManoDelJugador().isEmpty()) {
+            this.manoCache = dto.getManoDelJugador();
+        }
         if (dto.getTipoEvento() == TipoEvento.INCIALIZAR_FICHAS) {
 
             this.yaSeRepartio = false;
@@ -543,26 +600,6 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 JOptionPane.showMessageDialog(this, "Alguien votó que NO. ¡Seguimos!");
                 break;
         }
-
-        btnOrdenarMayorAMenor.addMouseListener(
-                new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent event
-            ) {
-                repintarManoOrdenadaPorNumero(modelo, dto);
-            }
-        }
-        );
-
-        btnOrdenarPorGrupos.addMouseListener(
-                new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent event
-            ) {
-                repintarManoOrdenadaPorGrupos(modelo, dto);
-            }
-        }
-        );
 
     }
 
