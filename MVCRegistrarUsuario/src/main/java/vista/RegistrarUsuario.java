@@ -7,16 +7,21 @@ package vista;
 import TipoEventos.EventoRegistro;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.iNavegacion;
+import gestorPadre.GestorSonidos;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 /**
  *
@@ -39,6 +44,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private Color colorSet3;
     private Color colorSet4;
 
+    private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
     /**
      * Creates new form RegistrarUsuario
      *
@@ -53,6 +59,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         initComponents();
         initEvents();
         initCarousel();
+        configurarHovers(); // <--- AQUI SE LLAMA AL NUEVO METODO
         resetearVista();
         configurarIconoVentana();
     }
@@ -83,6 +90,85 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                     currentAvatarIndex = 1;
                 }
                 updateAvatarDisplay();
+            }
+        });
+    }
+
+    /**
+     * Configura qué componentes tendrán la animación de zoom/borde.
+     */
+    private void configurarHovers() {
+        // 1. Botón Registrar (Texto activa al Panel de fondo)
+        agregarEfectoHover(btnRegistrar, panelRound2);
+
+        // 2. Botón de Pintura (Se anima solo)
+        agregarEfectoHover(btnColor);
+
+        // 3. Flechas del carrusel (Se animan solas)
+        agregarEfectoHover(flechaCarruselIzquierda);
+        agregarEfectoHover(flechaCarruselDerecha);
+    }
+
+    /**
+     * Sobrecarga para elementos simples que se animan a sí mismos.
+     */
+    private void agregarEfectoHover(JComponent componente) {
+        agregarEfectoHover(componente, componente);
+    }
+
+    /**
+     * Crea un MouseAdapter que maneja el Zoom y el Borde al mismo tiempo.
+     *
+     * @param trigger El componente que recibe el mouse (ej. el JLabel con
+     * texto/icono).
+     * @param target El componente que se transforma (ej. el Panel de fondo).
+     */
+    private void agregarEfectoHover(JComponent trigger, JComponent target) {
+        trigger.addMouseListener(new MouseAdapter() {
+            private Rectangle boundsOriginales; // Para recordar dónde estaba
+            private Border bordeOriginal;       // Para recordar si tenía borde antes
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!trigger.isEnabled() || !trigger.isVisible()) {
+                    return;
+                }
+
+                // 1. Guardar estado original (solo la primera vez que entra para evitar bugs)
+                if (boundsOriginales == null) {
+                    boundsOriginales = target.getBounds();
+                    bordeOriginal = target.getBorder();
+                }
+
+                // 2. EFECTO ZOOM (Crecer desde el centro)
+                int pixelCrecer = 4; // Cuánto crece en total
+                int offset = pixelCrecer / 2; // Cuánto se mueve para centrar
+
+                target.setBounds(
+                        boundsOriginales.x - offset,
+                        boundsOriginales.y - offset,
+                        boundsOriginales.width + pixelCrecer,
+                        boundsOriginales.height + pixelCrecer
+                );
+
+                // 3. EFECTO BORDE DORADO
+                // Le ponemos el borde amarillo brillante
+                target.setBorder(BORDE_HOVER);
+
+                // 4. CURSOR DE MANO
+                trigger.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                // Opcional: Sonido muy sutil de "aire" o "tick" al pasar el mouse
+                // GestorSonidos.reproducir("hover.wav"); 
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (boundsOriginales != null) {
+                    // Restaurar todo a la normalidad
+                    target.setBounds(boundsOriginales);
+                    target.setBorder(bordeOriginal); // Quita el borde amarillo
+                }
             }
         });
     }
@@ -180,12 +266,24 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(lblAvatarJ3, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 320, 80, 80));
 
         flechaCarruselIzquierda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/flechaIzquierda.png"))); // NOI18N
+        flechaCarruselIzquierda.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        flechaCarruselIzquierda.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                flechaCarruselIzquierdaMouseClicked(evt);
+            }
+        });
         jPanel1.add(flechaCarruselIzquierda, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, -1, -1));
 
         lblAvatarJ4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel1.add(lblAvatarJ4, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 420, 80, 80));
 
         flechaCarruselDerecha.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/flechaDerecha.png"))); // NOI18N
+        flechaCarruselDerecha.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        flechaCarruselDerecha.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                flechaCarruselDerechaMouseClicked(evt);
+            }
+        });
         jPanel1.add(flechaCarruselDerecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 150, -1, -1));
 
         lblNombreJ2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -285,10 +383,21 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(lblNombreJ4, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 450, 270, 20));
 
         btnColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
+        btnColor.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnColor.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnColorMouseClicked(evt);
+            }
+        });
         jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 350, -1, -1));
 
         txtfldNombre.setBackground(new java.awt.Color(255, 255, 255));
         txtfldNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtfldNombre.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtfldNombreMouseClicked(evt);
+            }
+        });
         txtfldNombre.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtfldNombreActionPerformed(evt);
@@ -311,14 +420,15 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         txtSubtitulo.setText("Selecciona tu avatar:");
         jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 90, -1, -1));
 
-        txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
+        txtTitulo.setFont(new java.awt.Font("Segoe UI", 1, 50)); // NOI18N
         txtTitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtTitulo.setText("Registrar Usuario");
         txtTitulo.setToolTipText("");
         jPanel1.add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 0, 450, 70));
 
-        panelRound2.setBackground(new java.awt.Color(246, 220, 105));
+        panelRound2.setBackground(new java.awt.Color(18, 88, 114));
+        panelRound2.setForeground(new java.awt.Color(255, 255, 255));
         panelRound2.setToolTipText("");
         panelRound2.setRoundBottomLeft(40);
         panelRound2.setRoundBottomRight(40);
@@ -326,9 +436,15 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         panelRound2.setRoundTopRight(40);
 
         btnRegistrar.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        btnRegistrar.setForeground(new java.awt.Color(153, 102, 0));
+        btnRegistrar.setForeground(new java.awt.Color(255, 255, 255));
         btnRegistrar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnRegistrar.setText("Registrarse");
+        btnRegistrar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnRegistrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnRegistrarMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelRound2Layout = new javax.swing.GroupLayout(panelRound2);
         panelRound2.setLayout(panelRound2Layout);
@@ -368,6 +484,29 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private void txtfldNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtfldNombreActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtfldNombreActionPerformed
+
+    private void btnRegistrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnRegistrarMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
+    }//GEN-LAST:event_btnRegistrarMouseClicked
+
+    private void flechaCarruselDerechaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_flechaCarruselDerechaMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
+    }//GEN-LAST:event_flechaCarruselDerechaMouseClicked
+
+    private void flechaCarruselIzquierdaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_flechaCarruselIzquierdaMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
+    }//GEN-LAST:event_flechaCarruselIzquierdaMouseClicked
+
+    private void txtfldNombreMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtfldNombreMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_txtfldNombreMouseClicked
+
+    private void btnColorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnColorMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnColorMouseClicked
 
     private void abrirEleccionColores() {
         EleccionColores ventanaColores = new EleccionColores(this);

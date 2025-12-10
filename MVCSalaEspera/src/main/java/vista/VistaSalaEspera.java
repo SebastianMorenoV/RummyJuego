@@ -10,8 +10,18 @@ import javax.swing.JLabel;
 import modelo.IModeloSalaDeEspera;
 import tipoEventos.EventoSalaEspera;
 import contratos.controladoresMVC.iControlSalaEspera;
+import gestorNuevo.GestorSonidos;
+import instructivopro.InstructivoRummy;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 /**
  *
@@ -20,6 +30,7 @@ import javax.swing.JOptionPane;
 public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSalaDeEspera {
 
     private iControlSalaEspera control;
+    private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
 
     /**
      * Creates new form VistaSalaEspera
@@ -32,6 +43,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         this.setLocationRelativeTo(null);
         initComponents();
         configurarIconoVentana();
+        configurarHovers();
     }
 
     /**
@@ -43,6 +55,8 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        reglasbtn = new vista.PanelRound();
+        jLabel2 = new javax.swing.JLabel();
         panelRound4 = new vista.PanelRound();
         nombreJugador4 = new javax.swing.JLabel();
         panelRound3 = new vista.PanelRound();
@@ -65,6 +79,27 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         setResizable(false);
         setSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
+
+        reglasbtn.setBackground(new java.awt.Color(18, 88, 114));
+        reglasbtn.setRoundBottomLeft(50);
+        reglasbtn.setRoundBottomRight(50);
+        reglasbtn.setRoundTopLeft(50);
+        reglasbtn.setRoundTopRight(50);
+        reglasbtn.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("?");
+        jLabel2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel2MouseClicked(evt);
+            }
+        });
+        reglasbtn.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(5, 5, 40, 40));
+
+        getContentPane().add(reglasbtn);
+        reglasbtn.setBounds(830, 400, 50, 50);
 
         panelRound4.setBackground(new java.awt.Color(0, 102, 102));
         panelRound4.setRoundBottomLeft(40);
@@ -140,6 +175,11 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Iniciar partida");
+        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel1MouseClicked(evt);
+            }
+        });
         btnIniciarPartida.add(jLabel1);
 
         getContentPane().add(btnIniciarPartida);
@@ -169,7 +209,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         txtTitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtTitulo.setText("Sala de espera");
         getContentPane().add(txtTitulo);
-        txtTitulo.setBounds(260, 30, 400, 90);
+        txtTitulo.setBounds(260, 20, 400, 90);
 
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoR.png"))); // NOI18N
         fondo.setText("jLabel1");
@@ -181,10 +221,100 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
     private void btnIniciarPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarPartidaMouseClicked
         if (control != null) {
+            GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
             control.solicitarInicioPartida();
             JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
             btnIniciarPartida.setEnabled(false);
         }    }//GEN-LAST:event_btnIniciarPartidaMouseClicked
+
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        if (control != null) {
+            control.solicitarInicioPartida();
+            JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
+            btnIniciarPartida.setEnabled(false);
+        }
+
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+        new InstructivoRummy().setVisible(true);
+    }//GEN-LAST:event_jLabel2MouseClicked
+    /**
+     * Configura qué componentes tendrán la animación de zoom/borde.
+     */
+    private void configurarHovers() {
+        // 1. Botón Registrar (Texto activa al Panel de fondo)
+        agregarEfectoHover(jLabel1, btnIniciarPartida);
+        agregarEfectoHover(jLabel2, reglasbtn);
+
+    }
+
+    /**
+     * Sobrecarga para elementos simples que se animan a sí mismos.
+     */
+    private void agregarEfectoHover(JComponent componente) {
+        agregarEfectoHover(componente, componente);
+    }
+
+    /**
+     * Crea un MouseAdapter que maneja el Zoom y el Borde al mismo tiempo.
+     *
+     * @param trigger El componente que recibe el mouse (ej. el JLabel con
+     * texto/icono).
+     * @param target El componente que se transforma (ej. el Panel de fondo).
+     */
+    private void agregarEfectoHover(JComponent trigger, JComponent target) {
+        trigger.addMouseListener(new MouseAdapter() {
+            private Rectangle boundsOriginales; // Para recordar dónde estaba
+            private Border bordeOriginal;       // Para recordar si tenía borde antes
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!trigger.isEnabled() || !trigger.isVisible()) {
+                    return;
+                }
+
+                // 1. Guardar estado original (solo la primera vez que entra para evitar bugs)
+                if (boundsOriginales == null) {
+                    boundsOriginales = target.getBounds();
+                    bordeOriginal = target.getBorder();
+                }
+
+                // 2. EFECTO ZOOM (Crecer desde el centro)
+                int pixelCrecer = 4; // Cuánto crece en total
+                int offset = pixelCrecer / 2; // Cuánto se mueve para centrar
+
+                target.setBounds(
+                        boundsOriginales.x - offset,
+                        boundsOriginales.y - offset,
+                        boundsOriginales.width + pixelCrecer,
+                        boundsOriginales.height + pixelCrecer
+                );
+
+                // 3. EFECTO BORDE DORADO
+                // Le ponemos el borde amarillo brillante
+                target.setBorder(BORDE_HOVER);
+
+                // 4. CURSOR DE MANO
+                trigger.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                // Opcional: Sonido muy sutil de "aire" o "tick" al pasar el mouse
+                // GestorSonidos.reproducir("hover.wav"); 
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (boundsOriginales != null) {
+                    // Restaurar todo a la normalidad
+                    target.setBounds(boundsOriginales);
+                    target.setBorder(bordeOriginal); // Quita el borde amarillo
+                }
+            }
+        });
+    }
 
     /**
      * Recibe la cadena "sucia" del servidor y actualiza la UI.
@@ -194,6 +324,8 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     public void actualizarJugadores(String data) {
         System.out.println("[VistaSalaEspera] Datos recibidos: " + data);
         resetearVista();
+
+        GestorSonidos.reproducir(GestorSonidos.SONIDO__NUEVO);
 
         if (data == null || data.isEmpty()) {
             return;
@@ -229,6 +361,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     private vista.PanelRound btnIniciarPartida;
     private javax.swing.JLabel fondo;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel nombreJugador1;
     private javax.swing.JLabel nombreJugador2;
     private javax.swing.JLabel nombreJugador3;
@@ -237,6 +370,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     private vista.PanelRound panelRound2;
     private vista.PanelRound panelRound3;
     private vista.PanelRound panelRound4;
+    private vista.PanelRound reglasbtn;
     private javax.swing.JLabel txtTitulo;
     // End of variables declaration//GEN-END:variables
 
@@ -356,6 +490,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
                 break;
         }
     }
+
     private void configurarIconoVentana() {
         try {
             // 1. Intentar cargar la ruta del icono
