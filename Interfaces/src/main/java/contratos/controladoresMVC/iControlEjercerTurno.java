@@ -44,4 +44,10 @@ public interface iControlEjercerTurno {
 
     void setControlSalaEspera(iControlSalaEspera controlSalaEspera);
 
+    void solicitarTerminarPartida();
+
+    void enviarVotoTerminar(boolean aceptaTerminar);
+    
+    void salirAlLobby();
+
 }

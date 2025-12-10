@@ -59,6 +59,37 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
             idAfectado = partes[1];
         }
         switch (eventoPuro) {
+            case "SOLICITAR_PUNTOS_A_TODOS":
+                // Alguien ganó (idAfectado). Pedimos puntaje a los DEMÁS.
+                String idGanador = idAfectado;
+                List<String> jugadores2 = pizarra.getOrdenDeTurnos();
+                
+                for (String id : jugadores2) {
+                    if (!id.equals(idGanador)) {
+                        // Enviamos petición para que calculen su mano
+                        enviarMensajeDirecto(id, "PETICION_PUNTAJE_FINAL");
+                    }
+                }
+                break;
+
+            case "PARTIDA_FINALIZADA":
+                // idAfectado contiene la tabla de posiciones completa
+                enviarATodos("JUEGO_TERMINADO_CON_TABLA:" + idAfectado);
+                break;
+
+            case "SOLICITUD_TERMINAR_ACTIVA":
+                String solicitante2 = idAfectado;
+                List<String> todos = pizarra.getOrdenDeTurnos();
+                for (String id : todos) {
+                    if (!id.equals(solicitante2)) {
+                        enviarMensajeDirecto(id, "PETICION_VOTO_TERMINAR:" + solicitante2);
+                    }
+                }
+                break;
+
+            case "VOTACION_TERMINAR_FALLIDA":
+                enviarATodos("VOTACION_FALLIDA");
+                break;
             case "INICIO_PARTIDA_RECHAZADO":
                 enviarATodos("INICIO_PARTIDA_RECHAZADA");
                 break;
@@ -72,20 +103,7 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                     }
                 }
                 break;
-            case "NOTIFICAR_GANADOR":
-                // 1. Obtener quién ganó (viene en idAfectado)
-                String idGanador = idAfectado;
-                System.out.println("[Controlador] ¡Victoria confirmada para " + idGanador + "! Finalizando partida...");
-
-                // 2. Construir el mensaje de broadcast
-                // Protocolo: JUEGO_TERMINADO:ID_DEL_GANADOR
-                String mensajeFin = "JUEGO_TERMINADO:" + idGanador;
-
-                // 3. Avisar a TODOS los jugadores (incluido el que ganó, para confirmar)
-                enviarATodos(mensajeFin);
-                
-                // Opcional: Aquí podrías reiniciar el servidor o limpiar la sala
-                break;
+            
             case "SOLICITUD_ENTRANTE":
                 String[] datos = pizarra.getCandidatoTemporal();
                 String idCandidato = datos[0];
