@@ -1,6 +1,7 @@
 vista\EleccionColores$2.class
 vista\InstructivoRummy$TileData.class
 modelo\ModeloRegistro.class
+vista\RegistrarUsuario$6.class
 vista\InstructivoRummy$1.class
 TipoEventos\EventoRegistro.class
 vista\RegistrarUsuario$1.class
@@ -21,5 +22,6 @@ vista\EleccionColores$1.class
 vista\EleccionColores$3.class
 vista\RegistrarUsuario$5.class
 vista\InstructivoRummy$TileComponent.class
+vista\PanelRound.class
 vista\EleccionColores$6.class
 vista\RegistrarUsuario$2.class

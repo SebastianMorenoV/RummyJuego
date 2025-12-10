@@ -5,13 +5,14 @@
 package vista;
 
 import TipoEventos.EventoRegistro;
-import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.iNavegacion;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.border.Border;
@@ -23,14 +24,15 @@ import javax.swing.border.Border;
 public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRegistro {
 
     private iControlRegistro control;
-    private iNavegacion navegacion;
 
-    //Valores por defecto del usuario
-    private String avatarSeleccionado = "avatar1";
-    private Color colorSeleccionado = Color.WHITE;
-    private Border bordeSeleccion = BorderFactory.createLineBorder(Color.RED, 3);
-
-    // Colores de los 4 sets
+    // Estado del usuario
+    private String avatarSeleccionado = "1";
+    private int currentAvatarIndex = 1; // Índice para controlar el carrusel (1-4)
+    private final Color DEFAULT_C1 = new Color(185, 29, 29);   // Rojo Intenso
+    private final Color DEFAULT_C2 = new Color(21, 101, 192);  // Azul Fuerte
+    private final Color DEFAULT_C3 = new Color(46, 125, 50);   // Verde Bosque
+    private final Color DEFAULT_C4 = new Color(249, 168, 37);  // Dorado
+    // Colores de los 4 sets (se llenarán al registrar o elegir color)
     private Color colorSet1;
     private Color colorSet2;
     private Color colorSet3;
@@ -43,86 +45,74 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
      */
     public RegistrarUsuario(iControlRegistro control) {
         this.control = control;
-        this.setTitle("RummyKub | Vive la experiencia!");
+        this.setTitle("RummyKub | Registrarse");
         this.setSize(900, 500);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         initComponents();
         initEvents();
-        initAvatarSelection();
-
-        // Avatares al frente
+        initCarousel();
+        resetearVista();
     }
 
-    /**
-     * Evento para el botón "Registrar"
-     */
+    private void initCarousel() {
+        // Mostrar el primer avatar al arrancar
+        updateAvatarDisplay();
+
+        // Lógica para ir "PARA ATRAS"
+        flechaCarruselIzquierda.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                currentAvatarIndex--; // Restamos 1
+                if (currentAvatarIndex < 1) {
+                    currentAvatarIndex = 4; // Si baja de 1, vuelve al último (4)
+                }
+                updateAvatarDisplay();
+            }
+        });
+
+        // Lógica para ir "PARA ADELANTE"
+        flechaCarruselDerecha.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                currentAvatarIndex++; // Sumamos 1
+                if (currentAvatarIndex > 4) {
+                    currentAvatarIndex = 1; // Si pasa de 4, vuelve al primero (1)
+                }
+                updateAvatarDisplay();
+            }
+        });
+    }
+
+    private void updateAvatarDisplay() {
+        // Construye la ruta: /avatares/avatar1.png, /avatares/avatar2.png, etc.
+        String ruta = "/avatares/avatar" + currentAvatarIndex + ".png";
+        colocarImagen(lblImagenesCarrusel, ruta);
+
+        // Actualizamos la variable que se enviará al controlador
+        this.avatarSeleccionado = String.valueOf(currentAvatarIndex);
+    }
+
     private void initEvents() {
         btnRegistrar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 String nombre = txtfldNombre.getText();
                 if (!nombre.trim().isEmpty()) {
-
-                    if (colorSet1 == null) { //color inicial de las fichas?
+                    // Si no se eligieron colores, usar default
+                    if (colorSet1 == null) {
                         colorSet1 = Color.RED;
                         colorSet2 = Color.GREEN;
                         colorSet3 = Color.YELLOW;
                         colorSet4 = Color.BLUE;
                     }
-
-                    control.intentarRegistrar(
-                            nombre,
-                            avatarSeleccionado,
-                            colorSet1, colorSet2, colorSet3, colorSet4
-                    );
-
+                    control.intentarRegistrar(nombre, avatarSeleccionado, colorSet1, colorSet2, colorSet3, colorSet4);
                 } else {
                     JOptionPane.showMessageDialog(null, "Por favor ingresa un nombre.");
                 }
             }
         });
 
-    }
-
-    /**
-     * Lógica para resaltar el avatar seleccionado
-     *
-     */
-    private void initAvatarSelection() {
-        MouseAdapter selector = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                avatar1.setBorder(null);
-                avatar2.setBorder(null);
-                avatar3.setBorder(null);
-                avatar4.setBorder(null);
-
-                //se le asigna un borde al seleccionado y guardamos el nombre
-                JLabel fuente = (JLabel) e.getSource();
-                fuente.setBorder(bordeSeleccion);
-
-                if (fuente == avatar1) {
-                    avatarSeleccionado = "1";
-                } else if (fuente == avatar2) {
-                    avatarSeleccionado = "2";
-                } else if (fuente == avatar3) {
-                    avatarSeleccionado = "3";
-                } else if (fuente == avatar4) {
-                    avatarSeleccionado = "4";
-                }
-            }
-        };
-
-        avatar1.addMouseListener(selector);
-        avatar2.addMouseListener(selector);
-        avatar3.addMouseListener(selector);
-        avatar4.addMouseListener(selector);
-
-        // El primer icono se escoge por defecto
-        avatar1.setBorder(bordeSeleccion);
-
-        // Listener para el Color
         btnColor.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -131,6 +121,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         });
     }
 
+    /**
+     * Lógica para resaltar el avatar seleccionado
+     *
+     */
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -141,51 +135,158 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        panel = new javax.swing.JPanel();
-        btnRegistrar = new javax.swing.JLabel();
+        lblNombreJ1 = new javax.swing.JLabel();
+        lblAvatarJ2 = new javax.swing.JLabel();
+        lblAvatarJ3 = new javax.swing.JLabel();
+        flechaCarruselIzquierda = new javax.swing.JLabel();
+        lblAvatarJ4 = new javax.swing.JLabel();
+        flechaCarruselDerecha = new javax.swing.JLabel();
+        lblNombreJ2 = new javax.swing.JLabel();
+        color1 = new vista.PanelRound();
+        lblImagenesCarrusel = new javax.swing.JLabel();
+        color3 = new vista.PanelRound();
+        color2 = new vista.PanelRound();
+        color4 = new vista.PanelRound();
+        jLabel1 = new javax.swing.JLabel();
+        lblAvatarJ1 = new javax.swing.JLabel();
+        lblNombreJ3 = new javax.swing.JLabel();
+        lblNombreJ4 = new javax.swing.JLabel();
         btnColor = new javax.swing.JLabel();
         txtfldNombre = new javax.swing.JTextField();
         txt2 = new javax.swing.JLabel();
         txt1 = new javax.swing.JLabel();
         txtSubtitulo = new javax.swing.JLabel();
-        fondoavatar4 = new javax.swing.JPanel();
-        avatar4 = new javax.swing.JLabel();
-        fondoAvatar3 = new javax.swing.JPanel();
-        avatar3 = new javax.swing.JLabel();
-        fondoAvatar2 = new javax.swing.JPanel();
-        avatar2 = new javax.swing.JLabel();
-        fondoAvatar1 = new javax.swing.JPanel();
-        avatar1 = new javax.swing.JLabel();
         txtTitulo = new javax.swing.JLabel();
+        panelRound2 = new vista.PanelRound();
+        btnRegistrar = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        panel.setBackground(new java.awt.Color(246, 220, 105));
-        panel.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblNombreJ1.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ1.setText("Espacio vacio...");
+        jPanel1.add(lblNombreJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 160, 270, 20));
 
-        btnRegistrar.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        btnRegistrar.setForeground(new java.awt.Color(153, 102, 0));
-        btnRegistrar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        btnRegistrar.setText("Registrarse");
+        lblAvatarJ2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lblAvatarJ2.setText("dasdasd");
+        jPanel1.add(lblAvatarJ2, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 220, 80, 80));
 
-        javax.swing.GroupLayout panelLayout = new javax.swing.GroupLayout(panel);
-        panel.setLayout(panelLayout);
-        panelLayout.setHorizontalGroup(
-            panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnRegistrar, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+        lblAvatarJ3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lblAvatarJ3.setText("asdasd");
+        jPanel1.add(lblAvatarJ3, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 320, 80, 80));
+
+        flechaCarruselIzquierda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/flechaIzquierda.png"))); // NOI18N
+        jPanel1.add(flechaCarruselIzquierda, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, -1, -1));
+
+        lblAvatarJ4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lblAvatarJ4.setText("asdasdad");
+        jPanel1.add(lblAvatarJ4, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 420, 80, 80));
+
+        flechaCarruselDerecha.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/flechaDerecha.png"))); // NOI18N
+        jPanel1.add(flechaCarruselDerecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 150, -1, -1));
+
+        lblNombreJ2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblNombreJ2.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ2.setText("Espacio vacio...");
+        jPanel1.add(lblNombreJ2, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 250, 270, 20));
+
+        color1.setRoundBottomLeft(80);
+        color1.setRoundBottomRight(80);
+        color1.setRoundTopLeft(80);
+        color1.setRoundTopRight(80);
+
+        javax.swing.GroupLayout color1Layout = new javax.swing.GroupLayout(color1);
+        color1.setLayout(color1Layout);
+        color1Layout.setHorizontalGroup(
+            color1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
-        panelLayout.setVerticalGroup(
-            panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnRegistrar, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+        color1Layout.setVerticalGroup(
+            color1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
 
-        jPanel1.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 390, 210, 60));
+        jPanel1.add(color1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 410, 40, 40));
+        jPanel1.add(lblImagenesCarrusel, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 130, 80, 80));
 
-        btnColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/color.png"))); // NOI18N
-        jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 320, -1, -1));
+        color3.setRoundBottomLeft(80);
+        color3.setRoundBottomRight(80);
+        color3.setRoundTopLeft(80);
+        color3.setRoundTopRight(80);
+
+        javax.swing.GroupLayout color3Layout = new javax.swing.GroupLayout(color3);
+        color3.setLayout(color3Layout);
+        color3Layout.setHorizontalGroup(
+            color3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+        color3Layout.setVerticalGroup(
+            color3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(color3, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 410, -1, -1));
+
+        color2.setRoundBottomLeft(80);
+        color2.setRoundBottomRight(80);
+        color2.setRoundTopLeft(80);
+        color2.setRoundTopRight(80);
+
+        javax.swing.GroupLayout color2Layout = new javax.swing.GroupLayout(color2);
+        color2.setLayout(color2Layout);
+        color2Layout.setHorizontalGroup(
+            color2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+        color2Layout.setVerticalGroup(
+            color2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(color2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 410, -1, -1));
+
+        color4.setRoundBottomLeft(80);
+        color4.setRoundBottomRight(80);
+        color4.setRoundTopLeft(80);
+        color4.setRoundTopRight(80);
+
+        javax.swing.GroupLayout color4Layout = new javax.swing.GroupLayout(color4);
+        color4.setLayout(color4Layout);
+        color4Layout.setHorizontalGroup(
+            color4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+        color4Layout.setVerticalGroup(
+            color4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(color4, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 410, -1, -1));
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(246, 220, 105));
+        jLabel1.setText("Jugadores en la sala de espera");
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 90, -1, -1));
+
+        lblAvatarJ1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lblAvatarJ1.setText("asdasdasd");
+        jPanel1.add(lblAvatarJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 80, 80));
+
+        lblNombreJ3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblNombreJ3.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ3.setText("Espacio vacio...");
+        jPanel1.add(lblNombreJ3, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 350, 270, 20));
+
+        lblNombreJ4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        lblNombreJ4.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ4.setText("Espacio vacio...");
+        jPanel1.add(lblNombreJ4, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 450, 270, 20));
+
+        btnColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
+        jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 350, -1, -1));
 
         txtfldNombre.setBackground(new java.awt.Color(255, 255, 255));
         txtfldNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -194,110 +295,58 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 txtfldNombreActionPerformed(evt);
             }
         });
-        jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 270, 410, 40));
+        jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 250, 220, 30));
 
-        txt2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txt2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         txt2.setForeground(new java.awt.Color(255, 255, 255));
-        txt2.setText("Color de fichas:");
-        jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 320, -1, -1));
+        txt2.setText("Selecciona el color de tus fichas");
+        jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 310, -1, -1));
 
         txt1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txt1.setForeground(new java.awt.Color(255, 255, 255));
         txt1.setText("Nombre:");
-        jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 230, -1, -1));
+        jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 250, -1, 30));
 
         txtSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txtSubtitulo.setForeground(new java.awt.Color(255, 255, 255));
-        txtSubtitulo.setText("Seleccionar Avatar:");
-        jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 110, -1, -1));
-
-        fondoavatar4.setBackground(new java.awt.Color(255, 255, 255));
-
-        avatar4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar4.png"))); // NOI18N
-
-        javax.swing.GroupLayout fondoavatar4Layout = new javax.swing.GroupLayout(fondoavatar4);
-        fondoavatar4.setLayout(fondoavatar4Layout);
-        fondoavatar4Layout.setHorizontalGroup(
-            fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(avatar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-        );
-        fondoavatar4Layout.setVerticalGroup(
-            fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(fondoavatar4Layout.createSequentialGroup()
-                .addComponent(avatar4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        jPanel1.add(fondoavatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 150, 70, 70));
-
-        fondoAvatar3.setBackground(new java.awt.Color(255, 255, 255));
-
-        avatar3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar3.png"))); // NOI18N
-
-        javax.swing.GroupLayout fondoAvatar3Layout = new javax.swing.GroupLayout(fondoAvatar3);
-        fondoAvatar3.setLayout(fondoAvatar3Layout);
-        fondoAvatar3Layout.setHorizontalGroup(
-            fondoAvatar3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(avatar3, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-        );
-        fondoAvatar3Layout.setVerticalGroup(
-            fondoAvatar3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar3Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-
-        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 150, 70, 70));
-
-        fondoAvatar2.setBackground(new java.awt.Color(255, 255, 255));
-
-        avatar2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar2.png"))); // NOI18N
-
-        javax.swing.GroupLayout fondoAvatar2Layout = new javax.swing.GroupLayout(fondoAvatar2);
-        fondoAvatar2.setLayout(fondoAvatar2Layout);
-        fondoAvatar2Layout.setHorizontalGroup(
-            fondoAvatar2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(avatar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        fondoAvatar2Layout.setVerticalGroup(
-            fondoAvatar2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar2Layout.createSequentialGroup()
-                .addComponent(avatar2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 150, 70, 70));
-
-        fondoAvatar1.setBackground(new java.awt.Color(255, 255, 255));
-
-        avatar1.setBackground(new java.awt.Color(255, 255, 255));
-        avatar1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/avatares/avatar1.png"))); // NOI18N
-
-        javax.swing.GroupLayout fondoAvatar1Layout = new javax.swing.GroupLayout(fondoAvatar1);
-        fondoAvatar1.setLayout(fondoAvatar1Layout);
-        fondoAvatar1Layout.setHorizontalGroup(
-            fondoAvatar1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-        fondoAvatar1Layout.setVerticalGroup(
-            fondoAvatar1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
-
-        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 150, 70, 70));
+        txtSubtitulo.setForeground(new java.awt.Color(246, 220, 105));
+        txtSubtitulo.setText("Selecciona tu avatar:");
+        jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, -1, -1));
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
         txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
         txtTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtTitulo.setText("Registrar Usuario");
         txtTitulo.setToolTipText("");
-        jPanel1.add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 30, 450, 70));
+        jPanel1.add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 0, 450, 70));
 
-        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.jpg"))); // NOI18N
+        panelRound2.setBackground(new java.awt.Color(246, 220, 105));
+        panelRound2.setToolTipText("");
+        panelRound2.setRoundBottomLeft(40);
+        panelRound2.setRoundBottomRight(40);
+        panelRound2.setRoundTopLeft(40);
+        panelRound2.setRoundTopRight(40);
+
+        btnRegistrar.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        btnRegistrar.setForeground(new java.awt.Color(153, 102, 0));
+        btnRegistrar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnRegistrar.setText("Registrarse");
+
+        javax.swing.GroupLayout panelRound2Layout = new javax.swing.GroupLayout(panelRound2);
+        panelRound2.setLayout(panelRound2Layout);
+        panelRound2Layout.setHorizontalGroup(
+            panelRound2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnRegistrar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+        );
+        panelRound2Layout.setVerticalGroup(
+            panelRound2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelRound2Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(btnRegistrar, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        jPanel1.add(panelRound2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 480, 240, 60));
+
+        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.png"))); // NOI18N
         fondo.setText("jLabel1");
         jPanel1.add(fondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 920, 570));
 
@@ -326,24 +375,116 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         ventanaColores.setVisible(true);
     }
 
-    public void setNavegacion(iNavegacion navegacion) {
-        this.navegacion = navegacion;
+    /**
+     * Actualiza la lista lateral de jugadores conectados
+     */
+    public void actualizarListaJugadores(String data) {
+        // 1. Limpiar primero
+        limpiarJugador(lblNombreJ1, lblAvatarJ1);
+        limpiarJugador(lblNombreJ2, lblAvatarJ2);
+        limpiarJugador(lblNombreJ3, lblAvatarJ3);
+        limpiarJugador(lblNombreJ4, lblAvatarJ4);
+
+        if (data == null || data.isEmpty()) {
+            return;
+        }
+
+        String[] jugadores = data.split(";");
+
+        // 2. Pintar según cuántos lleguen
+        if (jugadores.length > 0) {
+            pintarJugadorEnLista(jugadores[0], lblNombreJ1, lblAvatarJ1);
+        }
+        if (jugadores.length > 1) {
+            pintarJugadorEnLista(jugadores[1], lblNombreJ2, lblAvatarJ2);
+        }
+        if (jugadores.length > 2) {
+            pintarJugadorEnLista(jugadores[2], lblNombreJ3, lblAvatarJ3);
+        }
+        if (jugadores.length > 3) {
+            pintarJugadorEnLista(jugadores[3], lblNombreJ4, lblAvatarJ4);
+        }
     }
 
+    private void limpiarJugador(JLabel lblNombre, JLabel lblAvatar) {
+        lblNombre.setText("Espacio disponible");
+        lblAvatar.setIcon(null);
+    }
+
+    private void pintarJugadorEnLista(String rawData, JLabel lblNombre, JLabel lblAvatar) {
+        try {
+            // Formato esperado: ID,Nombre$Avatar$Color...
+            String[] primeraSeparacion = rawData.split(",");
+            if (primeraSeparacion.length > 1) {
+                String payload = primeraSeparacion[1];
+                String[] datosUsuario = payload.split("\\$");
+
+                String nombre = datosUsuario[0];
+                String idAvatar = (datosUsuario.length > 1) ? datosUsuario[1] : "1";
+
+                lblNombre.setText(nombre);
+                colocarImagen(lblAvatar, "/avatares/avatar" + idAvatar + ".png");
+            }
+        } catch (Exception e) {
+            System.err.println("Error pintando jugador: " + e.getMessage());
+        }
+    }
+
+    public void resetearVista() {
+        // 1. Limpiar campo de nombre
+        if (txtfldNombre != null) {
+            txtfldNombre.setText("");
+        }
+
+        // 2. Resetear Avatar al primero
+        currentAvatarIndex = 1;
+        updateAvatarDisplay();
+
+        // 3. ¡IMPORTANTE! Resetear Colores a los DEFAULT oscuros
+        // Esto asegura que coincidan con lo que muestra el "paint" al abrirse
+        actualizarColoresUsuario(DEFAULT_C1, DEFAULT_C2, DEFAULT_C3, DEFAULT_C4);
+
+        // 4. Limpiar lista visual de jugadores (opcional)
+        actualizarListaJugadores("");
+    }
+
+    private void colocarImagen(JLabel label, String ruta) {
+        try {
+            java.net.URL imgURL = getClass().getResource(ruta);
+            if (imgURL != null) {
+                ImageIcon icon = new ImageIcon(imgURL);
+                // Escalar imagen al tamaño del label
+                Image img = icon.getImage().getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
+                label.setIcon(new ImageIcon(img));
+            } else {
+                System.err.println("No se encontró imagen: " + ruta);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel avatar1;
-    private javax.swing.JLabel avatar2;
-    private javax.swing.JLabel avatar3;
-    private javax.swing.JLabel avatar4;
     private javax.swing.JLabel btnColor;
     private javax.swing.JLabel btnRegistrar;
+    private vista.PanelRound color1;
+    private vista.PanelRound color2;
+    private vista.PanelRound color3;
+    private vista.PanelRound color4;
+    private javax.swing.JLabel flechaCarruselDerecha;
+    private javax.swing.JLabel flechaCarruselIzquierda;
     private javax.swing.JLabel fondo;
-    private javax.swing.JPanel fondoAvatar1;
-    private javax.swing.JPanel fondoAvatar2;
-    private javax.swing.JPanel fondoAvatar3;
-    private javax.swing.JPanel fondoavatar4;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel panel;
+    private javax.swing.JLabel lblAvatarJ1;
+    private javax.swing.JLabel lblAvatarJ2;
+    private javax.swing.JLabel lblAvatarJ3;
+    private javax.swing.JLabel lblAvatarJ4;
+    private javax.swing.JLabel lblImagenesCarrusel;
+    private javax.swing.JLabel lblNombreJ1;
+    private javax.swing.JLabel lblNombreJ2;
+    private javax.swing.JLabel lblNombreJ3;
+    private javax.swing.JLabel lblNombreJ4;
+    private vista.PanelRound panelRound2;
     private javax.swing.JLabel txt1;
     private javax.swing.JLabel txt2;
     private javax.swing.JLabel txtSubtitulo;
@@ -368,8 +509,12 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 break;
 
             case ABRIR_VENTANA:
+                resetearVista();
                 this.setVisible(true);
                 this.toFront();
+                break;
+            case ACTUALIZAR_SALA: // <--- Actualizar vista
+                actualizarListaJugadores(mensaje);
                 break;
         }
     }
@@ -383,16 +528,29 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
      * @param c4
      */
     public void actualizarColoresUsuario(Color c1, Color c2, Color c3, Color c4) {
+        // 1. Guardamos los colores en las variables de estado
         this.colorSet1 = c1;
         this.colorSet2 = c2;
         this.colorSet3 = c3;
         this.colorSet4 = c4;
 
-        this.colorSeleccionado = c1;
+        // 2. Pintamos los 4 círculos (PanelRound) de la interfaz
+        if (color1 != null) {
+            color1.setBackground(c1);
+        }
+        if (color2 != null) {
+            color2.setBackground(c2);
+        }
+        if (color3 != null) {
+            color3.setBackground(c3);
+        }
+        if (color4 != null) {
+            color4.setBackground(c4);
+        }
 
-        btnColor.setOpaque(true);
-        btnColor.setBackground(c1); // podrías hacer algo más fancy luego
-        btnColor.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        // 3. Opcional: Si quieres que los paneles se redibujen inmediatamente
+        // (aunque setBackground suele ser suficiente)
+        this.repaint();
     }
 
     /**

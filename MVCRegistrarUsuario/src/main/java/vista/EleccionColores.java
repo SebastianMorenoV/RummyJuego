@@ -21,10 +21,10 @@ public class EleccionColores extends javax.swing.JFrame {
     private Color colorSeleccionado = null;
 
     // Colores default que no se repiten
-    private final Color COLOR_SET_1 = new Color(255, 102, 102); // Rojo suave
-    private final Color COLOR_SET_2 = new Color(102, 204, 255); // Azul cielo
-    private final Color COLOR_SET_3 = new Color(153, 255, 153); // Verde claro
-    private final Color COLOR_SET_4 = new Color(255, 255, 153); // Amarillo claro
+    private final Color COLOR_SET_1 = new Color(185, 29, 29);   // Rojo Intenso
+    private final Color COLOR_SET_2 = new Color(21, 101, 192);  // Azul Fuerte
+    private final Color COLOR_SET_3 = new Color(46, 125, 50);   // Verde Bosque
+    private final Color COLOR_SET_4 = new Color(249, 168, 37);  // Amarillo/Dorado Oscuro
 
     /**
      * Creates new form EleccionColores
@@ -57,10 +57,10 @@ public class EleccionColores extends javax.swing.JFrame {
         btnSet3 = new javax.swing.JLabel();
         btnSet2 = new javax.swing.JLabel();
         btnSet1 = new javax.swing.JLabel();
-        colorSet4 = new javax.swing.JPanel();
-        colorSet3 = new javax.swing.JPanel();
-        colorSet2 = new javax.swing.JPanel();
-        colorSet1 = new javax.swing.JPanel();
+        Color4 = new vista.PanelRound();
+        Color3 = new vista.PanelRound();
+        Color2 = new vista.PanelRound();
+        Color1 = new vista.PanelRound();
         fondoBtnRegresar = new javax.swing.JPanel();
         btnRegresar = new javax.swing.JLabel();
         fondoBtnConfirmar = new javax.swing.JPanel();
@@ -75,77 +75,89 @@ public class EleccionColores extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        btnSet4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        btnSet4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
         getContentPane().add(btnSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 430, 50, 50));
 
-        btnSet3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        btnSet3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
         getContentPane().add(btnSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 340, 50, 50));
 
-        btnSet2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        btnSet2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
         getContentPane().add(btnSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, 50, 50));
 
-        btnSet1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        btnSet1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
         getContentPane().add(btnSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 160, 50, 50));
 
-        colorSet4.setBackground(new java.awt.Color(255, 255, 255));
+        Color4.setRoundBottomLeft(80);
+        Color4.setRoundBottomRight(80);
+        Color4.setRoundTopLeft(80);
+        Color4.setRoundTopRight(80);
 
-        javax.swing.GroupLayout colorSet4Layout = new javax.swing.GroupLayout(colorSet4);
-        colorSet4.setLayout(colorSet4Layout);
-        colorSet4Layout.setHorizontalGroup(
-            colorSet4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
+        javax.swing.GroupLayout Color4Layout = new javax.swing.GroupLayout(Color4);
+        Color4.setLayout(Color4Layout);
+        Color4Layout.setHorizontalGroup(
+            Color4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
-        colorSet4Layout.setVerticalGroup(
-            colorSet4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
-
-        getContentPane().add(colorSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 430, -1, -1));
-
-        colorSet3.setBackground(new java.awt.Color(255, 255, 255));
-
-        javax.swing.GroupLayout colorSet3Layout = new javax.swing.GroupLayout(colorSet3);
-        colorSet3.setLayout(colorSet3Layout);
-        colorSet3Layout.setHorizontalGroup(
-            colorSet3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
-        colorSet3Layout.setVerticalGroup(
-            colorSet3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
+        Color4Layout.setVerticalGroup(
+            Color4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
 
-        getContentPane().add(colorSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 340, 50, 50));
+        getContentPane().add(Color4, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 430, -1, -1));
 
-        colorSet2.setBackground(new java.awt.Color(255, 255, 255));
+        Color3.setRoundBottomLeft(80);
+        Color3.setRoundBottomRight(80);
+        Color3.setRoundTopLeft(80);
+        Color3.setRoundTopRight(80);
 
-        javax.swing.GroupLayout colorSet2Layout = new javax.swing.GroupLayout(colorSet2);
-        colorSet2.setLayout(colorSet2Layout);
-        colorSet2Layout.setHorizontalGroup(
-            colorSet2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
+        javax.swing.GroupLayout Color3Layout = new javax.swing.GroupLayout(Color3);
+        Color3.setLayout(Color3Layout);
+        Color3Layout.setHorizontalGroup(
+            Color3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
-        colorSet2Layout.setVerticalGroup(
-            colorSet2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
-
-        getContentPane().add(colorSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, 50, 50));
-
-        colorSet1.setBackground(new java.awt.Color(255, 255, 255));
-
-        javax.swing.GroupLayout colorSet1Layout = new javax.swing.GroupLayout(colorSet1);
-        colorSet1.setLayout(colorSet1Layout);
-        colorSet1Layout.setHorizontalGroup(
-            colorSet1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
-        );
-        colorSet1Layout.setVerticalGroup(
-            colorSet1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
+        Color3Layout.setVerticalGroup(
+            Color3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
         );
 
-        getContentPane().add(colorSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 160, 50, 50));
+        getContentPane().add(Color3, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 340, -1, -1));
+
+        Color2.setRoundBottomLeft(80);
+        Color2.setRoundBottomRight(80);
+        Color2.setRoundTopLeft(80);
+        Color2.setRoundTopRight(80);
+
+        javax.swing.GroupLayout Color2Layout = new javax.swing.GroupLayout(Color2);
+        Color2.setLayout(Color2Layout);
+        Color2Layout.setHorizontalGroup(
+            Color2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+        Color2Layout.setVerticalGroup(
+            Color2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(Color2, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 250, -1, -1));
+
+        Color1.setRoundBottomLeft(80);
+        Color1.setRoundBottomRight(80);
+        Color1.setRoundTopLeft(80);
+        Color1.setRoundTopRight(80);
+
+        javax.swing.GroupLayout Color1Layout = new javax.swing.GroupLayout(Color1);
+        Color1.setLayout(Color1Layout);
+        Color1Layout.setHorizontalGroup(
+            Color1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+        Color1Layout.setVerticalGroup(
+            Color1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(Color1, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 160, 40, 40));
 
         fondoBtnRegresar.setBackground(new java.awt.Color(206, 70, 70));
 
@@ -209,11 +221,11 @@ public class EleccionColores extends javax.swing.JFrame {
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
         txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
-        txtTitulo.setText("Elegir Colores");
-        getContentPane().add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 30, -1, -1));
+        txtTitulo.setText("Elige los colores de tus fichas");
+        getContentPane().add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 30, -1, -1));
 
         fondo.setForeground(new java.awt.Color(255, 255, 255));
-        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.jpg"))); // NOI18N
+        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.png"))); // NOI18N
         fondo.setText("jLabel1");
         getContentPane().add(fondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 920, 570));
 
@@ -221,57 +233,57 @@ public class EleccionColores extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void initEstilos() {
-        // Asignar los colores a los paneles visuales
-        colorSet1.setBackground(COLOR_SET_1);
-        colorSet2.setBackground(COLOR_SET_2);
-        colorSet3.setBackground(COLOR_SET_3);
-        colorSet4.setBackground(COLOR_SET_4);
+        Color1.setBackground(COLOR_SET_1);
+        Color2.setBackground(COLOR_SET_2);
+        Color3.setBackground(COLOR_SET_3);
+        Color4.setBackground(COLOR_SET_4);
     }
 
     private void initEventos() {
+        // Eventos para abrir el selector (usando los paneles correctos)
         btnSet1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet1);
+                mostrarMiniSelectorColor(Color1); // <--- Usar Color1
             }
         });
 
         btnSet2.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet2);
+                mostrarMiniSelectorColor(Color2); // <--- Usar Color2
             }
         });
 
         btnSet3.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet3);
+                mostrarMiniSelectorColor(Color3); // <--- Usar Color3
             }
         });
 
         btnSet4.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet4);
+                mostrarMiniSelectorColor(Color4); // <--- Usar Color4
             }
         });
 
+        // LOGICA DE CONFIRMAR (Estaba comentada y con variables incorrectas)
         btnConfirmar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // 1. Obtenemos los colores actuales de los paneles
-                Color c1 = colorSet1.getBackground();
-                Color c2 = colorSet2.getBackground();
-                Color c3 = colorSet3.getBackground();
-                Color c4 = colorSet4.getBackground();
+                // 1. Obtenemos los colores de los paneles (Color1, Color2...)
+                Color c1 = Color1.getBackground();
+                Color c2 = Color2.getBackground();
+                Color c3 = Color3.getBackground();
+                Color c4 = Color4.getBackground();
 
-                // 2. Despues verificamos todas las combinaciones posibles de duplicados (cada set debe tener si o si un color distinto)
+                // 2. Verificamos duplicados
                 if (c1.equals(c2) || c1.equals(c3) || c1.equals(c4)
                         || c2.equals(c3) || c2.equals(c4)
                         || c3.equals(c4)) {
 
-                    // 3. Si se encuentran repetidos, mostramos el mensaje y NO cerramos la ventana (osea, no se puede continuar)
                     JOptionPane.showMessageDialog(EleccionColores.this,
                             "Has seleccionado colores repetidos.\nPor favor, elige un color distinto para cada Set.",
                             "Colores Duplicados",
@@ -279,14 +291,14 @@ public class EleccionColores extends javax.swing.JFrame {
                     return;
                 }
 
-                // 4. Guardamos y salimos
+                // 3. Enviamos los colores a la ventana padre y cerramos
                 vistaPadre.actualizarColoresUsuario(c1, c2, c3, c4);
                 dispose();
                 vistaPadre.setVisible(true);
             }
         });
 
-        // Listener Botón Regresar
+        // Botón Regresar
         btnRegresar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -303,30 +315,42 @@ public class EleccionColores extends javax.swing.JFrame {
      *
      * @param panelDestino
      */
-    private void mostrarMiniSelectorColor(JPanel panelDestino) {
+   private void mostrarMiniSelectorColor(JPanel panelDestino) {
         JPopupMenu popup = new JPopupMenu();
+        // Grid de 2 filas x 6 columnas
         JPanel grid = new JPanel(new java.awt.GridLayout(2, 6, 5, 5));
         grid.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        // Colores disponibles
+        // --- 2. LISTA DE COLORES DEL SELECTOR (PALETA OSCURA) ---
         Color[] colores = {
-            Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW,
-            Color.ORANGE, Color.MAGENTA, Color.CYAN, Color.PINK,
-            Color.GRAY, Color.BLACK, Color.WHITE, new Color(128, 0, 255)
+            new Color(185, 29, 29),   // Rojo Intenso
+            new Color(21, 101, 192),  // Azul Fuerte
+            new Color(46, 125, 50),   // Verde Bosque
+            new Color(249, 168, 37),  // Dorado
+            new Color(230, 81, 0),    // Naranja Oscuro
+            new Color(74, 20, 140),   // Morado/Violeta Oscuro
+            new Color(0, 96, 100),    // Cyan Oscuro (Teal)
+            new Color(136, 14, 79),   // Rosa Mexicano/Fucsia Oscuro
+            new Color(62, 39, 35),    // Café/Marrón
+            new Color(66, 66, 66),    // Gris Oscuro
+            new Color(13, 71, 161),   // Azul Marino Profundo
+            new Color(0, 0, 0)        // Negro
         };
 
         for (Color c : colores) {
             JPanel cuadrito = new JPanel();
             cuadrito.setBackground(c);
-            cuadrito.setPreferredSize(new java.awt.Dimension(25, 25));
+            cuadrito.setPreferredSize(new java.awt.Dimension(30, 30)); // Un poco más grandes
             cuadrito.setBorder(javax.swing.BorderFactory.createLineBorder(Color.DARK_GRAY));
+            
+            // Cursor de mano para que se vea clicable
+            cuadrito.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
             cuadrito.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    panelDestino.setBackground(c); // Actualiza visualmente el panel
-                    popup.setVisible(false);
-
+                    panelDestino.setBackground(c); // Actualiza el panel seleccionado
+                    popup.setVisible(false);       // Cierra el popup
                 }
             });
 
@@ -334,23 +358,22 @@ public class EleccionColores extends javax.swing.JFrame {
         }
 
         popup.add(grid);
-
         // Mostrar popup debajo del panel destino
-        popup.show(panelDestino, panelDestino.getWidth(), 0);
+        popup.show(panelDestino, 0, panelDestino.getHeight());
     }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private vista.PanelRound Color1;
+    private vista.PanelRound Color2;
+    private vista.PanelRound Color3;
+    private vista.PanelRound Color4;
     private javax.swing.JLabel btnConfirmar;
     private javax.swing.JLabel btnRegresar;
     private javax.swing.JLabel btnSet1;
     private javax.swing.JLabel btnSet2;
     private javax.swing.JLabel btnSet3;
     private javax.swing.JLabel btnSet4;
-    private javax.swing.JPanel colorSet1;
-    private javax.swing.JPanel colorSet2;
-    private javax.swing.JPanel colorSet3;
-    private javax.swing.JPanel colorSet4;
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel fondoBtnConfirmar;
     private javax.swing.JPanel fondoBtnRegresar;
