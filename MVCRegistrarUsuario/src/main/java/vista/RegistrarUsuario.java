@@ -45,6 +45,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private Color colorSet4;
 
     private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
+
     /**
      * Creates new form RegistrarUsuario
      *
@@ -174,11 +175,17 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     }
 
     private void updateAvatarDisplay() {
-        // Construye la ruta: /avatares/avatar1.png, /avatares/avatar2.png, etc.
-        String ruta = "/avatares/avatar" + currentAvatarIndex + ".png";
+        String extension = ".png";
+        // Excepciones para los archivos que no son png
+        if (currentAvatarIndex == 7) {
+            extension = ".jpeg";
+        } else if (currentAvatarIndex == 8 || currentAvatarIndex == 9) {
+            extension = ".jpg";
+        }
+
+        String ruta = "/avatares/avatar" + currentAvatarIndex + extension;
         colocarImagen(lblImagenesCarrusel, ruta);
 
-        // Actualizamos la variable que se enviará al controlador
         this.avatarSeleccionado = String.valueOf(currentAvatarIndex);
     }
 
@@ -364,7 +371,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
 
         jPanel1.add(color4, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 410, -1, -1));
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Jugadores en la sala de espera");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 90, -1, -1));
@@ -405,17 +412,17 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         });
         jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 250, 220, 30));
 
-        txt2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         txt2.setForeground(new java.awt.Color(255, 255, 255));
         txt2.setText("Selecciona el color de tus fichas");
         jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 310, -1, -1));
 
-        txt1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txt1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         txt1.setForeground(new java.awt.Color(255, 255, 255));
         txt1.setText("Nombre:");
         jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 250, -1, 30));
 
-        txtSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txtSubtitulo.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         txtSubtitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtSubtitulo.setText("Selecciona tu avatar:");
         jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 90, -1, -1));

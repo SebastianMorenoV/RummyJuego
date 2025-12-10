@@ -4,12 +4,18 @@
  */
 package vista;
 
+import gestorPadre.GestorSonidos;
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 /**
  *
@@ -19,6 +25,8 @@ public class EleccionColores extends javax.swing.JFrame {
 
     private RegistrarUsuario vistaPadre;
     private Color colorSeleccionado = null;
+
+    private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
 
     // Colores default que no se repiten
     private final Color COLOR_SET_1 = new Color(185, 29, 29);   // Rojo Intenso
@@ -36,6 +44,7 @@ public class EleccionColores extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         initComponents();
+        configurarHovers();
         initEstilos();
         initEventos();
     }
@@ -76,15 +85,35 @@ public class EleccionColores extends javax.swing.JFrame {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         btnSet4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
+        btnSet4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnSet4MouseClicked(evt);
+            }
+        });
         getContentPane().add(btnSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 430, 50, 50));
 
         btnSet3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
+        btnSet3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnSet3MouseClicked(evt);
+            }
+        });
         getContentPane().add(btnSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 340, 50, 50));
 
         btnSet2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
+        btnSet2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnSet2MouseClicked(evt);
+            }
+        });
         getContentPane().add(btnSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, 50, 50));
 
         btnSet1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/paint.png"))); // NOI18N
+        btnSet1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnSet1MouseClicked(evt);
+            }
+        });
         getContentPane().add(btnSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 160, 50, 50));
 
         Color4.setRoundBottomLeft(80);
@@ -165,6 +194,11 @@ public class EleccionColores extends javax.swing.JFrame {
         btnRegresar.setForeground(new java.awt.Color(255, 255, 255));
         btnRegresar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnRegresar.setText("Regresar");
+        btnRegresar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnRegresarMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnRegresarLayout = new javax.swing.GroupLayout(fondoBtnRegresar);
         fondoBtnRegresar.setLayout(fondoBtnRegresarLayout);
@@ -185,6 +219,11 @@ public class EleccionColores extends javax.swing.JFrame {
         btnConfirmar.setForeground(new java.awt.Color(204, 102, 0));
         btnConfirmar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnConfirmar.setText("Confirmar");
+        btnConfirmar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnConfirmarMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnConfirmarLayout = new javax.swing.GroupLayout(fondoBtnConfirmar);
         fondoBtnConfirmar.setLayout(fondoBtnConfirmarLayout);
@@ -231,6 +270,111 @@ public class EleccionColores extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnSet1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSet1MouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnSet1MouseClicked
+
+    private void btnRegresarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnRegresarMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnRegresarMouseClicked
+
+    private void btnConfirmarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConfirmarMouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnConfirmarMouseClicked
+
+    private void btnSet2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSet2MouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnSet2MouseClicked
+
+    private void btnSet3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSet3MouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnSet3MouseClicked
+
+    private void btnSet4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSet4MouseClicked
+        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+    }//GEN-LAST:event_btnSet4MouseClicked
+
+    /**
+     * Configura qué componentes tendrán la animación de zoom/borde.
+     */
+    private void configurarHovers() {
+        // 1. Botón Registrar (Texto activa al Panel de fondo)
+
+        agregarEfectoHover(btnRegresar, fondoBtnRegresar);
+        agregarEfectoHover(btnConfirmar, fondoBtnConfirmar);
+
+        // 2. Botón de Pintura (Se anima solo)
+        agregarEfectoHover(btnSet1);
+        agregarEfectoHover(btnSet2);
+        agregarEfectoHover(btnSet3);
+        agregarEfectoHover(btnSet4);
+
+    }
+
+    /**
+     * Sobrecarga para elementos simples que se animan a sí mismos.
+     */
+    private void agregarEfectoHover(JComponent componente) {
+        agregarEfectoHover(componente, componente);
+    }
+
+    /**
+     * Crea un MouseAdapter que maneja el Zoom y el Borde al mismo tiempo.
+     *
+     * @param trigger El componente que recibe el mouse (ej. el JLabel con
+     * texto/icono).
+     * @param target El componente que se transforma (ej. el Panel de fondo).
+     */
+    private void agregarEfectoHover(JComponent trigger, JComponent target) {
+        trigger.addMouseListener(new MouseAdapter() {
+            private Rectangle boundsOriginales; // Para recordar dónde estaba
+            private Border bordeOriginal;       // Para recordar si tenía borde antes
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!trigger.isEnabled() || !trigger.isVisible()) {
+                    return;
+                }
+
+                // 1. Guardar estado original (solo la primera vez que entra para evitar bugs)
+                if (boundsOriginales == null) {
+                    boundsOriginales = target.getBounds();
+                    bordeOriginal = target.getBorder();
+                }
+
+                // 2. EFECTO ZOOM (Crecer desde el centro)
+                int pixelCrecer = 4; // Cuánto crece en total
+                int offset = pixelCrecer / 2; // Cuánto se mueve para centrar
+
+                target.setBounds(
+                        boundsOriginales.x - offset,
+                        boundsOriginales.y - offset,
+                        boundsOriginales.width + pixelCrecer,
+                        boundsOriginales.height + pixelCrecer
+                );
+
+                // 3. EFECTO BORDE DORADO
+                // Le ponemos el borde amarillo brillante
+                target.setBorder(BORDE_HOVER);
+
+                // 4. CURSOR DE MANO
+                trigger.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                // Opcional: Sonido muy sutil de "aire" o "tick" al pasar el mouse
+                // GestorSonidos.reproducir("hover.wav"); 
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (boundsOriginales != null) {
+                    // Restaurar todo a la normalidad
+                    target.setBounds(boundsOriginales);
+                    target.setBorder(bordeOriginal); // Quita el borde amarillo
+                }
+            }
+        });
+    }
 
     private void initEstilos() {
         Color1.setBackground(COLOR_SET_1);
@@ -315,7 +459,7 @@ public class EleccionColores extends javax.swing.JFrame {
      *
      * @param panelDestino
      */
-   private void mostrarMiniSelectorColor(JPanel panelDestino) {
+    private void mostrarMiniSelectorColor(JPanel panelDestino) {
         JPopupMenu popup = new JPopupMenu();
         // Grid de 2 filas x 6 columnas
         JPanel grid = new JPanel(new java.awt.GridLayout(2, 6, 5, 5));
@@ -323,18 +467,18 @@ public class EleccionColores extends javax.swing.JFrame {
 
         // --- 2. LISTA DE COLORES DEL SELECTOR (PALETA OSCURA) ---
         Color[] colores = {
-            new Color(185, 29, 29),   // Rojo Intenso
-            new Color(21, 101, 192),  // Azul Fuerte
-            new Color(46, 125, 50),   // Verde Bosque
-            new Color(249, 168, 37),  // Dorado
-            new Color(230, 81, 0),    // Naranja Oscuro
-            new Color(74, 20, 140),   // Morado/Violeta Oscuro
-            new Color(0, 96, 100),    // Cyan Oscuro (Teal)
-            new Color(136, 14, 79),   // Rosa Mexicano/Fucsia Oscuro
-            new Color(62, 39, 35),    // Café/Marrón
-            new Color(66, 66, 66),    // Gris Oscuro
-            new Color(13, 71, 161),   // Azul Marino Profundo
-            new Color(0, 0, 0)        // Negro
+            new Color(185, 29, 29), // Rojo Intenso
+            new Color(21, 101, 192), // Azul Fuerte
+            new Color(46, 125, 50), // Verde Bosque
+            new Color(249, 168, 37), // Dorado
+            new Color(230, 81, 0), // Naranja Oscuro
+            new Color(74, 20, 140), // Morado/Violeta Oscuro
+            new Color(0, 96, 100), // Cyan Oscuro (Teal)
+            new Color(136, 14, 79), // Rosa Mexicano/Fucsia Oscuro
+            new Color(62, 39, 35), // Café/Marrón
+            new Color(66, 66, 66), // Gris Oscuro
+            new Color(13, 71, 161), // Azul Marino Profundo
+            new Color(0, 0, 0) // Negro
         };
 
         for (Color c : colores) {
@@ -342,13 +486,14 @@ public class EleccionColores extends javax.swing.JFrame {
             cuadrito.setBackground(c);
             cuadrito.setPreferredSize(new java.awt.Dimension(30, 30)); // Un poco más grandes
             cuadrito.setBorder(javax.swing.BorderFactory.createLineBorder(Color.DARK_GRAY));
-            
+
             // Cursor de mano para que se vea clicable
             cuadrito.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
             cuadrito.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
                     panelDestino.setBackground(c); // Actualiza el panel seleccionado
                     popup.setVisible(false);       // Cierra el popup
                 }

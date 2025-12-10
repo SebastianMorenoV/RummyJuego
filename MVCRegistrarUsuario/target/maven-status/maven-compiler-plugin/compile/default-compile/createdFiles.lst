@@ -2,6 +2,9 @@ vista\EleccionColores$2.class
 vista\InstructivoRummy$TileData.class
 vista\RegistrarUsuario$6.class
 TipoEventos\EventoRegistro.class
+vista\EleccionColores$11.class
+vista\EleccionColores$14.class
+vista\EleccionColores$9.class
 vista\RegistrarUsuario$9.class
 vista\EleccionColores$5.class
 vista\RegistrarUsuario$3.class
@@ -23,12 +26,16 @@ vista\RegistrarUsuario$11.class
 vista\RegistrarUsuario$4.class
 Util\SesionUsuario.class
 vista\EleccionColores$4.class
+vista\EleccionColores$12.class
 vista\RegistrarUsuario$8.class
 vista\EleccionColores$7.class
 controlador\ControladorRegistro.class
 vista\InstructivoRummy.class
+vista\EleccionColores$10.class
 vista\InstructivoRummy$2.class
+vista\EleccionColores$8.class
 vista\EleccionColores$1.class
 vista\RegistrarUsuario$10.class
+vista\EleccionColores$13.class
 vista\RegistrarUsuario$7.class
 vista\PanelRound.class
