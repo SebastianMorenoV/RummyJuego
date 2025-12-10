@@ -169,7 +169,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         lblNombreJ1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         lblNombreJ1.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreJ1.setText("Espacio vacio...");
-        jPanel1.add(lblNombreJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 150, 270, 40));
+        jPanel1.add(lblNombreJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 150, 270, 40));
 
         lblAvatarJ2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jPanel1.add(lblAvatarJ2, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 220, 80, 80));
