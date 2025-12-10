@@ -166,10 +166,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblNombreJ1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblNombreJ1.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ1.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblNombreJ1.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreJ1.setText("Espacio vacio...");
-        jPanel1.add(lblNombreJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 160, 270, 20));
+        jPanel1.add(lblNombreJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 150, 270, 40));
 
         lblAvatarJ2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         lblAvatarJ2.setText("dasdasd");
@@ -190,7 +190,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(flechaCarruselDerecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 150, -1, -1));
 
         lblNombreJ2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblNombreJ2.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ2.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreJ2.setText("Espacio vacio...");
         jPanel1.add(lblNombreJ2, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 250, 270, 20));
 
@@ -268,7 +268,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(color4, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 410, -1, -1));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(246, 220, 105));
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Jugadores en la sala de espera");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 90, -1, -1));
 
@@ -277,12 +277,12 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(lblAvatarJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 80, 80));
 
         lblNombreJ3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblNombreJ3.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ3.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreJ3.setText("Espacio vacio...");
         jPanel1.add(lblNombreJ3, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 350, 270, 20));
 
         lblNombreJ4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        lblNombreJ4.setForeground(new java.awt.Color(246, 220, 105));
+        lblNombreJ4.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreJ4.setText("Espacio vacio...");
         jPanel1.add(lblNombreJ4, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 450, 270, 20));
 
@@ -309,12 +309,12 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 250, -1, 30));
 
         txtSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txtSubtitulo.setForeground(new java.awt.Color(246, 220, 105));
+        txtSubtitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtSubtitulo.setText("Selecciona tu avatar:");
-        jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, -1, -1));
+        jPanel1.add(txtSubtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 90, -1, -1));
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
+        txtTitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtTitulo.setText("Registrar Usuario");
         txtTitulo.setToolTipText("");

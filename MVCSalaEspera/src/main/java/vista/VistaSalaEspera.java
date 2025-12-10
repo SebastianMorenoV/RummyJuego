@@ -41,19 +41,20 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnIniciarPartida = new javax.swing.JButton();
+        panelRound4 = new vista.PanelRound();
+        nombreJugador4 = new javax.swing.JLabel();
+        panelRound3 = new vista.PanelRound();
+        nombreJugador3 = new javax.swing.JLabel();
+        panelRound2 = new vista.PanelRound();
+        nombreJugador2 = new javax.swing.JLabel();
+        panelRound1 = new vista.PanelRound();
+        nombreJugador1 = new javax.swing.JLabel();
+        btnIniciarPartida = new vista.PanelRound();
+        jLabel1 = new javax.swing.JLabel();
         avatarJugador2 = new javax.swing.JLabel();
         avatarJugador3 = new javax.swing.JLabel();
         avatarJugador4 = new javax.swing.JLabel();
         avatarJugador1 = new javax.swing.JLabel();
-        fondoNombre4 = new javax.swing.JPanel();
-        nombreJugador4 = new javax.swing.JLabel();
-        fondoNombre3 = new javax.swing.JPanel();
-        nombreJugador3 = new javax.swing.JLabel();
-        fondoNombre2 = new javax.swing.JPanel();
-        nombreJugador2 = new javax.swing.JLabel();
-        fondoNombre1 = new javax.swing.JPanel();
-        nombreJugador1 = new javax.swing.JLabel();
         txtTitulo = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
 
@@ -63,93 +64,112 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         setSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
-        btnIniciarPartida.setBackground(new java.awt.Color(246, 220, 105));
-        btnIniciarPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        btnIniciarPartida.setForeground(new java.awt.Color(153, 102, 0));
-        btnIniciarPartida.setText("Iniciar Partida");
-        btnIniciarPartida.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnIniciarPartidaActionPerformed(evt);
+        panelRound4.setBackground(new java.awt.Color(0, 102, 102));
+        panelRound4.setRoundBottomLeft(40);
+        panelRound4.setRoundBottomRight(40);
+        panelRound4.setRoundTopLeft(40);
+        panelRound4.setRoundTopRight(40);
+
+        nombreJugador4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador4.setForeground(new java.awt.Color(255, 255, 255));
+        nombreJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador4.setText("Espacio disponible");
+        panelRound4.add(nombreJugador4);
+
+        getContentPane().add(panelRound4);
+        panelRound4.setBounds(260, 320, 400, 40);
+
+        panelRound3.setBackground(new java.awt.Color(0, 102, 102));
+        panelRound3.setRoundBottomLeft(40);
+        panelRound3.setRoundBottomRight(40);
+        panelRound3.setRoundTopLeft(40);
+        panelRound3.setRoundTopRight(40);
+
+        nombreJugador3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador3.setForeground(new java.awt.Color(255, 255, 255));
+        nombreJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador3.setText("Espacio disponible");
+        panelRound3.add(nombreJugador3);
+
+        getContentPane().add(panelRound3);
+        panelRound3.setBounds(260, 250, 400, 40);
+
+        panelRound2.setBackground(new java.awt.Color(0, 102, 102));
+        panelRound2.setRoundBottomLeft(40);
+        panelRound2.setRoundBottomRight(40);
+        panelRound2.setRoundTopLeft(40);
+        panelRound2.setRoundTopRight(40);
+
+        nombreJugador2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador2.setForeground(new java.awt.Color(255, 255, 255));
+        nombreJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador2.setText("Espacio disponible");
+        panelRound2.add(nombreJugador2);
+
+        getContentPane().add(panelRound2);
+        panelRound2.setBounds(260, 180, 400, 40);
+
+        panelRound1.setBackground(new java.awt.Color(0, 102, 102));
+        panelRound1.setRoundBottomLeft(40);
+        panelRound1.setRoundBottomRight(40);
+        panelRound1.setRoundTopLeft(40);
+        panelRound1.setRoundTopRight(40);
+
+        nombreJugador1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        nombreJugador1.setForeground(new java.awt.Color(255, 255, 255));
+        nombreJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        nombreJugador1.setText("Espacio disponible");
+        panelRound1.add(nombreJugador1);
+
+        getContentPane().add(panelRound1);
+        panelRound1.setBounds(260, 120, 400, 40);
+
+        btnIniciarPartida.setBackground(new java.awt.Color(0, 51, 51));
+        btnIniciarPartida.setRoundBottomLeft(30);
+        btnIniciarPartida.setRoundBottomRight(30);
+        btnIniciarPartida.setRoundTopLeft(30);
+        btnIniciarPartida.setRoundTopRight(30);
+        btnIniciarPartida.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnIniciarPartidaMouseClicked(evt);
             }
         });
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Iniciar partida");
+        btnIniciarPartida.add(jLabel1);
+
         getContentPane().add(btnIniciarPartida);
-        btnIniciarPartida.setBounds(320, 370, 290, 70);
+        btnIniciarPartida.setBounds(320, 400, 300, 60);
 
         avatarJugador2.setForeground(new java.awt.Color(13, 87, 26));
         avatarJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        avatarJugador2.setText("...");
         getContentPane().add(avatarJugador2);
-        avatarJugador2.setBounds(180, 180, 40, 40);
+        avatarJugador2.setBounds(200, 180, 40, 40);
 
         avatarJugador3.setForeground(new java.awt.Color(13, 87, 26));
         avatarJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        avatarJugador3.setText("...");
         getContentPane().add(avatarJugador3);
-        avatarJugador3.setBounds(180, 240, 40, 40);
+        avatarJugador3.setBounds(200, 250, 40, 40);
 
         avatarJugador4.setForeground(new java.awt.Color(13, 87, 26));
         avatarJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        avatarJugador4.setText("...");
         getContentPane().add(avatarJugador4);
-        avatarJugador4.setBounds(180, 310, 40, 40);
+        avatarJugador4.setBounds(200, 320, 40, 40);
 
         avatarJugador1.setForeground(new java.awt.Color(16, 101, 30));
         avatarJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        avatarJugador1.setText("...");
         getContentPane().add(avatarJugador1);
-        avatarJugador1.setBounds(180, 120, 40, 40);
-
-        fondoNombre4.setBackground(new java.awt.Color(237, 218, 218));
-
-        nombreJugador4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador4.setForeground(new java.awt.Color(0, 0, 0));
-        nombreJugador4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        nombreJugador4.setText("Esperando jugador 4...");
-        fondoNombre4.add(nombreJugador4);
-
-        getContentPane().add(fondoNombre4);
-        fondoNombre4.setBounds(260, 310, 400, 40);
-
-        fondoNombre3.setBackground(new java.awt.Color(237, 218, 218));
-
-        nombreJugador3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador3.setForeground(new java.awt.Color(0, 0, 0));
-        nombreJugador3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        nombreJugador3.setText("Esperando jugador 3...");
-        fondoNombre3.add(nombreJugador3);
-
-        getContentPane().add(fondoNombre3);
-        fondoNombre3.setBounds(260, 240, 400, 40);
-
-        fondoNombre2.setBackground(new java.awt.Color(237, 218, 218));
-
-        nombreJugador2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador2.setForeground(new java.awt.Color(0, 0, 0));
-        nombreJugador2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        nombreJugador2.setText("Esperando jugador 2...");
-        fondoNombre2.add(nombreJugador2);
-
-        getContentPane().add(fondoNombre2);
-        fondoNombre2.setBounds(260, 180, 400, 40);
-
-        fondoNombre1.setBackground(new java.awt.Color(237, 218, 218));
-
-        nombreJugador1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        nombreJugador1.setForeground(new java.awt.Color(0, 0, 0));
-        nombreJugador1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        nombreJugador1.setText("Jugador1");
-        fondoNombre1.add(nombreJugador1);
-
-        getContentPane().add(fondoNombre1);
-        fondoNombre1.setBounds(260, 120, 400, 40);
+        avatarJugador1.setBounds(200, 120, 40, 40);
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(255, 235, 126));
+        txtTitulo.setForeground(new java.awt.Color(255, 255, 255));
         txtTitulo.setText("Sala de espera");
         getContentPane().add(txtTitulo);
-        txtTitulo.setBounds(270, 30, 400, 90);
+        txtTitulo.setBounds(260, 30, 400, 90);
 
-        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoRummy.jpg"))); // NOI18N
+        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fondoR.png"))); // NOI18N
         fondo.setText("jLabel1");
         getContentPane().add(fondo);
         fondo.setBounds(-10, -10, 930, 520);
@@ -157,13 +177,12 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnIniciarPartidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarPartidaActionPerformed
+    private void btnIniciarPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarPartidaMouseClicked
         if (control != null) {
             control.solicitarInicioPartida();
             JOptionPane.showMessageDialog(this, "Se mando correctamente la solicitud para iniciar la partida. Iniciando votacion");
             btnIniciarPartida.setEnabled(false);
-        }
-    }//GEN-LAST:event_btnIniciarPartidaActionPerformed
+        }    }//GEN-LAST:event_btnIniciarPartidaMouseClicked
 
     /**
      * Recibe la cadena "sucia" del servidor y actualiza la UI.
@@ -194,14 +213,8 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
             pintarJugador(jugadores[3], nombreJugador4, avatarJugador4);
         }
 
-        // 2. LOGICA DEL BOTÓN DE INICIO
-        // Solo habilitamos el botón si hay 2 o más jugadores conectados
         if (jugadores.length >= 2) {
-            btnIniciarPartida.setEnabled(true);
-            btnIniciarPartida.setText("¡Estoy Listo!");
         } else {
-            btnIniciarPartida.setEnabled(false);
-            btnIniciarPartida.setText("Esperando jugadores...");
         }
     }
 
@@ -211,16 +224,17 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
     private javax.swing.JLabel avatarJugador2;
     private javax.swing.JLabel avatarJugador3;
     private javax.swing.JLabel avatarJugador4;
-    private javax.swing.JButton btnIniciarPartida;
+    private vista.PanelRound btnIniciarPartida;
     private javax.swing.JLabel fondo;
-    private javax.swing.JPanel fondoNombre1;
-    private javax.swing.JPanel fondoNombre2;
-    private javax.swing.JPanel fondoNombre3;
-    private javax.swing.JPanel fondoNombre4;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel nombreJugador1;
     private javax.swing.JLabel nombreJugador2;
     private javax.swing.JLabel nombreJugador3;
     private javax.swing.JLabel nombreJugador4;
+    private vista.PanelRound panelRound1;
+    private vista.PanelRound panelRound2;
+    private vista.PanelRound panelRound3;
+    private vista.PanelRound panelRound4;
     private javax.swing.JLabel txtTitulo;
     // End of variables declaration//GEN-END:variables
 
