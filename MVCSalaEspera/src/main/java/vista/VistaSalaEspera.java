@@ -400,8 +400,15 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
                 lblNombre.setText(nombre);
 
-                // Si el ID es solo un número "1", le pegamos "avatar" -> "avatar1.png"
-                String nombreArchivo = "avatar" + idAvatar + ".png";
+                // --- CORRECCIÓN AQUÍ ---
+                String extension = ".png"; // Por defecto
+                if (idAvatar.equals("7")) {
+                    extension = ".jpeg";
+                } else if (idAvatar.equals("8") || idAvatar.equals("9")) {
+                    extension = ".jpg";
+                }
+                
+                String nombreArchivo = "avatar" + idAvatar + extension;
                 colocarImagen(lblAvatar, "/avatares/" + nombreArchivo);
             }
         } catch (Exception e) {

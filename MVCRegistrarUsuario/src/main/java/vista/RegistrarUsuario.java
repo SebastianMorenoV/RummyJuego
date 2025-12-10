@@ -564,7 +564,17 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 String idAvatar = (datosUsuario.length > 1) ? datosUsuario[1] : "1";
 
                 lblNombre.setText(nombre);
-                colocarImagen(lblAvatar, "/avatares/avatar" + idAvatar + ".png");
+
+                // --- LÓGICA PARA DETECTAR EXTENSIONES ---
+                String extension = ".png"; // Extensión por defecto (1-6, 10)
+                
+                if (idAvatar.equals("7")) {
+                    extension = ".jpeg";
+                } else if (idAvatar.equals("8") || idAvatar.equals("9")) {
+                    extension = ".jpg";
+                }
+
+                colocarImagen(lblAvatar, "/avatares/avatar" + idAvatar + extension);
             }
         } catch (Exception e) {
             System.err.println("Error pintando jugador: " + e.getMessage());

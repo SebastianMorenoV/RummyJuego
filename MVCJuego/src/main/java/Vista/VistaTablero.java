@@ -673,7 +673,13 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
      * @return
      */
     private byte[] cargarImagenPorIndice(int indice) {
-        String rutaRecurso = "/avatares/avatar" + indice + ".png";
+        String extension = ".png"; 
+        if (indice == 7) {
+            extension = ".jpeg";
+        } else if (indice == 8 || indice == 9) {
+            extension = ".jpg";
+        }
+        String rutaRecurso = "/avatares/avatar" + indice + extension;
         try (java.io.InputStream is = getClass().getResourceAsStream(rutaRecurso)) {
             if (is != null) {
                 return is.readAllBytes();
