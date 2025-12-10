@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -53,9 +54,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         initEvents();
         initCarousel();
         resetearVista();
+        configurarIconoVentana();
     }
 
-   private void initCarousel() {
+    private void initCarousel() {
         updateAvatarDisplay();
 
         // Flecha Izquierda (Atrás)
@@ -65,7 +67,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 currentAvatarIndex--;
                 if (currentAvatarIndex < 1) {
                     // En lugar de un 4 fijo, usa la variable
-                    currentAvatarIndex = TOTAL_AVATARES; 
+                    currentAvatarIndex = TOTAL_AVATARES;
                 }
                 updateAvatarDisplay();
             }
@@ -77,7 +79,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             public void mouseClicked(MouseEvent e) {
                 currentAvatarIndex++;
                 // En lugar de un 4 fijo, usa la variable
-                if (currentAvatarIndex > TOTAL_AVATARES) { 
+                if (currentAvatarIndex > TOTAL_AVATARES) {
                     currentAvatarIndex = 1;
                 }
                 updateAvatarDisplay();
@@ -372,7 +374,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         ventanaColores.setVisible(true);
     }
 
-
     public void actualizarListaJugadores(String data) {
         limpiarJugador(lblNombreJ1, lblAvatarJ1);
         limpiarJugador(lblNombreJ2, lblAvatarJ2);
@@ -535,8 +536,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         this.repaint();
     }
 
-    
-     
     public void mostrarError(String mensaje) {
         javax.swing.JOptionPane.showMessageDialog(this,
                 mensaje,
@@ -544,4 +543,28 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 javax.swing.JOptionPane.ERROR_MESSAGE);
     }
 
+    private void configurarIconoVentana() {
+        try {
+            // 1. Intentar cargar la ruta del icono
+            URL urlIcono = getClass().getResource("/imagenes/iconoJuego.png");
+            if (urlIcono == null) {
+                urlIcono = getClass().getResource("iImagenes/InstructivoIcon.png"); // Fallback
+            }
+
+            if (urlIcono != null) {
+                // 2. Cargar la imagen original
+                ImageIcon imagenOriginal = new ImageIcon(urlIcono);
+
+                // 3. Forzar el redimensionado a un tamaño grande (ej. 256x256 píxeles)
+                //    Usamos SCALE_SMOOTH para que mantenga la calidad al estirarse.
+                Image imagenEscalada = imagenOriginal.getImage()
+                        .getScaledInstance(600, 600, java.awt.Image.SCALE_SMOOTH);
+
+                // 4. Asignar la imagen grande
+                this.setIconImage(imagenEscalada);
+            }
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
+        }
+    }
 }

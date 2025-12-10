@@ -5,9 +5,12 @@ import controlador.ControladorConfig;
 import gestor.GestorSonidos;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.border.Border;
@@ -39,6 +42,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         initComponents();
         listenerSpinner();
         configurarHovers();
+        configurarIconoVentana();
     }
 
     private void configurarHovers() {
@@ -375,5 +379,30 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
                 txtNumComodines2.setText("Comodines: " + numComodines);
             }
         });
+    }
+
+    private void configurarIconoVentana() {
+        try {
+            // 1. Intentar cargar la ruta del icono
+            URL urlIcono = getClass().getResource("/imagenes/iconoJuego.png");
+            if (urlIcono == null) {
+                urlIcono = getClass().getResource("iImagenes/InstructivoIcon.png"); // Fallback
+            }
+
+            if (urlIcono != null) {
+                // 2. Cargar la imagen original
+                ImageIcon imagenOriginal = new ImageIcon(urlIcono);
+
+                // 3. Forzar el redimensionado a un tamaño grande (ej. 256x256 píxeles)
+                //    Usamos SCALE_SMOOTH para que mantenga la calidad al estirarse.
+                Image imagenEscalada = imagenOriginal.getImage()
+                        .getScaledInstance(600, 600, java.awt.Image.SCALE_SMOOTH);
+
+                // 4. Asignar la imagen grande
+                this.setIconImage(imagenEscalada);
+            }
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
+        }
     }
 }

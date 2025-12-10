@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import modelo.IModeloSalaDeEspera;
 import tipoEventos.EventoSalaEspera;
 import contratos.controladoresMVC.iControlSalaEspera;
+import java.net.URL;
 import javax.swing.JOptionPane;
 
 /**
@@ -30,6 +31,7 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         initComponents();
+        configurarIconoVentana();
     }
 
     /**
@@ -352,6 +354,30 @@ public class VistaSalaEspera extends javax.swing.JFrame implements ObservadorSal
 
             default:
                 break;
+        }
+    }
+    private void configurarIconoVentana() {
+        try {
+            // 1. Intentar cargar la ruta del icono
+            URL urlIcono = getClass().getResource("/imagenes/iconoJuego.png");
+            if (urlIcono == null) {
+                urlIcono = getClass().getResource("iImagenes/InstructivoIcon.png"); // Fallback
+            }
+
+            if (urlIcono != null) {
+                // 2. Cargar la imagen original
+                ImageIcon imagenOriginal = new ImageIcon(urlIcono);
+
+                // 3. Forzar el redimensionado a un tamaño grande (ej. 256x256 píxeles)
+                //    Usamos SCALE_SMOOTH para que mantenga la calidad al estirarse.
+                Image imagenEscalada = imagenOriginal.getImage()
+                        .getScaledInstance(600, 600, java.awt.Image.SCALE_SMOOTH);
+
+                // 4. Asignar la imagen grande
+                this.setIconImage(imagenEscalada);
+            }
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
         }
     }
 }

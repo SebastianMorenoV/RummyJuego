@@ -18,15 +18,18 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -76,6 +79,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         configurarHovers();
         initBannerAlerta();
         configurarListenersOrdenamiento();
+        configurarIconoVentana();
     }
 
     private void initBannerAlerta() {
@@ -1136,5 +1140,29 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             }
         });
         animTimer.start();
+    }
+    private void configurarIconoVentana() {
+        try {
+            // 1. Intentar cargar la ruta del icono
+            URL urlIcono = getClass().getResource("/imagenes/iconoJuego.png");
+            if (urlIcono == null) {
+                urlIcono = getClass().getResource("iImagenes/InstructivoIcon.png"); // Fallback
+            }
+
+            if (urlIcono != null) {
+                // 2. Cargar la imagen original
+                ImageIcon imagenOriginal = new ImageIcon(urlIcono);
+
+                // 3. Forzar el redimensionado a un tamaño grande (ej. 256x256 píxeles)
+                //    Usamos SCALE_SMOOTH para que mantenga la calidad al estirarse.
+                Image imagenEscalada = imagenOriginal.getImage()
+                        .getScaledInstance(600, 600, java.awt.Image.SCALE_SMOOTH);
+
+                // 4. Asignar la imagen grande
+                this.setIconImage(imagenEscalada);
+            }
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
+        }
     }
 }
