@@ -26,7 +26,6 @@ public class InstructivoRummy extends JFrame {
     public InstructivoRummy() {
         setUndecorated(true);
         setTitle("¿Como se juega?");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         setSize(520, 340); 
         setLocationRelativeTo(null);
@@ -65,7 +64,7 @@ public class InstructivoRummy extends JFrame {
         btnClose.setPreferredSize(new Dimension(40, 30)); 
         
         btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnClose.addActionListener(e -> System.exit(0));
+        btnClose.addActionListener(e -> this.setVisible(false));
         
         JPanel btnContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnContainer.setOpaque(false);

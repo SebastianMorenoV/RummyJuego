@@ -1,11 +1,10 @@
-package Vista;
+package instructivo; // Asegúrate que sea el mismo paquete que tu VistaLobby
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.RoundRectangle2D;
 
 public class InstructivoRummy extends JFrame {
 
@@ -26,7 +25,10 @@ public class InstructivoRummy extends JFrame {
     public InstructivoRummy() {
         setUndecorated(true);
         setTitle("¿Como se juega?");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        // --- CORRECCIÓN 1: Usar DISPOSE para cerrar solo esta ventana ---
+        // Antes tenías EXIT_ON_CLOSE, que cierra toda la aplicación.
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         setSize(520, 340); 
         setLocationRelativeTo(null);
@@ -59,13 +61,16 @@ public class InstructivoRummy extends JFrame {
         btnClose.setFont(new Font("SansSerif", Font.BOLD, 16));
         btnClose.setForeground(Color.WHITE);       
         btnClose.setBackground(COLOR_ROJO_BOTON);  
-        btnClose.setFocusPainted(false);           
+        btnClose.setFocusPainted(false);            
         btnClose.setBorderPainted(false);
         btnClose.setMargin(new Insets(0, 0, 0, 0));
         btnClose.setPreferredSize(new Dimension(40, 30)); 
         
         btnClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnClose.addActionListener(e -> System.exit(0));
+        
+        // --- CORRECCIÓN 2: Usar dispose() en el botón X ---
+        // Antes tenías System.exit(0), que mata todo el proceso.
+        btnClose.addActionListener(e -> dispose());
         
         JPanel btnContainer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         btnContainer.setOpaque(false);
@@ -240,6 +245,7 @@ public class InstructivoRummy extends JFrame {
         }
     }
 
+    // Esto solo sirve para probar la ventana sola, no afecta al juego.
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new InstructivoRummy().setVisible(true);
