@@ -24,7 +24,7 @@ import javax.swing.border.Border;
 public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRegistro {
 
     private iControlRegistro control;
-
+    private final int TOTAL_AVATARES = 10;
     // Estado del usuario
     private String avatarSeleccionado = "1";
     private int currentAvatarIndex = 1; // Índice para controlar el carrusel (1-4)
@@ -55,29 +55,30 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         resetearVista();
     }
 
-    private void initCarousel() {
-        // Mostrar el primer avatar al arrancar
+   private void initCarousel() {
         updateAvatarDisplay();
 
-        // Lógica para ir "PARA ATRAS"
+        // Flecha Izquierda (Atrás)
         flechaCarruselIzquierda.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                currentAvatarIndex--; // Restamos 1
+                currentAvatarIndex--;
                 if (currentAvatarIndex < 1) {
-                    currentAvatarIndex = 4; // Si baja de 1, vuelve al último (4)
+                    // En lugar de un 4 fijo, usa la variable
+                    currentAvatarIndex = TOTAL_AVATARES; 
                 }
                 updateAvatarDisplay();
             }
         });
 
-        // Lógica para ir "PARA ADELANTE"
+        // Flecha Derecha (Adelante)
         flechaCarruselDerecha.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                currentAvatarIndex++; // Sumamos 1
-                if (currentAvatarIndex > 4) {
-                    currentAvatarIndex = 1; // Si pasa de 4, vuelve al primero (1)
+                currentAvatarIndex++;
+                // En lugar de un 4 fijo, usa la variable
+                if (currentAvatarIndex > TOTAL_AVATARES) { 
+                    currentAvatarIndex = 1;
                 }
                 updateAvatarDisplay();
             }
@@ -375,11 +376,8 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         ventanaColores.setVisible(true);
     }
 
-    /**
-     * Actualiza la lista lateral de jugadores conectados
-     */
+
     public void actualizarListaJugadores(String data) {
-        // 1. Limpiar primero
         limpiarJugador(lblNombreJ1, lblAvatarJ1);
         limpiarJugador(lblNombreJ2, lblAvatarJ2);
         limpiarJugador(lblNombreJ3, lblAvatarJ3);
@@ -431,21 +429,15 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     }
 
     public void resetearVista() {
-        // 1. Limpiar campo de nombre
         if (txtfldNombre != null) {
             txtfldNombre.setText("");
         }
 
-        // 2. Resetear Avatar al primero
         currentAvatarIndex = 1;
         updateAvatarDisplay();
 
-        // 3. ¡IMPORTANTE! Resetear Colores a los DEFAULT oscuros
-        // Esto asegura que coincidan con lo que muestra el "paint" al abrirse
         actualizarColoresUsuario(DEFAULT_C1, DEFAULT_C2, DEFAULT_C3, DEFAULT_C4);
 
-        // 4. Limpiar lista visual de jugadores (opcional)
-        actualizarListaJugadores("");
     }
 
     private void colocarImagen(JLabel label, String ruta) {
@@ -453,7 +445,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             java.net.URL imgURL = getClass().getResource(ruta);
             if (imgURL != null) {
                 ImageIcon icon = new ImageIcon(imgURL);
-                // Escalar imagen al tamaño del label
                 Image img = icon.getImage().getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
                 label.setIcon(new ImageIcon(img));
             } else {
@@ -497,7 +488,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         switch (evento) {
             case REGISTRO_EXITOSO:
                 System.out.println("[VistaRegistro] Registro exitoso. Cerrando y navegando...");
-                // 1. Cerrar la vista actual
                 this.setVisible(false);
 
                 control.entrarSalaEspera();
@@ -528,13 +518,11 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
      * @param c4
      */
     public void actualizarColoresUsuario(Color c1, Color c2, Color c3, Color c4) {
-        // 1. Guardamos los colores en las variables de estado
         this.colorSet1 = c1;
         this.colorSet2 = c2;
         this.colorSet3 = c3;
         this.colorSet4 = c4;
 
-        // 2. Pintamos los 4 círculos (PanelRound) de la interfaz
         if (color1 != null) {
             color1.setBackground(c1);
         }
@@ -548,15 +536,11 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             color4.setBackground(c4);
         }
 
-        // 3. Opcional: Si quieres que los paneles se redibujen inmediatamente
-        // (aunque setBackground suele ser suficiente)
         this.repaint();
     }
 
-    /**
-     * Muestra un mensaje de error al usuario. Llamado por el controlador cuando
-     * el servidor devuelve un error (ej. Nombre repetido).
-     */
+    
+     
     public void mostrarError(String mensaje) {
         javax.swing.JOptionPane.showMessageDialog(this,
                 mensaje,
