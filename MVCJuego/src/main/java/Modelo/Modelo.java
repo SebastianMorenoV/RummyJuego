@@ -98,6 +98,42 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String payloadd = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         switch (evento) {
+            case "ALERTA_FICHAS":
+                try {
+                    // Payload: "ID_JUGADOR:CANTIDAD"
+                    String[] partes = payloadd.split(":");
+                    String idJugador = partes[0];
+                    int cantidad = Integer.parseInt(partes[1]);
+
+                    String nombreMostrar = idJugador; // Fallback por si acaso
+
+                    if (perfilesJugadores.containsKey(idJugador)) {
+                        JugadorDTO perfil = perfilesJugadores.get(idJugador);
+                        if (perfil != null && perfil.getNombre() != null) {
+                            nombreMostrar = perfil.getNombre(); // <--- LA FORMA CORRECTA
+                        }
+                    }
+
+                    // Crear mensaje amigable
+                    String mensajeAlerta = "";
+                    if (cantidad == 1) {
+                        mensajeAlerta = "¡CUIDADO! A " + nombreMostrar + " le queda 1 ficha.";
+                    } else if (cantidad == 5) {
+                        mensajeAlerta = "¡Atención! " + nombreMostrar + " tiene 5 fichas.";
+                    } else if (cantidad == 11) { // <--- NUEVO MENSAJE
+                        mensajeAlerta = "¡Información! " + nombreMostrar + " bajó a 11 fichas.";
+                    }
+
+                    // Notificar a la vista (Usamos el constructor de chat que recibe String)
+                    ActualizacionDTO dto = new ActualizacionDTO(TipoEvento.MOSTRAR_ALERTA, this.esMiTurno, mensajeAlerta);
+                    for (Observador obs : observadores) {
+                        obs.actualiza(this, dto);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
             case "JUEGO_TERMINADO":
                 String idGanador = payloadd;
                 System.out.println("[Modelo] El juego terminó. Ganador: " + idGanador);
@@ -936,6 +972,20 @@ public class Modelo implements IModelo, PropertyChangeListener {
         dto.setFichasMazo(this.mazoFichasRestantes);
         dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
+        if (nombresJugadores != null && !nombresJugadores.isEmpty()) {
+            int indexActual = nombresJugadores.indexOf(this.idJugadorEnTurnoGlobal);
+            if (indexActual != -1) {
+                // Cálculo circular seguro
+                int indexSiguiente = (indexActual + 1) % nombresJugadores.size();
+                String idSiguiente = nombresJugadores.get(indexSiguiente);
+
+                // Obtener el nombre bonito del perfil si existe, o usar el ID
+                JugadorDTO perfilSig = perfilesJugadores.get(idSiguiente);
+                String nombreMostrar = (perfilSig != null) ? perfilSig.getNombre() : idSiguiente;
+
+                dto.setSiguienteJugador(nombreMostrar);
+            }
+        }
         List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
         List<String> ordenJugadoresUI = new ArrayList<>();
 

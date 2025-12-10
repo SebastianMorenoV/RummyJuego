@@ -72,6 +72,11 @@ public class ControladorBlackboard implements iControladorBlackboard, iObservado
                 }
                 break;
 
+            case "ALERTA_FICHAS":
+                // idAfectado trae "ID_JUGADOR:CANTIDAD"
+                // Enviamos a todos: "ALERTA_FICHAS:ID_JUGADOR:CANTIDAD"
+                enviarATodos("ALERTA_FICHAS:" + idAfectado);
+                break;
             case "NUEVO_MENSAJE_CHAT":
                 // Obtenemos el mensaje limpio (Nombre:Texto) desde la pizarra
                 String msgChat = ((EstadoJuegoPizarra) pizarra).getUltimoMensajeChat();

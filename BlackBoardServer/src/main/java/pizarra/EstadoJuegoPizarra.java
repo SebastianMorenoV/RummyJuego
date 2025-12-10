@@ -515,6 +515,14 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                             setFichasJugador(idCliente, fichasRestantes);
 
                             System.out.println("[Pizarra] " + idCliente + " finalizó con " + fichasRestantes + " fichas.");
+                            // --- NUEVA LÓGICA DE ALERTA ---
+                            if (fichasRestantes == 1) {
+                                notificarObservadores("ALERTA_FICHAS:" + idCliente + ":1");
+                            } else if (fichasRestantes == 5) {
+                                notificarObservadores("ALERTA_FICHAS:" + idCliente + ":5");
+                            } else if (fichasRestantes == 11) { // <--- NUEVA CONDICIÓN
+                                notificarObservadores("ALERTA_FICHAS:" + idCliente + ":11");
+                            }
                         } catch (NumberFormatException e) {
                             System.err.println("[Pizarra] Error al leer número de fichas: " + e.getMessage());
                         }
@@ -819,7 +827,18 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
-            fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
+            int nuevaCantidad = fichasPorJugador.get(id) + 1; // Calculamos la nueva cantidad
+            fichasPorJugador.put(id, nuevaCantidad);
+
+            // --- ALERTAS TAMBIÉN AL SUBIR FICHAS ---
+            if (nuevaCantidad == 1) {
+                notificarObservadores("ALERTA_FICHAS:" + id + ":1");
+            } else if (nuevaCantidad == 5) {
+                notificarObservadores("ALERTA_FICHAS:" + id + ":5");
+            } else if (nuevaCantidad == 11) {
+                notificarObservadores("ALERTA_FICHAS:" + id + ":11");
+            }
+            // ---------------------------------------
         }
     }
 

@@ -9,6 +9,7 @@ import Vista.Objetos.FichaUI;
 import Vista.Objetos.JugadorUI;
 import Vista.Objetos.ManoUI;
 import Vista.Objetos.MazoUI;
+import Vista.Objetos.PanelInfoUI;
 import Vista.Objetos.TableroUI;
 import static Vista.TipoEvento.MOSTRAR_JUEGO;
 import contratos.controladoresMVC.iControlEjercerTurno;
@@ -53,6 +54,9 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
     private boolean animacionEnCurso = false; // Bandera para bloquear actualizaciones externas
     private java.util.List<JugadorUI> listaJugadoresUI = new java.util.ArrayList<>();
     private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
+    private PanelInfoUI panelInfo; // <--- Nuevo atributo
+    private javax.swing.JLabel lblBannerAlerta; // Nuevo Label
+    private Timer timerAlerta; // Timer para ocultarlo
 
     /**
      * Constructor que recibe el control para poder ejecutar la logica hacia el
@@ -69,6 +73,54 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         initComponents();
 
         configurarHovers();
+        initBannerAlerta();
+    }
+
+    private void initBannerAlerta() {
+        lblBannerAlerta = new javax.swing.JLabel("", javax.swing.SwingConstants.CENTER);
+        lblBannerAlerta.setOpaque(true);
+        lblBannerAlerta.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
+        lblBannerAlerta.setForeground(Color.WHITE);
+        lblBannerAlerta.setVisible(false);
+
+        // Lo agregamos al LayeredPane en una capa MUY alta (POPUP_LAYER)
+        getLayeredPane().add(lblBannerAlerta, javax.swing.JLayeredPane.POPUP_LAYER);
+    }
+
+    private void mostrarNotificacionGlobal(String mensaje) {
+        // Configurar color según urgencia
+        if (mensaje.contains("1 ficha")) {
+            lblBannerAlerta.setBackground(new Color(220, 53, 69)); // Rojo Alerta
+            GestorSonidos.reproducir(GestorSonidos.SONIDO_ENOJO); // Sonido de tensión
+        } else {
+            lblBannerAlerta.setBackground(new Color(255, 193, 7)); // Amarillo/Naranja Precaución
+            GestorSonidos.reproducir(GestorSonidos.SONIDO_EFECTO);
+        }
+
+        lblBannerAlerta.setText(mensaje);
+
+        // Posicionar y dimensionar (Centrado arriba)
+        int ancho = 400;
+        int alto = 40;
+        int x = (getWidth() - ancho) / 2;
+        int y = 30; // Un poco bajado del borde superior
+
+        lblBannerAlerta.setBounds(x, y, ancho, alto);
+        // Borde redondeado y sombra (simple border factory)
+        lblBannerAlerta.setBorder(javax.swing.BorderFactory.createLineBorder(Color.WHITE, 2));
+
+        lblBannerAlerta.setVisible(true);
+
+        // Timer para ocultar a los 4 segundos
+        if (timerAlerta != null && timerAlerta.isRunning()) {
+            timerAlerta.stop();
+        }
+
+        timerAlerta = new Timer(4000, e -> {
+            lblBannerAlerta.setVisible(false);
+        });
+        timerAlerta.setRepeats(false);
+        timerAlerta.start();
     }
 
     /**
@@ -321,8 +373,35 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         if (estadoJuego != null) {
             actualizarEstadoJugadores(estadoJuego);
+            if (panelInfo != null) {
+                String actual = "Desconocido";
+
+                // 1. Obtener el nombre del jugador actual (ya lo hacías bien)
+                List<DTO.JugadorDTO> jugadores = estadoJuego.getJugadores();
+                if (jugadores != null) {
+                    for (DTO.JugadorDTO j : jugadores) {
+                        if (j.isEsTurno()) {
+                            actual = j.getNombre();
+                            break;
+                        }
+                    }
+                }
+
+                // 2. OBTENER EL SIGUIENTE DIRECTAMENTE DEL DTO
+                // ¡Ya no calculamos nada aquí! El servidor nos dice la verdad.
+                String siguiente = estadoJuego.getSiguienteJugador();
+                if (siguiente == null || siguiente.isEmpty()) {
+                    siguiente = "-";
+                }
+
+                panelInfo.actualizarTurnos(actual, siguiente);
+            }
         }
         switch (dto.getTipoEvento()) {
+            case MOSTRAR_ALERTA:
+                String msg = dto.getMensaje();
+                mostrarNotificacionGlobal(msg);
+                break;
             case MOSTRAR_JUEGO:
                 this.setVisible(true);
                 control.cerrarCUAnteriores();
@@ -387,17 +466,25 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
                 control.pasarTurno();
                 break;
             case PARTIDA_GANADA:
+
                 JOptionPane.showMessageDialog(this,
                         "¡FELICIDADES!\nHas ganado la partida de Rummy.",
                         "¡Victoria!",
                         JOptionPane.INFORMATION_MESSAGE);
+                if (panelInfo != null) {
+                    panelInfo.detenerCronometro();
+                }
                 break;
 
             case PARTIDA_PERDIDA:
+
                 JOptionPane.showMessageDialog(this,
                         "El juego ha terminado.\nOtro jugador se ha quedado sin fichas.",
                         "Fin del Juego",
                         JOptionPane.WARNING_MESSAGE);
+                if (panelInfo != null) {
+                    panelInfo.detenerCronometro();
+                }
                 break;
 
             case NUEVO_MENSAJE_CHAT:
@@ -568,6 +655,10 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
         if (tableroUI != null) {
             tableroUI.limpiarTablero();
         }
+        // --- AGREGAR ESTO AQUÍ ---
+        crearPanelInfo();
+        panelInfo.iniciarCronometro(); // Arrancar el tiempo al iniciar
+        // -------------------------
         crearManoUI();
 
 //        repintarMano(modelo, dto);
@@ -594,6 +685,17 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
 
         GUIjuego.revalidate();
         GUIjuego.repaint();
+    }
+
+    // --- NUEVO MÉTODO DE CREACIÓN ---
+    private void crearPanelInfo() {
+        if (panelInfo == null) {
+            panelInfo = new PanelInfoUI();
+            // Posición: Izquierda (x=10), un poco abajo del tope (y=20)
+            panelInfo.setBounds(5, 150, 110, 125);
+            GUIjuego.add(panelInfo);
+            GUIjuego.setComponentZOrder(panelInfo, 0); // Traer al frente
+        }
     }
 
     /**

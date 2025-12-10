@@ -10,6 +10,7 @@ import java.util.List;
 public class JuegoDTO {
 
     private String jugadorActual;
+    private String siguienteJugador;
     private List<JugadorDTO> jugadores;
     private List<GrupoDTO> gruposEnTablero;
     private int fichasMazo;
@@ -25,6 +26,14 @@ public class JuegoDTO {
         this.gruposEnTablero = gruposEnTablero;
         this.fichasMazo = fichasMazo;
         this.mensaje = mensaje;
+    }
+
+    public String getSiguienteJugador() {
+        return siguienteJugador;
+    }
+
+    public void setSiguienteJugador(String siguienteJugador) {
+        this.siguienteJugador = siguienteJugador;
     }
 
     public String getJugadorActual() {
