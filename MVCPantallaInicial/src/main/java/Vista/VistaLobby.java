@@ -4,6 +4,7 @@ import Modelo.IModeloLobby;
 import eventos.Evento;
 import contratos.controladoresMVC.iControlCUPrincipal;
 import gestor.GestorSonidos;
+import instructivo.InstructivoRummy;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -18,7 +19,16 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-import instructivo.InstructivoRummy;
+// Asegúrate de importar PanelRound correctamente según dónde lo tengas (ej. vista.PanelRound o Vista.PanelRound)
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.Image;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 /**
  * VistaLobby con diseño de Sidebar y Video Grande.
@@ -28,112 +38,151 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
     iControlCUPrincipal control;
     private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
 
-    // Componente del video (manual)
+    // --- Declaración de componentes como PanelRound ---
+    private PanelRound btnCrearPartida;
+    private PanelRound btnUnirsePartida;
+    private PanelRound btnAyuda;
+
+    // Componente del video
     private JLabel lblVideoTutorial;
+    // Título y fondo
+    private JLabel title;
+    private JLabel jLabel1;
 
     public VistaLobby(iControlCUPrincipal control) {
         this.control = control;
 
-        // 1. Inicialización (NetBeans)
+        // 1. Inicialización de componentes visuales
         initComponents();
 
-        // 2. Configuración Manual (Video y ajustes visuales)
+        // 2. Configuración manual extra
         configuracionManual();
         configurarHovers();
-        // 3. Cargar Video
+
+        // 3. Cargar Video e Icono
         cargarVideoTutorial();
+        configurarIconoVentana();
     }
 
-    private void configurarHovers() {
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("RummyKub | Vive la experiencia!");
+        setMinimumSize(new java.awt.Dimension(920, 550));
+        setResizable(false);
+        getContentPane().setLayout(null);
 
-        // Botón Terminar Partida:
-        // El trigger es el texto (btnTerminarPartida), pero el que se anima es el panel azul (panelRound1)
-        agregarEfectoHover(btnAyuda);
-        agregarEfectoHover(btnCrearPartida);
-        agregarEfectoHover(btnUnirsePartida);
+        // --- TÍTULO ---
+        title = new JLabel();
+        title.setFont(new java.awt.Font("Segoe UI", 1, 60));
+        title.setForeground(new java.awt.Color(255, 255, 255)); // Blanco
+        title.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        title.setText("RUMMY");
+        getContentPane().add(title);
+        title.setBounds(40, 30, 250, 70);
 
+        // --- BOTÓN CREAR PARTIDA ---
+        // Inicializamos la variable btnCrearPartida correctamente
+        btnCrearPartida = crearBotonRedondo("Crear partida");
+        // Agregamos el listener a la misma variable que acabamos de crear
+        agregarListenerClick(btnCrearPartida, evt -> btnCrearPartidaMouseClicked(null));
+        getContentPane().add(btnCrearPartida);
+        btnCrearPartida.setBounds(40, 150, 260, 80);
+
+        // --- BOTÓN UNIRSE A PARTIDA ---
+        btnUnirsePartida = crearBotonRedondo("Unirse a partida");
+        agregarListenerClick(btnUnirsePartida, evt -> btnUnirsePartidaMouseClicked(null));
+        getContentPane().add(btnUnirsePartida);
+        btnUnirsePartida.setBounds(40, 250, 260, 80);
+
+        // --- BOTÓN AYUDA ---
+        btnAyuda = crearBotonRedondo("Ayuda (?)");
+        agregarListenerClick(btnAyuda, evt -> btnAyudaMouseClicked(null));
+        getContentPane().add(btnAyuda);
+        btnAyuda.setBounds(40, 350, 260, 80);
+
+        // --- FONDO ---
+        jLabel1 = new JLabel();
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/fondoR.png")));
+        jLabel1.setText("Fondo");
+        getContentPane().add(jLabel1);
+        jLabel1.setBounds(0, 0, 920, 550);
+
+        pack();
+        setLocationRelativeTo(null);
     }
 
-    private void agregarEfectoHover(JComponent componente) {
-        agregarEfectoHover(componente, componente);
+    // --- MÉTODOS AUXILIARES DE DISEÑO ---
+    private PanelRound crearBotonRedondo(String texto) {
+        PanelRound panel = new PanelRound();
+        panel.setRoundTopLeft(30);
+        panel.setRoundTopRight(30);
+        panel.setRoundBottomLeft(30);
+        panel.setRoundBottomRight(30);
+        panel.setBackground(new Color(18, 88, 114)); // #125872
+        panel.setLayout(new BorderLayout());
+        panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JLabel lblTexto = new JLabel(texto);
+        lblTexto.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTexto.setForeground(Color.WHITE);
+        lblTexto.setHorizontalAlignment(SwingConstants.CENTER);
+
+        panel.add(lblTexto, BorderLayout.CENTER);
+        return panel;
     }
 
-    /**
-     * Crea un MouseAdapter que maneja el Zoom y el Borde al mismo tiempo.
-     *
-     * @param trigger El componente que recibe el mouse (ej. el JLabel con
-     * texto/icono).
-     * @param target El componente que se transforma (ej. el Panel de fondo).
-     */
-    private void agregarEfectoHover(JComponent trigger, JComponent target) {
-        trigger.addMouseListener(new MouseAdapter() {
-            private Rectangle boundsOriginales; // Para recordar dónde estaba
-            private Border bordeOriginal;       // Para recordar si tenía borde antes
-
+    private void agregarListenerClick(JComponent componente, java.awt.event.ActionListener accion) {
+        MouseAdapter ma = new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                if (!trigger.isEnabled() || !trigger.isVisible()) {
-                    return;
-                }
+            public void mouseClicked(MouseEvent e) {
+                GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+                accion.actionPerformed(null);
+            }
+        };
+        componente.addMouseListener(ma);
+        // Agregar también a los hijos (la etiqueta de texto) para que el click funcione sobre las letras
+        for (Component c : componente.getComponents()) {
+            c.addMouseListener(ma);
+        }
+    }
 
-                // 1. Guardar estado original (solo la primera vez que entra para evitar bugs)
-                if (boundsOriginales == null) {
-                    boundsOriginales = target.getBounds();
-                    bordeOriginal = target.getBorder();
-                }
-
-                // 2. EFECTO ZOOM (Crecer desde el centro)
-                int pixelCrecer = 4; // Cuánto crece en total
-                int offset = pixelCrecer / 2; // Cuánto se mueve para centrar
-
-                target.setBounds(
-                        boundsOriginales.x - offset,
-                        boundsOriginales.y - offset,
-                        boundsOriginales.width + pixelCrecer,
-                        boundsOriginales.height + pixelCrecer
-                );
-
-                // 3. EFECTO BORDE DORADO
-                // Le ponemos el borde amarillo brillante
-                target.setBorder(BORDE_HOVER);
-
-                // 4. CURSOR DE MANO
-                trigger.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-                // Opcional: Sonido muy sutil de "aire" o "tick" al pasar el mouse
-                // GestorSonidos.reproducir("hover.wav"); 
+    private void configurarIconoVentana() {
+        try {
+            // 1. Intentar cargar la ruta del icono
+            URL urlIcono = getClass().getResource("/Imagenes/iconoJuego.png");
+            if (urlIcono == null) {
+                urlIcono = getClass().getResource("/Imagenes/InstructivoIcon.png"); // Fallback
             }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (boundsOriginales != null) {
-                    // Restaurar todo a la normalidad
-                    target.setBounds(boundsOriginales);
-                    target.setBorder(bordeOriginal); // Quita el borde amarillo
-                }
+            if (urlIcono != null) {
+                // 2. Cargar la imagen original
+                ImageIcon imagenOriginal = new ImageIcon(urlIcono);
+
+                // 3. Forzar el redimensionado a un tamaño grande (ej. 256x256 píxeles)
+                //    Usamos SCALE_SMOOTH para que mantenga la calidad al estirarse.
+                Image imagenEscalada = imagenOriginal.getImage()
+                        .getScaledInstance(600, 600, java.awt.Image.SCALE_SMOOTH);
+
+                // 4. Asignar la imagen grande
+                this.setIconImage(imagenEscalada);
             }
-        });
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono: " + e.getMessage());
+        }
     }
 
     private void configuracionManual() {
-        this.setLocationRelativeTo(null);
-
-        // --- CONFIGURACIÓN DEL VIDEO (LADO DERECHO GRANDE) ---
+        // Configuracion del Video
         lblVideoTutorial = new JLabel() {
             @Override
             protected void paintComponent(java.awt.Graphics g) {
-                // 1. Pintar el fondo (el color negro)
                 if (isOpaque()) {
                     g.setColor(getBackground());
                     g.fillRect(0, 0, getWidth(), getHeight());
                 }
-
-                // 2. Pintar la imagen estirada
                 if (getIcon() != null && getIcon() instanceof ImageIcon) {
-                    // 'this' es importante: actúa como observador para que la animación avance
                     g.drawImage(((ImageIcon) getIcon()).getImage(), 0, 0, getWidth(), getHeight(), this);
                 } else {
-                    // Si no hay imagen (ej. mensaje de error), usar el pintado normal de JLabel
                     super.paintComponent(g);
                 }
             }
@@ -141,11 +190,8 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
         lblVideoTutorial.setBackground(new java.awt.Color(0, 0, 0));
         lblVideoTutorial.setOpaque(true);
         lblVideoTutorial.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-
-        // Borde dorado mantenido, puedes cambiarlo a blanco si prefieres: Color.WHITE
         lblVideoTutorial.setBorder(BorderFactory.createLineBorder(new java.awt.Color(255, 215, 0), 4));
 
-        // COORDENADAS: x=340 (derecha), y=50, ancho=550, alto=400
         getContentPane().add(lblVideoTutorial);
         lblVideoTutorial.setBounds(315, 50, 580, 400);
 
@@ -158,12 +204,8 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
 
     private void cargarVideoTutorial() {
         URL urlVideo = getClass().getResource("/Imagenes/tutorial.gif");
-
         if (urlVideo != null) {
-            Icon icon = new ImageIcon(urlVideo);
-            // Tip: Si el GIF es muy pequeño, Swing no lo estira automáticamente.
-            // Se mostrará centrado en el recuadro negro grande.
-            lblVideoTutorial.setIcon(icon);
+            lblVideoTutorial.setIcon(new ImageIcon(urlVideo));
             lblVideoTutorial.setText("");
         } else {
             lblVideoTutorial.setText("<html><center>VIDEO TUTORIAL<br>(No encontrado)</center></html>");
@@ -171,96 +213,69 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
         }
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
-    private void initComponents() {
+    private void configurarHovers() {
+        // Ahora usamos las variables PanelRound correctas
+        agregarEfectoHover(btnAyuda);
+        agregarEfectoHover(btnCrearPartida);
+        agregarEfectoHover(btnUnirsePartida);
+    }
 
-        title = new javax.swing.JLabel();
-        btnCrearPartida = new javax.swing.JButton();
-        btnUnirsePartida = new javax.swing.JButton();
-        btnAyuda = new javax.swing.JButton(); // Nuevo Botón
-        jLabel1 = new javax.swing.JLabel();
+    private void agregarEfectoHover(JComponent target) {
+        if (target == null) {
+            return; // Protección contra nulos
+        }
+        MouseAdapter hoverAdapter = new MouseAdapter() {
+            private Rectangle boundsOriginales;
+            private Border bordeOriginal;
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("RummyKub | Vive la experiencia!");
-        setMinimumSize(new java.awt.Dimension(920, 550));
-        setResizable(false);
-        getContentPane().setLayout(null);
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!target.isEnabled() || !target.isVisible()) {
+                    return;
+                }
 
-        // --- TÍTULO (Alineado a la izquierda, Blanco, Mayúsculas) ---
-        title.setFont(new java.awt.Font("Segoe UI", 1, 60));
-        title.setForeground(new java.awt.Color(255, 255, 255)); // Blanco
-        title.setHorizontalAlignment(javax.swing.SwingConstants.CENTER); // Alineado a la izq
-        title.setText("RUMMY");
-        getContentPane().add(title);
-        // x=40 para margen izquierdo
-        title.setBounds(40, 30, 250, 70);
+                if (boundsOriginales == null) {
+                    boundsOriginales = target.getBounds();
+                    bordeOriginal = target.getBorder();
+                }
 
-        // --- BOTÓN CREAR PARTIDA ---
-        btnCrearPartida.setBackground(new java.awt.Color(18, 88, 114)); // #125872
-        btnCrearPartida.setFont(new java.awt.Font("Segoe UI", 1, 22));
-        btnCrearPartida.setForeground(new java.awt.Color(255, 255, 255)); // Texto Blanco
-        btnCrearPartida.setText("Crear partida");
-        btnCrearPartida.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnCrearPartida.setBorderPainted(false); // Opcional: quita borde 3D para estilo más plano
-        btnCrearPartida.setFocusPainted(false);
-        btnCrearPartida.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+                int pixelCrecer = 4;
+                int offset = pixelCrecer / 2;
 
-                btnCrearPartidaMouseClicked(evt);
+                target.setBounds(
+                        boundsOriginales.x - offset,
+                        boundsOriginales.y - offset,
+                        boundsOriginales.width + pixelCrecer,
+                        boundsOriginales.height + pixelCrecer
+                );
+
+                target.setBorder(BORDE_HOVER);
+                target.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
-        });
-        getContentPane().add(btnCrearPartida);
-        // Columna izquierda
-        btnCrearPartida.setBounds(40, 150, 260, 80);
 
-        // --- BOTÓN UNIRSE A PARTIDA ---
-        btnUnirsePartida.setBackground(new java.awt.Color(18, 88, 114)); // #125872
-        btnUnirsePartida.setFont(new java.awt.Font("Segoe UI", 1, 22));
-        btnUnirsePartida.setForeground(new java.awt.Color(255, 255, 255)); // Texto Blanco
-        btnUnirsePartida.setText("Unirse a partida");
-        btnUnirsePartida.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnUnirsePartida.setBorderPainted(false);
-        btnUnirsePartida.setFocusPainted(false);
-        btnUnirsePartida.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
-                btnUnirsePartidaMouseClicked(evt);
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // Verificar si el mouse realmente salió del componente padre
+                if (target.contains(SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), target))) {
+                    return;
+                }
+
+                if (boundsOriginales != null) {
+                    target.setBounds(boundsOriginales);
+                    target.setBorder(bordeOriginal);
+                }
             }
-        });
-        getContentPane().add(btnUnirsePartida);
-        btnUnirsePartida.setBounds(40, 250, 260, 80);
+        };
 
-        // --- BOTÓN AYUDA (Nuevo) ---
-        btnAyuda.setBackground(new java.awt.Color(18, 88, 114)); // #125872
-        btnAyuda.setFont(new java.awt.Font("Segoe UI", 1, 22));
-        btnAyuda.setForeground(new java.awt.Color(255, 255, 255)); // Texto Blanco
-        btnAyuda.setText("Ayuda (?)");
-        btnAyuda.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnAyuda.setBorderPainted(false);
-        btnAyuda.setFocusPainted(false);
-        btnAyuda.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnAyudaMouseClicked(evt);
+        target.addMouseListener(hoverAdapter);
+        if (target instanceof Container) {
+            for (Component c : ((Container) target).getComponents()) {
+                c.addMouseListener(hoverAdapter);
             }
-        });
-        getContentPane().add(btnAyuda);
-        btnAyuda.setBounds(40, 350, 260, 80);
+        }
+    }
 
-        // --- FONDO ---
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/fondoR.png")));
-        jLabel1.setText("Fondo");
-        getContentPane().add(jLabel1);
-        jLabel1.setBounds(0, 0, 920, 550);
-
-        pack();
-        setLocationRelativeTo(null);
-    }// </editor-fold>                        
-
+    // --- MÉTODOS DE LÓGICA / CONTROLADOR ---
     private void btnCrearPartidaMouseClicked(java.awt.event.MouseEvent evt) {
         control.iniciarCreacionPartida();
     }
@@ -272,19 +287,20 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
     }
 
     private void btnAyudaMouseClicked(java.awt.event.MouseEvent evt) {
-        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+        new InstructivoRummy().setVisible(true); // Descomentar si la clase existe y el import es correcto
 
-        // Lógica para abrir el instructivo. 
-        // Si tienes la clase InstructivoRummy, descomenta la linea de abajo:
-        new InstructivoRummy().setVisible(true);
-        // Si no, usa este mensaje temporal:
-        // JOptionPane.showMessageDialog(this, "Aquí se abrirá el manual de usuario.", "Ayuda", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void bloquearBotones(boolean bloquear) {
-        btnCrearPartida.setEnabled(!bloquear);
-        btnUnirsePartida.setEnabled(!bloquear);
-        btnAyuda.setEnabled(!bloquear);
+        if (btnCrearPartida != null) {
+            btnCrearPartida.setEnabled(!bloquear);
+        }
+        if (btnUnirsePartida != null) {
+            btnUnirsePartida.setEnabled(!bloquear);
+        }
+        if (btnAyuda != null) {
+            btnAyuda.setEnabled(!bloquear);
+        }
     }
 
     @Override
@@ -328,12 +344,4 @@ public class VistaLobby extends javax.swing.JFrame implements ObservadorLobby {
                 break;
         }
     }
-
-    // Variables declaration - do not modify                     
-    private javax.swing.JButton btnAyuda;
-    private javax.swing.JButton btnCrearPartida;
-    private javax.swing.JButton btnUnirsePartida;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel title;
-    // End of variables declaration                   
 }
