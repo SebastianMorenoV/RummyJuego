@@ -591,7 +591,7 @@ public class VistaTablero extends javax.swing.JFrame implements Observador {
             case SOLICITUD_VOTO_TERMINAR:
                 String solicitante = modelo.getTablero().getMensaje();
                 int resp = JOptionPane.showConfirmDialog(this,
-                        "El jugador " + solicitante + " quiere terminar la partida.\n¿Aceptas? (Se contarán los puntos)",
+                        "El jugador " + solicitante + " Se aburrio .\n¿Tu tambien te aburriste y quieres terminar la partida?",
                         "Votación", JOptionPane.YES_NO_OPTION);
                 control.enviarVotoTerminar(resp == JOptionPane.YES_OPTION);
                 break;

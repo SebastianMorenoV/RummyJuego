@@ -166,24 +166,21 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        lblNombreJ1.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        lblNombreJ1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         lblNombreJ1.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreJ1.setText("Espacio vacio...");
         jPanel1.add(lblNombreJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 150, 270, 40));
 
         lblAvatarJ2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblAvatarJ2.setText("dasdasd");
         jPanel1.add(lblAvatarJ2, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 220, 80, 80));
 
         lblAvatarJ3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblAvatarJ3.setText("asdasd");
         jPanel1.add(lblAvatarJ3, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 320, 80, 80));
 
         flechaCarruselIzquierda.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/flechaIzquierda.png"))); // NOI18N
         jPanel1.add(flechaCarruselIzquierda, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, -1, -1));
 
         lblAvatarJ4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblAvatarJ4.setText("asdasdad");
         jPanel1.add(lblAvatarJ4, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 420, 80, 80));
 
         flechaCarruselDerecha.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/flechaDerecha.png"))); // NOI18N
@@ -273,7 +270,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 90, -1, -1));
 
         lblAvatarJ1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        lblAvatarJ1.setText("asdasdasd");
         jPanel1.add(lblAvatarJ1, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 80, 80));
 
         lblNombreJ3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
