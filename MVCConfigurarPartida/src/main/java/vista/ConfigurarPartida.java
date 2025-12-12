@@ -2,19 +2,7 @@ package vista;
 
 import TipoEventos.EventoConfig;
 import controlador.ControladorConfig;
-import gestor.GestorSonidos;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.net.URL;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
-import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import modelo.iModeloConfig;
@@ -27,7 +15,6 @@ import modelo.iModeloConfig;
 public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorConfig {
 
     ControladorConfig control;
-    private final Border BORDE_HOVER = new LineBorder(new Color(255, 215, 0), 3, true); // Amarillo, 3px, Redondeado
 
     /*Atributos privados temporales*/
     int numComodines = 1;
@@ -41,80 +28,6 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         this.setLocationRelativeTo(null);
         initComponents();
         listenerSpinner();
-        configurarHovers();
-        configurarIconoVentana();
-    }
-
-    private void configurarHovers() {
-
-        // Botón Terminar Partida:
-        // El trigger es el texto (btnTerminarPartida), pero el que se anima es el panel azul (panelRound1)
-        agregarEfectoHover(txt10Fichas, btn10Fichas);
-        agregarEfectoHover(txt13Fichas, btn13Fichas);
-        agregarEfectoHover(txtCrearPartida, btnCrearPartida);
-        agregarEfectoHover(txtNumComodines1, btnRegresar);
-
-    }
-
-    private void agregarEfectoHover(JComponent componente) {
-        agregarEfectoHover(componente, componente);
-    }
-
-    /**
-     * Crea un MouseAdapter que maneja el Zoom y el Borde al mismo tiempo.
-     *
-     * @param trigger El componente que recibe el mouse (ej. el JLabel con
-     * texto/icono).
-     * @param target El componente que se transforma (ej. el Panel de fondo).
-     */
-    private void agregarEfectoHover(JComponent trigger, JComponent target) {
-        trigger.addMouseListener(new MouseAdapter() {
-            private Rectangle boundsOriginales; // Para recordar dónde estaba
-            private Border bordeOriginal;       // Para recordar si tenía borde antes
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (!trigger.isEnabled() || !trigger.isVisible()) {
-                    return;
-                }
-
-                // 1. Guardar estado original (solo la primera vez que entra para evitar bugs)
-                if (boundsOriginales == null) {
-                    boundsOriginales = target.getBounds();
-                    bordeOriginal = target.getBorder();
-                }
-
-                // 2. EFECTO ZOOM (Crecer desde el centro)
-                int pixelCrecer = 4; // Cuánto crece en total
-                int offset = pixelCrecer / 2; // Cuánto se mueve para centrar
-
-                target.setBounds(
-                        boundsOriginales.x - offset,
-                        boundsOriginales.y - offset,
-                        boundsOriginales.width + pixelCrecer,
-                        boundsOriginales.height + pixelCrecer
-                );
-
-                // 3. EFECTO BORDE DORADO
-                // Le ponemos el borde amarillo brillante
-                target.setBorder(BORDE_HOVER);
-
-                // 4. CURSOR DE MANO
-                trigger.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-                // Opcional: Sonido muy sutil de "aire" o "tick" al pasar el mouse
-                // GestorSonidos.reproducir("hover.wav"); 
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                if (boundsOriginales != null) {
-                    // Restaurar todo a la normalidad
-                    target.setBounds(boundsOriginales);
-                    target.setBorder(bordeOriginal); // Quita el borde amarillo
-                }
-            }
-        });
     }
 
     @SuppressWarnings("unchecked")
@@ -134,17 +47,17 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         txtNumComodines1 = new javax.swing.JLabel();
         txtNumComodines2 = new javax.swing.JLabel();
         txtFichasCont = new javax.swing.JLabel();
-        fondo = new javax.swing.JLabel();
+        fondoRummy = new javax.swing.JLabel();
 
         setMinimumSize(new java.awt.Dimension(900, 500));
         getContentPane().setLayout(null);
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(255, 255, 255));
+        txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
         txtTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtTitulo.setText("Configurar Partida");
         getContentPane().add(txtTitulo);
-        txtTitulo.setBounds(0, 0, 900, 90);
+        txtTitulo.setBounds(0, 20, 900, 90);
 
         spinnerComidines.setModel(new javax.swing.SpinnerNumberModel(1, 1, 4, 1));
         spinnerComidines.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
@@ -155,7 +68,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(spinnerComidines);
         spinnerComidines.setBounds(450, 142, 260, 30);
 
-        btn13Fichas.setBackground(new java.awt.Color(18, 88, 114));
+        btn13Fichas.setBackground(new java.awt.Color(246, 220, 105));
         btn13Fichas.setRoundBottomLeft(30);
         btn13Fichas.setRoundBottomRight(30);
         btn13Fichas.setRoundTopLeft(30);
@@ -163,21 +76,20 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         btn13Fichas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         txt13Fichas.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txt13Fichas.setForeground(new java.awt.Color(255, 255, 255));
         txt13Fichas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txt13Fichas.setText("13 Fichas");
-        txt13Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txt13Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txt13Fichas.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txt13FichasMouseClicked(evt);
             }
         });
-        btn13Fichas.add(txt13Fichas, new org.netbeans.lib.awtextra.AbsoluteConstraints(-3, 2, 240, 60));
+        btn13Fichas.add(txt13Fichas, new org.netbeans.lib.awtextra.AbsoluteConstraints(7, 2, 230, 60));
 
         getContentPane().add(btn13Fichas);
         btn13Fichas.setBounds(470, 210, 240, 60);
 
-        btnCrearPartida.setBackground(new java.awt.Color(26, 83, 162));
+        btnCrearPartida.setBackground(new java.awt.Color(246, 220, 105));
         btnCrearPartida.setRoundBottomLeft(30);
         btnCrearPartida.setRoundBottomRight(30);
         btnCrearPartida.setRoundTopLeft(30);
@@ -185,10 +97,9 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         btnCrearPartida.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         txtCrearPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txtCrearPartida.setForeground(new java.awt.Color(255, 255, 255));
         txtCrearPartida.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtCrearPartida.setText("Crear Partida");
-        txtCrearPartida.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txtCrearPartida.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txtCrearPartida.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txtCrearPartidaMouseClicked(evt);
@@ -199,19 +110,17 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(btnCrearPartida);
         btnCrearPartida.setBounds(320, 300, 240, 70);
 
-        btn10Fichas.setBackground(new java.awt.Color(18, 88, 114));
+        btn10Fichas.setBackground(new java.awt.Color(246, 220, 105));
         btn10Fichas.setRoundBottomLeft(30);
         btn10Fichas.setRoundBottomRight(30);
         btn10Fichas.setRoundTopLeft(30);
         btn10Fichas.setRoundTopRight(30);
         btn10Fichas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        txt10Fichas.setBackground(new java.awt.Color(21, 56, 96));
         txt10Fichas.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txt10Fichas.setForeground(new java.awt.Color(255, 255, 255));
         txt10Fichas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txt10Fichas.setText("10 Fichas");
-        txt10Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txt10Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txt10Fichas.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txt10FichasMouseClicked(evt);
@@ -239,7 +148,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         txtNumComodines1.setForeground(new java.awt.Color(255, 255, 255));
         txtNumComodines1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtNumComodines1.setText("Regresar");
-        txtNumComodines1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txtNumComodines1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txtNumComodines1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txtNumComodines1MouseClicked(evt);
@@ -261,17 +170,21 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
 
         txtFichasCont.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txtFichasCont.setForeground(new java.awt.Color(255, 255, 255));
-        txtFichasCont.setText("Fichas: No establecido");
+        txtFichasCont.setText("Fichas: ");
         getContentPane().add(txtFichasCont);
         txtFichasCont.setBounds(430, 102, 250, 30);
 
-        fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoR.png"))); // NOI18N
-        getContentPane().add(fondo);
-        fondo.setBounds(0, 0, 930, 540);
+        fondoRummy.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.jpg"))); // NOI18N
+        fondoRummy.setText("NN");
+        fondoRummy.setMaximumSize(new java.awt.Dimension(900, 500));
+        fondoRummy.setMinimumSize(new java.awt.Dimension(900, 500));
+        fondoRummy.setName(""); // NOI18N
+        fondoRummy.setPreferredSize(new java.awt.Dimension(900, 500));
+        getContentPane().add(fondoRummy);
+        fondoRummy.setBounds(-4, -4, 910, 520);
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtCrearPartidaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtCrearPartidaMouseClicked
-        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
         int fichasSeleccionadas = this.numFichas;
         int comodinesSeleccionados = (Integer) spinnerComidines.getValue();
 
@@ -283,7 +196,6 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     }//GEN-LAST:event_txtCrearPartidaMouseClicked
 
     private void txt10FichasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txt10FichasMouseClicked
-        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
         btn10Fichas.setEnabled(false);
         txt10Fichas.setEnabled(false);
         btn13Fichas.setEnabled(true);
@@ -295,8 +207,6 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     }//GEN-LAST:event_txt10FichasMouseClicked
 
     private void txt13FichasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txt13FichasMouseClicked
-        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
-
         btn13Fichas.setEnabled(false);
         txt13Fichas.setEnabled(false);
         btn10Fichas.setEnabled(true);
@@ -316,8 +226,6 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     }//GEN-LAST:event_txtNumComodines1MouseEntered
 
     private void txtNumComodines1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtNumComodines1MouseClicked
-        GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
-
         this.setVisible(false);
         control.regresarPantallaPrincipal();
     }//GEN-LAST:event_txtNumComodines1MouseClicked
@@ -328,7 +236,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
     private vista.PanelRound btn13Fichas;
     private vista.PanelRound btnCrearPartida;
     private vista.PanelRound btnRegresar;
-    private javax.swing.JLabel fondo;
+    private javax.swing.JLabel fondoRummy;
     private javax.swing.JSpinner spinnerComidines;
     private javax.swing.JLabel txt10Fichas;
     private javax.swing.JLabel txt13Fichas;
@@ -373,36 +281,10 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         spinnerComidines.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
                 numComodines = (Integer) spinnerComidines.getValue();
 
                 txtNumComodines2.setText("Comodines: " + numComodines);
             }
         });
-    }
-
-    private void configurarIconoVentana() {
-        try {
-            // 1. Intentar cargar la ruta del icono
-            URL urlIcono = getClass().getResource("/imagenes/iconoJuego.png");
-            if (urlIcono == null) {
-                urlIcono = getClass().getResource("iImagenes/InstructivoIcon.png"); // Fallback
-            }
-
-            if (urlIcono != null) {
-                // 2. Cargar la imagen original
-                ImageIcon imagenOriginal = new ImageIcon(urlIcono);
-
-                // 3. Forzar el redimensionado a un tamaño grande (ej. 256x256 píxeles)
-                //    Usamos SCALE_SMOOTH para que mantenga la calidad al estirarse.
-                Image imagenEscalada = imagenOriginal.getImage()
-                        .getScaledInstance(600, 600, java.awt.Image.SCALE_SMOOTH);
-
-                // 4. Asignar la imagen grande
-                this.setIconImage(imagenEscalada);
-            }
-        } catch (Exception e) {
-            System.err.println("No se pudo cargar el icono: " + e.getMessage());
-        }
     }
 }

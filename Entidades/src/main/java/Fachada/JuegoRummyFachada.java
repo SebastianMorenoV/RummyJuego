@@ -29,20 +29,16 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Inicia una nueva partida o turno de juego, guardando el estado inicial
-     * del tablero y la mano del jugador para posibles reversiones. Es el primer
-     * paso en cada nuevo turno.
+     * del tablero y la mano del jugador para posibles reversiones.
+     * Es el primer paso en cada nuevo turno.
      */
     @Override
     public void iniciarPartida() {
-        this.tablero = new Tablero();
-        this.jugador = new Jugador();
-
         guardarEstadoTurno();
     }
 
     /**
      * Obtiene la instancia del Jugador que está participando actualmente.
-     *
      * * @return El objeto Jugador actual.
      */
     @Override
@@ -51,8 +47,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Simula la acción del jugador de tomar una ficha del mazo. La ficha es
-     * removida del mazo del Tablero y añadida a la mano del Jugador.
+     * Simula la acción del jugador de tomar una ficha del mazo.
+     * La ficha es removida del mazo del Tablero y añadida a la mano del Jugador.
      */
     @Override
     public void jugadorTomaFichaDelMazo() {
@@ -63,12 +59,10 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Coloca uno o más grupos de fichas (tercias o corridas) propuestos por el
-     * jugador en el tablero. Este método valida la estructura interna de los
-     * grupos antes de establecerlos.
-     *
-     * * @param nuevosGrupos La lista de grupos de fichas que el jugador
-     * intenta colocar.
+     * Coloca uno o más grupos de fichas (tercias o corridas) propuestos por el 
+     * jugador en el tablero.
+     * Este método valida la estructura interna de los grupos antes de establecerlos.
+     * * @param nuevosGrupos La lista de grupos de fichas que el jugador intenta colocar.
      */
     @Override
     public void colocarFichasEnTablero(List<Grupo> nuevosGrupos) {
@@ -77,12 +71,11 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Valida si los movimientos realizados por el jugador en el turno actual
+     * Valida si los movimientos realizados por el jugador en el turno actual 
      * cumplen con las reglas del Rummy (estructura de grupos válida, primer
-     * movimiento de 30+ puntos, o haber jugado al menos una ficha). Si las
-     * reglas se cumplen, los cambios se confirman; si no, se revierten.
-     *
-     * * @return true si el turno es válido y se finaliza, false si se revierte
+     * movimiento de 30+ puntos, o haber jugado al menos una ficha).
+     * Si las reglas se cumplen, los cambios se confirman; si no, se revierten.
+     * * @return true si el turno es válido y se finaliza, false si se revierte 
      * el estado del juego.
      */
     @Override
@@ -152,8 +145,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Revierte el estado del tablero y la mano del jugador a cómo estaban al
-     * inicio del turno actual.
+     * Revierte el estado del tablero y la mano del jugador a cómo estaban
+     * al inicio del turno actual.
      */
     @Override
     public void revertirCambiosDelTurno() {
@@ -161,14 +154,14 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Método privado que finaliza los cambios del turno, validando los grupos
-     * colocados y removiendo las fichas jugadas de la mano del jugador. También
-     * llama a guardarEstadoTurno() para preparar el estado para el siguiente
-     * jugador.
+     * Método privado que finaliza los cambios del turno, validando los grupos 
+     * colocados y removiendo las fichas jugadas de la mano del jugador.
+     * También llama a guardarEstadoTurno() para preparar el estado 
+     * para el siguiente jugador.
      */
     private void confirmarCambiosTurno() {
         for (Grupo g : this.tablero.getFichasEnTablero()) {
-            g.setValidado();
+            g.setValidado(); 
         }
 
         List<Integer> idsEnTablero
@@ -179,8 +172,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Método privado para restaurar el estado del tablero y la mano a partir de
-     * las copias guardadas al inicio del turno.
+     * Método privado para restaurar el estado del tablero y la mano 
+     * a partir de las copias guardadas al inicio del turno.
      */
     private void revertirCambiosTurno() {
         this.tablero = this.tableroAlInicioDelTurno.copiaProfunda();
@@ -188,8 +181,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Guarda el estado actual del Tablero} y la Mano del jugador en variables
-     * de respaldo para permitir una posible reversión.
+     * Guarda el estado actual del Tablero} y la Mano del jugador 
+     * en variables de respaldo para permitir una posible reversión.
      */
     @Override
     public void guardarEstadoTurno() {
@@ -198,9 +191,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Verifica si el jugador actual ha ganado la partida (normalmente, si su
-     * mano está vacía).
-     *
+     * Verifica si el jugador actual ha ganado la partida (normalmente, si 
+     * su mano está vacía).
      * * @return true si el jugador ganó, false en caso contrario.
      */
     @Override
@@ -210,12 +202,10 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Intenta regresar una ficha específica del tablero a la mano del jugador.
-     * Solo se pueden regresar fichas que no formen parte de grupos ya
-     * validados.
-     *
+     * Solo se pueden regresar fichas que no formen parte de grupos ya validados.
      * * @param idFicha El ID de la ficha a intentar regresar.
-     * @return true si la ficha fue regresada a la mano, false si pertenece a un
-     * grupo validado.
+     * @return true si la ficha fue regresada a la mano, false si pertenece 
+     * a un grupo validado.
      */
     @Override
     public boolean intentarRegresarFichaAMano(int idFicha) {
@@ -235,9 +225,7 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Obtiene la lista de fichas que el jugador actual tiene en su mano.
-     *
-     * * @param indiceJugador Parámetro de compatibilidad, se usa el jugador
-     * actual.
+     * * @param indiceJugador Parámetro de compatibilidad, se usa el jugador actual.
      * @return Lista de Fichas en la mano del jugador.
      */
     @Override
@@ -246,9 +234,8 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Obtiene la lista completa de grupos de fichas que están actualmente en el
-     * tablero.
-     *
+     * Obtiene la lista completa de grupos de fichas que están actualmente 
+     * en el tablero.
      * * @return Lista de Grupos en el tablero.
      */
     @Override
@@ -258,7 +245,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Obtiene la cantidad de fichas restantes en el mazo principal.
-     *
      * * @return El número de fichas en el mazo.
      */
     @Override
@@ -267,11 +253,9 @@ public class JuegoRummyFachada implements IJuegoRummy {
     }
 
     /**
-     * Establece la mano inicial del jugador. Esto se usa típicamente al inicio
+     * Establece la mano inicial del jugador. Esto se usa típicamente al inicio 
      * de la partida después de repartir las fichas.
-     *
-     * * @param mano La lista de fichas que compondrán la mano inicial del
-     * jugador.
+     * * @param mano La lista de fichas que compondrán la mano inicial del jugador.
      */
     @Override
     public void setManoInicial(List<Ficha> mano) {
@@ -281,7 +265,6 @@ public class JuegoRummyFachada implements IJuegoRummy {
 
     /**
      * Obtiene la lista completa de fichas que están en el mazo.
-     *
      * * @return La lista de Fichas en el mazo.
      */
     @Override

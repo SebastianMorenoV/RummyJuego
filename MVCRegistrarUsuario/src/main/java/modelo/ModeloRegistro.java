@@ -135,7 +135,7 @@ public class ModeloRegistro implements iModeloRegistro, PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String evento = evt.getPropertyName();
-
+        
         // El payload puede venir en evt.getNewValue() si el servidor manda mensaje de error, etc.
         String mensajeServidor = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
@@ -149,10 +149,7 @@ public class ModeloRegistro implements iModeloRegistro, PropertyChangeListener {
                 System.out.println("[ModeloRegistro] Error: Nombre repetido.");
                 notificarObservadores(EventoRegistro.NOMBRE_REPETIDO, mensajeServidor);
                 break;
-            case "ACTUALIZAR_SALA": 
-                System.out.println("[ModeloRegistro] Lista de jugadores recibida: " + mensajeServidor);
-                notificarObservadores(EventoRegistro.ACTUALIZAR_SALA, mensajeServidor);
-                break;
+
             default:
                 break;
         }

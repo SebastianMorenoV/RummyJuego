@@ -60,7 +60,7 @@ public class TableroUI extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(new Color(17, 80, 85));
+        g.setColor(new Color(15, 89, 46));
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 
         int anchoCelda = getWidth() / columnas;
@@ -73,20 +73,6 @@ public class TableroUI extends JPanel {
         for (int c = 0; c <= columnas; c++) {
             g.drawLine(c * anchoCelda, 0, c * anchoCelda, getHeight());
         }
-    }
-
-    public void limpiarTablero() {
-        // 1. Borrar todos los componentes visuales (JPanels de grupos, Fichas, etc.)
-        this.removeAll();
-
-        // 2. Limpiar las memorias/mapas internos
-        this.fichasEnTablero.clear();
-        this.fichasEnTableroValidas.clear();
-        this.posicionesValidas.clear();
-
-        // 3. Refrescar el panel para que se vea vacío
-        this.revalidate();
-        this.repaint();
     }
 
     /**

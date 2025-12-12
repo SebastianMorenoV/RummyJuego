@@ -25,29 +25,9 @@ public class Controlador implements iControlEjercerTurno {
     iControlCUPrincipal controlPantallaPrincipal;
     iControlSalaEspera controlSalaDeEspera;
 
+
     public Controlador(Modelo modelo) {
         this.modelo = modelo;
-    }
-
-    @Override
-    public void solicitarTerminarPartida() {
-        modelo.solicitarTerminarPartida();
-    }
-
-    @Override
-    public void salirAlLobby() {
-
-        if (controlPantallaPrincipal != null) {
-            System.out.println("[Controlador] Regresando al Lobby Principal...");
-            controlPantallaPrincipal.pantallaInicial();
-        } else {
-            System.err.println("[Controlador] Error: No hay referencia a PantallaPrincipal");
-        }
-    }
-
-    @Override
-    public void enviarVotoTerminar(boolean aceptaTerminar) {
-        modelo.enviarVotoTerminar(aceptaTerminar);
     }
 
     /**
@@ -78,11 +58,9 @@ public class Controlador implements iControlEjercerTurno {
     public void regresarFichaAMano(int idFicha) {
         modelo.regresarFichaAMano(idFicha);
     }
-
-    public void mockGanarPartida() {
+    public void mockGanarPartida(){
         modelo.mockGanarPartida();
     }
-
     /**
      * Metodo que le habla al modelo para pasar el Turno.
      */
@@ -104,19 +82,11 @@ public class Controlador implements iControlEjercerTurno {
         modelo.abrirCU();
     }
 
+    
+
     @Override
     public void setControlSalaEspera(iControlSalaEspera ControlSalaEspera) {
         this.controlSalaDeEspera = ControlSalaEspera;
-    }
-
-    @Override
-    public void enviarMensajeChat(String mensaje) {
-        modelo.enviarMensajeChat(mensaje);
-    }
-
-    @Override
-    public String getNombreJugadorLocal() {
-        return modelo.getMiNickname(); // Asumiendo que el modelo tiene esto
     }
 
     @Override
@@ -126,6 +96,7 @@ public class Controlador implements iControlEjercerTurno {
         modelo.setIpCliente(ipCliente);
         modelo.setPuertoCliente(puertoCliente);
     }
+
 
     @Override
     public void cerrarCUAnteriores() {
@@ -142,5 +113,6 @@ public class Controlador implements iControlEjercerTurno {
     public void setControlPantallaPrincipal(iControlCUPrincipal controlPantallaPrincipal) {
         this.controlPantallaPrincipal = controlPantallaPrincipal;
     }
+
 
 }

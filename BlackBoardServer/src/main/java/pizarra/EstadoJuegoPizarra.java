@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * El Pizarrón (Blackboard) "tonto". Solo guarda datos (muchos como Strings) y
@@ -49,13 +48,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     private int votosInicioRecibidos = 0;
     private int totalVotantesInicio = 0;
     private String idSolicitanteInicio = "";
-    private Map<String, Integer> puntajesFinales = new ConcurrentHashMap<>();
-    private boolean recolectandoPuntajes = false;
-
-    private String ultimoMensajeChat = "";
-
-    private Map<String, Integer> votosTerminar = new ConcurrentHashMap<>();
-    private boolean votacionTerminarEnCurso = false;
 
     public EstadoJuegoPizarra() {
         this.ordenDeTurnos = Collections.synchronizedList(new ArrayList<>());
@@ -151,32 +143,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     public String getDatosJugador(String idJugador) {
         return this.datosJugadores.get(idJugador);
 
-    }
-
-    private void limpiarSalaTotalmente() {
-        this.indiceTurnoActual = -1;
-        this.mazoSerializado = "";
-        this.ultimoTableroSerializado = "";
-        this.ultimoJugadorQueMovio = "";
-
-        // --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
-        this.ordenDeTurnos.clear(); // ¡Expulsamos a todos de la sala lógica!
-        this.perfilesJugadores.clear();
-        this.datosJugadores.clear();
-        this.numeroDeJugadoresRegistrados = 0;
-        // ---------------------------------
-
-        this.fichasPorJugador.clear();
-        this.votosTerminar.clear();
-        this.puntajesFinales.clear();
-
-        this.recolectandoPuntajes = false;
-        this.votacionTerminarEnCurso = false;
-        this.partidaConfigurada = false;
-
-        System.out.println("[Pizarra] ---------------------------------------------");
-        System.out.println("[Pizarra] ¡SALA DISUELTA! Todos los jugadores han sido removidos.");
-        System.out.println("[Pizarra] ---------------------------------------------");
     }
 
     /**
@@ -318,53 +284,11 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
     @Override
     public void procesarComando(String idCliente, String comando, String payload) {
         switch (comando) {
-
-            case "CHAT":
-                // Payload llega como: "NombreEmisor:Mensaje"
-                this.ultimoMensajeChat = payload;
-                System.out.println("[Pizarra] Chat recibido de " + idCliente + ": " + payload);
-                notificarObservadores("NUEVO_MENSAJE_CHAT");
-                break;
             case "GANADOR":
-                // Un jugador dice que ganó (0 fichas).
-                // Iniciamos la recolección de puntos de TODOS para armar la tabla real.
-                System.out.println("[Pizarra] " + idCliente + " reclama victoria. Solicitando puntajes a todos...");
-                iniciarRecoleccionPuntajes(idCliente);
-                break;
-
-            case "ENVIO_PUNTAJE":
-                // Payload esperado: Puntos (int)
-                if (recolectandoPuntajes) {
-                    try {
-                        int puntos = Integer.parseInt(payload);
-                        registrarPuntajeFinal(idCliente, puntos);
-                    } catch (NumberFormatException e) {
-                        System.err.println("Error parsing puntaje de " + idCliente);
-                    }
-                }
-                break;
-
-            case "SOLICITAR_TERMINAR":
-                // Votación para acabar antes
-                // Payload: Puntos del solicitante (voto implícito SI)
-                try {
-                    int puntos = Integer.parseInt(payload);
-                    iniciarVotacionTerminar(idCliente, puntos);
-                } catch (NumberFormatException e) {
-                    System.err.println("Error parsing puntos solicitud: " + payload);
-                }
-                break;
-
-            case "VOTO_TERMINAR":
-                if (votacionTerminarEnCurso) {
-                    String[] partes = payload.split(":");
-                    boolean acepta = "SI".equals(partes[0]);
-                    int puntos = 0;
-                    if (acepta && partes.length > 1) {
-                        puntos = Integer.parseInt(partes[1]);
-                    }
-                    recibirVotoTerminar(idCliente, acepta, puntos);
-                }
+                System.out.println("[Pizarra] ¡Tenemos un ganador! Jugador: " + idCliente);
+                // Avisar a TODOS (incluyendo al que envió, aunque él ya lo sabe localmente no hace daño)
+                // El ControladorBlackboard debe tener un método para enviar "JUEGO_TERMINADO:ID_GANADOR" a todos.
+                notificarObservadores("NOTIFICAR_GANADOR:" + idCliente);
                 break;
             case "SOLICITAR_UNIRSE":
                 registrarCandidato(idCliente, payload);
@@ -515,14 +439,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
                             setFichasJugador(idCliente, fichasRestantes);
 
                             System.out.println("[Pizarra] " + idCliente + " finalizó con " + fichasRestantes + " fichas.");
-                            // --- NUEVA LÓGICA DE ALERTA ---
-                            if (fichasRestantes == 1) {
-                                notificarObservadores("ALERTA_FICHAS:" + idCliente + ":1");
-                            } else if (fichasRestantes == 5) {
-                                notificarObservadores("ALERTA_FICHAS:" + idCliente + ":5");
-                            } else if (fichasRestantes == 11) { // <--- NUEVA CONDICIÓN
-                                notificarObservadores("ALERTA_FICHAS:" + idCliente + ":11");
-                            }
                         } catch (NumberFormatException e) {
                             System.err.println("[Pizarra] Error al leer número de fichas: " + e.getMessage());
                         }
@@ -654,114 +570,6 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         return this.ordenDeTurnos;
     }
 
-    private synchronized void iniciarRecoleccionPuntajes(String idGanador) {
-        this.recolectandoPuntajes = true;
-        this.puntajesFinales.clear();
-
-        // El que ganó tiene 0 puntos automáticamente (ya que vació la mano)
-        this.puntajesFinales.put(idGanador, 0);
-
-        // Avisamos al controlador para que pida los puntos a los DEMÁS
-        notificarObservadores("SOLICITAR_PUNTOS_A_TODOS:" + idGanador);
-    }
-
-    private synchronized void registrarPuntajeFinal(String idJugador, int puntos) {
-        if (!recolectandoPuntajes) {
-            return;
-        }
-
-        this.puntajesFinales.put(idJugador, puntos);
-        System.out.println("[Pizarra] Puntaje recibido de " + idJugador + ": " + puntos);
-
-        // Verificamos si ya tenemos los puntos de todos los jugadores en la partida
-        if (puntajesFinales.size() >= ordenDeTurnos.size()) {
-            finalizarPartidaConResultados();
-        }
-    }
-
-    // --- MÉTODOS DE VOTACIÓN (Vote to End) ---
-    public synchronized void iniciarVotacionTerminar(String idSolicitante, int puntosSolicitante) {
-        if (votacionTerminarEnCurso || recolectandoPuntajes) {
-            return;
-        }
-
-        this.votacionTerminarEnCurso = true;
-        this.votosTerminar.clear();
-        this.votosTerminar.put(idSolicitante, puntosSolicitante); // Voto SI implícito
-
-        notificarObservadores("SOLICITUD_TERMINAR_ACTIVA:" + idSolicitante);
-    }
-
-    public synchronized void recibirVotoTerminar(String idVotante, boolean acepta, int puntos) {
-        if (!votacionTerminarEnCurso) {
-            return;
-        }
-
-        if (!acepta) {
-            this.votacionTerminarEnCurso = false;
-            this.votosTerminar.clear();
-            notificarObservadores("VOTACION_TERMINAR_FALLIDA");
-        } else {
-            this.votosTerminar.put(idVotante, puntos);
-
-            if (this.votosTerminar.size() >= this.ordenDeTurnos.size()) {
-                // Si todos votan SI, usamos esos puntajes como finales
-                this.puntajesFinales.putAll(this.votosTerminar);
-                this.votacionTerminarEnCurso = false;
-                finalizarPartidaConResultados();
-            }
-        }
-    }
-
-    // --- GENERACIÓN DE TABLA FINAL ---
-    private void finalizarPartidaConResultados() {
-        System.out.println("[Pizarra] Generando tabla de posiciones final...");
-
-        // Detenemos la recolección para que nadie más envíe puntos tarde
-        this.recolectandoPuntajes = false;
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== RESULTADOS FINALES ===\n");
-        sb.append("(Gana quien tenga MENOS puntos)\n\n");
-
-        if (puntajesFinales.isEmpty()) {
-            sb.append("No se registraron puntajes.");
-        } else {
-            // Ordenar: Menor puntaje = Mejor
-            puntajesFinales.entrySet().stream()
-                    .sorted(Map.Entry.comparingByValue())
-                    .forEach(entry -> {
-                        String id = entry.getKey();
-                        String nombre = obtenerNombreJugador(id); // Convertimos ID a Nombre
-                        sb.append(nombre).append(": ").append(entry.getValue()).append(" pts\n");
-                    });
-
-            // Encontrar al ganador
-            String idGanador = puntajesFinales.entrySet().stream()
-                    .min(Map.Entry.comparingByValue())
-                    .get().getKey();
-
-            sb.append("\n¡GANADOR: ").append(obtenerNombreJugador(idGanador)).append("!");
-        }
-
-        // 1. PRIMERO Enviamos resultados (mientras los datos de la sala siguen vivos)
-        String tablaCompleta = sb.toString();
-        notificarObservadores("PARTIDA_FINALIZADA:" + tablaCompleta);
-
-        // 2. DESPUÉS limpiamos todo
-        limpiarSalaTotalmente();
-    }
-
-    private String obtenerNombreJugador(String id) {
-        if (perfilesJugadores.containsKey(id)) {
-            String[] datos = perfilesJugadores.get(id).split("\\$");
-            if (datos.length > 0) {
-                return datos[0];
-            }
-        }
-        return id;
-    }
-
     /**
      * Almacena el estado "tonto" del mazo, serializado como una larga cadena de
      * texto.
@@ -827,18 +635,7 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
      */
     public void incrementarFichasJugador(String id) {
         if (fichasPorJugador.containsKey(id)) {
-            int nuevaCantidad = fichasPorJugador.get(id) + 1; // Calculamos la nueva cantidad
-            fichasPorJugador.put(id, nuevaCantidad);
-
-            // --- ALERTAS TAMBIÉN AL SUBIR FICHAS ---
-            if (nuevaCantidad == 1) {
-                notificarObservadores("ALERTA_FICHAS:" + id + ":1");
-            } else if (nuevaCantidad == 5) {
-                notificarObservadores("ALERTA_FICHAS:" + id + ":5");
-            } else if (nuevaCantidad == 20) {
-                notificarObservadores("ALERTA_FICHAS:" + id + ":20");
-            }
-            // ---------------------------------------
+            fichasPorJugador.put(id, fichasPorJugador.get(id) + 1);
         }
     }
 
@@ -958,30 +755,4 @@ public class EstadoJuegoPizarra implements iPizarraJuego {
         notificarObservadores("VOTACION_FINALIZADA");
     }
 
-    public String getUltimoMensajeChat() {
-        return ultimoMensajeChat;
-    }
-
-    private void reiniciarPizarra() {
-        this.indiceTurnoActual = -1;
-        this.mazoSerializado = "";
-        this.ultimoTableroSerializado = "";
-        this.ultimoJugadorQueMovio = "";
-
-        // BORRAMOS JUGADORES PARA QUE EL LOBBY QUEDE VACÍO
-        this.ordenDeTurnos.clear();
-        this.perfilesJugadores.clear();
-        this.datosJugadores.clear();
-        this.numeroDeJugadoresRegistrados = 0;
-
-        this.fichasPorJugador.clear();
-        this.votosTerminar.clear();
-        this.puntajesFinales.clear();
-
-        this.recolectandoPuntajes = false;
-        this.votacionTerminarEnCurso = false;
-        this.partidaConfigurada = false;
-
-        System.out.println("[Pizarra] ¡SALA REINICIADA! Lista para nuevos registros.");
-    }
 }
