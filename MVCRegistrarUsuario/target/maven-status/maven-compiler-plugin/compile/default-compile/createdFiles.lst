@@ -13,7 +13,6 @@ vista\ObservadorRegistro.class
 vista\RegistrarUsuario.class
 modelo\iModeloRegistro.class
 vista\EleccionColores.class
-vista\PanelRedondo.class
 vista\EleccionColores$1.class
 vista\EleccionColores$3.class
 vista\RegistrarUsuario$5.class

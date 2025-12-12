@@ -53,27 +53,17 @@ public class EleccionColores extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        subtitulo = new javax.swing.JLabel();
-        subtitulo1 = new javax.swing.JLabel();
-        colorSet4 = new vista.PanelRedondo(40);
         btnSet4 = new javax.swing.JLabel();
-        colorSet3 = new vista.PanelRedondo(40);
         btnSet3 = new javax.swing.JLabel();
-        colorSet2 = new vista.PanelRedondo(40);
         btnSet2 = new javax.swing.JLabel();
-        colorSet1 = new vista.PanelRedondo(40);
         btnSet1 = new javax.swing.JLabel();
-        prev4 = new vista.PanelRedondo(20);
-        jLabel4 = new javax.swing.JLabel();
-        prev3 = new vista.PanelRedondo(20);
-        jLabel3 = new javax.swing.JLabel();
-        prev2 = new vista.PanelRedondo(20);
-        jLabel2 = new javax.swing.JLabel();
-        prev1 = new vista.PanelRedondo(20);
-        jLabel1 = new javax.swing.JLabel();
-        fondoBtnRegresar = new vista.PanelRedondo(20);
+        colorSet4 = new javax.swing.JPanel();
+        colorSet3 = new javax.swing.JPanel();
+        colorSet2 = new javax.swing.JPanel();
+        colorSet1 = new javax.swing.JPanel();
+        fondoBtnRegresar = new javax.swing.JPanel();
         btnRegresar = new javax.swing.JLabel();
-        fondoBtnConfirmar = new vista.PanelRedondo(20);
+        fondoBtnConfirmar = new javax.swing.JPanel();
         btnConfirmar = new javax.swing.JLabel();
         txtSet4 = new javax.swing.JLabel();
         txtSet3 = new javax.swing.JLabel();
@@ -81,196 +71,81 @@ public class EleccionColores extends javax.swing.JFrame {
         txtSet1 = new javax.swing.JLabel();
         txtTitulo = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
-        subtitulo2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        subtitulo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        subtitulo.setForeground(new java.awt.Color(232, 241, 251));
-        subtitulo.setText("Previsualización ");
-        getContentPane().add(subtitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 430, -1, -1));
+        btnSet4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        getContentPane().add(btnSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 430, 50, 50));
 
-        subtitulo1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        subtitulo1.setForeground(new java.awt.Color(232, 241, 251));
-        subtitulo1.setText("Elige los colores de tus 4 sets");
-        getContentPane().add(subtitulo1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 110, -1, -1));
+        btnSet3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        getContentPane().add(btnSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 340, 50, 50));
+
+        btnSet2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        getContentPane().add(btnSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, 50, 50));
+
+        btnSet1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
+        getContentPane().add(btnSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 160, 50, 50));
 
         colorSet4.setBackground(new java.awt.Color(255, 255, 255));
-
-        btnSet4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
 
         javax.swing.GroupLayout colorSet4Layout = new javax.swing.GroupLayout(colorSet4);
         colorSet4.setLayout(colorSet4Layout);
         colorSet4Layout.setHorizontalGroup(
             colorSet4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet4Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet4, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
         colorSet4Layout.setVerticalGroup(
             colorSet4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet4Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet4, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
 
-        getContentPane().add(colorSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 180, 50, 50));
+        getContentPane().add(colorSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 430, -1, -1));
 
         colorSet3.setBackground(new java.awt.Color(255, 255, 255));
-
-        btnSet3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
 
         javax.swing.GroupLayout colorSet3Layout = new javax.swing.GroupLayout(colorSet3);
         colorSet3.setLayout(colorSet3Layout);
         colorSet3Layout.setHorizontalGroup(
             colorSet3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(colorSet3Layout.createSequentialGroup()
-                .addComponent(btnSet3, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
         colorSet3Layout.setVerticalGroup(
             colorSet3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet3Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet3, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
 
-        getContentPane().add(colorSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 180, 50, 50));
+        getContentPane().add(colorSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 340, 50, 50));
 
         colorSet2.setBackground(new java.awt.Color(255, 255, 255));
-
-        btnSet2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
 
         javax.swing.GroupLayout colorSet2Layout = new javax.swing.GroupLayout(colorSet2);
         colorSet2.setLayout(colorSet2Layout);
         colorSet2Layout.setHorizontalGroup(
             colorSet2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
         colorSet2Layout.setVerticalGroup(
             colorSet2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
 
-        getContentPane().add(colorSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 180, 50, 50));
+        getContentPane().add(colorSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, 50, 50));
 
         colorSet1.setBackground(new java.awt.Color(255, 255, 255));
-
-        btnSet1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/cubeta.png"))); // NOI18N
 
         javax.swing.GroupLayout colorSet1Layout = new javax.swing.GroupLayout(colorSet1);
         colorSet1.setLayout(colorSet1Layout);
         colorSet1Layout.setHorizontalGroup(
             colorSet1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
         colorSet1Layout.setVerticalGroup(
             colorSet1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, colorSet1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnSet1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 50, Short.MAX_VALUE)
         );
 
-        getContentPane().add(colorSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 180, 50, 50));
-
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("4");
-
-        javax.swing.GroupLayout prev4Layout = new javax.swing.GroupLayout(prev4);
-        prev4.setLayout(prev4Layout);
-        prev4Layout.setHorizontalGroup(
-            prev4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev4Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel4)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        prev4Layout.setVerticalGroup(
-            prev4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, prev4Layout.createSequentialGroup()
-                .addContainerGap(19, Short.MAX_VALUE)
-                .addComponent(jLabel4)
-                .addGap(16, 16, 16))
-        );
-
-        getContentPane().add(prev4, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 350, 40, 60));
-
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("3");
-
-        javax.swing.GroupLayout prev3Layout = new javax.swing.GroupLayout(prev3);
-        prev3.setLayout(prev3Layout);
-        prev3Layout.setHorizontalGroup(
-            prev3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev3Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabel3)
-                .addContainerGap(15, Short.MAX_VALUE))
-        );
-        prev3Layout.setVerticalGroup(
-            prev3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev3Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addComponent(jLabel3)
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
-
-        getContentPane().add(prev3, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 350, 40, 60));
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("2");
-
-        javax.swing.GroupLayout prev2Layout = new javax.swing.GroupLayout(prev2);
-        prev2.setLayout(prev2Layout);
-        prev2Layout.setHorizontalGroup(
-            prev2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev2Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jLabel2)
-                .addContainerGap(16, Short.MAX_VALUE))
-        );
-        prev2Layout.setVerticalGroup(
-            prev2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev2Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addComponent(jLabel2)
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
-
-        getContentPane().add(prev2, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 350, 40, 60));
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("1");
-
-        javax.swing.GroupLayout prev1Layout = new javax.swing.GroupLayout(prev1);
-        prev1.setLayout(prev1Layout);
-        prev1Layout.setHorizontalGroup(
-            prev1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev1Layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(jLabel1)
-                .addContainerGap(16, Short.MAX_VALUE))
-        );
-        prev1Layout.setVerticalGroup(
-            prev1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(prev1Layout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addComponent(jLabel1)
-                .addContainerGap(18, Short.MAX_VALUE))
-        );
-
-        getContentPane().add(prev1, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 350, 40, 60));
+        getContentPane().add(colorSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 160, 50, 50));
 
         fondoBtnRegresar.setBackground(new java.awt.Color(206, 70, 70));
 
@@ -292,10 +167,10 @@ public class EleccionColores extends javax.swing.JFrame {
 
         getContentPane().add(fondoBtnRegresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 500, 170, 50));
 
-        fondoBtnConfirmar.setBackground(new java.awt.Color(20, 86, 128));
+        fondoBtnConfirmar.setBackground(new java.awt.Color(255, 235, 126));
 
-        btnConfirmar.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        btnConfirmar.setForeground(new java.awt.Color(232, 241, 251));
+        btnConfirmar.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        btnConfirmar.setForeground(new java.awt.Color(204, 102, 0));
         btnConfirmar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnConfirmar.setText("Confirmar");
 
@@ -312,40 +187,35 @@ public class EleccionColores extends javax.swing.JFrame {
 
         getContentPane().add(fondoBtnConfirmar, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 490, 180, 60));
 
-        txtSet4.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        txtSet4.setFont(new java.awt.Font("Segoe UI", 0, 45)); // NOI18N
         txtSet4.setForeground(new java.awt.Color(255, 255, 255));
         txtSet4.setText("SET 4");
-        getContentPane().add(txtSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 240, -1, -1));
+        getContentPane().add(txtSet4, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 420, -1, -1));
 
-        txtSet3.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        txtSet3.setFont(new java.awt.Font("Segoe UI", 0, 45)); // NOI18N
         txtSet3.setForeground(new java.awt.Color(255, 255, 255));
         txtSet3.setText("SET 3");
-        getContentPane().add(txtSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 240, -1, -1));
+        getContentPane().add(txtSet3, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 330, -1, -1));
 
-        txtSet2.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        txtSet2.setFont(new java.awt.Font("Segoe UI", 0, 45)); // NOI18N
         txtSet2.setForeground(new java.awt.Color(255, 255, 255));
         txtSet2.setText("SET 2");
-        getContentPane().add(txtSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 240, -1, -1));
+        getContentPane().add(txtSet2, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 240, -1, -1));
 
-        txtSet1.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        txtSet1.setFont(new java.awt.Font("Segoe UI", 0, 45)); // NOI18N
         txtSet1.setForeground(new java.awt.Color(255, 255, 255));
         txtSet1.setText("SET 1");
-        getContentPane().add(txtSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 240, -1, -1));
+        getContentPane().add(txtSet1, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 150, -1, -1));
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(232, 241, 251));
+        txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
         txtTitulo.setText("Elegir Colores");
-        getContentPane().add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 30, -1, -1));
+        getContentPane().add(txtTitulo, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 30, -1, -1));
 
         fondo.setForeground(new java.awt.Color(255, 255, 255));
         fondo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.jpg"))); // NOI18N
         fondo.setText("jLabel1");
         getContentPane().add(fondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 920, 570));
-
-        subtitulo2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        subtitulo2.setForeground(new java.awt.Color(232, 241, 251));
-        subtitulo2.setText("Elige los colores de tus 4 sets");
-        getContentPane().add(subtitulo2, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 110, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -356,40 +226,34 @@ public class EleccionColores extends javax.swing.JFrame {
         colorSet2.setBackground(COLOR_SET_2);
         colorSet3.setBackground(COLOR_SET_3);
         colorSet4.setBackground(COLOR_SET_4);
-
-        // Al asignar el background aquí, el PanelRedondo lo usará para pintar el círculo/óvalo
-        prev1.setBackground(COLOR_SET_1);
-        prev2.setBackground(COLOR_SET_2);
-        prev3.setBackground(COLOR_SET_3);
-        prev4.setBackground(COLOR_SET_4);
     }
 
     private void initEventos() {
         btnSet1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet1, prev1);
+                mostrarMiniSelectorColor(colorSet1);
             }
         });
 
         btnSet2.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet2, prev2);
+                mostrarMiniSelectorColor(colorSet2);
             }
         });
 
         btnSet3.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet3, prev3);
+                mostrarMiniSelectorColor(colorSet3);
             }
         });
 
         btnSet4.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                mostrarMiniSelectorColor(colorSet4, prev4);
+                mostrarMiniSelectorColor(colorSet4);
             }
         });
 
@@ -439,7 +303,7 @@ public class EleccionColores extends javax.swing.JFrame {
      *
      * @param panelDestino
      */
-    private void mostrarMiniSelectorColor(JPanel panelDestino, JPanel panelPrev) {
+    private void mostrarMiniSelectorColor(JPanel panelDestino) {
         JPopupMenu popup = new JPopupMenu();
         JPanel grid = new JPanel(new java.awt.GridLayout(2, 6, 5, 5));
         grid.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -460,17 +324,9 @@ public class EleccionColores extends javax.swing.JFrame {
             cuadrito.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    // 1. Cambiamos el color del cuadrito pequeño (colorSet1, colorSet2...)
-                    panelDestino.setBackground(c);
-
-                    // 2. Cambiamos el color del panel de previsualización (prev1, prev2...)
-                    // Aquí usamos "panelPrev" que es el nombre temporal que le dimos arriba
-                    if (panelPrev != null) {
-                        panelPrev.setBackground(c);
-                        panelPrev.repaint(); // Forzamos que se repinte inmediatamente
-                    }
-
+                    panelDestino.setBackground(c); // Actualiza visualmente el panel
                     popup.setVisible(false);
+
                 }
             });
 
@@ -478,6 +334,8 @@ public class EleccionColores extends javax.swing.JFrame {
         }
 
         popup.add(grid);
+
+        // Mostrar popup debajo del panel destino
         popup.show(panelDestino, panelDestino.getWidth(), 0);
     }
 
@@ -496,17 +354,6 @@ public class EleccionColores extends javax.swing.JFrame {
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel fondoBtnConfirmar;
     private javax.swing.JPanel fondoBtnRegresar;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JPanel prev1;
-    private javax.swing.JPanel prev2;
-    private javax.swing.JPanel prev3;
-    private javax.swing.JPanel prev4;
-    private javax.swing.JLabel subtitulo;
-    private javax.swing.JLabel subtitulo1;
-    private javax.swing.JLabel subtitulo2;
     private javax.swing.JLabel txtSet1;
     private javax.swing.JLabel txtSet2;
     private javax.swing.JLabel txtSet3;

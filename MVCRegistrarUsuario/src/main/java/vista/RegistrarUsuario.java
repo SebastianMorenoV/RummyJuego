@@ -5,6 +5,7 @@
 package vista;
 
 import TipoEventos.EventoRegistro;
+import contratos.controladoresMVC.iControlCUPrincipal;
 import contratos.controladoresMVC.iControlRegistro;
 import contratos.iNavegacion;
 import java.awt.Color;
@@ -140,24 +141,20 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        panel = new vista.PanelRedondo(20);
+        panel = new javax.swing.JPanel();
         btnRegistrar = new javax.swing.JLabel();
         btnColor = new javax.swing.JLabel();
-        flechaDer = new vista.PanelRedondo(30);
-        flechaDerecha = new javax.swing.JLabel();
-        flechaIzq = new vista.PanelRedondo(30);
-        flechaIzquierda = new javax.swing.JLabel();
         txtfldNombre = new javax.swing.JTextField();
         txt2 = new javax.swing.JLabel();
         txt1 = new javax.swing.JLabel();
         txtSubtitulo = new javax.swing.JLabel();
-        fondoavatar4 = new vista.PanelRedondo(20);
+        fondoavatar4 = new javax.swing.JPanel();
         avatar4 = new javax.swing.JLabel();
-        fondoAvatar3 = new vista.PanelRedondo(20);
+        fondoAvatar3 = new javax.swing.JPanel();
         avatar3 = new javax.swing.JLabel();
-        fondoAvatar2 = new vista.PanelRedondo(20);
+        fondoAvatar2 = new javax.swing.JPanel();
         avatar2 = new javax.swing.JLabel();
-        fondoAvatar1 = new vista.PanelRedondo(20);
+        fondoAvatar1 = new javax.swing.JPanel();
         avatar1 = new javax.swing.JLabel();
         txtTitulo = new javax.swing.JLabel();
         fondo = new javax.swing.JLabel();
@@ -166,11 +163,11 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        panel.setBackground(new java.awt.Color(20, 86, 128));
+        panel.setBackground(new java.awt.Color(246, 220, 105));
         panel.setForeground(new java.awt.Color(246, 220, 105));
 
         btnRegistrar.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        btnRegistrar.setForeground(new java.awt.Color(232, 241, 251));
+        btnRegistrar.setForeground(new java.awt.Color(153, 102, 0));
         btnRegistrar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnRegistrar.setText("Registrarse");
 
@@ -185,53 +182,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
             .addComponent(btnRegistrar, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
         );
 
-        jPanel1.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 420, 210, 60));
+        jPanel1.add(panel, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 390, 210, 60));
 
         btnColor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/color.png"))); // NOI18N
-        jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 340, -1, -1));
-
-        flechaDer.setBackground(new java.awt.Color(232, 241, 251));
-        flechaDer.setForeground(new java.awt.Color(232, 241, 251));
-
-        flechaDerecha.setBackground(new java.awt.Color(20, 86, 128));
-        flechaDerecha.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        flechaDerecha.setForeground(new java.awt.Color(20, 86, 128));
-        flechaDerecha.setText(">");
-
-        javax.swing.GroupLayout flechaDerLayout = new javax.swing.GroupLayout(flechaDer);
-        flechaDer.setLayout(flechaDerLayout);
-        flechaDerLayout.setHorizontalGroup(
-            flechaDerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(flechaDerecha, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
-        );
-        flechaDerLayout.setVerticalGroup(
-            flechaDerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(flechaDerecha, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
-        );
-
-        jPanel1.add(flechaDer, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 270, 20, 40));
-
-        flechaIzq.setBackground(new java.awt.Color(232, 241, 251));
-        flechaIzq.setForeground(new java.awt.Color(20, 86, 128));
-        flechaIzq.setToolTipText("");
-
-        flechaIzquierda.setBackground(new java.awt.Color(20, 86, 128));
-        flechaIzquierda.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        flechaIzquierda.setForeground(new java.awt.Color(20, 86, 128));
-        flechaIzquierda.setText("<");
-
-        javax.swing.GroupLayout flechaIzqLayout = new javax.swing.GroupLayout(flechaIzq);
-        flechaIzq.setLayout(flechaIzqLayout);
-        flechaIzqLayout.setHorizontalGroup(
-            flechaIzqLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(flechaIzquierda, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        flechaIzqLayout.setVerticalGroup(
-            flechaIzqLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(flechaIzquierda, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-
-        jPanel1.add(flechaIzq, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 270, 20, 40));
+        jPanel1.add(btnColor, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 320, -1, -1));
 
         txtfldNombre.setBackground(new java.awt.Color(255, 255, 255));
         txtfldNombre.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
@@ -240,17 +194,17 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 txtfldNombreActionPerformed(evt);
             }
         });
-        jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 340, 250, 40));
+        jPanel1.add(txtfldNombre, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 270, 410, 40));
 
         txt2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txt2.setForeground(new java.awt.Color(255, 255, 255));
         txt2.setText("Color de fichas:");
-        jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 300, -1, -1));
+        jPanel1.add(txt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 320, -1, -1));
 
         txt1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txt1.setForeground(new java.awt.Color(255, 255, 255));
         txt1.setText("Nombre:");
-        jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 300, -1, -1));
+        jPanel1.add(txt1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 230, -1, -1));
 
         txtSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txtSubtitulo.setForeground(new java.awt.Color(255, 255, 255));
@@ -265,16 +219,16 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         fondoavatar4.setLayout(fondoavatar4Layout);
         fondoavatar4Layout.setHorizontalGroup(
             fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(avatar4, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+            .addComponent(avatar4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
         fondoavatar4Layout.setVerticalGroup(
             fondoavatar4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoavatar4Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(fondoavatar4Layout.createSequentialGroup()
+                .addComponent(avatar4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jPanel1.add(fondoavatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 170, 70, 70));
+        jPanel1.add(fondoavatar4, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 150, 70, 70));
 
         fondoAvatar3.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -284,9 +238,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         fondoAvatar3.setLayout(fondoAvatar3Layout);
         fondoAvatar3Layout.setHorizontalGroup(
             fondoAvatar3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar3Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(avatar3, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
         );
         fondoAvatar3Layout.setVerticalGroup(
             fondoAvatar3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -295,7 +247,7 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 .addComponent(avatar3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 170, 70, 70));
+        jPanel1.add(fondoAvatar3, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 150, 70, 70));
 
         fondoAvatar2.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -305,18 +257,16 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
         fondoAvatar2.setLayout(fondoAvatar2Layout);
         fondoAvatar2Layout.setHorizontalGroup(
             fondoAvatar2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(avatar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         fondoAvatar2Layout.setVerticalGroup(
             fondoAvatar2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoAvatar2Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(avatar2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(avatar2, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 170, 70, 70));
+        jPanel1.add(fondoAvatar2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 150, 70, 70));
 
         fondoAvatar1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -338,10 +288,10 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
                 .addComponent(avatar1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 70, 70));
+        jPanel1.add(fondoAvatar1, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 150, 70, 70));
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 50)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(232, 241, 251));
+        txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
         txtTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtTitulo.setText("Registrar Usuario");
         txtTitulo.setToolTipText("");
@@ -387,10 +337,6 @@ public class RegistrarUsuario extends javax.swing.JFrame implements ObservadorRe
     private javax.swing.JLabel avatar4;
     private javax.swing.JLabel btnColor;
     private javax.swing.JLabel btnRegistrar;
-    private javax.swing.JPanel flechaDer;
-    private javax.swing.JLabel flechaDerecha;
-    private javax.swing.JPanel flechaIzq;
-    private javax.swing.JLabel flechaIzquierda;
     private javax.swing.JLabel fondo;
     private javax.swing.JPanel fondoAvatar1;
     private javax.swing.JPanel fondoAvatar2;

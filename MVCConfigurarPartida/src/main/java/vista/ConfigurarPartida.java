@@ -53,7 +53,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().setLayout(null);
 
         txtTitulo.setFont(new java.awt.Font("Segoe UI", 0, 60)); // NOI18N
-        txtTitulo.setForeground(new java.awt.Color(255, 255, 255));
+        txtTitulo.setForeground(new java.awt.Color(246, 220, 105));
         txtTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtTitulo.setText("Configurar Partida");
         getContentPane().add(txtTitulo);
@@ -68,7 +68,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(spinnerComidines);
         spinnerComidines.setBounds(450, 142, 260, 30);
 
-        btn13Fichas.setBackground(new java.awt.Color(20, 86, 128));
+        btn13Fichas.setBackground(new java.awt.Color(246, 220, 105));
         btn13Fichas.setRoundBottomLeft(30);
         btn13Fichas.setRoundBottomRight(30);
         btn13Fichas.setRoundTopLeft(30);
@@ -76,10 +76,9 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         btn13Fichas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         txt13Fichas.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txt13Fichas.setForeground(new java.awt.Color(232, 241, 251));
         txt13Fichas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txt13Fichas.setText("13 Fichas");
-        txt13Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txt13Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txt13Fichas.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txt13FichasMouseClicked(evt);
@@ -90,18 +89,17 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(btn13Fichas);
         btn13Fichas.setBounds(470, 210, 240, 60);
 
-        btnCrearPartida.setBackground(new java.awt.Color(25, 84, 160));
+        btnCrearPartida.setBackground(new java.awt.Color(246, 220, 105));
         btnCrearPartida.setRoundBottomLeft(30);
         btnCrearPartida.setRoundBottomRight(30);
         btnCrearPartida.setRoundTopLeft(30);
         btnCrearPartida.setRoundTopRight(30);
         btnCrearPartida.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        txtCrearPartida.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        txtCrearPartida.setForeground(new java.awt.Color(232, 241, 251));
+        txtCrearPartida.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txtCrearPartida.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtCrearPartida.setText("Crear Partida");
-        txtCrearPartida.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txtCrearPartida.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txtCrearPartida.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txtCrearPartidaMouseClicked(evt);
@@ -112,7 +110,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(btnCrearPartida);
         btnCrearPartida.setBounds(320, 300, 240, 70);
 
-        btn10Fichas.setBackground(new java.awt.Color(20, 86, 128));
+        btn10Fichas.setBackground(new java.awt.Color(246, 220, 105));
         btn10Fichas.setRoundBottomLeft(30);
         btn10Fichas.setRoundBottomRight(30);
         btn10Fichas.setRoundTopLeft(30);
@@ -120,10 +118,9 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         btn10Fichas.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         txt10Fichas.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txt10Fichas.setForeground(new java.awt.Color(232, 241, 251));
         txt10Fichas.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txt10Fichas.setText("10 Fichas");
-        txt10Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txt10Fichas.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txt10Fichas.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txt10FichasMouseClicked(evt);
@@ -140,7 +137,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(txtNumComodines);
         txtNumComodines.setBounds(190, 140, 280, 32);
 
-        btnRegresar.setBackground(new java.awt.Color(232, 108, 108));
+        btnRegresar.setBackground(new java.awt.Color(206, 70, 70));
         btnRegresar.setRoundBottomLeft(20);
         btnRegresar.setRoundBottomRight(20);
         btnRegresar.setRoundTopLeft(20);
@@ -151,7 +148,7 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         txtNumComodines1.setForeground(new java.awt.Color(255, 255, 255));
         txtNumComodines1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtNumComodines1.setText("Regresar");
-        txtNumComodines1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        txtNumComodines1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         txtNumComodines1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 txtNumComodines1MouseClicked(evt);
@@ -165,19 +162,20 @@ public class ConfigurarPartida extends javax.swing.JFrame implements ObservadorC
         getContentPane().add(btnRegresar);
         btnRegresar.setBounds(30, 440, 170, 40);
 
-        txtNumComodines2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtNumComodines2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txtNumComodines2.setForeground(new java.awt.Color(255, 255, 255));
         txtNumComodines2.setText("Comodines: 1");
         getContentPane().add(txtNumComodines2);
         txtNumComodines2.setBounds(190, 102, 200, 30);
 
-        txtFichasCont.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        txtFichasCont.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         txtFichasCont.setForeground(new java.awt.Color(255, 255, 255));
         txtFichasCont.setText("Fichas: ");
         getContentPane().add(txtFichasCont);
-        txtFichasCont.setBounds(450, 100, 250, 30);
+        txtFichasCont.setBounds(430, 102, 250, 30);
 
         fondoRummy.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/fondoRummy.jpg"))); // NOI18N
+        fondoRummy.setText("NN");
         fondoRummy.setMaximumSize(new java.awt.Dimension(900, 500));
         fondoRummy.setMinimumSize(new java.awt.Dimension(900, 500));
         fondoRummy.setName(""); // NOI18N
