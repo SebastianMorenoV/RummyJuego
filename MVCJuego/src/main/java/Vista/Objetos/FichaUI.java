@@ -1,14 +1,19 @@
 package Vista.Objetos;
 
 import DTO.GrupoDTO;
+import GestorDeSonidos.GestorSonidos;
 import Vista.VistaTablero;
 import contratos.controladoresMVC.iControlEjercerTurno;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -32,7 +37,7 @@ public class FichaUI extends JPanel {
     private Point originalLocation;
     private JPanel originalParent;
     private Origen origen;
-
+    private boolean isHovered = false;
     private JComponent glassPane;
     private Point glassPaneOffset;
 
@@ -70,11 +75,28 @@ public class FichaUI extends JPanel {
 
     private void initDrag() {
         MouseAdapter ma = new MouseAdapter() {
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (getParent() != null && getParent().isEnabled()) {
+                    isHovered = true;
+                    repaint(); // Forza a repintar para mostrar el borde
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                isHovered = false;
+                repaint(); // Quita el borde
+            }
+
             @Override
             public void mousePressed(MouseEvent e) {
                 if (getParent() != null && !getParent().isEnabled()) {
                     return;
                 }
+                GestorSonidos.reproducir(GestorSonidos.SONIDO_CLICK);
+
                 setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
                 originalParent = (JPanel) getParent();
                 originalLocation = getLocation();
@@ -159,6 +181,7 @@ public class FichaUI extends JPanel {
                     boolean colocada = panelTablero.colocarFichaEnCelda(FichaUI.this, dropPoint);
 
                     if (colocada) {
+                        GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
                         origen = Origen.TABLERO;
 
                         List<GrupoDTO> gruposColocados = panelTablero.generarGruposDesdeCeldas();
@@ -175,6 +198,7 @@ public class FichaUI extends JPanel {
                         if (fichasValidadas.containsValue(FichaUI.this)) {
                             devolverFichaAlOrigen();
                         } else {
+                            GestorSonidos.reproducir(GestorSonidos.SONIDO_SOLTAR);
                             control.regresarFichaAMano(FichaUI.this.idFicha);
                         }
 
@@ -201,6 +225,7 @@ public class FichaUI extends JPanel {
              * estaba colocada.
              */
             private void devolverFichaAlOrigen() {
+                GestorSonidos.reproducir(GestorSonidos.SONIDO_ERROR);
                 setLocation(originalLocation);
                 originalParent.add(FichaUI.this);
                 originalParent.revalidate();
@@ -220,17 +245,38 @@ public class FichaUI extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(color);
-        g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+        Graphics2D g2 = (Graphics2D) g;
+        // ACTIVAR ANTI-ALIASING (Hace que las líneas y curvas se vean suaves y HD)
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g.setColor(Color.WHITE);
-        FontMetrics fm = g.getFontMetrics();
+        // Fondo de la ficha
+        g2.setColor(color);
+        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+
+        // --- EFECTO HOVER ---
+        if (isHovered) {
+            // Borde dorado brillante cuando pasas el mouse
+            g2.setColor(new Color(255, 215, 0));
+            g2.setStroke(new BasicStroke(3));
+            g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 10, 10);
+        }
+
+        // Texto o Símbolo
+        g2.setColor(Color.WHITE);
+
+        // --- FUENTE GRUESA (BOLD) Y MÁS GRANDE ---
+        // SansSerif suele ser más limpia para números que la fuente por defecto.
+        g2.setFont(new Font("SansSerif", Font.BOLD, 20));
+
+        FontMetrics fm = g2.getFontMetrics();
         String texto = comodin ? "★" : String.valueOf(numero);
 
         int x = (getWidth() - fm.stringWidth(texto)) / 2;
-        int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+        // Ajuste vertical preciso para centrar
+        int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent() - 2;
 
-        g.drawString(texto, x, y);
+        g2.drawString(texto, x, y);
     }
 
     public int getIdFicha() {
