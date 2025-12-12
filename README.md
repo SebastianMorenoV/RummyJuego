@@ -1,15 +1,16 @@
 # 🃏 Arquitectura de Software - Proyecto Juego Rummy
 
-Este proyecto implementa el juego de Rummy, centrándose en una arquitectura de software MVC limpia y bien definida para asegurar la escalabilidad y el mantenimiento.
+Este proyecto representa el juego de Mesa Rummy Multijugador Online o Localhost, centrándose en una arquitectura de software MVC limpia integrada con la Arquitectura Blackboard bien definida para asegurar la escalabilidad y el mantenimiento manejando una comunicacion intermitente asincrona con sockets TCP.
 
-Release: 03/10/2025
+Release: 12/12/2025
 ---
 
 ## 🛠️ Tecnologías Utilizadas
 
 *   **Java**: Lenguaje de programación principal.
-*   **Java Swing / JavaFX**: Utilizada para la interfaz de usuario.
-*   **Maven / Gradle**: Para la gestión de dependencias y la construcción del proyecto.
+*   **Java Swing**: Utilizada para la interfaz de usuario.
+*   **Maven**: Para la gestión de dependencias y la construcción del proyecto.
+*   **Sockets TCP**: Para la comunicacion TCP entre cliente y servidor.
 
 ---
 
@@ -17,9 +18,9 @@ Release: 03/10/2025
 
 ### 📋 Prerrequisitos
 
-Asegúrate de tener instalado el JDK (Java Development Kit) en tu máquina.
+Asegúrate de tener instalado el JDK17+ (Java Development Kit) en tu PC.
 
-### ⚙️ Instalación
+### ⚙️ Instalación por Git
 
 1.  **Clonar el repositorio**:
     ```bash
@@ -36,10 +37,9 @@ Asegúrate de tener instalado el JDK (Java Development Kit) en tu máquina.
 ### ▶️ Ejecutar el Programa
 
 > [!TIP]
-> Para iniciar el juego, ejecuta la clase `Main` ubicada en el paquete `main`.
-
-1.  **Ejecutar la clase principal**:
-    Despues de clean and build correr la clase main.
+> Es prioritario primero ejecutar la clase main `BlackboardServer.java` del paquete `main` en el proyecto `BlackboardServer`
+> Una vez corriendo, Abrir el Proyecto `Ensambladores` y Cambiar la clase `Configuracion` dentro del paquete `Util` la IP prestablecida, por la IP que este corriendo el `BlackboardServer.java`.
+> Para iniciar el juego como cliente y poder jugar, ejecuta la clase `EnsambladorMVC.java` ubicada en el paquete `Ensambladores` del Proyecto `Ensambladores`.
 
 ## 🏗️ Arquitectura del Software
 
@@ -58,6 +58,11 @@ El proyecto sigue un diseño modular para separar la lógica de negocio de la in
 *   **`Controlador`**: Responsable de atender las llamadas de la vista, dirigiendolas hacia el modelo.
 *   **`Modelo`**: Responsable de la logica principal de el juego y dirigir llamadas a entidades necesarias para validar las reglas de el juego. (Se comunica con la vista a traves de segregar una interfaz con metodos para obtener datos, pasandoselo como notificacion a los observadores de esta misma). 
 
+
+## CONTENIDO DE BLACKBOARD:
+*  **`Blackboard`** : Ubicada como EstadoJuegoPizarra.java es utilizada como pizarra "dummy" el estado del juego sin logica de negocio, responsable de guardar datos escenciales del juego y notificar al Controlador mediante el patron `Observer` cuando recibe un cambio por la comunicacion TCP.
+*  **`Controlador`** : Ubicado como ControladorBlackboard.java es utilizado como un mediador encargado de hablarle a los Agentes(`Componentes MVC`) cuando se le notifica el cambio , esta comunicacion se realiza mediante Sockets TCP que se abren y se cierran para mantener una comunicacion Asincrona Intermitente y no cargar los recursos.
+*  **`Agentes de Conocimiento`** : Ubicados como los `Componentes MVC` de todo el proyecto son los encargados de escribir en la pizarra y como anteriormente se explico ellos mantienen la logica de negocio y tambien utilizan el patron `Observer`, escriben dentro de la Pizarra utilizando los mismos SocketsTCP, `Controlador` los notifica mientras que ellos escuchan esos cambios gracias a la interfaz PropertyChangeListener.
 ---
 
 ## 👨‍💻 Equipo de Desarrollo
