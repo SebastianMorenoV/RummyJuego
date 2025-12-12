@@ -42,7 +42,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
     private String idJugadorEnTurnoGlobal = "";
     private boolean esMiTurno;
     private iDespachador despachador;
-
+    private String mensajeTemporalVista = "";
     String ipServidor;
     int puertoServidor;
     String ipCliente;
@@ -98,6 +98,42 @@ public class Modelo implements IModelo, PropertyChangeListener {
         String payloadd = (evt.getNewValue() != null) ? evt.getNewValue().toString() : "";
 
         switch (evento) {
+            case "ALERTA_FICHAS":
+                try {
+                    // Payload: "ID_JUGADOR:CANTIDAD"
+                    String[] partes = payloadd.split(":");
+                    String idJugador = partes[0];
+                    int cantidad = Integer.parseInt(partes[1]);
+
+                    String nombreMostrar = idJugador; // Fallback por si acaso
+
+                    if (perfilesJugadores.containsKey(idJugador)) {
+                        JugadorDTO perfil = perfilesJugadores.get(idJugador);
+                        if (perfil != null && perfil.getNombre() != null) {
+                            nombreMostrar = perfil.getNombre(); // <--- LA FORMA CORRECTA
+                        }
+                    }
+
+                    // Crear mensaje amigable
+                    String mensajeAlerta = "";
+                    if (cantidad == 1) {
+                        mensajeAlerta = "¡CUIDADO! A " + nombreMostrar + " le queda 1 ficha.";
+                    } else if (cantidad == 5) {
+                        mensajeAlerta = "¡Atención! " + nombreMostrar + " tiene 5 fichas.";
+                    } else if (cantidad == 20) { // <--- NUEVO MENSAJE
+                        mensajeAlerta = "¡Información! " + nombreMostrar + " subio a 20 fichas. JAJA";
+                    }
+
+                    // Notificar a la vista (Usamos el constructor de chat que recibe String)
+                    ActualizacionDTO dto = new ActualizacionDTO(TipoEvento.MOSTRAR_ALERTA, this.esMiTurno, mensajeAlerta);
+                    for (Observador obs : observadores) {
+                        obs.actualiza(this, dto);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
             case "JUEGO_TERMINADO":
                 String idGanador = payloadd;
                 System.out.println("[Modelo] El juego terminó. Ganador: " + idGanador);
@@ -111,11 +147,27 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 System.out.println("[Modelo] Recibida orden del servidor para iniciar la partida.");
                 enviarComandoIniciarPartida();
                 break;
-
+            case "CHAT_MENSAJE":
+                // payload llega como: "NombreEmisor:Mensaje"
+                notificarObservadoresChat(payloadd);
+                break;
             case "MANO_INICIAL":
                 System.out.println("[Modelo] Evento 'MANO_INICIAL' detectado!");
                 System.out.println("PAYLOAD: " + payloadd);
                 try {
+                    // 1. PRIMERO: Limpiamos todo rastro de la partida anterior
+                    // Reiniciamos la lógica (Fachada)
+                    juego.iniciarPartida();
+
+                    // Reiniciamos las listas temporales del Modelo (para borrar grupos viejos de la UI)
+                    if (this.gruposDeTurnoDTO != null) {
+                        this.gruposDeTurnoDTO.clear();
+                    }
+                    if (this.gruposDTOAlInicioDelTurno != null) {
+                        this.gruposDTOAlInicioDelTurno.clear();
+                    }
+
+                    // 2. Procesamos el Payload
                     String[] payloadPartes = payloadd.split("\\$");
                     String manoPayload = payloadPartes[0];
 
@@ -128,10 +180,8 @@ public class Modelo implements IModelo, PropertyChangeListener {
                             }
                         }
                         String listaJugadoresStr = listaJugadoresBuilder.toString();
-                        System.out.println("[Modelo Debug] Lista de jugadores completa reconstruida: " + listaJugadoresStr);
 
                         String[] usuariosRaw = listaJugadoresStr.split(";");
-                        System.out.println("[Modelo Debug] Número de jugadores después de split por ';': " + usuariosRaw.length);
 
                         this.nombresJugadores.clear();
                         this.perfilesJugadores.clear();
@@ -141,8 +191,6 @@ public class Modelo implements IModelo, PropertyChangeListener {
                                 continue;
                             }
 
-                            System.out.println("[Modelo Debug] Procesando cadena de usuario: " + usuario);
-
                             String[] partes = usuario.split(",", 2);
 
                             if (partes.length >= 2) {
@@ -150,9 +198,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                                 String datosPerfil = partes[1]; // "Nick$Avatar$..."
 
                                 String[] perfilSplit = datosPerfil.split("\\$");
-                                System.out.println("[Modelo Debug] Nickname: " + perfilSplit[0] + ", Avatar ID Raw: " + (perfilSplit.length > 1 ? perfilSplit[1] : "N/A"));
 
-                                // Creamos un DTO temporal para guardar estos datos estáticos
                                 JugadorDTO dtoPerfil = new JugadorDTO();
                                 dtoPerfil.setNombre(perfilSplit[0]);
 
@@ -164,7 +210,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                                     dtoPerfil.setIdAvatar(1);
                                 }
 
-                                // 3. OBTENER COLORES (C1,C2,C3,C4) para todos los jugadores
+                                // Obtener colores (C1,C2,C3,C4)
                                 if (perfilSplit.length > 2) {
                                     String[] colorStrings = perfilSplit[2].split(",");
                                     int[] colores = new int[4];
@@ -172,26 +218,30 @@ public class Modelo implements IModelo, PropertyChangeListener {
                                         colores[i] = Integer.parseInt(colorStrings[i]);
                                     }
                                     dtoPerfil.setColores(colores);
-
-                                    // DEBUG: Muestra si los colores se procesaron.
-                                    System.out.println("[Modelo Debug] Colores cargados.");
                                 }
 
                                 this.perfilesJugadores.put(idReal, dtoPerfil);
                                 this.nombresJugadores.add(idReal);
-                            } else {
-                                System.err.println("[Modelo Debug] ERROR: Cadena de usuario mal formada (sin ',') para: " + usuario);
                             }
                         }
-                        System.out.println("[Modelo] Jugadores en la partida: " + this.nombresJugadores.toString());
 
                         JugadorDTO miPerfil = this.perfilesJugadores.get(this.miId);
-                        if (miPerfil != null && miPerfil.getColores() != null) {
-                            this.misColores = miPerfil.getColores();
-                            this.coloresCargados = true;
-                            System.out.println("[Modelo Fix] Colores de mi jugador cargados desde MANO_INICIAL payload.");
+
+                        if (miPerfil != null) {
+                            if (miPerfil.getColores() != null) {
+                                this.misColores = miPerfil.getColores();
+                                this.coloresCargados = true;
+                            }
+                            // 1. ACTUALIZAR EL NICKNAME REAL
+                            if (miPerfil.getNombre() != null) {
+                                this.miNickname = miPerfil.getNombre();
+                                System.out.println("[Modelo Fix] Nickname actualizado correctamente a: " + this.miNickname);
+                            }
+
                         }
                     }
+
+                    // 3. Establecemos la nueva mano
                     List<FichaJuegoDTO> fichasDTO = deserializarMano(manoPayload);
                     List<Ficha> manoEntidad = fichasDTO.stream()
                             .map(this::convertirFichaDtoAEntidad)
@@ -199,7 +249,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
                     juego.setManoInicial(manoEntidad);
 
-                    // Notificar a la vista
+                    // 4. Notificamos a la vista para que repinte todo limpio
                     notificarObservadores(TipoEvento.INCIALIZAR_FICHAS);
                     notificarObservadores(TipoEvento.TOMO_FICHA);
                     notificarObservadores(TipoEvento.REPINTAR_MANO);
@@ -275,6 +325,41 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 }
                 break;
 
+            case "JUEGO_TERMINADO_CON_TABLA":
+                System.out.println("[Modelo] Tabla recibida: " + payloadd);
+                this.mensajeTemporalVista = payloadd;
+                notificarObservadores(TipoEvento.RESULTADOS_VOTACION);
+                break;
+
+            case "PETICION_VOTO_TERMINAR":
+                String idSolicitante = payloadd;
+                String nombreMostrar = idSolicitante;
+
+                if (perfilesJugadores.containsKey(idSolicitante)) {
+                    JugadorDTO perfil = perfilesJugadores.get(idSolicitante);
+                    if (perfil != null && perfil.getNombre() != null) {
+                        nombreMostrar = perfil.getNombre();
+                    }
+                }
+
+                this.mensajeTemporalVista = nombreMostrar;
+
+                notificarObservadores(TipoEvento.SOLICITUD_VOTO_TERMINAR);
+                break;
+
+            case "VOTACION_FALLIDA":
+                notificarObservadores(TipoEvento.VOTACION_FALLIDA);
+                break;
+
+            case "PETICION_PUNTAJE_FINAL":
+                int misPuntos = calcularPuntosMano();
+                try {
+                    this.despachador.enviar(ipServidor, puertoServidor, this.miId + ":ENVIO_PUNTAJE:" + misPuntos);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
             case "ESTADO_FINAL_TABLERO":
                 System.out.println("[Modelo] Evento 'ESTADO_FINAL_TABLERO' detectado!");
                 try {
@@ -345,6 +430,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    private void notificarObservadoresChat(String payload) {
+        for (Observador observer : this.observadores) {
+            ActualizacionDTO dto = new ActualizacionDTO(TipoEvento.NUEVO_MENSAJE_CHAT, this.esMiTurno, payload);
+            observer.actualiza(this, dto);
+        }
+    }
+
     /**
      * Refresca estado del tablero temporalmente antes de validar jugada.
      */
@@ -355,18 +447,16 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
             List<Ficha> fichasEntity = new ArrayList<>();
             for (FichaJuegoDTO fichaDto : dto.getFichasGrupo()) {
-
-                // 1. Convertir a Entity. Aquí se aplica el color personalizado (MIS colores)
-                // Usamos this.miId por defecto.
                 Ficha fichaEntity = convertirFichaDtoAEntidad(fichaDto, this.miId, true);
                 fichasEntity.add(fichaEntity);
 
-                // 2. Actualizar el DTO con el nuevo color para la vista.
                 fichaDto.setColor(fichaEntity.getColor());
             }
 
-            // 3. Crear el Grupo Entity para pasarlo a la lógica del juego (Facade)
-            Grupo grupo = new Grupo(dto.getTipo(), fichasEntity.size(), fichasEntity);
+            String tipoParaBackend = dto.isEsTemporal() ? "Temporal" : dto.getTipo();
+
+            Grupo grupo = new Grupo(tipoParaBackend, fichasEntity.size(), fichasEntity);
+
             if (!dto.isEsTemporal()) {
                 grupo.setValidado();
             }
@@ -375,10 +465,9 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         juego.colocarFichasEnTablero(nuevosGrupos);
 
-        // 4. Almacenar la lista de DTOs original, ahora con los colores actualizados.
+        // 4. Almacenar la lista de DTOs original
         this.gruposDeTurnoDTO = gruposPropuestos;
 
-        // [FIN DE MODIFICACIÓN]
         notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
     }
 
@@ -466,6 +555,38 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    private int calcularPuntosMano() {
+        int total = 0;
+        if (juego.getJugadorActual() != null && juego.getJugadorActual().getManoJugador() != null) {
+            List<Ficha> mano = juego.getJugadorActual().getManoJugador().getFichasEnMano();
+            for (Ficha f : mano) {
+                if (f.isComodin()) {
+                    total += 30;
+                } else {
+                    total += f.getNumero();
+                }
+            }
+        }
+        return total;
+    }
+
+    public void solicitarTerminarPartida() {
+        int puntos = calcularPuntosMano(); // Voto SI con mis puntos
+        try {
+            this.despachador.enviar(ipServidor, puertoServidor, this.miId + ":SOLICITAR_TERMINAR:" + puntos);
+        } catch (IOException e) {
+        }
+    }
+
+    public void enviarVotoTerminar(boolean acepta) {
+        String decision = acepta ? "SI" : "NO";
+        int puntos = acepta ? calcularPuntosMano() : 0;
+        try {
+            this.despachador.enviar(ipServidor, puertoServidor, this.miId + ":VOTO_TERMINAR:" + decision + ":" + puntos);
+        } catch (IOException e) {
+        }
+    }
+
     /**
      * Reversa jugada si no fue válida y solicita ficha al servidor.
      */
@@ -491,72 +612,77 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     /**
      * Finaliza turno: valida jugada, envía estado al servidor y notifica a la
-     * vista.
+     * vista. Si gana, espera respuesta del servidor.
      */
     public void terminarTurno() {
+        // 1. Validar que sea mi turno
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'terminarTurno' ignorada. No es mi turno.");
             notificarObservadores(TipoEvento.NO_ES_MI_TURNO);
             return;
         }
 
+        // 2. Validar reglas del Rummy (Fachada)
         boolean jugadaFueValida = juego.validarYFinalizarTurno();
 
         if (jugadaFueValida) {
-
             notificarObservadores(TipoEvento.JUGADA_VALIDA_FINALIZADA);
+
+            // Verificamos si ganamos (0 fichas)
             int misFichasRestantes = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
 
             if (misFichasRestantes == 0) {
                 // --- CASO VICTORIA ---
-                System.out.println("[Modelo] ¡Felicidades! Has ganado la partida.");
+                System.out.println("[Modelo] ¡Mano vacía! Avisando al servidor y ESPERANDO tabla...");
 
-                // 1. Notificar a mi vista local
-                notificarObservadores(TipoEvento.PARTIDA_GANADA);
-
-                // 2. Avisar al servidor que gané
+                // IMPORTANTE: NO notificamos PARTIDA_GANADA aquí localmente.
+                // Esperamos a que el servidor recolecte los puntos de los rivales 
+                // y nos responda con el evento "JUEGO_TERMINADO_CON_TABLA".
                 try {
-                    String mensaje = this.miId + ":GANADOR:";
+                    String mensaje = this.miId + ":GANADOR:0";
                     this.despachador.enviar(ipServidor, puertoServidor, mensaje);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
+
             } else {
+                // --- CASO TURNO NORMAL ---
                 try {
                     String payloadJuego = serializarJuegoFinal();
-                    int misFichas = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-                    String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichas;
+                    // Enviamos el estado del tablero y cuántas fichas nos quedan
+                    String mensaje = this.miId + ":FINALIZAR_TURNO:" + payloadJuego + "#" + misFichasRestantes;
                     this.despachador.enviar(ipServidor, puertoServidor, mensaje);
 
                 } catch (IOException ex) {
-                    Logger.getLogger(Modelo.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         } else {
+            // --- CASO JUGADA INVÁLIDA ---
+
+            // Si intentó mover fichas pero el tablero quedó inválido -> Revertir todo
             if (!gruposDTOAlInicioDelTurno.equals(gruposDeTurnoDTO)) {
+                System.out.println("Jugada inválida: Reviertiendo cambios.");
 
-                System.out.println("Jugada invalida");
-                System.out.println(gruposDTOAlInicioDelTurno.toString());
-                System.out.println(gruposDeTurnoDTO.toString());
-
+                // Restauramos copia local
                 this.gruposDeTurnoDTO = new ArrayList<>(this.gruposDTOAlInicioDelTurno);
-
                 notificarObservadores(TipoEvento.JUGADA_INVALIDA_REVERTIR);
+
+                // Avisamos al servidor para que él también revierta (si hubo cambios temporales)
                 try {
                     String payloadJuegoRevertido = serializarEstadoRevertido();
                     String mensaje = this.miId + ":MOVER:" + payloadJuegoRevertido;
                     this.despachador.enviar(ipServidor, puertoServidor, mensaje);
-
                 } catch (IOException ex) {
-                    Logger.getLogger(Modelo.class
-                            .getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
+                // Si no movió nada y le dio a terminar -> Debe tomar una ficha
                 notificarObservadores(TipoEvento.TOMAR_FICHA_POR_FINALIZARTURNO);
             }
-
         }
+
+        // Siempre refrescamos la mano visualmente al final
         notificarObservadores(TipoEvento.REPINTAR_MANO);
     }
 
@@ -669,6 +795,13 @@ public class Modelo implements IModelo, PropertyChangeListener {
      *
      * @param idFicha
      */
+    /**
+     * Regresa ficha a la mano (si el movimiento es válido) y actualiza la UI.
+     * Ahora maneja la DIVISIÓN de grupos y actualiza el feedback
+     * inmediatamente.
+     *
+     * @param idFicha
+     */
     public void regresarFichaAMano(int idFicha) {
         if (!this.esMiTurno) {
             System.out.println("[Modelo] Acción 'regresarFichaAMano' ignorada. No es mi turno.");
@@ -679,25 +812,54 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
         if (fueRegresadaExitosamente) {
 
-            boolean fichaEncontrada = false;
-            for (GrupoDTO grupoDTO : this.gruposDeTurnoDTO) {
-                Iterator<FichaJuegoDTO> iter = grupoDTO.getFichasGrupo().iterator();
-                while (iter.hasNext()) {
-                    if (iter.next().getIdFicha() == idFicha) {
-                        iter.remove();
-                        grupoDTO.setCantidad(grupoDTO.getFichasGrupo().size());
-                        fichaEncontrada = true;
+            GrupoDTO grupoObjetivo = null;
+            int indiceFicha = -1;
+
+            for (GrupoDTO grupo : this.gruposDeTurnoDTO) {
+                for (int i = 0; i < grupo.getFichasGrupo().size(); i++) {
+                    if (grupo.getFichasGrupo().get(i).getIdFicha() == idFicha) {
+                        grupoObjetivo = grupo;
+                        indiceFicha = i;
                         break;
                     }
                 }
-                if (fichaEncontrada) {
+                if (grupoObjetivo != null) {
                     break;
+                }
+            }
+
+            if (grupoObjetivo != null) {
+                grupoObjetivo.getFichasGrupo().remove(indiceFicha);
+                grupoObjetivo.setCantidad(grupoObjetivo.getFichasGrupo().size());
+
+                if (indiceFicha > 0 && indiceFicha < grupoObjetivo.getFichasGrupo().size()) {
+
+                    List<FichaJuegoDTO> fichasDerecha = new ArrayList<>(
+                            grupoObjetivo.getFichasGrupo().subList(indiceFicha, grupoObjetivo.getFichasGrupo().size())
+                    );
+
+                    grupoObjetivo.getFichasGrupo().subList(indiceFicha, grupoObjetivo.getFichasGrupo().size()).clear();
+                    grupoObjetivo.setCantidad(grupoObjetivo.getFichasGrupo().size());
+
+                    int nuevaColumna = grupoObjetivo.getColumna() + indiceFicha + 1;
+
+                    GrupoDTO nuevoGrupoDTO = new GrupoDTO(
+                            "Temporal",
+                            fichasDerecha.size(),
+                            fichasDerecha,
+                            grupoObjetivo.getFila(),
+                            nuevaColumna,
+                            true
+                    );
+
+                    this.gruposDeTurnoDTO.add(nuevoGrupoDTO);
                 }
             }
 
             this.gruposDeTurnoDTO.removeIf(g -> g.getFichasGrupo().isEmpty());
 
-            notificarObservadores(TipoEvento.ACTUALIZAR_TABLERO_TEMPORAL);
+            actualizarVistaTemporal(this.gruposDeTurnoDTO);
+
             notificarObservadores(TipoEvento.REPINTAR_MANO);
 
             try {
@@ -706,8 +868,7 @@ public class Modelo implements IModelo, PropertyChangeListener {
                 this.despachador.enviar(ipServidor, puertoServidor, mensaje);
 
             } catch (IOException ex) {
-                Logger.getLogger(Modelo.class
-                        .getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Modelo.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
@@ -748,36 +909,84 @@ public class Modelo implements IModelo, PropertyChangeListener {
      *
      * @return
      */
-    @Override
     public JuegoDTO getTablero() {
         JuegoDTO dto = new JuegoDTO();
+
+        // 1. Obtenemos la verdad absoluta desde la lógica (Entidades)
         List<Grupo> gruposDelJuego = juego.getGruposEnTablero();
 
-        if (this.gruposDeTurnoDTO != null && this.gruposDeTurnoDTO.size() == gruposDelJuego.size()) {
-            for (int i = 0; i < gruposDelJuego.size(); i++) {
-                String tipoValidado = gruposDelJuego.get(i).getTipo();
-                this.gruposDeTurnoDTO.get(i).setTipo(tipoValidado);
-                this.gruposDeTurnoDTO.get(i).setEsTemporal(gruposDelJuego.get(i).esTemporal());
+        // 2. DECISIÓN: Usamos el caché visual si existe.
+        // ELIMINAMOS 'this.esMiTurno' de la condición.
+        // Necesitamos usar los DTOs siempre que existan, porque son los únicos 
+        // que saben en qué fila/columna están las fichas (el backend no lo sabe).
+        boolean hayDatosVisuales = (this.gruposDeTurnoDTO != null && !this.gruposDeTurnoDTO.isEmpty());
+
+        if (hayDatosVisuales) {
+            // Sincronizamos el estado lógico (Valido/Invalido) sobre los DTOs visuales (Fila/Columna)
+
+            // Creamos una lista temporal para limpiar grupos visuales que ya no existen en la lógica
+            // (Esto arregla la desincronización si se borran grupos)
+            List<GrupoDTO> gruposVisualesValidos = new ArrayList<>();
+
+            for (GrupoDTO dtoGrupo : this.gruposDeTurnoDTO) {
+                if (dtoGrupo.getFichasGrupo() == null || dtoGrupo.getFichasGrupo().isEmpty()) {
+                    continue;
+                }
+
+                int idFichaRastreadora = dtoGrupo.getFichasGrupo().get(0).getIdFicha();
+                boolean existeEnLogica = false;
+
+                for (Grupo gLogico : gruposDelJuego) {
+                    boolean esEsteGrupo = gLogico.getFichas().stream()
+                            .anyMatch(f -> f.getId() == idFichaRastreadora);
+
+                    if (esEsteGrupo) {
+                        // Inyectamos el estado REAL del backend en el visual
+                        dtoGrupo.setTipo(gLogico.getTipo());
+                        dtoGrupo.setEsTemporal(gLogico.esTemporal());
+                        existeEnLogica = true;
+                        break;
+                    }
+                }
+
+                // Solo añadimos el grupo visual si todavía existe en la lógica del juego
+                if (existeEnLogica) {
+                    gruposVisualesValidos.add(dtoGrupo);
+                }
             }
+
+            // Actualizamos la lista local y el DTO de salida
+            this.gruposDeTurnoDTO = gruposVisualesValidos;
             dto.setGruposEnTablero(this.gruposDeTurnoDTO);
+
         } else {
+            // Solo entramos aquí si la lista visual está vacía (inicio de partida o error).
+            // Aquí se pierden las posiciones (se van a 0,0), pero es mejor que no mostrar nada.
             List<GrupoDTO> gruposDTO = gruposDelJuego.stream()
                     .map(this::convertirGrupoEntidadADto)
                     .collect(Collectors.toList());
             dto.setGruposEnTablero(gruposDTO);
         }
 
+        // 3. RESTO DE LA LÓGICA (Sin cambios)
         dto.setFichasMazo(this.mazoFichasRestantes);
-
-        // Obtener nombre del jugador actual (quien tiene el turno)
-        String nombreJugadorActual = (juego.getJugadorActual() != null)
-                ? juego.getJugadorActual().getNickname()
-                : "...";
-
         dto.setJugadorActual(this.idJugadorEnTurnoGlobal);
 
-        List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
+        if (nombresJugadores != null && !nombresJugadores.isEmpty()) {
+            int indexActual = nombresJugadores.indexOf(this.idJugadorEnTurnoGlobal);
+            if (indexActual != -1) {
+                // Cálculo circular seguro
+                int indexSiguiente = (indexActual + 1) % nombresJugadores.size();
+                String idSiguiente = nombresJugadores.get(indexSiguiente);
 
+                // Obtener el nombre bonito del perfil si existe, o usar el ID
+                JugadorDTO perfilSig = perfilesJugadores.get(idSiguiente);
+                String nombreMostrar = (perfilSig != null) ? perfilSig.getNombre() : idSiguiente;
+
+                dto.setSiguienteJugador(nombreMostrar);
+            }
+        }
+        List<DTO.JugadorDTO> listaJugadoresDTO = new ArrayList<>();
         List<String> ordenJugadoresUI = new ArrayList<>();
 
         if (this.nombresJugadores.contains(this.miId)) {
@@ -790,44 +999,37 @@ public class Modelo implements IModelo, PropertyChangeListener {
             }
         }
 
-        // 2. Recorrer la lista ORDENADA una sola vez
         for (String idJugadores : ordenJugadoresUI) {
             DTO.JugadorDTO jugadorDTO1 = new DTO.JugadorDTO();
-
-            // Buscamos la info estática (Avatar, Nombre Real)
             JugadorDTO perfil = perfilesJugadores.get(idJugadores);
+
             if (perfil != null) {
                 jugadorDTO1.setNombre(perfil.getNombre());
                 jugadorDTO1.setIdAvatar(perfil.getIdAvatar());
                 jugadorDTO1.setColores(perfil.getColores());
             } else {
-                // Fallback
                 jugadorDTO1.setNombre(idJugadores);
                 jugadorDTO1.setIdAvatar(1);
             }
 
-            // Determinar si es turno
             boolean esSuTurno = idJugadores.equals(this.idJugadorEnTurnoGlobal);
             jugadorDTO1.setEsTurno(esSuTurno);
 
             if (idJugadores.equals(this.miId)) {
-                // Protección contra null pointer si el juego no ha iniciado bien
                 if (juego.getJugadorActual() != null && juego.getJugadorActual().getManoJugador() != null) {
-                    int cantidad = juego.getJugadorActual().getManoJugador().getFichasEnMano().size();
-                    jugadorDTO1.setFichasRestantes(cantidad);
+                    jugadorDTO1.setFichasRestantes(juego.getJugadorActual().getManoJugador().getFichasEnMano().size());
                 } else {
                     jugadorDTO1.setFichasRestantes(0);
                 }
             } else {
-                int cantidadRival = conteoFichasRivales.getOrDefault(idJugadores, 14);
-                jugadorDTO1.setFichasRestantes(cantidadRival);
+                jugadorDTO1.setFichasRestantes(conteoFichasRivales.getOrDefault(idJugadores, 14));
             }
 
             listaJugadoresDTO.add(jugadorDTO1);
         }
 
-        // Asignar la lista limpia al DTO
         dto.setJugadores(listaJugadoresDTO);
+        dto.setMensaje(this.mensajeTemporalVista);
 
         return dto;
     }
@@ -924,15 +1126,11 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     }
 
-    /**
-     * Obtiene el arreglo de colores personalizado de un jugador por su ID.
-     */
     private int[] obtenerColoresDeRival(String idJugador) {
         JugadorDTO perfil = perfilesJugadores.get(idJugador);
         if (perfil != null && perfil.getColores() != null) {
             return perfil.getColores();
         }
-        // Fallback a null o algún color por defecto si no se encuentra
         return null;
     }
 
@@ -1046,6 +1244,27 @@ public class Modelo implements IModelo, PropertyChangeListener {
         }
     }
 
+    public void enviarMensajeChat(String mensaje) {
+        if (this.miNickname.equals("Cargando...")) {
+            System.err.println("No se puede enviar chat: Nickname no cargado.");
+            return;
+        }
+        // Protocolo sugerido: ID:CHAT:Mensaje
+        // Pero como el servidor es Blackboard, tal vez solo retransmita todo lo que no entienda
+        // O necesitamos un comando específico.
+        // Vamos a usar un formato simple que el servidor retransmita a todos:
+        // MI_ID:CHAT:NOMBRE_EMISOR:MENSAJE
+        // Asi el Blackboard lo manda a todos y el cliente lo procesa.
+
+        try {
+            String comando = this.miId + ":CHAT:" + this.miNickname + ":" + mensaje;
+            System.out.println("[Modelo] Enviando chat: " + comando);
+            this.despachador.enviar(ipServidor, puertoServidor, comando);
+        } catch (IOException ex) {
+            System.err.println("Error enviando chat: " + ex.getMessage());
+        }
+    }
+
     /**
      * Envía comando al servidor para iniciar partida.
      *
@@ -1099,6 +1318,14 @@ public class Modelo implements IModelo, PropertyChangeListener {
 
     public int getPuertoCliente() {
         return puertoCliente;
+    }
+
+    public String getMiId() {
+        return miId;
+    }
+
+    public String getMiNickname() {
+        return miNickname;
     }
 
 }
